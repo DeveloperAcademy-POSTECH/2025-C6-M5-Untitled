@@ -1,0 +1,92 @@
+included:
+  - .
+
+excluded:
+  - Pods
+  - Carthage
+  - .build
+  - DerivedData
+  - Generated
+  - .git
+  - "**/*.xcodeproj"
+  - Build
+  - "**/Build"
+
+# 사고 예방(에러)
+force_unwrapping: error
+force_cast: error
+force_try: error
+implicitly_unwrapped_optional: error
+duplicate_imports: error
+unused_import: error
+
+# 분석기
+analyzer_rules:
+  - unused_declaration
+  - unused_import
+
+# opt-in 규칙
+opt_in_rules:
+  - empty_count
+  - first_where
+  - contains_over_first_not_nil
+  - explicit_init
+  - discouraged_optional_boolean
+  - discouraged_object_literal
+  - number_separator
+  - closure_end_indentation
+  - closure_spacing
+  - fatal_error_message
+  - unused_parameter
+  - sorted_imports               # opt-in
+  - force_unwrapping             # opt-in
+  - implicitly_unwrapped_optional # opt-in  ← 주석 앞 공백 ✔
+
+todo: warning
+
+# 복잡도/길이(느슨)
+cyclomatic_complexity:
+  warning: 14
+  error: 999
+
+function_body_length:
+  warning: 80
+  error: 999
+
+type_body_length:
+  warning: 400
+  error: 999
+
+file_length:
+  warning: 1000
+  error: 9999
+
+nesting:
+  type_level: 3
+
+# 스타일
+line_length:
+  warning: 140
+  error: 999
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_comments: true
+
+identifier_name:
+  min_length: 2
+  excluded: [id, i, j, x, y]
+
+trailing_comma: warning
+trailing_newline: warning
+sorted_imports: warning
+
+disabled_rules:
+  - vertical_parameter_alignment_on_call
+  - vertical_parameter_alignment
+  - opening_brace
+  - colon
+  - redundant_type_annotation
+  - redundant_string_enum_value
+  - redundant_void_return
+  - trailing_whitespace
+  - vertical_whitespace
