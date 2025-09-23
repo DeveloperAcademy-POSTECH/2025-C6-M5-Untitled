@@ -15,9 +15,23 @@
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Feature/BeforeRide/Untitled.swift,
+				Resource/Untitled.swift,
+			);
+			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		60A8CDA32E7CDFE500530B92 /* BusRoad */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */,
+			);
 			path = BusRoad;
 			sourceTree = "<group>";
 		};
