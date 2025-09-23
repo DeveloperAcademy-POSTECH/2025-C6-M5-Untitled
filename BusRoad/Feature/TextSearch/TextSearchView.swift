@@ -8,7 +8,12 @@
 import SwiftUI
 
 struct TextSearchView: View {
+    @EnvironmentObject private var coordinator: NavigationCoordinator
     var body: some View {
-        Text("Hello, World!")
+        Button {
+            coordinator.push(.voiceSearch)
+        } label: {
+            Text("Move to VoiceSearch")
+        }
     }
 }
