@@ -9,6 +9,6 @@ import SwiftUI
 
 struct VoiceSearchView: View {
     var body: some View {
-        Text("Hello, World!")
+        Text("VoiceSearch View")
     }
 }
