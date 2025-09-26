@@ -12,3 +12,7 @@ struct VoiceSearchView: View {
         Text("VoiceSearch View")
     }
 }
+
+#Preview {
+    VoiceSearchView()
+}
