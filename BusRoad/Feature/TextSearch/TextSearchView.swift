@@ -10,10 +10,20 @@ import SwiftUI
 struct TextSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     var body: some View {
-        Button {
-            coordinator.push(.voiceSearch)
-        } label: {
-            Text("Move to VoiceSearch")
+        VStack {
+            Text("어디로 갈까요?")
+                .font(.title)
+                .bold()
+            
+            Button {
+                coordinator.push(.voiceSearch)
+            } label: {
+                Text("Move to VoiceSearch")
+            }
         }
     }
+}
+
+#Preview {
+    TextSearchView()
 }
