@@ -62,3 +62,6 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 
 .DS_Store
+/Secrets.xcconfig
+**/Secrets.xcconfig
+Generated/Secrets.swift

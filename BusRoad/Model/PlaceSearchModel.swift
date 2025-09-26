@@ -5,7 +5,7 @@ struct NaverLocalResponse: Decodable {
 }
 
 struct NaverLocalItem: Identifiable, Hashable, Decodable {
-    var id: UUID
+    var id: UUID = UUID()
     
     let title: String?
     let category: String?
@@ -16,17 +16,6 @@ struct NaverLocalItem: Identifiable, Hashable, Decodable {
     
     enum CodingKeys: String, CodingKey {
         case title, category, address, roadAddress, mapx, mapy
-    }
-    
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.title = try c.decodeIfPresent(String.self, forKey: .title)
-        self.category = try c.decodeIfPresent(String.self, forKey: .category)
-        self.address = try c.decodeIfPresent(String.self, forKey: .address)
-        self.roadAddress = try c.decodeIfPresent(String.self, forKey: .roadAddress)
-        self.mapx = try c.decodeIfPresent(String.self, forKey: .mapx)
-        self.mapy = try c.decodeIfPresent(String.self, forKey: .mapy)
-        self.id = UUID()
     }
     
     // <b>태그 제거
@@ -40,5 +29,13 @@ struct NaverLocalItem: Identifiable, Hashable, Decodable {
     var displayAddress: String {
         if let road = roadAddress, !road.isEmpty { return road }
         return address ?? ""
+    }
+    
+    // 좌표 변환
+    var longitude: Double? {
+        mapx.flatMap { Double($0) }.map { $0 / 1e7 }
+    }
+    var latitude: Double? {
+        mapy.flatMap { Double($0) }.map { $0 / 1e7 }
     }
 }
