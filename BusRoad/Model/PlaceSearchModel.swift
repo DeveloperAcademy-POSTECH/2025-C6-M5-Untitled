@@ -8,14 +8,13 @@ struct NaverLocalItem: Identifiable, Hashable, Decodable {
     var id: UUID = UUID()
     
     let title: String?
-    let category: String?
     let address: String?
     let roadAddress: String?
     let mapx: String?
     let mapy: String?
     
     enum CodingKeys: String, CodingKey {
-        case title, category, address, roadAddress, mapx, mapy
+        case title, address, roadAddress, mapx, mapy
     }
     
     // <b>태그 제거
@@ -37,5 +36,21 @@ struct NaverLocalItem: Identifiable, Hashable, Decodable {
     }
     var latitude: Double? {
         mapy.flatMap { Double($0) }.map { $0 / 1e7 }
+    }
+}
+
+//MARK: - 화면전달용 DTO 
+struct PlaceSummary: Hashable, Identifiable, Codable {
+    var id = UUID()
+    let name: String
+    let address: String
+    let latitude: Double
+    let longitude: Double
+}
+
+extension NaverLocalItem {
+    func toSummary() -> PlaceSummary? {
+        guard let lat = latitude, let lon = longitude else { return nil }
+        return .init(name: plainTitle, address: displayAddress, latitude: lat, longitude: lon)
     }
 }
