@@ -3,8 +3,8 @@ import SwiftUI
 struct PlaceCard: View {
     let title: String
     let address: String
-    var searchQuery: String? = nil
-    var onTap: (() -> Void)? = nil   // 카드 탭 액션
+    var searchQuery: String? 
+    var onTap: (() -> Void)?    // 카드 탭 액션
 
     var body: some View {
         Button(action: { onTap?() }) {

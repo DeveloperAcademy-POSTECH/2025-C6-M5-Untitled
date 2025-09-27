@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - TextSearchView
 struct TextSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    @StateObject private var vm = TextSearchViewModel()
+    @EnvironmentObject private var vm: TextSearchViewModel
     
     @State private var hasSubmitted = false
     @State private var isSearchMode = false
@@ -11,22 +11,28 @@ struct TextSearchView: View {
     @FocusState private var isFocused: Bool
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 12) {
-                if !isSearchMode {
-                    introView
-                } else {
-                    searchModeView
-                }
+        
+        VStack(spacing: 12) {
+            if !isSearchMode {
+                introView
+            } else {
+                searchModeView
             }
-            .animation(.easeInOut(duration: 0.22), value: isSearchMode)
-            .animation(nil, value: vm.query) // 텍스트 변경 시 애니메이션 비활성화
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar(.hidden, for: .navigationBar)
-            .background(Color(.systemBackground).ignoresSafeArea())
-            .onAppear {
-                // 뷰가 완전히 준비되면 표시
-                isViewReady = true
+        }
+        .animation(.easeInOut(duration: 0.22), value: isSearchMode)
+        .animation(nil, value: vm.query) // 텍스트 변경 시 애니메이션 비활성화
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar(.hidden, for: .navigationBar)
+        .background(Color(.systemBackground).ignoresSafeArea())
+        .onAppear {
+            // 뷰가 완전히 준비되면 표시
+            isViewReady = true
+        }
+        .onChange(of: vm.results) { _, new in
+            if !new.isEmpty {
+                isSearchMode = true
+                hasSubmitted = true
+                isFocused = false
             }
         }
     }
@@ -109,7 +115,7 @@ private extension TextSearchView {
             isFocused: $isFocused,
             compact: compact,
             onSubmit: { performSearch() },
-            onMicTap: { /* TODO: 음성 검색 */ },
+            onMicTap: {  coordinator.push(.voiceSearch)  },
             onClearTap: { clearSearch() }
         )
     }
@@ -209,7 +215,7 @@ private extension SearchBar {
             .disableAutocorrection(true)
             .submitLabel(.search)
             .onSubmit { onSubmit?() }
-            
+        
     }
     
     /// 오른쪽 액션 버튼 - 텍스트가 없으면 마이크, 있으면 X버튼
@@ -242,4 +248,5 @@ private extension SearchBar {
 #Preview {
     TextSearchView()
         .environmentObject(NavigationCoordinator())
+        .environmentObject(TextSearchViewModel())
 }
