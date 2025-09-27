@@ -63,5 +63,6 @@ fastlane/test_output
 
 .DS_Store
 /Secrets.xcconfig
-**/Secrets.xcconfig
+# 모든 Secrets.*.xcconfig 무시 (debug/release 포함)
+**/Secrets.*.xcconfig
 Generated/Secrets.swift
