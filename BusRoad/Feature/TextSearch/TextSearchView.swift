@@ -7,32 +7,42 @@ struct TextSearchView: View {
     
     @State private var hasSubmitted = false
     @State private var isSearchMode = false
-    @State private var isViewReady = false
+    @State private var suppressKeyboardOnce = false
     @FocusState private var isFocused: Bool
     
     var body: some View {
-        
         VStack(spacing: 12) {
             if !isSearchMode {
                 introView
+                
             } else {
                 searchModeView
+                
             }
         }
-        .animation(.easeInOut(duration: 0.22), value: isSearchMode)
-        .animation(nil, value: vm.query) // 텍스트 변경 시 애니메이션 비활성화
+        .onTapGesture { isFocused = false }
+        .animation(nil, value: vm.query)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
-        .onAppear {
-            // 뷰가 완전히 준비되면 표시
-            isViewReady = true
+        .onChange(of: isFocused) { _, new in
+            if new && !isSearchMode {
+                isSearchMode = true
+                DispatchQueue.main.async {
+                           isFocused = true
+                       }
+            }
         }
-        .onChange(of: vm.results) { _, new in
-            if !new.isEmpty {
+        .onChange(of: vm.shouldShowSearchMode) { _, show in
+            if show {
                 isSearchMode = true
                 hasSubmitted = true
-                isFocused = false
+                
+                if vm.isFromVoiceSearch {
+                    isFocused = false
+                }
+                
+                vm.resetSearchMode()
             }
         }
     }
@@ -50,7 +60,6 @@ private extension TextSearchView {
                 .foregroundStyle(Color.green.opacity(0.9))
             
             searchBar(compact: false)
-                .onTapGesture { enterSearchMode() }
                 .padding(.horizontal, 16)
             
             Spacer()
@@ -82,8 +91,8 @@ private extension TextSearchView {
     /// 검색 결과 영역 - 빈 결과 메시지 또는 장소 리스트
     var searchResults: some View {
         VStack {
-            if hasSubmitted && vm.results.isEmpty {
-                Text("결과가 없습니다")
+            if vm.results.isEmpty && !vm.query.isEmpty == false  {
+                Text("")
                     .foregroundStyle(.secondary)
                     .padding(.top, 8)
             }
@@ -96,7 +105,7 @@ private extension TextSearchView {
                             address: item.displayAddress,
                             searchQuery: vm.query.trimmingCharacters(in: .whitespacesAndNewlines)
                         ) {
-                            // TODO: 탭 시 액션
+                            // TODO: 탭하면 경로추천뷰로 넘어가도록
                         }
                     }
                 }
@@ -115,7 +124,7 @@ private extension TextSearchView {
             isFocused: $isFocused,
             compact: compact,
             onSubmit: { performSearch() },
-            onMicTap: {  coordinator.push(.voiceSearch)  },
+            onMicTap: { coordinator.push(.voiceSearch) },
             onClearTap: { clearSearch() }
         )
     }
@@ -123,40 +132,21 @@ private extension TextSearchView {
 
 // MARK: - Actions
 private extension TextSearchView {
-    /// 검색 모드로 진입 - 애니메이션과 함께 검색바 포커스
-    func enterSearchMode() {
-        withAnimation(.easeInOut(duration: 0.22)) {
-            isSearchMode = true
-        }
-        
-        // 뷰가 준비된 상태에서만 포커스 적용
-        if isViewReady {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isFocused = true
-            }
-        } else {
-            // 뷰가 준비되지 않았다면 더 긴 지연
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                isFocused = true
-            }
-        }
-    }
-    
     /// 검색 모드 종료 - 인트로 화면으로 돌아가며 모든 상태 초기화
     func exitSearchMode() {
-        withAnimation(.easeInOut(duration: 0.22)) {
-            isSearchMode = false
-        }
-        resetSearchState()
+        isSearchMode = false
+        isFocused = false
+        hasSubmitted = false
+        vm.query = ""
+        vm.results = []
     }
     
     /// 실제 검색 수행 - API 호출 및 결과 표시
     func performSearch() {
-        withAnimation(.easeInOut(duration: 0.22)) {
-            isSearchMode = true
-        }
+        isSearchMode = true
         hasSubmitted = true
         Task { await vm.search() }
+        // isFocused는 그대로 true 유지 - 키보드 계속 나와있음
     }
     
     /// 검색어 및 결과 지우기 - X 버튼 탭 시 호출
@@ -164,15 +154,7 @@ private extension TextSearchView {
         vm.query = ""
         vm.results = []
         hasSubmitted = false
-        isFocused = true // 지운 후에도 포커스 유지
-    }
-    
-    /// 검색 상태 완전 초기화 - 검색 모드 종료 시 사용
-    func resetSearchState() {
-        isFocused = false
-        vm.query = ""
-        vm.results = []
-        hasSubmitted = false
+        isFocused = true // 지운 후에도 바로 재입력 가능하게 포커스 유지
     }
 }
 

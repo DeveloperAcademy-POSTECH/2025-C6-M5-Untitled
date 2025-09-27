@@ -25,7 +25,7 @@ final class VoiceSearchViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var lastTranscript: String = ""
     private var isSearchCompleted = false
-
+    
     
     // MARK: - 콜백
     var onSearchCompleted: ((String) -> Void)?
@@ -46,7 +46,7 @@ final class VoiceSearchViewModel: ObservableObject {
             return
         }
         isSearchCompleted = false
-
+        
         
         state = .listening
         errorMessage = nil
@@ -66,7 +66,7 @@ final class VoiceSearchViewModel: ObservableObject {
     /// 재시도
     func retry() {
         isSearchCompleted = false
-
+        
         speechManager.reset()
         startListening()
     }
@@ -75,7 +75,7 @@ final class VoiceSearchViewModel: ObservableObject {
     func dismiss() {
         speechManager.stopRecording()
         isSearchCompleted = false
-
+        
         onDismiss?()
     }
     
@@ -129,18 +129,18 @@ private extension VoiceSearchViewModel {
             .combineLatest(speechManager.$recognizedText)
             .sink { [weak self] isRecording, _ in
                 guard let self = self else { return }
-
+                
                 guard !isRecording, self.state == .processing else { return }
-
+                
                 let finalNow = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !finalNow.isEmpty {
                     self.completeVoiceSearch(with: finalNow)
                     return
                 }
-
+                
                 Task { @MainActor in
                     try? await Task.sleep(nanoseconds: 500_000_000) // 0.5초
-
+                    
                     // 핵심: 이미 completed 상태라면 에러 처리 하지 않음
                     guard self.state == .processing else { return }
                     
@@ -163,15 +163,12 @@ private extension VoiceSearchViewModel {
         
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return handleError("음성을 인식하지 못했습니다.") }
-
+        
         state = .completed
         recognizedText = trimmed
-
+        
         Task { @MainActor in
-            textSearchVM.query = trimmed
-            await textSearchVM.search()
-            
-            // 검색이 완료되면 바로 이동 (결과 유무 상관없이)
+            await textSearchVM.searchWithVoiceResult(trimmed)
             onSearchCompleted?(trimmed)
         }
     }
@@ -190,20 +187,20 @@ extension VoiceSearchViewModel {
     
     /// 가운데 표시할 메시지
     var centerMessage: String {
-            switch state {
-            case .ready:
-                return "원하는 장소를 말해보세요"
-            case .listening:
-                // 듣는 중에도 실시간으로 인식된 텍스트 표시
-                return recognizedText.isEmpty ? "원하는 장소를 말해보세요" : recognizedText
-            case .processing:
-                return recognizedText.isEmpty ? "" : recognizedText
-            case .completed:
-                return recognizedText
-            case .failed:
-                return "마이크를 눌러서 다시 말해주세요"
-            }
+        switch state {
+        case .ready:
+            return "원하는 장소를 말해보세요"
+        case .listening:
+            // 듣는 중에도 실시간으로 인식된 텍스트 표시
+            return recognizedText.isEmpty ? "원하는 장소를 말해보세요" : recognizedText
+        case .processing:
+            return recognizedText.isEmpty ? "" : recognizedText
+        case .completed:
+            return recognizedText
+        case .failed:
+            return "마이크를 눌러서 다시 말해주세요"
         }
+    }
     
     /// 파동 애니메이션 표시 여부
     var showWaveAnimation: Bool {
