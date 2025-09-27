@@ -8,6 +8,7 @@ final class TextSearchViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var shouldShowSearchMode = false // 음성 검색 완료 후 검색 모드 표시용
+    @Published var isFromVoiceSearch = false
 
     private let manager: PlaceSearchManager
 
@@ -36,11 +37,13 @@ final class TextSearchViewModel: ObservableObject {
     func searchWithVoiceResult(_ text: String) async {
         query = text
         await search()
+        isFromVoiceSearch = true
         shouldShowSearchMode = true
     }
     
     /// 검색 모드 상태 초기화
     func resetSearchMode() {
         shouldShowSearchMode = false
+        isFromVoiceSearch = false
     }
 }
