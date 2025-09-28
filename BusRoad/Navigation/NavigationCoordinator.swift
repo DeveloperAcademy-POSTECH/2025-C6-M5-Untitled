@@ -9,7 +9,7 @@ import Foundation
 import Combine
 
 class NavigationCoordinator: ObservableObject {
-    @Published var path: [Route] = [.routeSuggestion]
+    @Published var path: [Route] = []
     
     func push(_ path: Route) {
         self.path.append(path)
