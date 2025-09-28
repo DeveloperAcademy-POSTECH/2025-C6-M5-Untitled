@@ -62,14 +62,16 @@ struct RouteCardSlideView: View {
         }
       }
     }
-    .onChange(of: viewModel.routes) { oldRoutes, newRoutes in
+    .onChange(of: viewModel.routes) { _, newRoutes in
       if !newRoutes.isEmpty {
         centerRoute = newRoutes[0]
+        print("📬 경로 데이터 수신! 초기 중앙 경로는: \(centerRoute?.busNumbers.first ?? "오류")번")
       }
     }
-    .onChange(of: currentIndex) { oldIndex, newIndex in
-      if !viewModel.routes.isEmpty && viewModel.routes.indices.contains(newIndex) {
+    .onChange(of: currentIndex) { _, newIndex in
+      if viewModel.routes.indices.contains(newIndex) {
         centerRoute = viewModel.routes[newIndex]
+        print("🔄 스와이프! 현재 중앙 경로는: \(centerRoute?.busNumbers.first ?? "오류")번")
       }
     }
   }

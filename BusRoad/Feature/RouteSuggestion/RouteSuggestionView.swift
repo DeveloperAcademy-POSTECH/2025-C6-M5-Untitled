@@ -17,12 +17,17 @@ struct RouteSuggestionView: View {
   @State private var destination: LocationInfo?
   @State private var user = User(isOnBus: false)
   @State private var centerRoute: BusRoute?
+  @State private var hasFetchedInitialLocation = false
   
   var body: some View {
     VStack(spacing: 10) {
       Text("경로 선택")
         .padding(.bottom,20)
-      OriginTextFieldView(location: $origin)
+      OriginTextFieldView(location: $origin,
+                          onRefreshTapped: {
+        print("🔄 현위치 새로고침 버튼 눌림!")
+        locationManager.requestLocation()
+      })
       DestinationTextFieldView(location: $destination)
       
       Divider()
@@ -31,11 +36,11 @@ struct RouteSuggestionView: View {
       RouteCardSlideView(viewModel: viewModel, centerRoute: $centerRoute)
       
       Button(action: {
+        print("🅿️ 버튼 클릭! 현재 centerRoute: \(centerRoute?.busNumbers.first ?? "nil")")
         if let route = centerRoute {
           user.selectedRoute = route
-          print("✅ 선택된 경로: \(route.busNumbers.joined(separator: ", "))번 버스, 소요시간 \(route.totalTime)분")
-          coordinator.push(.onRide)
-          //네비게이션이랑 로그 다른 파일에선 되다가 갑자기 안 돼서 2시간 째 붙잡고 있었는데 여전히 안 되네요,,, 주말에 수정해보겠습니다
+          print("✅ 선택된 경로: \(route.busNumbers.joined(separator: ", "))번 버스...")
+          coordinator.push(.textSearch)
         }
       }, label: {
         ZStack{
@@ -65,14 +70,15 @@ struct RouteSuggestionView: View {
       )
     }
     .onChange(of: locationManager.location) { _, newLocation in
-      if let location = newLocation {
-        print("📍 새 위치 정보 수신: \(location.coordinate)")
+      if let location = newLocation, !hasFetchedInitialLocation {
+        print("📍 새 위치 정보 수신 (최초 1회): \(location.coordinate)")
         user.currentLocation = location.coordinate
         self.origin = LocationInfo(
           name: "현위치",
           longitude: location.coordinate.longitude,
           latitude: location.coordinate.latitude
         )
+        hasFetchedInitialLocation = true
       }
     }
     .onChange(of: origin) { _, newOrigin in
