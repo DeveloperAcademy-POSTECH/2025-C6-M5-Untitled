@@ -6,10 +6,15 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 struct RouteSuggestionView: View {
+  @StateObject private var viewModel = BusRouteViewModel()
   @EnvironmentObject var coordinator: NavigationCoordinator
   
+  @StateObject private var locationManager = LocationManager()
+  @State private var origin: LocationInfo?
+  @State private var destination: LocationInfo?
   @State private var user = User(isOnBus: false)
   @State private var centerRoute: BusRoute?
   
@@ -17,12 +22,13 @@ struct RouteSuggestionView: View {
     VStack(spacing: 10) {
       Text("경로 선택")
         .padding(.bottom,20)
-      DepartureTextFieldView()
-      ArrivalTextFieldView()
+      OriginTextFieldView(location: $origin)
+      DestinationTextFieldView(location: $destination)
+      
       Divider()
         .padding(10)
       
-      RouteCardSlideView(centerRoute: $centerRoute)
+      RouteCardSlideView(viewModel: viewModel, centerRoute: $centerRoute)
       
       Button(action: {
         if let route = centerRoute {
@@ -41,49 +47,39 @@ struct RouteSuggestionView: View {
             .font(.title)
         }
       })
+      if let location = user.currentLocation {
+      } else {
+        Text("현재 위치를 가져오는 중...")
+          .font(.caption)
+          .foregroundColor(.gray)
+      }
     }
     .padding()
-  }
-}
-
-struct DepartureTextFieldView : View {
-  var body: some View {
-    ZStack {
-      ZStack {
-        RoundedRectangle(cornerSize: .init(width: 10, height: 10))
-          .stroke(Color.black)
-          .frame(height:50)
-          .foregroundColor(.clear)
-        HStack{
-          Text("출발지")
-            .padding(.leading, 10)
-          Divider()
-          Text("현위치")
-          Spacer()
-          Image(systemName:"arrow.clockwise")
-            .padding(.trailing, 10)
-        }
-        .frame(height: 30)
+    .onAppear {
+      locationManager.requestLocation()
+      // 테스트를 위해 destination은 mock data로 설정
+      self.destination = LocationInfo(
+        name: "포항역",
+        longitude: 129.3433,
+        latitude: 36.0697
+      )
+    }
+    .onChange(of: locationManager.location) { _, newLocation in
+      if let location = newLocation {
+        print("📍 새 위치 정보 수신: \(location.coordinate)")
+        user.currentLocation = location.coordinate
+        self.origin = LocationInfo(
+          name: "현위치",
+          longitude: location.coordinate.longitude,
+          latitude: location.coordinate.latitude
+        )
       }
     }
-  }
-}
-
-struct ArrivalTextFieldView : View {
-  var body: some View {
-    ZStack {
-      RoundedRectangle(cornerSize: .init(width: 10, height: 10))
-        .stroke(Color.black)
-        .frame(height:50)
-        .foregroundColor(.clear)
-      HStack{
-        Text("도착지")
-          .padding(.leading, 10)
-        Divider()
-        Text("")
-        Spacer()
-      }
-      .frame(height: 30)
+    .onChange(of: origin) { _, newOrigin in
+      viewModel.validateAndFetchRoute(origin: newOrigin, destination: destination)
+    }
+    .onChange(of: destination) { _, newDestination in
+      viewModel.validateAndFetchRoute(origin: origin, destination: newDestination)
     }
   }
 }

@@ -1,10 +1,3 @@
-//
-//  BusRouteViewModel.swift
-//  C6test
-//
-//  Created by 강진 on 9/27/25.
-//
-
 import Foundation
 import Combine
 
@@ -13,23 +6,37 @@ class BusRouteViewModel: ObservableObject {
   @Published var isLoading: Bool = false
   @Published var errorMessage: String?
   
-  func fetchRoute() {
+  func validateAndFetchRoute(origin: LocationInfo?, destination: LocationInfo?) {
+    if let origin = origin, let destination = destination {
+      print("➡️ ViewModel: 출발지/목적지 준비 완료! 경로 검색을 시작합니다.")
+      // 유효성이 확인되면, 실제 API를 호출하는 private 함수를 실행합니다.
+      fetchRoute(
+        startX: origin.longitude,
+        startY: origin.latitude,
+        endX: destination.longitude,
+        endY: destination.latitude
+      )
+    }
+  }
+  
+  private func fetchRoute(startX: Double, startY: Double, endX: Double, endY: Double) {
     isLoading = true
     errorMessage = nil
     
     guard let filePath = Bundle.main.path(forResource: "Secrets", ofType: "plist"),
           let plist = NSDictionary(contentsOfFile: filePath),
           let apiKey = plist["ODSAY_API_KEY"] as? String else {
-      fatalError("❌ API Key 로드 실패")
+      self.isLoading = false
+      self.errorMessage = "API Key 로드 실패"
+      return
     }
     let urlString = "https://api.odsay.com/v1/api/searchPubTransPath"
     
-    // 여기 출발지, 목적지 정보 - 경도 위도로 가져와서 검색하도록 수정해야 함
     let params: [String: Any] = [
-      "SX": 129.3264,
-      "SY": 36.01523,
-      "EX": 129.3420,
-      "EY": 36.07181,
+      "SX": startX,
+      "SY": startY,
+      "EX": endX,
+      "EY": endY,
       "SearchType": 0
     ]
     
@@ -44,6 +51,10 @@ class BusRouteViewModel: ObservableObject {
           self.errorMessage = "읽을 데이터 없음"
           return
         }
+        if let jsonString = String(data: data, encoding: .utf8) {
+          print("📬 [ODsay API 응답 원본]")
+          print(jsonString)
+        }
         do {
           if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
              let result = json["result"] as? [String: Any],
@@ -54,10 +65,18 @@ class BusRouteViewModel: ObservableObject {
             for firstPath in path.prefix(3) {
               if let info = firstPath["info"] as? [String: Any],
                  let totalTimeMin = info["totalTime"] as? Int,
+                 let originName = info["firstStartStation"] as? String,
+                 let destinationName = info["lastEndStation"] as? String,
                  let subPathArr = firstPath["subPath"] as? [[String: Any]] {
                 
                 var busNos: [String] = []
                 var stationGroupsLocal: [[String]] = []
+                var boardingLocation = ""
+                if let firstBusPath = subPathArr.first(where: { ($0["trafficType"] as? Int) == 2 }),
+                   let startName = firstBusPath["startName"] as? String {
+                  boardingLocation = startName
+                }
+                
                 
                 for sub in subPathArr {
                   if let trafficType = sub["trafficType"] as? Int, trafficType == 2 {
@@ -79,24 +98,25 @@ class BusRouteViewModel: ObservableObject {
                   }
                 }
                 
-                var boardingLocation = ""
-                if let firstStationGroup = stationGroupsLocal.first,
-                   let firstStation = firstStationGroup.first {
-                  boardingLocation = firstStation
-                }
-                
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "HH:mm"
                 let currentDate = Date()
                 let estimatedArrivalTime: String
                 if let arrivalDate = Calendar.current.date(byAdding: .minute, value: totalTimeMin, to: currentDate) {
-                    estimatedArrivalTime = dateFormatter.string(from: arrivalDate)
+                  estimatedArrivalTime = dateFormatter.string(from: arrivalDate)
                 } else {
-                    // Fallback: use current time if adding minutes failed for any reason
-                    estimatedArrivalTime = dateFormatter.string(from: currentDate)
+                  estimatedArrivalTime = dateFormatter.string(from: currentDate)
                 }
-
-                let route = BusRoute(busNumbers: busNos, stationGroups: stationGroupsLocal, totalTime: totalTimeMin, estimatedArrivalTime: estimatedArrivalTime, boardingLocation: boardingLocation)
+                
+                let route = BusRoute(
+                  origin: originName,
+                  destination: destinationName,
+                  busNumbers: busNos,
+                  stationGroups: stationGroupsLocal,
+                  totalTime: totalTimeMin,
+                  estimatedArrivalTime: estimatedArrivalTime,
+                  boardingLocation: boardingLocation
+                )
                 newRoutes.append(route)
               }
             }

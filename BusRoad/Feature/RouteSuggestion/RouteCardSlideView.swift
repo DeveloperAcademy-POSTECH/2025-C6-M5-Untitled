@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RouteCardSlideView: View {
-  @StateObject private var viewModel = BusRouteViewModel()
+  @ObservedObject var viewModel: BusRouteViewModel
   @State private var currentIndex: Int = 0
   
   @Binding var centerRoute: BusRoute?
@@ -62,9 +62,6 @@ struct RouteCardSlideView: View {
         }
       }
     }
-    .onAppear {
-      viewModel.fetchRoute()
-    }
     .onChange(of: viewModel.routes) { oldRoutes, newRoutes in
       if !newRoutes.isEmpty {
         centerRoute = newRoutes[0]
@@ -79,5 +76,5 @@ struct RouteCardSlideView: View {
 }
 
 #Preview {
-  RouteCardSlideView(centerRoute: .constant(nil))
+  RouteCardSlideView(viewModel: BusRouteViewModel(), centerRoute: .constant(nil))
 }
