@@ -1,0 +1,21 @@
+# .github/workflows/discord-main-push.yml
+name: Notify Discord on main push
+
+on:
+  push:
+    branches:
+      - main  # main 브랜치에 push 발생 시만 트리거
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send fixed message to Discord
+        run: |
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d '{
+                     "username": "‼️GitHub Main Branch ALERT‼️",
+                     "content": "@dev main branch가 수정되었으므로 '현재 작업중인 브랜치'를 병합하시길 바랍니다."
+                   }' \
+               ${{ secrets.DISCORD_WEBHOOK_URL }}
