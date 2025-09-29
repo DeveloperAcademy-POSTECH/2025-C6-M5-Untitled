@@ -1,5 +1,5 @@
-import Foundation
 import Combine
+import Foundation
 
 // MARK: - 음성 검색 상태
 enum VoiceSearchState {
@@ -21,7 +21,7 @@ final class VoiceSearchViewModel: ObservableObject {
     
     // MARK: - 의존성
     private let speechManager = SpeechRecognitionManager()
-    private let textSearchVM: TextSearchViewModel
+    private let mainSearchVM: MainSearchViewModel
     private var cancellables = Set<AnyCancellable>()
     private var lastTranscript: String = ""
     private var isSearchCompleted = false
@@ -32,8 +32,8 @@ final class VoiceSearchViewModel: ObservableObject {
     var onDismiss: (() -> Void)?
     
     // MARK: - 초기화
-    init(textSearchVM: TextSearchViewModel) {
-        self.textSearchVM = textSearchVM
+    init(mainSearchVM: MainSearchViewModel) {
+        self.mainSearchVM = mainSearchVM
         setupSpeechManager()
     }
     
@@ -156,7 +156,7 @@ private extension VoiceSearchViewModel {
             .store(in: &cancellables)
     }
     
-    /// 음성 검색 완료 처리
+    
     /// 음성 검색 완료 처리
     func completeVoiceSearch(with text: String) {
         isSearchCompleted = true
@@ -168,7 +168,7 @@ private extension VoiceSearchViewModel {
         recognizedText = trimmed
         
         Task { @MainActor in
-            await textSearchVM.searchWithVoiceResult(trimmed)
+            await mainSearchVM.searchWithVoiceResult(trimmed)
             onSearchCompleted?(trimmed)
         }
     }
@@ -212,5 +212,3 @@ extension VoiceSearchViewModel {
         return state == .ready || state == .failed
     }
 }
-
-

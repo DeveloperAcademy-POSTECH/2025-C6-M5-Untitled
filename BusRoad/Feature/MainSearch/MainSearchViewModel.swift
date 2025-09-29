@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 @MainActor
-final class TextSearchViewModel: ObservableObject {
+final class MainSearchViewModel: ObservableObject {
     @Published var query: String = ""
     @Published var results: [NaverLocalItem] = []
     @Published var isLoading = false

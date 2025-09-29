@@ -9,12 +9,12 @@ import SwiftUI
 
 struct AppNavigationView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
-    @StateObject private var textVM = TextSearchViewModel()
+    @StateObject private var mainVM = MainSearchViewModel()
     
     var body: some View {
         NavigationStack(path: $coordinator.path) {
-            TextSearchView()
-                .environmentObject(textVM)
+            MainSearchView()
+                .environmentObject(mainVM)
                 .navigationDestination(for: Route.self) { route in
                     switch route {
                     case .beforeRide:
@@ -25,12 +25,12 @@ struct AppNavigationView: View {
                         OnRideView()
                     case .routeSuggestion:
                         RouteSuggestionView()
-                    case .textSearch:
-                        TextSearchView()
-                            .environmentObject(textVM)
+                    case .mainSearch:
+                        MainSearchView()
+                            .environmentObject(mainVM)
                     case .voiceSearch:
                         VoiceSearchView(
-                            textSearchVM: textVM
+                            mainSearchVM: mainVM
                         ) { _ in
                             coordinator.pop()
                         }
