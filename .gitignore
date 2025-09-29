@@ -63,6 +63,9 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+.DS_Store
+Secrets.plist
+
 # ========================
 # 추가: 보안/서명 관련
 # ========================
