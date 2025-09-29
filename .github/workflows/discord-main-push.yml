@@ -16,6 +16,6 @@ jobs:
                -X POST \
                -d '{
                      "username": "GitHub",
-                     "content": "[병합한 후 ✅]main branch가 수정되었으므로 **현재 작업중인 브랜치**를 병합하시길 바랍니다."
+                     "content": ">[병합한 후 ✅] main branch가 수정되었으므로 **현재 작업중인 브랜치**에 병합해주세요!!"
                    }' \
                ${{ secrets.DISCORD_WEBHOOK_URL }}
