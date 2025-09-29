@@ -9,7 +9,7 @@ import Foundation
 import SwiftUI
 
 enum Route: Hashable {
-    case textSearch
+    case mainSearch
     case voiceSearch
     case routeSuggestion
     case walking

@@ -1,7 +1,7 @@
-import Foundation
-import Speech
 import AVFoundation
 import Combine
+import Foundation
+import Speech
 
 // MARK: - 음성 인식 매니저
 @MainActor
@@ -91,7 +91,7 @@ private extension SpeechRecognitionManager {
     
     /// 권한 요청
     func requestPermissions() async throws {
-        // 마이크 권한 요청 (iOS 17+ 호환)
+        // 마이크 권한 요청
         let audioPermission: Bool
         
         if #available(iOS 17.0, *) {
@@ -232,7 +232,7 @@ enum SpeechError: LocalizedError {
     }
 }
 
-// MARK: - 음성 인식기 델리게이트
+// MARK: - 음성 인식기 delegate
 private class SpeechRecognizerDelegate: NSObject, SFSpeechRecognizerDelegate {
     let onAvailabilityChanged: (Bool) -> Void
     
