@@ -7,20 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		60043AB22E88181600167A28 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60043AB02E88181600167A28 /* Secrets.swift */; };
+		60043BAB2E8AC91300167A28 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 60043BAA2E8AC91300167A28 /* Secrets.plist */; };
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		60043AB02E88181600167A28 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
-		60043AB32E88182000167A28 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
-		60043AB62E88190D00167A28 /* Secrets.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.debug.xcconfig; sourceTree = "<group>"; };
-		60043AB82E88193500167A28 /* Secrets.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.release.xcconfig; sourceTree = "<group>"; };
-		60043AFC2E8A17BF00167A28 /* Secrets.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.debug.xcconfig; sourceTree = "<group>"; };
-		60043AFD2E8A17BF00167A28 /* Secrets.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.release.xcconfig; sourceTree = "<group>"; };
-		60043B0A2E8A1FCD00167A28 /* Secrets.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.debug.xcconfig; sourceTree = "<group>"; };
-		60043B0B2E8A1FCD00167A28 /* Secrets.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.release.xcconfig; sourceTree = "<group>"; };
-		60A508D02E86D77700BCE64B /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		60043BAA2E8AC91300167A28 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 		60A8CDA12E7CDFE500530B92 /* BusRoad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BusRoad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -58,69 +50,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		60043AB12E88181600167A28 /* Generated */ = {
-			isa = PBXGroup;
-			children = (
-				60043AB02E88181600167A28 /* Secrets.swift */,
-			);
-			path = Generated;
-			sourceTree = "<group>";
-		};
-		60043AB42E88182000167A28 /* Generated */ = {
-			isa = PBXGroup;
-			children = (
-				60043AB32E88182000167A28 /* Secrets.swift */,
-			);
-			path = Generated;
-			sourceTree = "<group>";
-		};
-		60043ABB2E8A0F2100167A28 /* Recovered References */ = {
-			isa = PBXGroup;
-			children = (
-				60043AB62E88190D00167A28 /* Secrets.debug.xcconfig */,
-				60043AB82E88193500167A28 /* Secrets.release.xcconfig */,
-			);
-			name = "Recovered References";
-			sourceTree = "<group>";
-		};
-		60043AFE2E8A17BF00167A28 /* Config */ = {
-			isa = PBXGroup;
-			children = (
-				60043AFC2E8A17BF00167A28 /* Secrets.debug.xcconfig */,
-				60043AFD2E8A17BF00167A28 /* Secrets.release.xcconfig */,
-			);
-			path = Config;
-			sourceTree = "<group>";
-		};
-		60043B012E8A19DC00167A28 /* Config */ = {
-			isa = PBXGroup;
-			children = (
-				60043B0A2E8A1FCD00167A28 /* Secrets.debug.xcconfig */,
-				60043B0B2E8A1FCD00167A28 /* Secrets.release.xcconfig */,
-			);
-			path = Config;
-			sourceTree = "<group>";
-		};
-		60A508D12E86D77700BCE64B /* Generated */ = {
-			isa = PBXGroup;
-			children = (
-				60A508D02E86D77700BCE64B /* Secrets.swift */,
-			);
-			path = Generated;
-			sourceTree = "<group>";
-		};
 		60A8CD982E7CDFE500530B92 = {
 			isa = PBXGroup;
 			children = (
-				60043B012E8A19DC00167A28 /* Config */,
-				60A508D12E86D77700BCE64B /* Generated */,
+				60043BAA2E8AC91300167A28 /* Secrets.plist */,
 				60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */,
 				60A8CDA32E7CDFE500530B92 /* BusRoad */,
 				60A8CDA22E7CDFE500530B92 /* Products */,
-				60043AB12E88181600167A28 /* Generated */,
-				60043AB42E88182000167A28 /* Generated */,
-				60043ABB2E8A0F2100167A28 /* Recovered References */,
-				60043AFE2E8A17BF00167A28 /* Config */,
 			);
 			sourceTree = "<group>";
 		};
@@ -139,7 +75,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 60A8CDAC2E7CDFE700530B92 /* Build configuration list for PBXNativeTarget "BusRoad" */;
 			buildPhases = (
-				60A508CF2E86CA1700BCE64B /* Run Script */,
 				60A8CD9D2E7CDFE500530B92 /* Sources */,
 				60A8CD9E2E7CDFE500530B92 /* Frameworks */,
 				60A8CD9F2E7CDFE500530B92 /* Resources */,
@@ -198,6 +133,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				60043BAB2E8AC91300167A28 /* Secrets.plist in Resources */,
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -205,25 +141,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		60A508CF2E86CA1700BCE64B /* Run Script */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			name = "Run Script";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_SOURCES_DIR)/Secrets.swift",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\n\nGEN_DIR=\"${SRCROOT}/Generated\"\nmkdir -p \"$GEN_DIR\"\nOUT=\"${GEN_DIR}/Secrets.swift\"\nTMP=\"${OUT}.tmp\"\n\n# 필요한 값만 체크\n: \"${NAVER_CLIENT_ID:?Missing NAVER_CLIENT_ID}\"\n: \"${NAVER_CLIENT_SECRET:?Missing NAVER_CLIENT_SECRET}\"\n\ncat > \"$TMP\" <<EOF\n// Auto-generated. Do NOT edit.\nenum Secrets {\n  static let naverClientID: String = \"\\(NAVER_CLIENT_ID)\"\n  static let naverClientSecret: String = \"\\(NAVER_CLIENT_SECRET)\"\n}\nEOF\n\nmv \"$TMP\" \"$OUT\"\necho \"✅ Generated/Secrets.swift created.\"\necho \"Generated at: $OUT\"\n";
-		};
 		60A8CDB12E7CE82300530B92 /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -251,7 +168,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				60043AB22E88181600167A28 /* Secrets.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -260,7 +176,6 @@
 /* Begin XCBuildConfiguration section */
 		60A8CDAA2E7CDFE700530B92 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 60043AFC2E8A17BF00167A28 /* Secrets.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -325,7 +240,6 @@
 		};
 		60A8CDAB2E7CDFE700530B92 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 60043AFD2E8A17BF00167A28 /* Secrets.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -383,7 +297,6 @@
 		};
 		60A8CDAD2E7CDFE700530B92 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 60043AFC2E8A17BF00167A28 /* Secrets.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -424,7 +337,6 @@
 		};
 		60A8CDAE2E7CDFE700530B92 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 60043AFD2E8A17BF00167A28 /* Secrets.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
