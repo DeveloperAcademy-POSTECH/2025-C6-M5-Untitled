@@ -14,7 +14,6 @@ xcuserdata/
 *.ipa
 *.dSYM.zip
 *.dSYM
-*.plist
 
 ## Playgrounds
 timeline.xctimeline
@@ -72,3 +71,6 @@ fastlane/test_output
 
 # Derived data
 DerivedData/
+
+Secrets.plist
+.DS_Store
