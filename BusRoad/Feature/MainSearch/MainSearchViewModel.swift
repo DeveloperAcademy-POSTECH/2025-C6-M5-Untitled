@@ -4,51 +4,27 @@ import Foundation
 @MainActor
 final class MainSearchViewModel: ObservableObject {
     
-    static let shared = MainSearchViewModel()
-    
-    @Published var query: String = ""
-    @Published var results: [NaverLocalItem] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-    @Published var shouldShowSearchMode = false // 음성 검색 완료 후 검색 모드 표시용
-    @Published var isFromVoiceSearch = false
+    let searchManager = SearchManager.shared
 
-    private let manager: PlaceSearchManager
-
-    private init(manager: PlaceSearchManager = PlaceSearchManager()) {
-            self.manager = manager
-        }
-
-    /// 엔터/버튼에서 호출
-    func search() async {
-        errorMessage = nil
-        let kw = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !kw.isEmpty else { results = []; return }
-
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            results = try await manager.search(keyword: kw, display: 5, sort: "random")
-        } catch {
-            errorMessage = error.localizedDescription
-            results = []
-        }
+    // SearchManager의 변경을 View로 릴레이 (UI 갱신 보장)
+    private var bag = Set<AnyCancellable>()
+    init() {
+        searchManager.objectWillChange
+            .sink { [weak self] _ in self?.objectWillChange.send() }
+            .store(in: &bag)
     }
-    
-    /// 음성 검색 완료 처리 (검색어 설정 + 검색 실행 + 모드 전환)
-    func searchWithVoiceResult(_ text: String) async {
-        query = text
-        
-        isFromVoiceSearch = true
-        shouldShowSearchMode = true
 
-        await search()
+    // 뷰에서 쓰기 편한 프록시
+    var query: String {
+        get { searchManager.query }
+        set { searchManager.query = newValue }
     }
-    
-    /// 검색 모드 상태 초기화
-    func resetSearchMode() {
-        shouldShowSearchMode = false
-        isFromVoiceSearch = false
-    }
+    var results: [NaverLocalItem] { searchManager.results }
+    var shouldShowSearchMode: Bool { searchManager.shouldShowSearchMode }
+    var isLoading: Bool { searchManager.isLoading }
+    var errorMessage: String? { searchManager.errorMessage }
+
+  
+    func search() async { await searchManager.search() }
+    func resetSearchMode() { searchManager.resetSearchMode() }
 }
