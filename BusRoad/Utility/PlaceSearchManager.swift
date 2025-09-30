@@ -6,7 +6,7 @@ final class PlaceSearchManager {
     private let clientSecret: String
 
     init(
-        clientID: String = Secrets.naverClientID,
+        clientID: String = Secrets.naverClientId,
         clientSecret: String = Secrets.naverClientSecret
     ) {
         self.clientID = clientID
