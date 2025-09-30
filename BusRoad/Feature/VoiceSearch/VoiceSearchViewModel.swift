@@ -1,40 +1,24 @@
 import Combine
 import Foundation
 
-// MARK: - 음성 검색 상태
-enum VoiceSearchState {
-    case ready          // 준비 상태
-    case listening      // 듣는 중 (파동 애니메이션)
-    case processing     // 처리 중 (음성 → 텍스트 변환)
-    case completed      // 완료 (검색 실행)
-    case failed         // 실패
-}
+enum VoiceSearchState { case ready, listening, processing, completed, failed }
 
-// MARK: - 음성 검색 뷰모델
 @MainActor
 final class VoiceSearchViewModel: ObservableObject {
-    
-    // MARK: - 퍼블리시 프로퍼티들
     @Published var state: VoiceSearchState = .ready
     @Published var recognizedText = ""
     @Published var errorMessage: String?
     
-    // MARK: - 의존성
-    private let mainSearchVM = MainSearchViewModel.shared
+    private let searchManager = SearchManager.shared
     private let speechManager = SpeechRecognitionManager()
     private var cancellables = Set<AnyCancellable>()
     private var lastTranscript: String = ""
     private var isSearchCompleted = false
     
-    
-    // MARK: - 콜백
     var onSearchCompleted: ((String) -> Void)?
     var onDismiss: (() -> Void)?
     
-    // MARK: - 초기화
-    init() {                        
-          setupSpeechManager()
-      }
+    init() { setupSpeechManager() }
     
     // MARK: - 공개 메서드들
     
@@ -85,28 +69,22 @@ final class VoiceSearchViewModel: ObservableObject {
             startListening()
         }
     }
-}
-
-// MARK: - 프라이빗 메서드들
-private extension VoiceSearchViewModel {
     
-    /// 음성 인식 매니저 설정
-    func setupSpeechManager() {
-        // 녹음 상태 감시
+    
+    // MARK: - 프라이빗 메서드들
+    private func setupSpeechManager() {
+        // 녹음 상태
         speechManager.$isRecording
             .sink { [weak self] isRecording in
-                guard let self = self else { return }
-                
-                if !isRecording && self.state == .listening {
-                    self.state = .processing
-                }
+                guard let self else { return }
+                if !isRecording && self.state == .listening { self.state = .processing }
             }
             .store(in: &cancellables)
         
-        // 인식된 텍스트 업데이트
+        // 인식 텍스트
         speechManager.$recognizedText
             .sink { [weak self] text in
-                guard let self = self else { return }
+                guard let self else { return }
                 self.recognizedText = text
                 if !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     self.lastTranscript = text
@@ -114,52 +92,36 @@ private extension VoiceSearchViewModel {
             }
             .store(in: &cancellables)
         
-        // 에러 처리
+        // 에러
         speechManager.$errorMessage
-            .sink { [weak self] errorMessage in
-                if let error = errorMessage {
-                    self?.handleError(error)
-                }
+            .sink { [weak self] err in
+                if let e = err { self?.handleError(e) }
             }
             .store(in: &cancellables)
         
-        // 음성 인식 완료 처리
+        // 완료 판정
         speechManager.$isRecording
             .combineLatest(speechManager.$recognizedText)
             .sink { [weak self] isRecording, _ in
-                guard let self = self else { return }
-                
+                guard let self else { return }
                 guard !isRecording, self.state == .processing else { return }
                 
-                let finalNow = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-                if !finalNow.isEmpty {
-                    self.completeVoiceSearch(with: finalNow)
-                    return
-                }
+                let now = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !now.isEmpty { self.completeVoiceSearch(with: now); return }
                 
                 Task { @MainActor in
-                    try? await Task.sleep(nanoseconds: 500_000_000) // 0.5초
-                    
-                    // 핵심: 이미 completed 상태라면 에러 처리 하지 않음
+                    try? await Task.sleep(nanoseconds: 500_000_000)
                     guard self.state == .processing else { return }
-                    
-                    let finalAfter = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !finalAfter.isEmpty {
-                        self.completeVoiceSearch(with: finalAfter)
-                        
-                    } else {
-                        self.handleError("음성을 인식하지 못했습니다.")
-                    }
+                    let later = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
+                    if !later.isEmpty { self.completeVoiceSearch(with: later) }
+                    else { self.handleError("음성을 인식하지 못했습니다.") }
                 }
             }
             .store(in: &cancellables)
     }
     
-    
-    /// 음성 검색 완료 처리
-    func completeVoiceSearch(with text: String) {
+    private func completeVoiceSearch(with text: String) {
         isSearchCompleted = true
-        
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return handleError("음성을 인식하지 못했습니다.") }
         
@@ -167,20 +129,17 @@ private extension VoiceSearchViewModel {
         recognizedText = trimmed
         
         Task { @MainActor in
-            await mainSearchVM.searchWithVoiceResult(trimmed)
+            await searchManager.searchWithVoiceResult(trimmed)
             onSearchCompleted?(trimmed)
         }
     }
     
-    /// 에러 처리
-    func handleError(_ message: String) {
+    private func handleError(_ message: String) {
         guard !isSearchCompleted else { return }
-        
         state = .failed
         errorMessage = message
     }
 }
-
 // MARK: - 편의 확장
 extension VoiceSearchViewModel {
     

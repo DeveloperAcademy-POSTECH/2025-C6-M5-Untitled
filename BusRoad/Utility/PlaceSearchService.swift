@@ -1,7 +1,7 @@
 import Foundation
 
 /// 네이버 지역 검색 API를 호출하는 매니저
-final class PlaceSearchManager {
+final class PlaceSearchService {
     private let clientID: String
     private let clientSecret: String
 

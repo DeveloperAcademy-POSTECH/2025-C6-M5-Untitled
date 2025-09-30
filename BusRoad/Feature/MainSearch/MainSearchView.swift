@@ -2,18 +2,17 @@ import SwiftUI
 
 struct MainSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    @ObservedObject private var vm = MainSearchViewModel.shared
-    
+    @StateObject private var vm = MainSearchViewModel()
+
     @State private var hasSubmitted = false
     @State private var isSearchMode = false
-    @State private var suppressKeyboardOnce = false
     @FocusState private var isFocused: Bool
-    
+
     var body: some View {
         Group {
             if isSearchMode {
                 SearchModeSection(
-                    query: $vm.query,
+                    query: Binding(get: { vm.query }, set: { vm.query = $0 }),
                     results: vm.results,
                     isFocused: $isFocused,
                     onBack: { exitSearchMode() },
@@ -21,16 +20,18 @@ struct MainSearchView: View {
                     onClear: { clearSearch() },
                     onMicTap: {
                         isFocused = false
-                        coordinator.push(.voiceSearch)}
+                        coordinator.push(.voiceSearch)
+                    }
                 )
             } else {
                 IntroSection(
-                    query: $vm.query,
+                    query: Binding(get: { vm.query }, set: { vm.query = $0 }),
                     isFocused: $isFocused,
                     onSubmit: { performSearch() },
                     onMicTap: {
                         isFocused = false
-                        coordinator.push(.voiceSearch) },
+                        coordinator.push(.voiceSearch)
+                    },
                     onClear: { clearSearch() }
                 )
             }
@@ -45,6 +46,7 @@ struct MainSearchView: View {
                 DispatchQueue.main.async { isFocused = true }
             }
         }
+        // ✅ SearchManager가 올린 전환 신호 감시
         .onChange(of: vm.shouldShowSearchMode) { _, show in
             if show {
                 isSearchMode = true
@@ -53,32 +55,28 @@ struct MainSearchView: View {
             }
         }
     }
-}
 
-// MARK: - Helpers
-private extension MainSearchView {
+    // MARK: - Helpers
     @MainActor func exitSearchMode() {
         isSearchMode = false
         isFocused = false
         hasSubmitted = false
         vm.query = ""
-        vm.results = []
+        // vm.results는 매니저가 관리하니 굳이 초기화 필요 없음
     }
-    
+
     @MainActor func performSearch() {
         isSearchMode = true
         hasSubmitted = true
-        Task { await vm.search() } // vm이 내부에서 메인 업데이트하도록 설계 권장
+        Task { await vm.search() }
     }
-    
+
     @MainActor func clearSearch() {
         vm.query = ""
-        vm.results = []
         hasSubmitted = false
         isFocused = true
     }
 }
-
 //#Preview {
 //    MainSearchView()
 //        .environmentObject(NavigationCoordinator())
