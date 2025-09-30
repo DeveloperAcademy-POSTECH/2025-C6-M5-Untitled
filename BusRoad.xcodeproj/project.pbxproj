@@ -8,17 +8,21 @@
 
 /* Begin PBXBuildFile section */
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
+		FEBC41162E8BC871008CA1AD /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = FEBC410E2E8BBD50008CA1AD /* Secrets.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		60A8CDA12E7CDFE500530B92 /* BusRoad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BusRoad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		FEBC410E2E8BBD50008CA1AD /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Application/Secrets.plist,
+				Info.plist,
 				Resource/dummyResource.swift,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
@@ -50,6 +54,7 @@
 		60A8CD982E7CDFE500530B92 = {
 			isa = PBXGroup;
 			children = (
+				FEBC410E2E8BBD50008CA1AD /* Secrets.plist */,
 				60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */,
 				60A8CDA32E7CDFE500530B92 /* BusRoad */,
 				60A8CDA22E7CDFE500530B92 /* Products */,
@@ -74,7 +79,7 @@
 				60A8CD9D2E7CDFE500530B92 /* Sources */,
 				60A8CD9E2E7CDFE500530B92 /* Frameworks */,
 				60A8CD9F2E7CDFE500530B92 /* Resources */,
-				60A8CDB12E7CE82300530B92 /* ShellScript */,
+				60A8CDB12E7CE82300530B92 /* Run Script */,
 			);
 			buildRules = (
 			);
@@ -129,6 +134,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FEBC41162E8BC871008CA1AD /* Secrets.plist in Resources */,
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -136,7 +142,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		60A8CDB12E7CE82300530B92 /* ShellScript */ = {
+		60A8CDB12E7CE82300530B92 /* Run Script */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -147,6 +153,7 @@
 			inputPaths = (
 				"$(SRCROOT)/.swiftlint.yml",
 			);
+			name = "Run Script";
 			outputFileListPaths = (
 			);
 			outputPaths = (
@@ -302,7 +309,9 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현위치 기반 경로 추천을 위해 위치 정보가 필요합니다.";
+				INFOPLIST_FILE = BusRoad/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "\"말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -340,7 +349,9 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "현위치 기반 경로 추천을 위해 위치 정보가 필요합니다.";
+				INFOPLIST_FILE = BusRoad/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "\"말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.\"";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

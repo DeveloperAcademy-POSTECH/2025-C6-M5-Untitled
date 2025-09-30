@@ -10,7 +10,6 @@ import CoreLocation
 
 struct RouteSuggestionView: View {
   @StateObject private var viewModel = BusRouteViewModel()
-  @EnvironmentObject var coordinator: NavigationCoordinator
   
   @StateObject private var locationManager = LocationManager()
   @State private var origin: LocationInfo?
@@ -35,23 +34,8 @@ struct RouteSuggestionView: View {
       
       RouteCardSlideView(viewModel: viewModel, centerRoute: $centerRoute)
       
-      Button(action: {
-        print("🅿️ 버튼 클릭! 현재 centerRoute: \(centerRoute?.busNumbers.first ?? "nil")")
-        if let route = centerRoute {
-          user.selectedRoute = route
-          print("✅ 선택된 경로: \(route.busNumbers.joined(separator: ", "))번 버스...")
-          coordinator.push(.textSearch)
-        }
-      }, label: {
-        ZStack{
-          RoundedRectangle(cornerRadius:25)
-            .frame(width: 230, height: 65)
-            .foregroundColor(.black)
-          Text("이걸로 갈게요")
-            .foregroundColor(Color.white)
-            .font(.title)
-        }
-      })
+      routeSelectButton
+      
       if let location = user.currentLocation {
       } else {
         Text("현재 위치를 가져오는 중...")
@@ -87,6 +71,28 @@ struct RouteSuggestionView: View {
     .onChange(of: destination) { _, newDestination in
       viewModel.validateAndFetchRoute(origin: origin, destination: newDestination)
     }
+  }
+  
+  var routeSelectButton: some View {
+    @EnvironmentObject var coordinator: NavigationCoordinator
+    
+    return Button(action: {
+      print("🅿️ 버튼 클릭! 현재 centerRoute: \(centerRoute?.busNumbers.first ?? "nil")")
+      if let route = centerRoute {
+        user.selectedRoute = route
+        print("✅ 선택된 경로: \(route.busNumbers.joined(separator: ", "))번 버스...")
+        coordinator.push(.mainSearch)
+      }
+    }, label: {
+      ZStack{
+        RoundedRectangle(cornerRadius:25)
+          .frame(width: 230, height: 65)
+          .foregroundColor(.black)
+        Text("이걸로 갈게요")
+          .foregroundColor(Color.white)
+          .font(.title)
+      }
+    })
   }
 }
 
