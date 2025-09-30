@@ -8,6 +8,7 @@ struct SearchModeSection: View {
     let onBack: () -> Void
     let onSubmit: () -> Void
     let onClear: () -> Void
+    let onMicTap: () -> Void
 
     var body: some View {
         VStack(spacing: 12) {
@@ -30,7 +31,7 @@ struct SearchModeSection: View {
                 isFocused: isFocused,
                 compact: true,
                 onSubmit: onSubmit,
-                onMicTap: {},          // 검색 모드 헤더엔 마이크 없으면 비워둠
+                onMicTap: onMicTap,          // 검색 모드 헤더엔 마이크 없으면 비워둠
                 onClearTap: onClear
             )
         }
@@ -53,8 +54,7 @@ struct SearchModeSection: View {
                             address: item.displayAddress,
                             searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
                         ) {
-                            // 예: 아이템 탭 시 수행할 액션이 있으면
-                            // 외부에서 또 하나의 클로저로 주입 가능하도록 확장 가능
+                            // 예: 아이템 탭 시 수행할 액션
                         }
                     }
                 }

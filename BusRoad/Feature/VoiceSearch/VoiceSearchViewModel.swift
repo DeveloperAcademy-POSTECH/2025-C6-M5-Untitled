@@ -20,8 +20,8 @@ final class VoiceSearchViewModel: ObservableObject {
     @Published var errorMessage: String?
     
     // MARK: - 의존성
+    private let mainSearchVM = MainSearchViewModel.shared
     private let speechManager = SpeechRecognitionManager()
-    private let mainSearchVM: MainSearchViewModel
     private var cancellables = Set<AnyCancellable>()
     private var lastTranscript: String = ""
     private var isSearchCompleted = false
@@ -32,10 +32,9 @@ final class VoiceSearchViewModel: ObservableObject {
     var onDismiss: (() -> Void)?
     
     // MARK: - 초기화
-    init(mainSearchVM: MainSearchViewModel) {
-        self.mainSearchVM = mainSearchVM
-        setupSpeechManager()
-    }
+    init() {                        
+          setupSpeechManager()
+      }
     
     // MARK: - 공개 메서드들
     
