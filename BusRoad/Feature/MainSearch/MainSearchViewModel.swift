@@ -3,6 +3,9 @@ import Foundation
 
 @MainActor
 final class MainSearchViewModel: ObservableObject {
+    
+    static let shared = MainSearchViewModel()
+    
     @Published var query: String = ""
     @Published var results: [NaverLocalItem] = []
     @Published var isLoading = false
@@ -12,9 +15,9 @@ final class MainSearchViewModel: ObservableObject {
 
     private let manager: PlaceSearchManager
 
-    init(manager: PlaceSearchManager = PlaceSearchManager()) {
-        self.manager = manager
-    }
+    private init(manager: PlaceSearchManager = PlaceSearchManager()) {
+            self.manager = manager
+        }
 
     /// 엔터/버튼에서 호출
     func search() async {
@@ -36,9 +39,11 @@ final class MainSearchViewModel: ObservableObject {
     /// 음성 검색 완료 처리 (검색어 설정 + 검색 실행 + 모드 전환)
     func searchWithVoiceResult(_ text: String) async {
         query = text
-        await search()
+        
         isFromVoiceSearch = true
         shouldShowSearchMode = true
+
+        await search()
     }
     
     /// 검색 모드 상태 초기화

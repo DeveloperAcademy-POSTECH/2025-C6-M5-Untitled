@@ -2,13 +2,13 @@ import SwiftUI
 
 struct MainSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    @EnvironmentObject private var vm: MainSearchViewModel
-
+    @ObservedObject private var vm = MainSearchViewModel.shared
+    
     @State private var hasSubmitted = false
     @State private var isSearchMode = false
     @State private var suppressKeyboardOnce = false
     @FocusState private var isFocused: Bool
-
+    
     var body: some View {
         Group {
             if isSearchMode {
@@ -18,14 +18,19 @@ struct MainSearchView: View {
                     isFocused: $isFocused,
                     onBack: { exitSearchMode() },
                     onSubmit: { performSearch() },
-                    onClear: { clearSearch() }
+                    onClear: { clearSearch() },
+                    onMicTap: {
+                        isFocused = false
+                        coordinator.push(.voiceSearch)}
                 )
             } else {
                 IntroSection(
                     query: $vm.query,
                     isFocused: $isFocused,
                     onSubmit: { performSearch() },
-                    onMicTap: { coordinator.push(.voiceSearch) },
+                    onMicTap: {
+                        isFocused = false
+                        coordinator.push(.voiceSearch) },
                     onClear: { clearSearch() }
                 )
             }
@@ -44,7 +49,6 @@ struct MainSearchView: View {
             if show {
                 isSearchMode = true
                 hasSubmitted = true
-                if vm.isFromVoiceSearch { isFocused = false }
                 vm.resetSearchMode()
             }
         }
@@ -60,13 +64,13 @@ private extension MainSearchView {
         vm.query = ""
         vm.results = []
     }
-
+    
     @MainActor func performSearch() {
         isSearchMode = true
         hasSubmitted = true
         Task { await vm.search() } // vm이 내부에서 메인 업데이트하도록 설계 권장
     }
-
+    
     @MainActor func clearSearch() {
         vm.query = ""
         vm.results = []
@@ -75,9 +79,7 @@ private extension MainSearchView {
     }
 }
 
-
-#Preview {
-    MainSearchView()
-        .environmentObject(NavigationCoordinator())
-        .environmentObject(MainSearchViewModel())
-}
+//#Preview {
+//    MainSearchView()
+//        .environmentObject(NavigationCoordinator())
+//}

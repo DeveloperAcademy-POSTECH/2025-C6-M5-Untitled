@@ -2,31 +2,25 @@ import SwiftUI
 
 struct VoiceSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    @StateObject var vm: VoiceSearchViewModel
+    @StateObject var vm = VoiceSearchViewModel()
     @Environment(\.dismiss) private var dismiss
-
-    private let onSearchCompleted: (String) -> Void
-
-    init(mainSearchVM: MainSearchViewModel,
-         onSearchCompleted: @escaping (String) -> Void) {
-        _vm = StateObject(wrappedValue: VoiceSearchViewModel(mainSearchVM: mainSearchVM))
-        self.onSearchCompleted = onSearchCompleted
-    }
-
+    
+    var onSearchCompleted: ((String) -> Void)? = nil
+    
     var body: some View {
         ZStack {
             backgroundGradient
-
+            
             VStack {
                 Spacer()
-
+                
                 Text(vm.centerMessage)
                     .font(.title2.weight(.medium))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
-
+                
                 Spacer()
-
+                
                 ZStack {
                     if vm.showWaveAnimation {
                         WaveRingsView()
@@ -49,7 +43,7 @@ struct VoiceSearchView: View {
                 .animation(.easeInOut(duration: 0.25), value: vm.showWaveAnimation)
             }
             .padding(.horizontal, 32)
-
+            
             VStack {
                 HStack {
                     Spacer()
@@ -68,8 +62,11 @@ struct VoiceSearchView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            vm.onSearchCompleted = { text in onSearchCompleted(text) }
-            vm.onDismiss = { coordinator.pop() }
+            vm.onSearchCompleted = { text in
+                onSearchCompleted?(text)
+                coordinator.pop()
+            }
+            vm.onDismiss = { coordinator.pop() } 
             vm.onAppear()
         }
         .onDisappear { vm.stopListening() }
