@@ -12,7 +12,7 @@ struct AppNavigationView: View {
     
     var body: some View {
         NavigationStack(path: $coordinator.path) {
-            TextSearchView()
+            MainSearchView()
                 .navigationDestination(for: Route.self) { route in
                     switch route {
                     case .beforeRide:
@@ -23,8 +23,8 @@ struct AppNavigationView: View {
                         OnRideView()
                     case .routeSuggestion:
                         RouteSuggestionView()
-                    case .textSearch:
-                        TextSearchView()
+                    case .mainSearch:
+                        MainSearchView()
                     case .voiceSearch:
                         VoiceSearchView()
                     case .walking:
