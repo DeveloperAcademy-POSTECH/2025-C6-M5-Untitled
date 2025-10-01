@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct DestinationTextFieldView : View {
+struct DestinationTextField : View {
     @Binding var location: LocationInfo?
     
     var body: some View {

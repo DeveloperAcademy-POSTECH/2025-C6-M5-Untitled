@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RouteCardSlideView: View {
+struct RouteCardSlide: View {
   @ObservedObject var viewModel: BusRouteViewModel
   @State private var currentIndex: Int = 0
   
@@ -34,7 +34,7 @@ struct RouteCardSlideView: View {
             ForEach(viewModel.routes.indices, id: \.self) { index in
               let relativeIndex = index - currentIndex
               
-              RouteCardView(route: viewModel.routes[index],
+              RouteCard(route: viewModel.routes[index],
                             isFirstCard: index == 0)
               .frame(width: cardWidth)
               .offset(x: CGFloat(relativeIndex) * cardSpacing)
@@ -78,5 +78,5 @@ struct RouteCardSlideView: View {
 }
 
 #Preview {
-  RouteCardSlideView(viewModel: BusRouteViewModel(), centerRoute: .constant(nil))
+  RouteCardSlide(viewModel: BusRouteViewModel(), centerRoute: .constant(nil))
 }

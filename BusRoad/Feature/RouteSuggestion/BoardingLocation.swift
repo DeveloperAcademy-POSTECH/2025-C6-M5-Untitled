@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct BoardingLocationView: View {
+struct BoardingLocation: View {
   var route: BusRoute
   var body: some View {
     VStack(alignment:.leading){

@@ -59,7 +59,9 @@ class BusRouteViewModel: ObservableObject {
       "SearchType": 0
     ]
     
-    odsayAPI(apiKey: apiKey, urlString: urlString, params: params) { success, ret in
+    let odsayService = ODsayAPIService(apiKey: apiKey)
+    
+    odsayService.request(urlString: urlString, params: params) { success, ret in
       DispatchQueue.main.async {
         self.isLoading = false
         if !success {

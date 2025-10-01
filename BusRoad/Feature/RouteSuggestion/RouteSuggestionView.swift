@@ -9,6 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct RouteSuggestionView: View {
+  @EnvironmentObject var coordinator: NavigationCoordinator
   @StateObject private var viewModel = BusRouteViewModel()
   
   @StateObject private var locationManager = LocationManager()
@@ -22,17 +23,17 @@ struct RouteSuggestionView: View {
     VStack(spacing: 10) {
       Text("경로 선택")
         .padding(.bottom, 20)
-      OriginTextFieldView(location: $origin,
+      OriginTextField(location: $origin,
                           onRefreshTapped: {
         print("🔄 현위치 새로고침 버튼 눌림!")
         locationManager.requestLocation()
       })
-      DestinationTextFieldView(location: $destination)
+      DestinationTextField(location: $destination)
       
       Divider()
         .padding(10)
       
-      RouteCardSlideView(viewModel: viewModel, centerRoute: $centerRoute)
+      RouteCardSlide(viewModel: viewModel, centerRoute: $centerRoute)
       
       routeSelectButton
       
@@ -74,7 +75,6 @@ struct RouteSuggestionView: View {
   }
   
   var routeSelectButton: some View {
-    @EnvironmentObject var coordinator: NavigationCoordinator
     
     return Button(action: {
       print("🅿️ 버튼 클릭! 현재 centerRoute: \(centerRoute?.busNumbers.first ?? "nil")")

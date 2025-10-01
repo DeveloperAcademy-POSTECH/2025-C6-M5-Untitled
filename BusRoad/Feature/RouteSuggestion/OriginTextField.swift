@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct OriginTextFieldView : View {
+struct OriginTextField : View {
   @Binding var location: LocationInfo?
   
   var onRefreshTapped: () -> Void

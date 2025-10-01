@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct ETAView: View {
+struct ETA: View {
   var route: BusRoute
   var isFirstCard: Bool
   

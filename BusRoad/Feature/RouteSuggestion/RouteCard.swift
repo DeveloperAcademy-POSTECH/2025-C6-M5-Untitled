@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct RouteCardView: View {
+struct RouteCard: View {
     var route: BusRoute
     var isFirstCard: Bool
   
@@ -19,11 +19,11 @@ struct RouteCardView: View {
           .cornerRadius(20)
         VStack(alignment:.leading){
           Spacer()
-          ETAView(route: route, isFirstCard: isFirstCard)
+          ETA(route: route, isFirstCard: isFirstCard)
           Spacer()
-          BoardingLocationView(route: route)
+          BoardingLocation(route: route)
           Spacer()
-          WholeJourneyView(route: route)
+          WholeJourney(route: route)
           Spacer()
         }
         .frame(width: 317, height: 400)
