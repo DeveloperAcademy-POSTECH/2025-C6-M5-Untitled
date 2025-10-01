@@ -1,5 +1,5 @@
 //
-//  RouteCardSlideView.swift
+//  RouteCardSlide.swift
 //  C6test
 //
 //  Created by 강진 on 9/25/25.
