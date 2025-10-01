@@ -1,4 +1,5 @@
 import SwiftUI
+import MapKit
 
 struct MainSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
@@ -21,6 +22,11 @@ struct MainSearchView: View {
                     onMicTap: {
                         isFocused = false
                         coordinator.push(.voiceSearch)
+                    },
+                    onSelect: { item in
+                        // 옵셔널 언래핑 주의
+                        vm.setDestination(destination: CLLocationCoordinate2D(latitude: item.latitude!, longitude: item.longitude!))
+                        coordinator.push(.routeSuggestion)
                     }
                 )
             } else {

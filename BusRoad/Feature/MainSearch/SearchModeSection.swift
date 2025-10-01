@@ -9,7 +9,8 @@ struct SearchModeSection: View {
     let onSubmit: () -> Void
     let onClear: () -> Void
     let onMicTap: () -> Void
-
+    let onSelect: (NaverLocalItem) -> Void
+    
     var body: some View {
         VStack(spacing: 12) {
             header
@@ -54,7 +55,8 @@ struct SearchModeSection: View {
                             address: item.displayAddress,
                             searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
                         ) {
-                            // 예: 아이템 탭 시 수행할 액션
+                            // onTap
+                            onSelect(item)
                         }
                     }
                 }

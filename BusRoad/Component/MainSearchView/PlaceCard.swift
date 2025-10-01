@@ -4,10 +4,10 @@ struct PlaceCard: View {
     let title: String
     let address: String
     var searchQuery: String? 
-    var onTap: (() -> Void)?    // 카드 탭 액션
+    var onTap: () -> Void    // 카드 탭 액션
 
     var body: some View {
-        Button(action: { onTap?() }) {
+        Button(action: onTap) {
             VStack(alignment: .leading, spacing: 6) {
                 
                 if let query = searchQuery, !query.isEmpty {
@@ -46,6 +46,8 @@ struct PlaceCard: View {
         .accessibilityLabel("\(title), \(address)")
     }
 }
+
+// TODO: extension은 파일 따로 만들기
 
 // MARK: - 텍스트 하이라이트 헬퍼
 extension String {
