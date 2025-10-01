@@ -81,7 +81,7 @@ struct RouteSuggestionView: View {
       if let route = centerRoute {
         user.selectedRoute = route
         print("✅ 선택된 경로: \(route.busNumbers.joined(separator: ", "))번 버스...")
-        coordinator.push(.mainSearch)
+        coordinator.push(.beforeRide)
       }
     }, label: {
       ZStack{

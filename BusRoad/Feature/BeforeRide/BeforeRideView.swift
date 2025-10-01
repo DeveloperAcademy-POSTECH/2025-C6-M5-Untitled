@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct BeforeRideView: View {
-    var body: some View {
-        Text("Hello, World!")
-    }
+  @State private var isBusArriveSoon: Bool = true
+  
+  var body: some View {
+    Card(isActive: isBusArriveSoon, busStop: "대구북편네거리", instruction: "정류장에서 타야 해요")
+    CustomButton(isDisabled: true, title: "탔어요", action: { })
+  }
 }
