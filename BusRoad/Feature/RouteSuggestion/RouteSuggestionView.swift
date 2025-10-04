@@ -12,9 +12,9 @@ struct RouteSuggestionView: View {
   @EnvironmentObject var coordinator: NavigationCoordinator
   @StateObject private var viewModel = BusRouteViewModel()
   
-  @StateObject private var locationManager = LocationManager()
-  @State private var origin: LocationInfo?
-  @State private var destination: LocationInfo?
+//  @StateObject private var locationManager = LocationManager()  // TODO: View에서는 Manager 참조하지 않도록 수정하기(ViewModel에서만)
+//  @State private var origin: LocationInfo?
+//  @State private var destination: LocationInfo?
   @State private var user = User(isOnBus: false)
   @State private var centerRoute: BusRoute?
   @State private var hasFetchedInitialLocation = false
@@ -23,12 +23,10 @@ struct RouteSuggestionView: View {
     VStack(spacing: 10) {
       Text("경로 선택")
         .padding(.bottom, 20)
-      OriginTextField(location: $origin,
-                          onRefreshTapped: {
-        print("🔄 현위치 새로고침 버튼 눌림!")
-        locationManager.requestLocation()
-      })
-      DestinationTextField(location: $destination)
+        OriginTextField(location: $viewModel.origin,
+                      onRefreshTapped: { viewModel.requestOrigin() }
+      )
+        DestinationTextField(location: $viewModel.destination)
       
       Divider()
         .padding(10)
@@ -46,31 +44,26 @@ struct RouteSuggestionView: View {
     }
     .padding()
     .onAppear {
-      locationManager.requestLocation()
-      // 테스트를 위해 destination은 mock data로 설정
-      self.destination = LocationInfo(
-        name: "포항역",
-        longitude: 129.3433,
-        latitude: 36.0697
-      )
+        viewModel.requestOrigin()
+        user.currentLocation = viewModel.origin?.coordinate
     }
-    .onChange(of: locationManager.location) { _, newLocation in
-      if let location = newLocation, !hasFetchedInitialLocation {
-        print("📍 새 위치 정보 수신 (최초 1회): \(location.coordinate)")
-        user.currentLocation = location.coordinate
-        self.origin = LocationInfo(
-          name: "현위치",
-          longitude: location.coordinate.longitude,
-          latitude: location.coordinate.latitude
-        )
-        hasFetchedInitialLocation = true
-      }
+//    .onChange(of: locationManager.location) { _, newLocation in
+//      if let location = newLocation, !hasFetchedInitialLocation {
+//        print("📍 새 위치 정보 수신 (최초 1회): \(location.coordinate)")
+//        user.currentLocation = location.coordinate
+//        self.origin = LocationInfo(
+//          name: "현위치",
+//          longitude: location.coordinate.longitude,
+//          latitude: location.coordinate.latitude
+//        )
+//        hasFetchedInitialLocation = true
+//      }
+//    }
+    .onChange(of: viewModel.origin) { _, newOrigin in
+        viewModel.validateAndFetchRoute(origin: newOrigin, destination: viewModel.destination)
     }
-    .onChange(of: origin) { _, newOrigin in
-      viewModel.validateAndFetchRoute(origin: newOrigin, destination: destination)
-    }
-    .onChange(of: destination) { _, newDestination in
-      viewModel.validateAndFetchRoute(origin: origin, destination: newDestination)
+    .onChange(of: viewModel.destination) { _, newDestination in
+        viewModel.validateAndFetchRoute(origin: viewModel.origin, destination: newDestination)
     }
   }
   
@@ -100,4 +93,3 @@ struct RouteSuggestionView: View {
   RouteSuggestionView()
     .environmentObject(NavigationCoordinator())
 }
-

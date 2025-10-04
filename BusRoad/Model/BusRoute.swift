@@ -6,7 +6,7 @@
 //
 
 import Foundation
-struct BusRoute: Identifiable,Hashable {
+struct BusRoute: Identifiable, Hashable {
     let id = UUID()
     let origin: String
     let destination: String
@@ -15,10 +15,4 @@ struct BusRoute: Identifiable,Hashable {
     let totalTime: Int
     let estimatedArrivalTime: String
     let boardingLocation: String
-}
-
-struct LocationInfo: Equatable {
-    var name: String
-    var longitude: Double
-    var latitude: Double
 }

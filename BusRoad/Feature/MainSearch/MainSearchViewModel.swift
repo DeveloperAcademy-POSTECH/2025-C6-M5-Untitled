@@ -30,7 +30,7 @@ final class MainSearchViewModel: ObservableObject {
     func search() async { await searchManager.search() }
     func resetSearchMode() { searchManager.resetSearchMode() }
     
-    func setDestination(destination: CLLocationCoordinate2D) {
+    func setDestination(destination: LocationInfo) {
         journeyManager.setDestination(destination)
     }
     

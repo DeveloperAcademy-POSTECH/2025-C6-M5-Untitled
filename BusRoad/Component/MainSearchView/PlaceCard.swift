@@ -83,16 +83,19 @@ extension String {
         PlaceCard(
             title: "포항 영일대해수욕장",
             address: "경북 포항시 북구 두호동 685",
-            searchQuery: "포항"
+            searchQuery: "포항",
+            onTap: {}
         )
         PlaceCard(
             title: "테라로사 포스텍점",
             address: "포항시 남구 청암로 87",
-            searchQuery: "포항"
+            searchQuery: "포항",
+            onTap: {}
         )
         PlaceCard(
             title: "일반 카드 (하이라이트 없음)",
-            address: "일반 주소"
+            address: "일반 주소",
+            onTap: {}
         )
     }
     .padding()

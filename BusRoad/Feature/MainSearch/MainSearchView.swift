@@ -24,8 +24,9 @@ struct MainSearchView: View {
                         coordinator.push(.voiceSearch)
                     },
                     onSelect: { item in
-                        // 옵셔널 언래핑 주의
-                        vm.setDestination(destination: CLLocationCoordinate2D(latitude: item.latitude!, longitude: item.longitude!))
+                        if let latitude = item.latitude, let longitude = item.longitude {
+                            vm.setDestination(destination: LocationInfo(name: item.plainTitle, longitude: longitude, latitude: latitude))
+                        }
                         coordinator.push(.routeSuggestion)
                     }
                 )
