@@ -12,7 +12,7 @@ struct RouteSuggestionView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
 
-    //  @StateObject private var locationManager = LocationManager()  // TODO: View에서는 Manager 참조하지 않도록 수정하기(ViewModel에서만)
+    //  @StateObject private var locationManager = LocationManager()
     //  @State private var origin: LocationInfo?
     //  @State private var destination: LocationInfo?
     @State private var user = User(isOnBus: false)
@@ -41,8 +41,7 @@ struct RouteSuggestionView: View {
 
             routeSelectButton
 
-            if let location = user.currentLocation {
-            } else {
+            if viewModel.routes == nil {
                 Text("현재 위치를 가져오는 중...")
                     .font(.caption)
                     .foregroundColor(.gray)
