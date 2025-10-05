@@ -9,7 +9,7 @@ import SwiftUI
 
 //여기는 아직 대대적 작업이 필요함,,, 루트 가져와서 시각화 어떻게 할지 고민해봐야 함...
 struct WholeJourney: View {
-  var route: BusRoute
+  var journey: Journey
   var body: some View {
     ZStack{
       Rectangle()

@@ -3,13 +3,13 @@ import Combine
 import CoreLocation
 
 extension LocationInfo {
-  var asCLLocation: CLLocation {
-    return CLLocation(latitude: self.latitude, longitude: self.longitude)
-  }
+    var asCLLocation: CLLocation {
+        return CLLocation(latitude: self.latitude, longitude: self.longitude)
+    }
 }
 
 class BusRouteViewModel: ObservableObject {
-    @Published var routes: [BusRoute] = []
+    @Published var routes: [Journey]?
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
     @Published var origin: LocationInfo?
@@ -25,10 +25,12 @@ class BusRouteViewModel: ObservableObject {
     private func observeManager() {
         journeyManager.$origin
             .assign(to: &$origin)
-
+        
         journeyManager.$destination
             .assign(to: &$destination)
-
+        
+        journeyManager.$journeyList
+            .assign(to: &$routes)
     }
     
     func validateAndFetchRoute(origin: LocationInfo?, destination: LocationInfo?) {
@@ -120,69 +122,77 @@ class BusRouteViewModel: ObservableObject {
                            let path = result["path"] as? [[String: Any]],
                            !path.isEmpty {
                             
-                            var newRoutes: [BusRoute] = []
-                            for firstPath in path.prefix(3) {
-                                if let info = firstPath["info"] as? [String: Any],
-                                   let totalTimeMin = info["totalTime"] as? Int,
-                                   let originName = info["firstStartStation"] as? String,
-                                   let destinationName = info["lastEndStation"] as? String,
-                                   let subPathArr = firstPath["subPath"] as? [[String: Any]] {
-                                    
-                                    // (이하 버스 번호, 정류장 등 파싱 로직은 기존과 동일)
-                                    var busNos: [String] = []
-                                    var stationGroupsLocal: [[String]] = []
-                                    var boardingLocation = ""
-                                    if let firstBusPath = subPathArr.first(where: { ($0["trafficType"] as? Int) == 2 }),
-                                       let startName = firstBusPath["startName"] as? String {
-                                        boardingLocation = startName
-                                    }
-                                    
-                                    for sub in subPathArr {
-                                        if let trafficType = sub["trafficType"] as? Int, trafficType == 2 {
-                                            if let laneArray = sub["lane"] as? [[String: Any]] {
-                                                for laneInfo in laneArray {
-                                                    if let busNumber = laneInfo["busNo"] as? String {
-                                                        let numericBusNumber = busNumber.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
-                                                        busNos.append(numericBusNumber)
-                                                    }
-                                                }
-                                            }
-                                            var thisBusStations: [String] = []
-                                            if let passStopList = sub["passStopList"] as? [String: Any],
-                                               let stationsArr = passStopList["stations"] as? [[String: Any]] {
-                                                for st in stationsArr {
-                                                    if let name = st["stationName"] as? String {
-                                                        thisBusStations.append(name)
-                                                    }
-                                                }
-                                            }
-                                            stationGroupsLocal.append(thisBusStations)
-                                        }
-                                    }
-                                    
-                                    let dateFormatter = DateFormatter()
-                                    dateFormatter.dateFormat = "HH:mm"
-                                    let currentDate = Date()
-                                    let estimatedArrivalTime: String
-                                    if let arrivalDate = Calendar.current.date(byAdding: .minute, value: totalTimeMin, to: currentDate) {
-                                        estimatedArrivalTime = dateFormatter.string(from: arrivalDate)
-                                    } else {
-                                        estimatedArrivalTime = dateFormatter.string(from: currentDate)
-                                    }
-                                    
-                                    let route = BusRoute(
-                                        origin: originName,
-                                        destination: destinationName,
-                                        busNumbers: busNos,
-                                        stationGroups: stationGroupsLocal,
-                                        totalTime: totalTimeMin,
-                                        estimatedArrivalTime: estimatedArrivalTime,
-                                        boardingLocation: boardingLocation
-                                    )
-                                    newRoutes.append(route)
-                                }
+                            // MARK: 버스 경로만 보기(나중에 지하철 확장하면 코드 수정하기)
+                            if result["busCount"] as? Int ?? 0 > 0 {
+                                self.journeyManager.setJourneyList(path)
+                            } else {
+                                print("[ALERT] 버스 경로 없음")
                             }
-                            self.routes = newRoutes
+                            
+                            //                            var newRoutes: [BusRoute] = []
+                            //                            for firstPath in path.prefix(3) {
+                            //                                if let info = firstPath["info"] as? [String: Any],
+                            //                                   let totalTimeMin = info["totalTime"] as? Int,
+                            //                                   let originName = info["firstStartStation"] as? String,
+                            //                                   let destinationName = info["lastEndStation"] as? String,
+                            //                                   let subPathArr = firstPath["subPath"] as? [[String: Any]] {
+                            //
+                            //                                    // (이하 버스 번호, 정류장 등 파싱 로직은 기존과 동일)
+                            //                                    var busNos: [String] = []
+                            //                                    var stationGroupsLocal: [[String]] = []
+                            //                                    var boardingLocation = ""
+                            //                                    if let firstBusPath = subPathArr.first(where: { ($0["trafficType"] as? Int) == 2 }),
+                            //                                       let startName = firstBusPath["startName"] as? String {
+                            //                                        boardingLocation = startName
+                            //                                    }
+                            //
+                            //                                    for sub in subPathArr {
+                            //                                        if let trafficType = sub["trafficType"] as? Int, trafficType == 2 {
+                            //                                            if let laneArray = sub["lane"] as? [[String: Any]] {
+                            //                                                for laneInfo in laneArray {
+                            //                                                    if let busNumber = laneInfo["busNo"] as? String {
+                            //                                                        let numericBusNumber = busNumber.components(separatedBy: CharacterSet.decimalDigits.inverted).joined()
+                            //                                                        busNos.append(numericBusNumber)
+                            //                                                    }
+                            //                                                }
+                            //                                            }
+                            //                                            var thisBusStations: [String] = []
+                            //                                            if let passStopList = sub["passStopList"] as? [String: Any],
+                            //                                               let stationsArr = passStopList["stations"] as? [[String: Any]] {
+                            //                                                for st in stationsArr {
+                            //                                                    if let name = st["stationName"] as? String {
+                            //                                                        thisBusStations.append(name)
+                            //                                                    }
+                            //                                                }
+                            //                                            }
+                            //                                            stationGroupsLocal.append(thisBusStations)
+                            //                                        }
+                            //                                    }
+                            //
+                            //                                    let dateFormatter = DateFormatter()
+                            //                                    dateFormatter.dateFormat = "HH:mm"
+                            //                                    let currentDate = Date()
+                            //                                    let estimatedArrivalTime: String
+                            //                                    if let arrivalDate = Calendar.current.date(byAdding: .minute, value: totalTimeMin, to: currentDate) {
+                            //                                        estimatedArrivalTime = dateFormatter.string(from: arrivalDate)
+                            //                                    } else {
+                            //                                        estimatedArrivalTime = dateFormatter.string(from: currentDate)
+                            //                                    }
+                            //
+                            //                                    let route = BusRoute(
+                            //                                        origin: originName,
+                            //                                        destination: destinationName,
+                            //                                        busNumbers: busNos,
+                            //                                        stationGroups: stationGroupsLocal,
+                            //                                        totalTime: totalTimeMin,
+                            //                                        estimatedArrivalTime: estimatedArrivalTime,
+                            //                                        boardingLocation: boardingLocation
+                            //                                    )
+                            //                                    newRoutes.append(route)
+                            //                                }
+                            //                            }
+                            //                            self.routes = newRoutes
+                            
                             
                         } else {
                             self.errorMessage = "추천 경로를 찾을 수 없습니다."
@@ -197,7 +207,15 @@ class BusRouteViewModel: ObservableObject {
     }
     
     func requestOrigin() {
-        print("[DEBUG] requestOrigin")
+        print("[DEBUG] requestOrigin started")
         journeyManager.requestOrigin()
+        print("[DEBUG] requestOrigin finished")
+    }
+    
+    func selectJourney(at index: Int) {
+        if let routes = journeyManager.journeyList {
+            journeyManager.selectedJourney = routes[index]
+            print("[DEBUG] selected journey: \(routes[index])")
+        }
     }
 }

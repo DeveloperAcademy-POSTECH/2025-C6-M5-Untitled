@@ -7,10 +7,10 @@
 
 import CoreLocation
 
-struct LocationInfo: Equatable {
+struct LocationInfo: Equatable, Hashable {
     var name: String
-    var longitude: Double
     var latitude: Double
+    var longitude: Double
     
     var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)

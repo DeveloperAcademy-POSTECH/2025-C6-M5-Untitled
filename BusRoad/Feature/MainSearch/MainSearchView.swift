@@ -25,7 +25,7 @@ struct MainSearchView: View {
                     },
                     onSelect: { item in
                         if let latitude = item.latitude, let longitude = item.longitude {
-                            vm.setDestination(destination: LocationInfo(name: item.plainTitle, longitude: longitude, latitude: latitude))
+                            vm.setDestination(destination: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
                         }
                         coordinator.push(.routeSuggestion)
                     }

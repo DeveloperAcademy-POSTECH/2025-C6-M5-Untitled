@@ -57,20 +57,28 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
             throw LocationError.servicesDisabled
         }
 
-        switch manager.authorizationStatus {
+        let status = manager.authorizationStatus
+        switch status {
         case .authorizedAlways, .authorizedWhenInUse:
             return
+
         case .notDetermined:
             try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
                 self.authContinuation = cont
-                self.manager.requestWhenInUseAuthorization()
+                // 권한 요청은 메인에서 (UI 프롬프트 표시를 위한 권장 경로)
+                DispatchQueue.main.async { [weak self] in
+                    self?.manager.requestWhenInUseAuthorization()
+                }
             }
+
         case .restricted, .denied:
             throw LocationError.authorizationDenied
+
         @unknown default:
             throw LocationError.unknown
         }
     }
+
 
     // 1회성 현재 위치 가져오기 (권한 체크 포함). 기본 타임아웃 8초.
     func requestOneShotLocation(timeout seconds: TimeInterval = 8) async throws -> CLLocation {
