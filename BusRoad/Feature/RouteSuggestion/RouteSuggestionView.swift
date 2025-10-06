@@ -11,13 +11,7 @@ import SwiftUI
 struct RouteSuggestionView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
-
-    //  @StateObject private var locationManager = LocationManager()
-    //  @State private var origin: LocationInfo?
-    //  @State private var destination: LocationInfo?
     @State private var user = User(isOnBus: false)
-    //  @State private var centerRoute: BusRoute?
-    //  @State private var hasFetchedInitialLocation = false
     @State var currentIndex = 0
 
     var body: some View {
@@ -52,18 +46,6 @@ struct RouteSuggestionView: View {
             viewModel.requestOrigin()
             user.currentLocation = viewModel.origin?.coordinate
         }
-        //    .onChange(of: locationManager.location) { _, newLocation in
-        //      if let location = newLocation, !hasFetchedInitialLocation {
-        //        print("📍 새 위치 정보 수신 (최초 1회): \(location.coordinate)")
-        //        user.currentLocation = location.coordinate
-        //        self.origin = LocationInfo(
-        //          name: "현위치",
-        //          longitude: location.coordinate.longitude,
-        //          latitude: location.coordinate.latitude
-        //        )
-        //        hasFetchedInitialLocation = true
-        //      }
-        //    }
         .onChange(of: viewModel.origin) { _, newOrigin in
             print("[DEBUG] origin updated")
             viewModel.validateAndFetchRoute(
@@ -88,11 +70,6 @@ struct RouteSuggestionView: View {
 
         return Button(
             action: {
-                //      if let route = centerRoute {
-                //        user.selectedRoute = route
-                //        print("✅ 선택된 경로: \(route.busNumbers.joined(separator: ", "))번 버스...")
-                //        coordinator.push(.mainSearch)
-                //      }
                 if let routes = viewModel.routes {
                     print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
                     viewModel.selectJourney(at: currentIndex)
