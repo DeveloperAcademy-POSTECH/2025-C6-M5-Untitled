@@ -69,7 +69,6 @@ struct OnRideCard: View {
                    RoundedRectangle(cornerRadius: 20, style: .continuous)
                        .fill(Color(remainingStops == 1 ? .primaryStrong : .primaryLight))
                )
-        .padding(.horizontal, 24)
     }
 }
 
