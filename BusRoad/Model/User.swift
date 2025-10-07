@@ -10,7 +10,7 @@ import CoreLocation
 
 struct User{
     var currentLocation: CLLocationCoordinate2D?
-    var selectedRoute: BusRoute?
+    var selectedRoute: BusRouteNode?
     
     /// 현재 버스에 탑승 중인지 여부
     var isOnBus: Bool
