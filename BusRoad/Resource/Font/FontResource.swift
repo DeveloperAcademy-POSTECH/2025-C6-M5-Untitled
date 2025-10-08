@@ -93,6 +93,10 @@ extension Font {
         return .pre(type: .regular, size: 20)
     }
     
+    static var prereg18: Font {
+        return .pre(type: .regular, size: 18)
+    }
+    
     static var prereg16: Font {
         return .pre(type: .regular, size: 16)
     }
