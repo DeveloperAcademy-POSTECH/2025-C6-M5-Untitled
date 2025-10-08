@@ -12,9 +12,14 @@ struct SearchModeSection: View {
     let onSelect: (NaverLocalItem) -> Void
     
     var body: some View {
-        VStack(spacing: 12) {
-            header
-            list
+        ZStack {
+            Color.background
+                .ignoresSafeArea()
+            
+            VStack(spacing: 12) {
+                header
+                list
+            }
         }
     }
 
@@ -28,9 +33,7 @@ struct SearchModeSection: View {
 
             SearchBar(
                 text: $query,
-                placeholder: "장소 이름 검색하기",
                 isFocused: isFocused,
-                compact: true,
                 onSubmit: onSubmit,
                 onMicTap: onMicTap,          // 검색 모드 헤더엔 마이크 없으면 비워둠
                 onClearTap: onClear
