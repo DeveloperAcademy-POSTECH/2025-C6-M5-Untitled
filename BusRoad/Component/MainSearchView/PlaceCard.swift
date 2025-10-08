@@ -4,10 +4,10 @@ struct PlaceCard: View {
     let title: String
     let address: String
     var searchQuery: String? 
-    var onTap: (() -> Void)?    // 카드 탭 액션
+    var onTap: () -> Void    // 카드 탭 액션
 
     var body: some View {
-        Button(action: { onTap?() }) {
+        Button(action: onTap) {
             VStack(alignment: .leading, spacing: 6) {
                 
                 if let query = searchQuery, !query.isEmpty {
@@ -47,6 +47,8 @@ struct PlaceCard: View {
     }
 }
 
+// TODO: extension은 파일 따로 만들기
+
 // MARK: - 텍스트 하이라이트 헬퍼
 extension String {
     /// 검색어와 일치하는 부분을 찾아서 AttributedString으로 변환
@@ -81,16 +83,19 @@ extension String {
         PlaceCard(
             title: "포항 영일대해수욕장",
             address: "경북 포항시 북구 두호동 685",
-            searchQuery: "포항"
+            searchQuery: "포항",
+            onTap: {}
         )
         PlaceCard(
             title: "테라로사 포스텍점",
             address: "포항시 남구 청암로 87",
-            searchQuery: "포항"
+            searchQuery: "포항",
+            onTap: {}
         )
         PlaceCard(
             title: "일반 카드 (하이라이트 없음)",
-            address: "일반 주소"
+            address: "일반 주소",
+            onTap: {}
         )
     }
     .padding()
