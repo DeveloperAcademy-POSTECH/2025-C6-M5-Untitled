@@ -9,14 +9,15 @@ struct VoiceSearchView: View {
 
     var body: some View {
         ZStack {
-            backgroundGradient
+            Color.primaryNormal
+                .ignoresSafeArea()
 
             VStack {
                 Spacer()
 
                 Text(vm.centerMessage)
-                    .font(.title2.weight(.medium))
-                    .foregroundColor(.white)
+                    .font(.premed28)
+                    .foregroundStyle(.subLight)
                     .multilineTextAlignment(.center)
 
                 Spacer()
@@ -29,22 +30,17 @@ struct VoiceSearchView: View {
                         ZStack {
                             Circle()
                                 .fill(micButtonColor)
-                                .frame(width: 120, height: 120)
-                                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 5)
+                                .frame(width: 105, height: 105)
                             Image(systemName: micIconName)
-                                .font(.system(size: 40, weight: .medium))
+                                .font(.system(size: 48, weight: .medium))
                                 .foregroundColor(micIconColor)
                         }
                     }
-                    // 듣는 중/처리 중에는 살짝 눌린 느낌
-                    .scaleEffect(vm.isMicButtonEnabled ? 1.0 : 0.95)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.6), value: vm.state)
                     .disabled(!vm.isMicButtonEnabled) // 준비/실패 외 상태에서는 탭 방지
                 }
-                .padding(.bottom, 60)
-                .animation(.easeInOut(duration: 0.25), value: vm.showWaveAnimation)
+                .frame(width: 200, height: 200) // 화면 움직이지 않도록 frame 값
+                .padding(.bottom, 114)
             }
-            .padding(.horizontal, 32)
 
             // 닫기 버튼
             VStack {
@@ -52,13 +48,13 @@ struct VoiceSearchView: View {
                     Spacer()
                     Button { vm.dismiss() } label: {
                         Image(systemName: "xmark")
-                            .font(.title3)
+                            .font(.title2)
                             .foregroundColor(.white)
                             .padding(12)
-                            .background(Circle().fill(Color.white.opacity(0.2)))
+                            .bold() // 이 친구들도 크기 어떻게 할건지..?
                     }
-                    .padding(.top, 8)
-                    .padding(.trailing, 16)
+                    .padding(.top, 13)
+                    .padding(.trailing, 24)
                 }
                 Spacer()
             }
