@@ -25,8 +25,8 @@ struct OnRideCard: View {
                 Spacer()
             }
             .padding(.horizontal, 40)
-                
-           
+            
+            
             
             //TODO: 여기에 로티,이미지 파일 들어가야함
             /// 버스 탑승 중 이미지
@@ -38,8 +38,8 @@ struct OnRideCard: View {
                 .padding(.top, 48)
                 .padding(.bottom, 50)
             
-       
-                /// 남은 정류장 안내
+            
+            /// 남은 정류장 안내
             HStack {
                 Spacer()
                 
@@ -54,21 +54,21 @@ struct OnRideCard: View {
                 }
             }
             .padding(.horizontal, 40)
-                
-                /// 남은정류장 progressbar
-                BusStopProgress(
-                    progress: progress,
-                    trackColor: remainingStops == 1 ? Color(.subHeavy) : Color(.primaryNormal),
-                    fillColor: remainingStops == 1 ? Color(.subNormal): Color(.primaryDisable)
-                )
-                .padding(.horizontal, 40)
+            
+            /// 남은정류장 progressbar
+            BusStopProgress(
+                progress: progress,
+                trackColor: remainingStops == 1 ? Color(.subHeavy) : Color(.primaryNormal),
+                fillColor: remainingStops == 1 ? Color(.subNormal): Color(.primaryDisable)
+            )
+            .padding(.horizontal, 40)
         }
         .padding(.top, 60)
         .padding(.bottom, 45)
         .background(
-                   RoundedRectangle(cornerRadius: 20, style: .continuous)
-                       .fill(Color(remainingStops == 1 ? .primaryStrong : .primaryLight))
-               )
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(remainingStops == 1 ? .primaryStrong : .primaryLight))
+        )
     }
 }
 
@@ -83,16 +83,28 @@ struct BusStopProgress: View {
     var body: some View {
         
         GeometryReader { geometry in
+            let width = geometry.size.width
+            let progress = min(max(progress,0),1)
+            
             ZStack(alignment: .leading) {
                 Rectangle()
-                    .frame(width:geometry.size.width, height: 8)
+                    .frame(width: width, height: 8)
                     .cornerRadius(10)
                     .foregroundStyle(trackColor)
                 
                 Rectangle()
-                    .frame(width: progress*geometry.size.width, height: 8)
-                    .cornerRadius(10)
+                    .frame(width: progress*width, height: 8)
                     .foregroundStyle(fillColor)
+                    .clipShape(
+                        UnevenRoundedRectangle(
+                            cornerRadii: .init(
+                                topLeading: 10,
+                                bottomLeading: 10,
+                                bottomTrailing: progress >= 1 ? 10 : 0,
+                                topTrailing: progress >= 1 ? 10 : 0
+                            )
+                        )
+                    )
             }
         }
         .frame(height: 8)
