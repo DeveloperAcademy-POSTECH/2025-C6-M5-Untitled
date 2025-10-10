@@ -58,8 +58,8 @@ struct OnRideCard: View {
             /// 남은정류장 progressbar
             BusStopProgress(
                 progress: progress,
-                trackColor: remainingStops == 1 ? Color(.subHeavy) : Color(.primaryDisable),
-                fillColor: remainingStops == 1 ? Color(.subNormal): Color(.primaryNormal)
+                trackColor: remainingStops == 1 ? Color(.subNormal) : Color(.primaryNormal),
+                fillColor: remainingStops == 1 ? Color(.subHeavy): Color(.primaryDisable)
             )
             .padding(.horizontal, 40)
         }
@@ -77,8 +77,8 @@ struct OnRideCard: View {
 struct BusStopProgress: View {
     
     let progress: CGFloat
-    var trackColor: Color = .primaryDisable
-    var fillColor: Color = .primaryNormal
+    var trackColor: Color = .subNormal
+    var fillColor: Color = .subHeavy
     
     var body: some View {
         
