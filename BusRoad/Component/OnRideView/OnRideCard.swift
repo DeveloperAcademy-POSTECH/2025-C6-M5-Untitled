@@ -58,8 +58,8 @@ struct OnRideCard: View {
             /// 남은정류장 progressbar
             BusStopProgress(
                 progress: progress,
-                trackColor: remainingStops == 1 ? Color(.subHeavy) : Color(.primaryNormal),
-                fillColor: remainingStops == 1 ? Color(.subNormal): Color(.primaryDisable)
+                trackColor: remainingStops == 1 ? Color(.subHeavy) : Color(.primaryDisable),
+                fillColor: remainingStops == 1 ? Color(.subNormal): Color(.primaryNormal)
             )
             .padding(.horizontal, 40)
         }
