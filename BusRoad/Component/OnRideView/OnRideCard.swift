@@ -77,8 +77,8 @@ struct OnRideCard: View {
 struct BusStopProgress: View {
     
     let progress: CGFloat
-    var trackColor: Color = .primaryNormal
-    var fillColor: Color = .primaryDisable
+    var trackColor: Color = .primaryDisable
+    var fillColor: Color = .primaryNormal
     
     var body: some View {
         
