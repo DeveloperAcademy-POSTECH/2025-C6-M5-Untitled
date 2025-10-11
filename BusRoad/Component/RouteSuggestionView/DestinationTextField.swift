@@ -8,32 +8,31 @@
 import SwiftUI
 
 struct DestinationTextField : View {
+    @EnvironmentObject var coordinator: NavigationCoordinator
     @Binding var location: LocationInfo?
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerSize: .init(width: 10, height: 10))
-                .stroke(Color.black)
-                .frame(height:50)
+            RoundedRectangle(cornerSize: .init(width: 25, height: 25))
+                .stroke(Color.subStrong)
+                .frame(width: 350, height:50)
             
-            HStack{
+          HStack(spacing: 10){
                 Text("도착지")
-                    .padding(.leading, 10)
+                    .foregroundColor(Color.subPoint)
+                    .font(.prereg20)
+                    .padding(.leading, 30)
                 Divider()
-                
-                TextField(
-                    "도착지를 입력하세요",
-                    text: Binding(
-                        get: { self.location?.name ?? "" },
-                        set: { newName in
-                            if self.location == nil {
-                                self.location = LocationInfo(name: newName, latitude: 0, longitude: 0)
-                            } else {
-                                self.location?.name = newName
-                            }
-                        }
-                    )
-                )
+                  .background(Color.greyDisable)
+              
+                Button(action: {
+                    // TODO: 임시 내비게이션
+                    coordinator.push(.mainSearch)
+                }) {
+                    Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
+                        .foregroundColor(Color.greyHeavy)
+                        .font(.prereg20)
+                }
                 Spacer()
             }
             .frame(height: 30)

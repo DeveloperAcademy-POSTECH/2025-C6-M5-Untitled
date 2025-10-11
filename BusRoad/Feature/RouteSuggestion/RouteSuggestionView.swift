@@ -15,23 +15,23 @@ struct RouteSuggestionView: View {
     @State var currentIndex = 0
 
     var body: some View {
-        VStack(spacing: 10) {
+        VStack{
             Text("경로 선택")
-                .padding(.bottom, 20)
+                .font(.papermed16)
+                .padding(.bottom, 10)
             OriginTextField(
                 location: $viewModel.origin,
                 onRefreshTapped: { viewModel.requestOrigin() }
             )
+          
             DestinationTextField(location: $viewModel.destination)
-
-            Divider()
-                .padding(10)
 
             RouteCardSlide(
                 currentIndex: $currentIndex,
                 routes: viewModel.routes,
                 errorMessage: viewModel.errorMessage
             )
+            .padding([.top, .bottom], 20)
 
             routeSelectButton
 
@@ -41,7 +41,8 @@ struct RouteSuggestionView: View {
                     .foregroundColor(.gray)
             }
         }
-        .padding()
+        .padding([.leading, .trailing, .bottom], 10)
+        .background(Color.gray.opacity(0.01))
         .onAppear {
             viewModel.requestOrigin()
             user.currentLocation = viewModel.origin?.coordinate
@@ -73,17 +74,17 @@ struct RouteSuggestionView: View {
                 if let routes = viewModel.routes {
                     print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
                     viewModel.selectJourney(at: currentIndex)
-                    coordinator.push(.mainSearch)  // TODO: 임시 내비게이션
+                    coordinator.push(.walking)  // TODO: 임시 내비게이션
                 }
             },
             label: {
                 ZStack {
-                    RoundedRectangle(cornerRadius: 25)
-                        .frame(width: 230, height: 65)
-                        .foregroundColor(.black)
+                    RoundedRectangle(cornerRadius: 20)
+                        .frame(width: 240, height: 75)
+                        .foregroundColor(Color.subStrong)
                     Text("이걸로 갈게요")
-                        .foregroundColor(Color.white)
-                        .font(.title)
+                        .foregroundColor(Color.subLight)
+                        .font(.premed32)
                 }
             }
         )
