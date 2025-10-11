@@ -78,7 +78,6 @@ identifier_name:
 
 trailing_comma: warning
 trailing_newline: warning
-sorted_imports: warning
 
 disabled_rules:
   - vertical_parameter_alignment_on_call

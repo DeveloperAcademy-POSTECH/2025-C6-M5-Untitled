@@ -8,15 +8,15 @@
 import SwiftUI
 
 struct BoardingLocation: View {
-  var route: BusRoute
+  var route: BusRouteNode
   var body: some View {
     VStack(alignment:.leading){
-      Text("\(route.boardingLocation)에서 탑승")
+        Text("\(route.start.name)에서 탑승")
         .font(.title2)
       HStack{
-          Text(route.busNumbers.first ?? "")
+          Text(route.busNo)
             .font(.title2)
-        //실시간 버스 도착 예정 시간으로 수정해야 함!! (실시간 API 활용 필요)
+        // TODO: 실시간 버스 도착 예정 시간으로 수정해야 함!! (실시간 API 활용 필요)
         Text("3분 뒤 도착")
       }
     }

@@ -29,7 +29,7 @@ struct OriginTextField : View {
               get: { self.location?.name ?? "" },
               set: { newName in
                 if self.location == nil {
-                  self.location = LocationInfo(name: newName, longitude: 0, latitude: 0)
+                    self.location = LocationInfo(name: newName, latitude: 0, longitude: 0)
                 } else {
                   self.location?.name = newName
                 }
