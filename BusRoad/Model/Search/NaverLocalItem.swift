@@ -39,15 +39,6 @@ struct NaverLocalItem: Identifiable, Hashable, Decodable {
     }
 }
 
-//MARK: - 화면전달용 DTO 
-struct PlaceSummary: Hashable, Identifiable, Codable {
-    var id = UUID()
-    let name: String
-    let address: String
-    let latitude: Double
-    let longitude: Double
-}
-
 extension NaverLocalItem {
     func toSummary() -> PlaceSummary? {
         guard let lat = latitude, let lon = longitude else { return nil }
