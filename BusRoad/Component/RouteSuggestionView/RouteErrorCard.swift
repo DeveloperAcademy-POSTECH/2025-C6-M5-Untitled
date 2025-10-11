@@ -17,6 +17,8 @@ struct RouteErrorCard: View {
         Text("앗, 문제가 발생했어요😵\n경로를 다시 검색해주세요.")
           .font(.presemi24)
           .foregroundColor(Color.subLight)
+          .multilineTextAlignment(.center)
+          .lineSpacing(5)
       }
     }
 }

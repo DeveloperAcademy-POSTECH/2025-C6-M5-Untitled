@@ -17,12 +17,15 @@ struct ETA: View {
     return formatter.string(from: arrival)
   }
   
+  var timeText: String {
+    let hours = journey.totalTime / 60
+    let minutes = journey.totalTime % 60
+    return hours > 0 ? "\(hours)시간 \(minutes)분" : "\(minutes)분"
+  }
+  
   var body: some View {
     HStack{
       VStack(alignment:.leading){
-        let hours = journey.totalTime / 60
-        let minutes = journey.totalTime % 60
-        let timeText = hours > 0 ? "\(hours)시간 \(minutes)분" : "\(minutes)분"
         Text(timeText)
           .font(.presemi32)
           .foregroundColor(.subLight)
@@ -30,15 +33,16 @@ struct ETA: View {
         Text("\(estimatedArrivalTime) 도착 예정")
           .foregroundColor(Color.greyDisable)
       }
+        Spacer()
         ZStack{
           RoundedRectangle(cornerRadius: 10)
             .foregroundColor(Color.primaryLight)
             .frame(width: 100, height: 40)
-          Text("최적경로")
+          Text(journey.routeType)
             .foregroundColor(.primaryStrong)
             .font(.presemi20)
         }
-        .padding(.leading, 60)
+        .padding(.trailing, 20)
     }
   }
 }

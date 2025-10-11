@@ -9,12 +9,17 @@ import CoreLocation
 import SwiftUI
 
 struct RouteSuggestionView: View {
-    @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
     @State private var user = User(isOnBus: false)
-    @State var currentIndex = 0
+    @State var currentIndex: Int = 0
 
     var body: some View {
+      ZStack{
+        Rectangle()
+          .fill(Color.gray.opacity(0.05))
+          .stroke(Color.greyDisable, lineWidth: 0.5)
+          .frame(maxWidth: .infinity, maxHeight: 615)
+          .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
         VStack{
             Text("경로 선택")
                 .font(.papermed16)
@@ -33,7 +38,8 @@ struct RouteSuggestionView: View {
             )
             .padding([.top, .bottom], 20)
 
-            routeSelectButton
+            RouteSelectButton(currentIndex: $currentIndex,
+                              errorMessage: viewModel.errorMessage)
 
             if viewModel.routes == nil {
                 Text("현재 위치를 가져오는 중...")
@@ -42,7 +48,6 @@ struct RouteSuggestionView: View {
             }
         }
         .padding([.leading, .trailing, .bottom], 10)
-        .background(Color.gray.opacity(0.01))
         .onAppear {
             viewModel.requestOrigin()
             user.currentLocation = viewModel.origin?.coordinate
@@ -65,29 +70,7 @@ struct RouteSuggestionView: View {
             print("[DEBUG] routes updated")
             currentIndex = 0
         }
-    }
-
-    var routeSelectButton: some View {
-
-        return Button(
-            action: {
-                if let routes = viewModel.routes {
-                    print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
-                    viewModel.selectJourney(at: currentIndex)
-                    coordinator.push(.walking)  // TODO: 임시 내비게이션
-                }
-            },
-            label: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 20)
-                        .frame(width: 240, height: 75)
-                        .foregroundColor(Color.subStrong)
-                    Text("이걸로 갈게요")
-                        .foregroundColor(Color.subLight)
-                        .font(.premed32)
-                }
-            }
-        )
+      }
     }
 }
 

@@ -4,10 +4,12 @@ struct Journey: Identifiable, Equatable {
     let id = UUID()
     let totalTime: Int  // 총 걸리는 시간
     var nodes: [RouteNode]
+    let routeType: String
     
-    init(totalTime: Int, nodes: [RouteNode]) {
+    init(totalTime: Int, nodes: [RouteNode], routeType: String) {
         self.totalTime = totalTime
         self.nodes = nodes
+        self.routeType = routeType
     }
     
     static func == (lhs: Journey, rhs: Journey) -> Bool {

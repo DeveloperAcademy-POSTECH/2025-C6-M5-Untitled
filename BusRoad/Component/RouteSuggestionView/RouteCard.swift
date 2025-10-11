@@ -18,16 +18,15 @@ struct RouteCard: View {
                 .cornerRadius(20)
             if let firstBusRoute = journey.firstBusRoute {
                 VStack(alignment:.leading){
-                    Spacer()
                     ETA(journey: journey)
                     Spacer()
                     BoardingLocation(route: firstBusRoute)
                     Spacer()
                     RouteSummary(journey: journey)
-                    Spacer()
+                    .padding(.bottom, 30)
                 }
-                .frame(width: 300, height: 423)
-                .padding(.leading, 10)
+                .frame(width: 290, height: 400)
+                .padding(.leading, 20)
             }
         }
     }
