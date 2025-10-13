@@ -11,7 +11,7 @@
  WholeJourney(journey: DummyData.journey)
  }
  
- DummyData.journey, busNode, walkNode 존재
+ DummyData.journey, DummyData.busNode, DummyData.walkNode 존재
  */
 struct DummyData {
     static let journey: Journey = {

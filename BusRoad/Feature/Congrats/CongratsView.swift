@@ -8,7 +8,22 @@
 import SwiftUI
 
 struct CongratsView: View {
+    @EnvironmentObject private var coordinator: NavigationCoordinator
     var body: some View {
-        Text("Hello, World!")
+        VStack {
+            HStack {
+                Spacer()
+                Button {
+                    coordinator.popToRoot()
+                } label: {
+                    Image(systemName: "xmark")
+                        .frame(width: 28, height: 28)
+                        .foregroundColor(.greyNormal)
+                }
+            }
+            Spacer()
+            Text("Congratulations!")
+            Spacer()
+        }
     }
 }

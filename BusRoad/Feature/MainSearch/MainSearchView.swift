@@ -27,6 +27,9 @@ struct MainSearchView: View {
                         if let latitude = item.latitude, let longitude = item.longitude {
                             vm.setDestination(destination: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
                         }
+                        // 초기화
+                        vm.resetManager()
+                        isSearchMode = false
                         coordinator.push(.routeSuggestion)
                     }
                 )

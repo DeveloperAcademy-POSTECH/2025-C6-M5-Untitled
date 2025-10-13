@@ -5,13 +5,14 @@
 //  Created by 박난 on 9/24/25.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 class NavigationCoordinator: ObservableObject {
     @Published var path: [Route] = []
     @Published var currentStage: JourneyStage?
     let journeyManager = JourneyManager.shared
+    let searchManager = SearchManager.shared
     
     func push(_ path: Route) {
         self.path.append(path)
@@ -24,6 +25,9 @@ class NavigationCoordinator: ObservableObject {
     }
     
     func popToRoot() {
+        // manager 초기화
+        journeyManager.reset()
+        searchManager.reset()
         self.path.removeAll()
     }
     
@@ -64,10 +68,10 @@ class NavigationCoordinator: ObservableObject {
                         break
                     }
                     journeyManager.journeyIndex = index + 1
-
+                    
                 case .beforeRide:   // [주의] 여기만 journeyIndex 안 올라감!!
                     self.currentStage = .onRide
-
+                    
                 case .onRide:
                     let nextNode = journey.nodes[index + 1]
                     switch nextNode {
@@ -77,7 +81,7 @@ class NavigationCoordinator: ObservableObject {
                         self.currentStage = .beforeRide
                     }
                     journeyManager.journeyIndex = index + 1
-
+                    
                 case .congrats:
                     print("[ERROR] There is no more stages.")
                 }

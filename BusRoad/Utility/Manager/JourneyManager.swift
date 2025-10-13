@@ -14,6 +14,14 @@ final class JourneyManager: ObservableObject {
     
     let locationService = LocationService()
     
+    func reset() {
+        self.origin = nil
+        self.destination = nil
+        self.journeyList = nil
+        self.selectedJourney = nil
+        self.journeyIndex = nil
+    }
+    
     func setOrigin(_ origin: LocationInfo) {
         self.origin = origin
     }
