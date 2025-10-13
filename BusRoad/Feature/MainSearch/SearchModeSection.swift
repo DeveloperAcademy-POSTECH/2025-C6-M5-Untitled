@@ -12,31 +12,41 @@ struct SearchModeSection: View {
     let onSelect: (NaverLocalItem) -> Void
     
     var body: some View {
-        VStack(spacing: 12) {
-            header
-            list
+        ZStack {
+            Color.background
+                .ignoresSafeArea()
+            
+            VStack(spacing: 12) {
+                header
+                list
+            }
+            
         }
     }
 
     private var header: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 0) {
             Button(action: onBack) {
                 Image(systemName: "chevron.left")
-                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.greyNormal)
+                    .font(.title3)
+                    .frame(width: 44, height: 44)
+                    .bold()
+                // bold가 들어가야하는건가..?
             }
             .buttonStyle(.plain)
 
             SearchBar(
                 text: $query,
-                placeholder: "장소 이름 검색하기",
                 isFocused: isFocused,
-                compact: true,
                 onSubmit: onSubmit,
-                onMicTap: onMicTap,          // 검색 모드 헤더엔 마이크 없으면 비워둠
+                onMicTap: onMicTap,
                 onClearTap: onClear
             )
         }
-        .padding(.horizontal, 16)
+        .padding(.leading, 8)
+        .padding(.trailing, 20)
+        .padding(.vertical, 8)
     }
 
     private var list: some View {
@@ -48,7 +58,7 @@ struct SearchModeSection: View {
             }
 
             ScrollView {
-                LazyVStack(spacing: 12) {
+                LazyVStack(spacing: 7) {
                     ForEach(results) { item in
                         PlaceCard(
                             title: item.plainTitle,

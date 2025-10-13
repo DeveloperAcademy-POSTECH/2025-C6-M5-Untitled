@@ -1,57 +1,87 @@
 import SwiftUI
 
 struct WaveRingsView: View {
-    @State private var s1: CGFloat = 0.001
-    @State private var s2: CGFloat = 0.001
-    @State private var s3: CGFloat = 0.001
-
-    private let a1: CGFloat = 0.22
-    private let a2: CGFloat = 0.28
-    private let a3: CGFloat = 0.34
-
-    private let baseSize: CGFloat = 120
-    private let maxScale: CGFloat = 2.1
-    private let duration: Double = 2.0
-
+    @State private var animationTrigger = false
+    
+    // 디자인 스펙
+    private let baseSize: CGFloat = 105
+    private let maxScale: CGFloat = 312 / 105  // 최대 스케일
+    private let duration: Double = 3.0
+    private let ringCount: Int = 2  // 링 개수
+    private let waveInterval: Double = 0.8  // 파동 간격
+    
     var body: some View {
         ZStack {
-            ring(scale: s1, baseAlpha: a1)
-            ring(scale: s2, baseAlpha: a2)
-            ring(scale: s3, baseAlpha: a3)
+            ForEach(0..<ringCount, id: \.self) { index in
+                WaveRing(
+                    maxScale: maxScale,
+                    duration: duration,
+                    delay: Double(index) * waveInterval,
+                    animationTrigger: animationTrigger
+                )
+            }
         }
         .frame(width: baseSize, height: baseSize)
-        .onAppear { start() }
-        .onDisappear { reset() }
+        .onAppear {
+            animationTrigger = true
+        }
+        .onDisappear {
+            animationTrigger = false
+        }
     }
+}
 
-    private func ring(scale: CGFloat, baseAlpha: CGFloat) -> some View {
+struct WaveRing: View {
+    let maxScale: CGFloat
+    let duration: Double
+    let delay: Double
+    let animationTrigger: Bool
+    
+    @State private var scale: CGFloat = 0.001
+    @State private var opacity: Double = 0.4
+    
+    var body: some View {
         Circle()
-            .fill(Color.white.opacity(baseAlpha))
+            .fill(Color.subNormal)
             .scaleEffect(scale)
-            .opacity(max(0.0, min(1.0, (maxScale + 0.2) - scale)))
+            .opacity(opacity)
+            .onChange(of: animationTrigger) { _, newValue in
+                if newValue {
+                    startAnimation()
+                } else {
+                    reset()
+                }
+            }
     }
-
-    private func start() {
-        s1 = 0.001; s2 = 0.001; s3 = 0.001
-
-        withAnimation(.easeOut(duration: duration).repeatForever(autoreverses: false)) {
-            s1 = maxScale
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-            withAnimation(.easeOut(duration: duration).repeatForever(autoreverses: false)) {
-                s2 = maxScale
-            }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.90) {
-            withAnimation(.easeOut(duration: duration).repeatForever(autoreverses: false)) {
-                s3 = maxScale
-            }
+    
+    private func startAnimation() {
+        // 지연 후 애니메이션 시작
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            animateWave()
         }
     }
-
+    
+    private func animateWave() {
+        guard animationTrigger else { return }
+        
+        // 초기화
+        scale = 0.001
+        opacity = 0.4
+        
+        // 확장 + 페이드아웃
+        withAnimation(.easeOut(duration: duration)) {
+            scale = maxScale
+            opacity = 0.0
+        }
+        
+        // 애니메이션 끝나면 다시 시작 
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+            animateWave()
+        }
+    }
+    
     private func reset() {
-        withAnimation(.easeOut(duration: 0.2)) {
-            s1 = 0.001; s2 = 0.001; s3 = 0.001
-        }
+        scale = 0.001
+        opacity = 0.0
     }
 }
