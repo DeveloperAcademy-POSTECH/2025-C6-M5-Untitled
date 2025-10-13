@@ -16,7 +16,7 @@ struct RouteSuggestionView: View {
     var body: some View {
       ZStack{
         Rectangle()
-          .fill(Color.gray.opacity(0.05))
+          .fill(Color.background)
           .stroke(Color.greyDisable, lineWidth: 0.5)
           .frame(maxWidth: .infinity, maxHeight: 615)
           .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
