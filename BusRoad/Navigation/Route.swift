@@ -12,8 +12,4 @@ enum Route: Hashable {
     case mainSearch
     case voiceSearch
     case routeSuggestion
-    case walking
-    case beforeRide
-    case onRide
-    case congrats
 }

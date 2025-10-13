@@ -15,4 +15,6 @@ struct BusRouteNode {
     let busId: Int
     let stations: [BusStation]  // [start ~ end] stations
     let travelTime: Int
+    
+    var asRouteNode: RouteNode { .bus(self) }   // RouteNode로서 취급
 }

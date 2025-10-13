@@ -20,7 +20,7 @@ struct RouteSelectButton: View {
               if let routes = viewModel.routes {
                   print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
                   viewModel.selectJourney(at: currentIndex)
-                  coordinator.push(.walking)  // TODO: 임시 내비게이션
+                  coordinator.push(.walking)  // TODO: 임시 내비게이션 -> 컴포넌트에서 coordinator 쓰면 안됨. onTap으로 올려서 상위뷰에서 coordinator 쓰기
               }
           },
           label: {
@@ -38,7 +38,7 @@ struct RouteSelectButton: View {
       Button(
           action: {
               print(errorMessage)
-              coordinator.push(.mainSearch)  // TODO: 임시 내비게이션
+              coordinator.push(.mainSearch)  // TODO: 임시 내비게이션 -> 컴포넌트에서 coordinator 쓰면 안됨. onTap으로 올려서 상위뷰에서 coordinator 쓰기
           },
           label: {
               ZStack {

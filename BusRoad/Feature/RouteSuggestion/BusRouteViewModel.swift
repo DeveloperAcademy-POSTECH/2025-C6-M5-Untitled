@@ -194,6 +194,7 @@ class BusRouteViewModel: ObservableObject {
                 return
             }
             journeyManager.selectedJourney = routes[index]
+            journeyManager.journeyIndex = 0
             print("[DEBUG] selected journey: \(routes[index])")
         }
     }

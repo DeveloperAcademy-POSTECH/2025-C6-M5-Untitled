@@ -15,20 +15,20 @@ struct AppNavigationView: View {
             MainSearchView()
                 .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case .beforeRide:
-                        BeforeRideView()
-                    case .congrats:
-                        CongratsView()
-                    case .onRide:
-                        OnRideView()
+//                    case .beforeRide:
+//                        BeforeRideView()
+//                    case .congrats:
+//                        CongratsView()
+//                    case .onRide:
+//                        OnRideView()
                     case .routeSuggestion:
                         RouteSuggestionView()
                     case .mainSearch:
                         MainSearchView()
                     case .voiceSearch:
                         VoiceSearchView()
-                    case .walking:
-                        WalkingView()
+//                    case .walking:
+//                        WalkingView()
                     }
                 }
         }
