@@ -28,6 +28,7 @@ class NavigationCoordinator: ObservableObject {
         // manager 초기화
         journeyManager.reset()
         searchManager.reset()
+        self.currentStage = nil
         self.path.removeAll()
     }
     
