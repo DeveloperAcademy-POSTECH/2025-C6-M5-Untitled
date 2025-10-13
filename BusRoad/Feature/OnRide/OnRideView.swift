@@ -22,7 +22,6 @@ struct OnRideView: View {
                 
                 if let journey, let index {
                     WholeJourney(journey: journey, journeyIndex: index)
-                        .padding(.horizontal, 30)
                 }
                 
                 OnRideCard(

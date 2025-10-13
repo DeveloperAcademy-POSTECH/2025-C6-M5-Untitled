@@ -19,6 +19,7 @@ struct CongratsView: View {
                     Image(systemName: "xmark")
                         .frame(width: 28, height: 28)
                         .foregroundColor(.greyNormal)
+                        .padding()
                 }
             }
             Spacer()

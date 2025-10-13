@@ -7,7 +7,6 @@
 
 import SwiftUI
 
-// 상위 뷰에서 패딩으로 조정
 struct WholeJourney: View {
     var journey: Journey
     var journeyIndex: Int
@@ -32,6 +31,8 @@ struct WholeJourney: View {
                 }
             }
         }
+        .padding(.horizontal, 30)
+        .padding(.vertical, 32)
     }
 }
 

@@ -22,10 +22,8 @@ struct WalkingView: View {
     var body: some View {
         // 임시 화면
         VStack {
-            
             if let journey, let index {
                 WholeJourney(journey: journey, journeyIndex: index)
-                    .padding(.horizontal, 30)
             }
             
             Spacer()
