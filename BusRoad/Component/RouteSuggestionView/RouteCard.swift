@@ -9,26 +9,24 @@ import SwiftUI
 
 struct RouteCard: View {
     var journey: Journey
-    var isFirstCard: Bool
     
     var body: some View {
         ZStack{
             Rectangle()
-                .foregroundColor(.gray)
-                .frame(width: 317, height: 400)
+                .foregroundColor(Color.primaryNormal)
+                .frame(width: 305, height: 423)
                 .cornerRadius(20)
             if let firstBusRoute = journey.firstBusRoute {
                 VStack(alignment:.leading){
-                    Spacer()
-                    ETA(journey: journey, isFirstCard: isFirstCard)
+                    ETA(journey: journey)
                     Spacer()
                     BoardingLocation(route: firstBusRoute)
                     Spacer()
-                    WholeJourney(journey: journey)
-                    Spacer()
+                    RouteSummary(journey: journey)
+                    .padding(.bottom, 30)
                 }
-                .frame(width: 317, height: 400)
-                .padding(.leading, 5)
+                .frame(width: 290, height: 400)
+                .padding(.leading, 20)
             }
         }
     }

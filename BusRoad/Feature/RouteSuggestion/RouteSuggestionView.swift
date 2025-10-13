@@ -9,31 +9,37 @@ import CoreLocation
 import SwiftUI
 
 struct RouteSuggestionView: View {
-    @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
     @State private var user = User(isOnBus: false)
-    @State var currentIndex = 0
+    @State var currentIndex: Int = 0
 
     var body: some View {
-        VStack(spacing: 10) {
+      ZStack{
+        Rectangle()
+          .fill(Color.background)
+          .stroke(Color.greyDisable, lineWidth: 0.5)
+          .frame(maxWidth: .infinity, maxHeight: 615)
+          .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
+        VStack{
             Text("경로 선택")
-                .padding(.bottom, 20)
+                .font(.papermed16)
+                .padding(.bottom, 10)
             OriginTextField(
                 location: $viewModel.origin,
                 onRefreshTapped: { viewModel.requestOrigin() }
             )
+          
             DestinationTextField(location: $viewModel.destination)
-
-            Divider()
-                .padding(10)
 
             RouteCardSlide(
                 currentIndex: $currentIndex,
                 routes: viewModel.routes,
                 errorMessage: viewModel.errorMessage
             )
+            .padding([.top, .bottom], 20)
 
-            routeSelectButton
+            RouteSelectButton(currentIndex: $currentIndex,
+                              errorMessage: viewModel.errorMessage)
 
             if viewModel.routes == nil {
                 Text("현재 위치를 가져오는 중...")
@@ -41,7 +47,7 @@ struct RouteSuggestionView: View {
                     .foregroundColor(.gray)
             }
         }
-        .padding()
+        .padding([.leading, .trailing, .bottom], 10)
         .onAppear {
             viewModel.requestOrigin()
             user.currentLocation = viewModel.origin?.coordinate
@@ -64,29 +70,7 @@ struct RouteSuggestionView: View {
             print("[DEBUG] routes updated")
             currentIndex = 0
         }
-    }
-
-    var routeSelectButton: some View {
-
-        return Button(
-            action: {
-                if let routes = viewModel.routes {
-                    print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
-                    viewModel.selectJourney(at: currentIndex)
-                    coordinator.push(.mainSearch)  // TODO: 임시 내비게이션
-                }
-            },
-            label: {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 25)
-                        .frame(width: 230, height: 65)
-                        .foregroundColor(.black)
-                    Text("이걸로 갈게요")
-                        .foregroundColor(Color.white)
-                        .font(.title)
-                }
-            }
-        )
+      }
     }
 }
 

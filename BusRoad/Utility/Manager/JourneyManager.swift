@@ -39,48 +39,37 @@ final class JourneyManager: ObservableObject {
         }
     }
     
-    func setJourneyList(_ path: [[String: Any]]) {
-        // pathType: 1-지하철, 2-버스, 3-버스+지하철
-        
-        // MARK: 버스 경로만 모아보기(지하철 확장하면 고려해서 코드 전체 수정하기)
-        let filtered = path.filter { $0["pathType"] as? Int == 2 }
-        
-        // TODO: (진) 현재는 추천경로 순서대로 3개 뽑는데 나중에 최소시간/최소환승/최소도보로 뽑기
-        let top3 = filtered.prefix(3)
-        
-        self.journeyList = top3.compactMap { parseJourney($0) }
-    }
+  func setJourneyList(journeys: [Journey]) {
+          self.journeyList = journeys.isEmpty ? nil : journeys
+      }
     
-    private func parseJourney(_ data: [String: Any]) -> Journey? {
-        guard let subPaths = data["subPath"] as? [[String: Any]],
-              let info = data["info"] as? [String: Any],
-              let totalTime = info["totalTime"] as? Int
-        else { return nil }
-        
-        var nodes: [RouteNode] = []
-        
-        for (i, sub) in subPaths.enumerated() {
-            let tType = sub["trafficType"] as? Int
-            // trafficType: 이동 수단 종류 (1-지하철, 2-버스, 3-도보)
-            switch tType {
-            case 1: // TODO: 지하철
-                continue
-                
-            case 2: // 버스
-                if let bus = parseBusNode(sub) {
-                    nodes.append(.bus(bus))
-                }
-                
-            case 3: // 도보
-                if let walk = parseWalkNode(at: i, in: subPaths) {
-                    nodes.append(.walk(walk))
-                }
-            default:
-                continue
-            }
+  public func parseJourney(_ data: [String: Any], routeType: String) -> Journey? {
+          guard let subPaths = data["subPath"] as? [[String: Any]],
+                let info = data["info"] as? [String: Any],
+                let totalTime = info["totalTime"] as? Int
+          else { return nil }
+          
+          var nodes: [RouteNode] = []
+          
+          for (i, sub) in subPaths.enumerated() {
+              let tType = sub["trafficType"] as? Int
+              // trafficType: 이동 수단 종류 (1-지하철, 2-버스, 3-도보)
+              switch tType {
+              case 1: // TODO: 지하철
+                  continue
+                  
+              case 2: // 버스
+                  if let bus = parseBusNode(sub) {
+                      nodes.append(.bus(bus))
+                  }
+                  
+              default:
+                  print("[DEBUG] 알 수 없는 교통 타입: \(String(describing: tType))")
+                  continue
+              }
+          }
+    return Journey(totalTime: totalTime, nodes: nodes, routeType: routeType)
         }
-        return Journey(totalTime: totalTime, nodes: nodes)
-    }
     
     private func parseBusNode(_ sub: [String: Any]) -> BusRouteNode? {
         // 필수 데이터

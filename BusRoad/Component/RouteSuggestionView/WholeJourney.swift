@@ -7,8 +7,7 @@
 
 import SwiftUI
 
-// 여기는 아직 대대적 작업이 필요함,,, 루트 가져와서 시각화 어떻게 할지 고민해봐야 함...
-// TODO: Journey의 transferCount, walkingTime 가져와서 UI 꾸미기
+// TODO: RouteSuggestion의 wholeJourney -> RouteSummary를 추가해서 대체함. 이 컴포넌트는 탑승 전/중 뷰 상단에 들어가는 컴포넌트로 수정 필요
 struct WholeJourney: View {
   var journey: Journey
   var body: some View {
