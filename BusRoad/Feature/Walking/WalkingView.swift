@@ -8,7 +8,33 @@
 import SwiftUI
 
 struct WalkingView: View {
+    @EnvironmentObject var coordinator: NavigationCoordinator
+    var journey: Journey?
+    var index: Int?
+    
+    init(manager: JourneyManager = .shared) {
+        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
+            self.journey = journey
+            self.index = index
+        }
+    }
+    
     var body: some View {
-        Text("Hello, World!")
+        // 임시 화면
+        VStack {
+            if let journey, let index {
+                WholeJourney(journey: journey, journeyIndex: index)
+            }
+            
+            Spacer()
+            
+            Button {
+                coordinator.advanceJourneyStage()
+            } label: {
+                Text("도보뷰입니다. -> 다음 노드로 가는 임시 버튼!!")
+            }
+            
+            Spacer()
+        }
     }
 }

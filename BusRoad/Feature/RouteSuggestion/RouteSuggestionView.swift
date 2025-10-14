@@ -9,6 +9,7 @@ import CoreLocation
 import SwiftUI
 
 struct RouteSuggestionView: View {
+    @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
     @State private var user = User(isOnBus: false)
     @State var currentIndex: Int = 0
@@ -39,7 +40,18 @@ struct RouteSuggestionView: View {
             .padding([.top, .bottom], 20)
 
             RouteSelectButton(currentIndex: $currentIndex,
-                              errorMessage: viewModel.errorMessage)
+                              errorMessage: viewModel.errorMessage,
+                              routes: viewModel.getJourneyList(),
+                              onSelect: {
+                viewModel.selectJourney(at: currentIndex)
+                coordinator.push(.journeyFlow)
+            },
+                              retrySearch: {
+                print(viewModel.errorMessage)
+                coordinator.popToRoot() // MainSearch로 초기화
+            }
+                              
+            )
 
             if viewModel.routes == nil {
                 Text("현재 위치를 가져오는 중...")

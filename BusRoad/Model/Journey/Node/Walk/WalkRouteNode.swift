@@ -14,4 +14,6 @@ struct WalkRouteNode {
     let start: LocationInfo   // 도보 출발지점
     let end: LocationInfo     // 도보 목적지점
     let travelTime: Int       // 도보 시간
+    
+    var asRouteNode: RouteNode { .walk(self) }
 }

@@ -34,4 +34,8 @@ final class MainSearchViewModel: ObservableObject {
         journeyManager.setDestination(destination)
     }
     
+    func resetManager() {
+        searchManager.reset()
+    }
+    
 }

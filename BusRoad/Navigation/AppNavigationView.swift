@@ -13,22 +13,21 @@ struct AppNavigationView: View {
     var body: some View {
         NavigationStack(path: $coordinator.path) {
             MainSearchView()
+                .navigationBarBackButtonHidden(true)
                 .navigationDestination(for: Route.self) { route in
                     switch route {
-                    case .beforeRide:
-                        BeforeRideView()
-                    case .congrats:
-                        CongratsView()
-                    case .onRide:
-                        OnRideView()
                     case .routeSuggestion:
                         RouteSuggestionView()
+                            .toolbar(.hidden, for: .navigationBar)
                     case .mainSearch:
                         MainSearchView()
+                            .toolbar(.hidden, for: .navigationBar)
                     case .voiceSearch:
                         VoiceSearchView()
-                    case .walking:
-                        WalkingView()
+                            .toolbar(.hidden, for: .navigationBar)
+                    case .journeyFlow:
+                        JourneyFlowView()
+                            .toolbar(.hidden, for: .navigationBar)
                     }
                 }
         }
