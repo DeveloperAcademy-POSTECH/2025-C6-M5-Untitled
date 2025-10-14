@@ -81,7 +81,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
 
 
     // 1회성 현재 위치 가져오기 (권한 체크 포함). 기본 타임아웃 8초.
-    func requestOneShotLocation(timeout seconds: TimeInterval = 8) async throws -> CLLocation {
+    func requestOneShotLocation(timeout seconds: TimeInterval = 30) async throws -> CLLocation {
         // 권한 보장
         try await requestWhenInUseAuthorizationIfNeeded()
 
@@ -109,7 +109,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     }
 
     // 좌표만 필요한 경우 편의 메서드
-    func requestOneShotCoordinate(timeout seconds: TimeInterval = 8) async throws -> CLLocationCoordinate2D {
+    func requestOneShotCoordinate(timeout seconds: TimeInterval = 30) async throws -> CLLocationCoordinate2D {
         let loc = try await requestOneShotLocation(timeout: seconds)
         return loc.coordinate
     }
