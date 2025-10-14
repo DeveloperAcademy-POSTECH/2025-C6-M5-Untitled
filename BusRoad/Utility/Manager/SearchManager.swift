@@ -20,6 +20,14 @@ final class SearchManager: ObservableObject {
     private init(service: PlaceSearchService = PlaceSearchService()) {
         self.service = service
     }
+    
+    func reset() {
+        self.query = ""
+        self.results = []
+        self.isLoading = false
+        self.errorMessage = nil
+        self.shouldShowSearchMode = false
+    }
 
     // 일반 검색
     func search() async {

@@ -2,6 +2,16 @@ import SwiftUI
 
 struct OnRideView: View {
     @StateObject private var vm = OnRideViewModel()
+    @EnvironmentObject private var coordinator: NavigationCoordinator
+    var journey: Journey?
+    var index: Int?
+    
+    init(manager: JourneyManager = .shared) {
+        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
+            self.journey = journey
+            self.index = index
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -9,6 +19,10 @@ struct OnRideView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 47) {
+                
+                if let journey, let index {
+                    WholeJourney(journey: journey, journeyIndex: index)
+                }
                 
                 OnRideCard(
                     busStopName: vm.stopName,
@@ -18,9 +32,9 @@ struct OnRideView: View {
                 .padding(.horizontal, 24)
                 
                 
-                if vm.remainingStops == 1 {
+                if vm.remainingStops <= 1 {
                     Button {
-                       // TODO: 다음화면으로 넘어가도록하는 액션
+                        coordinator.advanceJourneyStage()
                     } label: {
                         Text("내렸어요")
                             .font(.premed32)
