@@ -10,6 +10,8 @@ import SwiftUI
 struct BoardingLocation: View {
   var route: BusRouteNode
   var body: some View {
+    let cleanBusNo = route.busNo.replacingOccurrences(of: "\\(.*?\\)", with: "", options: .regularExpression)
+    
     VStack(alignment:.leading){
         Text("탑승 정류장")
           .font(.prereg20)
@@ -19,7 +21,7 @@ struct BoardingLocation: View {
           .foregroundColor(Color.subLight)
           .padding([.top, .bottom], 5)
       HStack{
-        Text("\(route.busNo)번")
+        Text("\(cleanBusNo)번")
             .font(.presemi24)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
