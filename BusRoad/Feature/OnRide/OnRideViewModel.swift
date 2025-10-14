@@ -7,7 +7,7 @@ final class OnRideViewModel: ObservableObject {
     // TODO: 나중에 선택한 전체 경로 및 실시간 위치에서 받아와야함
     @Published var stopName: String = "포항 성모병원"
     @Published var totalStops: Int = 10
-    @Published var remainingStops: Int = 4
+    @Published var remainingStops: Int = 1
     
     /// 정류장 목록 (API에서 받아오기)
     private var routeStops: [String] = []

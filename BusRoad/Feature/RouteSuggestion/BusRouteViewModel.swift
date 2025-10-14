@@ -194,7 +194,11 @@ class BusRouteViewModel: ObservableObject {
                 return
             }
             journeyManager.selectedJourney = routes[index]
-            print("[DEBUG] selected journey: \(routes[index])")
+            journeyManager.journeyIndex = 0
         }
+    }
+    
+    func getJourneyList() -> [Journey]? {
+        return journeyManager.journeyList
     }
 }
