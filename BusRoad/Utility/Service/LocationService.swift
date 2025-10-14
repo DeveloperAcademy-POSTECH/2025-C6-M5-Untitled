@@ -5,9 +5,9 @@
 //  Created by 강진 on 9/28/25.
 //
 
-import Foundation
-import CoreLocation
 import Combine
+import CoreLocation
+import Foundation
 
 @MainActor
 final class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
@@ -47,6 +47,11 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
+       
+        // 백그라운드 업데이트 허용
+        manager.allowsBackgroundLocationUpdates = true
+        manager.pausesLocationUpdatesAutomatically = true
+        manager.activityType = .otherNavigation
     }
 
     // MARK: - Public API
@@ -157,5 +162,26 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         timeoutTask?.cancel()
         timeoutTask = nil
         print("🚨 위치 실패: \(error.localizedDescription)")
+    }
+}
+
+// 실시간 위치추적 기능
+// TODO: - extension 파일 추후 분리해야함
+extension LocationService {
+    func startContinuousUpdates(
+        // 20m 이동마다 업데이트되도록
+        distanceFilter: CLLocationDistance = 10,
+        accuracy: CLLocationAccuracy = kCLLocationAccuracyBest
+    ) async throws {
+        try await requestWhenInUseAuthorizationIfNeeded()
+        
+        manager.distanceFilter = distanceFilter
+        manager.desiredAccuracy = accuracy
+        
+        manager.startUpdatingLocation()
+    }
+    
+    func stopContinuousUpdates() {
+        manager.stopUpdatingLocation()
     }
 }

@@ -45,3 +45,18 @@ struct Journey: Identifiable, Equatable {
         }
     }
 }
+
+
+//  TODO: 따로 파일 정리
+// 마지막 정류장 뽑아오기 위한 extension
+extension Journey {
+    var busSegments: [BusRouteNode] {
+        nodes.compactMap { if case let .bus(b) = $0 { b } else { nil } }
+    }
+
+    /// N번째 버스 구간에서 내릴 정류장(0-based)
+    func alightStop(ofBusLeg index: Int) -> LocationInfo? {
+        guard busSegments.indices.contains(index) else { return nil }
+        return busSegments[index].end
+    }
+}

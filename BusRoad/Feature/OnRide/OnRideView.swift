@@ -26,13 +26,13 @@ struct OnRideView: View {
                 
                 OnRideCard(
                     busStopName: vm.stopName,
-                    remainingStops: vm.remainingStops,
+                    isNearAlight: vm.isNearAlight,
                     progress: vm.progress
                 )
                 .padding(.horizontal, 24)
                 
                 
-                if vm.remainingStops <= 1 {
+                if vm.isNearAlight {
                     Button {
                         coordinator.advanceJourneyStage()
                     } label: {
@@ -46,7 +46,7 @@ struct OnRideView: View {
                     .buttonStyle(.plain)
                 } else {
                     Button {
-                        // TODO: 비활성화 상태에서의 동작(토스트/알럿/햅틱 등)
+                        // TODO: 비활성화 상태에서의 동작(토스트 등)
                         // “1정류장 남으면 버튼이 활성화돼요”
                     } label: {
                         Text("내렸어요")
@@ -58,6 +58,12 @@ struct OnRideView: View {
                     }
                 }
             }
+            .onAppear {
+                vm.busLegIndex = 0 
+                vm.start()
+            }
+            .onDisappear { vm.stop() }
+
         }
     }
 }
