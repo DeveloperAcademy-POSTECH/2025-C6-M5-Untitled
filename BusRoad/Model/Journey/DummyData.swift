@@ -115,8 +115,7 @@ struct DummyData {
                         travelTime: 1
                     )
                 )
-            ],
-            routeType: "추천"
+            ]
         )
     }()
     
