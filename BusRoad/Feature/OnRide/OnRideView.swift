@@ -59,11 +59,29 @@ struct OnRideView: View {
                 }
             }
             .onAppear {
-                vm.busLegIndex = 0 
+                guard
+                    let journey = coordinator.journeyManager.selectedJourney,
+                    let nodeIndex = coordinator.journeyManager.journeyIndex,
+                    let leg = journey.busLegIndex(forNodeIndex: nodeIndex)
+                else { return }
+                
+                vm.busLegIndex = leg
                 vm.start()
             }
+            .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
+                guard
+                  let j = coordinator.journeyManager.selectedJourney,
+                  let nodeIdx = coordinator.journeyManager.journeyIndex,
+                  let leg = j.busLegIndex(forNodeIndex: nodeIdx)
+                else { return }
+                
+                if vm.busLegIndex != leg {
+                    vm.busLegIndex = leg
+                    vm.start()
+                }
+            }
             .onDisappear { vm.stop() }
-
+            
         }
     }
 }
@@ -71,4 +89,5 @@ struct OnRideView: View {
 
 #Preview {
     OnRideView()
+        .environmentObject(NavigationCoordinator())
 }
