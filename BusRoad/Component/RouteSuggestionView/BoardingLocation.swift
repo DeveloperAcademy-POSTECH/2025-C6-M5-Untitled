@@ -10,7 +10,6 @@ import SwiftUI
 struct BoardingLocation: View {
   var route: BusRouteNode
   var body: some View {
-    
     VStack(alignment:.leading){
         Text("탑승 정류장")
           .font(.prereg20)
