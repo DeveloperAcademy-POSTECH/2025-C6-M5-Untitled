@@ -31,14 +31,8 @@ struct OnRideView: View {
                 )
                 .padding(.horizontal, 24)
                 
-//#if DEBUG
-//                Button("환승 전체 데모 시작") {
-//                    vm.startFullTransferDemo()
-//                }
-//                .buttonStyle(.borderedProminent)
-//#endif
-                
-                if vm.isNearAlight {
+                // canAlight로 버튼 활성화 상태 결정
+                if vm.canAlight {
                     Button {
                         coordinator.advanceJourneyStage()
                     } label: {

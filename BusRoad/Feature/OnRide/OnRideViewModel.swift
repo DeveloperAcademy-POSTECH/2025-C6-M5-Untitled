@@ -7,6 +7,7 @@ final class OnRideViewModel: ObservableObject {
     // UI 상태
     @Published var stopName: String = ""
     @Published var isNearAlight: Bool = false
+    @Published var canAlight: Bool = false
     
     // 거리 & 근접 상태
     @Published private(set) var lastDistanceMeters: CLLocationDistance?
@@ -78,6 +79,7 @@ extension OnRideViewModel {
         proximity.configure(busLegIndex: busLegIndex, enter: enter, exit: exit)
         proximity.onEnterRadius = { [weak self] _, _ in
             self?.isNearAlight = true
+            self?.canAlight = true
             let generator = UINotificationFeedbackGenerator()
 
             for i in 0..<3 {
@@ -101,11 +103,13 @@ extension OnRideViewModel {
         
         // 거리 스트림 구독 → progress 갱신
         bag.removeAll()
-        // 상태 초기화(안전)
+        
+        // 상태 초기화
         initialDistance = nil
         recentDistances.removeAll()
         maxProgress = 0
         progress = 0
+        canAlight = false
         
         proximity.$lastDistance
             .sink { [weak self] d in
@@ -121,7 +125,7 @@ extension OnRideViewModel {
                 }
                 let smoothed = self.recentDistances.reduce(0, +) / Double(self.recentDistances.count)
                 
-                // 화면용 표시 거리 업데이트(선택)
+                // 화면용 표시 거리 업데이트
                 self.lastDistanceMeters = smoothed
                 
                 // 진행률: 1 - (현재/초기)
@@ -155,7 +159,7 @@ Task {
         recentDistances.removeAll()
         maxProgress = 0
         progress = 0
-        
+        canAlight = false
         
     }
 }
