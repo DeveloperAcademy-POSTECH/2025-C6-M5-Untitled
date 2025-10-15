@@ -31,6 +31,12 @@ struct OnRideView: View {
                 )
                 .padding(.horizontal, 24)
                 
+//#if DEBUG
+//                Button("환승 전체 데모 시작") {
+//                    vm.startFullTransferDemo()
+//                }
+//                .buttonStyle(.borderedProminent)
+//#endif
                 
                 if vm.isNearAlight {
                     Button {
@@ -68,11 +74,12 @@ struct OnRideView: View {
                 vm.busLegIndex = leg
                 vm.start()
             }
+            
             .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
                 guard
-                  let j = coordinator.journeyManager.selectedJourney,
-                  let nodeIdx = coordinator.journeyManager.journeyIndex,
-                  let leg = j.busLegIndex(forNodeIndex: nodeIdx)
+                    let j = coordinator.journeyManager.selectedJourney,
+                    let nodeIdx = coordinator.journeyManager.journeyIndex,
+                    let leg = j.busLegIndex(forNodeIndex: nodeIdx)
                 else { return }
                 
                 if vm.busLegIndex != leg {
