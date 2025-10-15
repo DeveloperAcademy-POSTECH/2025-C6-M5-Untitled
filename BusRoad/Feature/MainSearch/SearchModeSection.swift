@@ -22,6 +22,11 @@ struct SearchModeSection: View {
             }
             
         }
+        .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                isFocused.wrappedValue = true
+            }
+        }
     }
 
     private var header: some View {

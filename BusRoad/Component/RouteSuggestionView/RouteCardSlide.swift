@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RouteCardSlide: View {
     @Binding var currentIndex: Int
-    var routes: [Journey]?
+    @Binding var routes: [Journey]?
     var errorMessage: String?
         
     var body: some View {

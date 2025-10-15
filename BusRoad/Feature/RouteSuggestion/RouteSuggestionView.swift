@@ -13,76 +13,145 @@ struct RouteSuggestionView: View {
     @StateObject private var viewModel = BusRouteViewModel()
     @State private var user = User(isOnBus: false)
     @State var currentIndex: Int = 0
-
+    @State var isSearchMode = false
+    @State var hasSubmitted = false
+    @FocusState var isFocused: Bool
+    @State var locationType: LocationType = .origin
+    @State var isFirstLoad = true
+    
+    // MARK: - Helpers
+    @MainActor func exitSearchMode() {
+        isSearchMode = false
+        isFocused = false
+        hasSubmitted = false
+        viewModel.query = ""
+        // vm.results는 매니저가 관리하니 굳이 초기화 필요 없음
+    }
+    
+    @MainActor func performSearch() {
+        isSearchMode = true
+        hasSubmitted = true
+        Task { await viewModel.search() }
+    }
+    
+    @MainActor func clearSearch() {
+        viewModel.query = ""
+        hasSubmitted = false
+        isFocused = true
+    }
+    
     var body: some View {
-      ZStack{
-        Rectangle()
-          .fill(Color.background)
-          .stroke(Color.greyDisable, lineWidth: 0.5)
-          .frame(maxWidth: .infinity, maxHeight: 615)
-          .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
-        VStack{
-            Text("경로 선택")
-                .font(.papermed16)
-                .padding(.bottom, 10)
-            OriginTextField(
-                location: $viewModel.origin,
-                onRefreshTapped: { viewModel.requestOrigin() }
+        if isSearchMode {
+            SearchModeSection(
+                query: Binding(get: { viewModel.query }, set: { viewModel.query = $0 }),
+                results: viewModel.results,
+                isFocused: $isFocused,
+                onBack: { exitSearchMode() },
+                onSubmit: { performSearch() },
+                onClear: { clearSearch() },
+                onMicTap: {
+                    isFocused = false
+                    coordinator.push(.voiceSearch)
+                },
+                onSelect: { item in
+                    if let latitude = item.latitude, let longitude = item.longitude {
+                        switch locationType {
+                        case .origin:
+                            print(LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
+                            viewModel.setOrigin(origin: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
+                        case .destination:
+                            viewModel.setDestination(destination: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
+                        }
+                    }
+                    // 초기화
+                    viewModel.resetManager()
+                    isSearchMode = false
+                }
             )
-          
-            DestinationTextField(location: $viewModel.destination)
-
-            RouteCardSlide(
-                currentIndex: $currentIndex,
-                routes: viewModel.routes,
-                errorMessage: viewModel.errorMessage
-            )
-            .padding([.top, .bottom], 20)
-
-            RouteSelectButton(currentIndex: $currentIndex,
-                              errorMessage: viewModel.errorMessage,
-                              routes: viewModel.getJourneyList(),
-                              onSelect: {
-                viewModel.selectJourney(at: currentIndex)
-                coordinator.push(.journeyFlow)
-            },
-                              retrySearch: {
-                print(viewModel.errorMessage)
-                coordinator.popToRoot() // MainSearch로 초기화
+        } else {
+            ZStack {
+                Rectangle()
+                    .fill(Color.background)
+                    .stroke(Color.greyDisable, lineWidth: 0.5)
+                    .frame(maxWidth: .infinity, maxHeight: 615)    // TODO: 나중에 패딩값으로 바꾸기
+                    .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
+                VStack{
+                    Text("경로 선택")
+                        .font(.papermed16)
+                        .padding(.bottom, 10)
+                    OriginTextField(
+                        location: $viewModel.origin,
+                        isSearchMode: $isSearchMode,
+                        locationType: $locationType,
+                        onRefreshTapped: { viewModel.requestOrigin() }
+                    )
+                    
+                    DestinationTextField(
+                        location: $viewModel.destination,
+                        locationType: $locationType,
+                        isSearchMode: $isSearchMode
+                    )
+                    
+                    RouteCardSlide(
+                        currentIndex: $currentIndex,
+                        routes: $viewModel.routes,
+                        errorMessage: viewModel.errorMessage
+                    )
+                    .padding([.top, .bottom], 20)
+                    
+                    RouteSelectButton(currentIndex: $currentIndex,
+                                      errorMessage: viewModel.errorMessage,
+                                      routes: viewModel.routes,
+                                      onSelect: {
+                        viewModel.selectJourney(at: currentIndex)
+                        coordinator.push(.journeyFlow)
+                    },
+                                      retrySearch: {
+                        print(viewModel.errorMessage)
+                        coordinator.popToRoot() // MainSearch로 초기화
+                    }
+                                      
+                    )
+                    
+                    if viewModel.routes == nil {
+                        Text("현재 위치를 가져오는 중...")
+                            .font(.caption)
+                            .foregroundColor(.gray)
+                    }
+                }
+                .padding([.leading, .trailing, .bottom], 10)
+                .onAppear {
+                    if isFirstLoad {
+                        viewModel.requestOrigin()
+                        isFirstLoad = false
+                    }
+                    user.currentLocation = viewModel.origin?.coordinate
+                    viewModel.validateAndFetchRoute(
+                        origin: viewModel.origin,
+                        destination: viewModel.destination
+                    )
+                    print("onAppear")
+                }
+                .onChange(of: viewModel.origin) { _, newOrigin in
+                    print("[DEBUG] origin updated")
+                    viewModel.validateAndFetchRoute(
+                        origin: newOrigin,
+                        destination: viewModel.destination
+                    )
+                }
+                .onChange(of: viewModel.destination) { _, newDestination in
+                    print("[DEBUG] destination updated")
+                    viewModel.validateAndFetchRoute(
+                        origin: viewModel.origin,
+                        destination: newDestination
+                    )
+                }
+                .onChange(of: viewModel.routes) { _, _ in
+                    print("[DEBUG] routes updated")
+                    currentIndex = 0
+                }
             }
-                              
-            )
-
-            if viewModel.routes == nil {
-                Text("현재 위치를 가져오는 중...")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
         }
-        .padding([.leading, .trailing, .bottom], 10)
-        .onAppear {
-            viewModel.requestOrigin()
-            user.currentLocation = viewModel.origin?.coordinate
-        }
-        .onChange(of: viewModel.origin) { _, newOrigin in
-            print("[DEBUG] origin updated")
-            viewModel.validateAndFetchRoute(
-                origin: newOrigin,
-                destination: viewModel.destination
-            )
-        }
-        .onChange(of: viewModel.destination) { _, newDestination in
-            print("[DEBUG] destination updated")
-            viewModel.validateAndFetchRoute(
-                origin: viewModel.origin,
-                destination: newDestination
-            )
-        }
-        .onChange(of: viewModel.routes) { _, _ in
-            print("[DEBUG] routes updated")
-            currentIndex = 0
-        }
-      }
     }
 }
 
