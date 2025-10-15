@@ -21,7 +21,10 @@ struct WalkingView: View {
     
     var body: some View {
         // 임시 화면
-        VStack {
+        VStack(spacing: 0) {
+            
+            TopBar(isMoving: true) { coordinator.popToRoot() }
+            
             if let journey, let index {
                 WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
             }

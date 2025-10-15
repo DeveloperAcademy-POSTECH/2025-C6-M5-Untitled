@@ -14,47 +14,51 @@ struct OnRideView: View {
     }
     
     var body: some View {
-        ZStack {
-            Color(.background)
-                .ignoresSafeArea()
+        VStack(spacing: 0) {
             
-            VStack(spacing: 47) {
+            TopBar(isMoving: true) { coordinator.popToRoot() }
+            
+            if let journey, let index {
+                WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
+            }
+            
+            LineDivider()
+            
+            ZStack {
+                Color(.background)
+                    .ignoresSafeArea()
                 
-                if let journey, let index {
-                    WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-                }
-                
-                OnRideCard(
-                    busStopName: vm.stopName,
-                    remainingStops: vm.remainingStops,
-                    progress: vm.progress
-                )
-                .padding(.horizontal, 24)
-                
-                
-                if vm.remainingStops <= 1 {
-                    Button {
-                        coordinator.advanceJourneyStage()
-                    } label: {
-                        Text("내렸어요")
-                            .font(.premed32)
-                            .foregroundStyle(.subLight)
-                            .frame(width: 239, height: 74)
-                            .background(.subStrong)
-                            .cornerRadius(20)
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    Button {
-                        // TODO: 비활성화 상태에서의 동작(토스트/알럿/햅틱 등)
-                        // “1정류장 남으면 버튼이 활성화돼요”
-                    } label: {
-                        Text("내렸어요")
-                            .font(.premed32)
-                            .foregroundStyle(.subNeutral)
-                            .frame(width: 239, height: 74)
-                            .background(.subDisable)
-                            .cornerRadius(20)
+                VStack(spacing: 0) {
+                    OnRideCard(
+                        busStopName: vm.stopName,
+                        remainingStops: vm.remainingStops,
+                        progress: vm.progress
+                    )
+                    
+                    if vm.remainingStops <= 1 {
+                        Button {
+                            coordinator.advanceJourneyStage()
+                        } label: {
+                            Text("내렸어요")
+                                .font(.premed32)
+                                .foregroundStyle(.subLight)
+                                .frame(width: 239, height: 74)
+                                .background(.subStrong)
+                                .cornerRadius(20)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Button {
+                            // TODO: 비활성화 상태에서의 동작(토스트/알럿/햅틱 등)
+                            // “1정류장 남으면 버튼이 활성화돼요”
+                        } label: {
+                            Text("내렸어요")
+                                .font(.premed32)
+                                .foregroundStyle(.subNeutral)
+                                .frame(width: 239, height: 74)
+                                .background(.subDisable)
+                                .cornerRadius(20)
+                        }
                     }
                 }
             }

@@ -45,7 +45,7 @@ struct RouteCardSlide: View {
                 )
                 .animation(.spring(), value: currentIndex)
             } else {
-                ProgressView("경로를 찾는 중...")
+                ProgressRouteCard()
             }
         }
     }
