@@ -3,7 +3,7 @@ import SwiftUI
 struct OnRideCard: View {
     
     let busStopName: String
-    let isNearAlight: Bool
+    let canAlight: Bool
     let progress: CGFloat
     
     
@@ -15,11 +15,11 @@ struct OnRideCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(busStopName)
                         .font(.prebold36)
-                        .foregroundStyle(isNearAlight ? .subLight : .primaryHeavy)
+                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                     
                     Text("정류장에서 내려야 해요.")
                         .font(.prereg24)
-                        .foregroundStyle(isNearAlight ? .subLight : .primaryHeavy)
+                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                 }
                 
                 Spacer()
@@ -43,9 +43,9 @@ struct OnRideCard: View {
                 HStack {
                     Spacer()
                     
-                    Text(isNearAlight ? "곧 내려야 해요" : "")
+                    Text(canAlight ? "곧 내려야 해요" : "")
                         .font(.presemi20)
-                        .foregroundStyle(isNearAlight ? .subLight : .primaryHeavy)
+                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                 }
                 .padding(.horizontal, 40)
                 
@@ -54,8 +54,8 @@ struct OnRideCard: View {
                     /// 남은정류장 progressbar
                     BusStopProgress(
                         progress: progress,
-                        trackColor: isNearAlight ? Color(.subNormal) : Color(.primaryNormal),
-                        fillColor: isNearAlight ? Color(.subHeavy): Color(.primaryDisable)
+                        trackColor: canAlight ? Color(.subNormal) : Color(.primaryNormal),
+                        fillColor: canAlight ? Color(.subHeavy): Color(.primaryDisable)
                     )
                     .padding(.horizontal, 40)
         }
@@ -63,7 +63,7 @@ struct OnRideCard: View {
             .padding(.bottom, 45)
             .background(
                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(isNearAlight ? .primaryStrong : .primaryLight))
+                    .fill(Color(canAlight ? .primaryStrong : .primaryLight))
             )
     }
 }
@@ -110,7 +110,7 @@ struct BusStopProgress: View {
 #Preview {
     OnRideCard(
         busStopName: "Bus stop name",
-        isNearAlight: false,
+        canAlight: false,
         progress: 0.9
     )
 }

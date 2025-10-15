@@ -26,7 +26,7 @@ struct OnRideView: View {
                 
                 OnRideCard(
                     busStopName: vm.stopName,
-                    isNearAlight: vm.isNearAlight,
+                    canAlight: vm.canAlight,
                     progress: vm.progress
                 )
                 .padding(.horizontal, 24)
