@@ -170,7 +170,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
 extension LocationService {
     func startContinuousUpdates(
         // 20m 이동마다 업데이트되도록
-        distanceFilter: CLLocationDistance = 10,
+        distanceFilter: CLLocationDistance = 20,
         accuracy: CLLocationAccuracy = kCLLocationAccuracyBest
     ) async throws {
         try await requestWhenInUseAuthorizationIfNeeded()
