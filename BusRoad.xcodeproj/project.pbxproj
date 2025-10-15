@@ -21,6 +21,7 @@
 		246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Application/Secrets.plist,
 				Info.plist,
 				Resource/dummyResource.swift,
 			);
