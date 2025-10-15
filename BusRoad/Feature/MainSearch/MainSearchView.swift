@@ -51,7 +51,7 @@ struct MainSearchView: View {
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
         .onAppear() {   // GPS 하드웨어 웜업용
-            print("warm-up")
+            print("[DEBUG] GPS warm-up")
             vm.requestOrigin()
         }
         .onChange(of: isFocused) { _, new in

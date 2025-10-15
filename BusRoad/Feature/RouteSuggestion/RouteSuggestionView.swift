@@ -121,6 +121,7 @@ struct RouteSuggestionView: View {
                 }
                 .padding([.leading, .trailing, .bottom], 10)
                 .onAppear {
+                    print("[DEBUG] onAppear")
                     if isFirstLoad {
                         viewModel.requestOrigin()
                         isFirstLoad = false
@@ -130,21 +131,25 @@ struct RouteSuggestionView: View {
                         origin: viewModel.origin,
                         destination: viewModel.destination
                     )
-                    print("onAppear")
                 }
                 .onChange(of: viewModel.origin) { _, newOrigin in
-                    print("[DEBUG] origin updated")
-                    viewModel.validateAndFetchRoute(
-                        origin: newOrigin,
-                        destination: viewModel.destination
-                    )
+                    if !isFirstLoad {
+                        user.currentLocation = viewModel.origin?.coordinate
+                        print("[DEBUG] origin updated")
+                        viewModel.validateAndFetchRoute(
+                            origin: newOrigin,
+                            destination: viewModel.destination
+                        )
+                    }
                 }
                 .onChange(of: viewModel.destination) { _, newDestination in
-                    print("[DEBUG] destination updated")
-                    viewModel.validateAndFetchRoute(
-                        origin: viewModel.origin,
-                        destination: newDestination
-                    )
+                    if !isFirstLoad {
+                        print("[DEBUG] destination updated")
+                        viewModel.validateAndFetchRoute(
+                            origin: viewModel.origin,
+                            destination: newDestination
+                        )
+                    }
                 }
                 .onChange(of: viewModel.routes) { _, _ in
                     print("[DEBUG] routes updated")

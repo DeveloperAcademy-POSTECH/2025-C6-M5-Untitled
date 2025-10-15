@@ -101,6 +101,7 @@ class BusRouteViewModel: ObservableObject {
     }
     
     private func fetchRoute(startX: Double, startY: Double, endX: Double, endY: Double) {
+        print("[DEBUG] fetchRoute start")
         isLoading = true
         errorMessage = nil
         
