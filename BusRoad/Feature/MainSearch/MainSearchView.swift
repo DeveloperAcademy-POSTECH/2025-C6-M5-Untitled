@@ -50,8 +50,8 @@ struct MainSearchView: View {
         .animation(nil, value: vm.query)
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
-        .onAppear() {   // GPS 하드웨어 웜업용
-            print("[DEBUG] GPS warm-up")
+        .onAppear {   // GPS 하드웨어 웜업용
+            print("[DEBUG] requestOrigin")
             vm.requestOrigin()
         }
         .onChange(of: isFocused) { _, new in
