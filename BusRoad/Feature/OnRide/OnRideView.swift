@@ -21,7 +21,7 @@ struct OnRideView: View {
             VStack(spacing: 47) {
                 
                 if let journey, let index {
-                    WholeJourney(journey: journey, journeyIndex: index)
+                    WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
                 }
                 
                 OnRideCard(

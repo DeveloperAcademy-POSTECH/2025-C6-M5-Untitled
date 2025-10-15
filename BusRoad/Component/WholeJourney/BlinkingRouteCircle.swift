@@ -1,14 +1,16 @@
 //
-//  RouteCircle.swift
+//  BlinkingRouteCircle.swift
 //  BusRoad
 //
-//  Created by 박난 on 10/14/25.
+//  Created by 박난 on 10/15/25.
 //
+import Combine
 import SwiftUI
 
-struct RouteCircle: View {
-    var status: Status          // 활성, 비활성에 따라 색깔 변화
+struct BlinkingRouteCircle: View {
+    @State var status: Status = .active
     var routeNode: RouteNode    // 버스, 도보 노드에 따라 아이콘 변화
+    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
     
     var iconName: String {
         switch routeNode {
@@ -44,9 +46,14 @@ struct RouteCircle: View {
             .font(.system(size: 18))
             .foregroundColor(iconColor)
         }
+        .onReceive(timer) { _ in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                status.toggle()
+            }
+        }
     }
 }
 
 #Preview {
-    RouteCircle(status: .active, routeNode: DummyData.busNode.asRouteNode)
+    BlinkingRouteCircle(routeNode: DummyData.busNode.asRouteNode)
 }
