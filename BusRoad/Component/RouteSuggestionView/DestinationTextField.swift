@@ -10,6 +10,8 @@ import SwiftUI
 struct DestinationTextField : View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @Binding var location: LocationInfo?
+    @Binding var locationType: LocationType
+    @Binding var isSearchMode: Bool
     
     var body: some View {
         ZStack {
@@ -26,8 +28,8 @@ struct DestinationTextField : View {
                   .background(Color.greyDisable)
               
                 Button(action: {
-                    // TODO: 임시 내비게이션
-                    coordinator.push(.mainSearch)
+                    locationType = .destination
+                    isSearchMode = true
                 }) {
                     Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
                         .foregroundColor(Color.greyHeavy)

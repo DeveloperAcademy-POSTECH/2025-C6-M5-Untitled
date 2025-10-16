@@ -38,4 +38,8 @@ final class MainSearchViewModel: ObservableObject {
         searchManager.reset()
     }
     
+    func requestOrigin() {
+        journeyManager.requestOrigin()
+    }
+    
 }
