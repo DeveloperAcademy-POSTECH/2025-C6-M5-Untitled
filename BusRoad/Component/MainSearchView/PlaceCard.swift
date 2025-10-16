@@ -37,7 +37,7 @@ struct PlaceCard: View {
             .padding(.horizontal, 23)
             .background(
                 RoundedRectangle(cornerRadius: 15)
-                    .fill(Color(.primaryWhite))
+                    .fill(Color(.primarywhite))
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 15)

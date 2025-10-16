@@ -36,64 +36,65 @@ struct OnRideView: View {
                     .padding(.horizontal, 24)
                     
                     //#if DEBUG
-//                Button("환승 전체 데모 시작") {
-//                    vm.startFullTransferDemo()
-//                }
-//                .buttonStyle(.borderedProminent)
-//#endif
-                
-                if vm.canAlight {
-                    Button {
-                        coordinator.advanceJourneyStage()
-                    } label: {
-                        Text("내렸어요")
-                            .font(.premed32)
-                            .foregroundStyle(.subLight)
-                            .frame(width: 239, height: 74)
-                            .background(.subStrong)
-                            .cornerRadius(20)
-                    }
-                    .buttonStyle(.plain)
-                } else {
-                    Button {
-                        // TODO: 비활성화 상태에서의 동작(토스트 등)
-                        // “1정류장 남으면 버튼이 활성화돼요”
-                    } label: {
-                        Text("내렸어요")
-                            .font(.premed32)
-                            .foregroundStyle(.subNeutral)
-                            .frame(width: 239, height: 74)
-                            .background(.subDisable)
-                            .cornerRadius(20)
-
+                    //                Button("환승 전체 데모 시작") {
+                    //                    vm.startFullTransferDemo()
+                    //                }
+                    //                .buttonStyle(.borderedProminent)
+                    //#endif
+                    
+                    if vm.canAlight {
+                        Button {
+                            coordinator.advanceJourneyStage()
+                        } label: {
+                            Text("내렸어요")
+                                .font(.premed32)
+                                .foregroundStyle(.subLight)
+                                .frame(width: 239, height: 74)
+                                .background(.subStrong)
+                                .cornerRadius(20)
+                        }
+                        .buttonStyle(.plain)
+                    } else {
+                        Button {
+                            // TODO: 비활성화 상태에서의 동작(토스트 등)
+                            // “1정류장 남으면 버튼이 활성화돼요”
+                        } label: {
+                            Text("내렸어요")
+                                .font(.premed32)
+                                .foregroundStyle(.subNeutral)
+                                .frame(width: 239, height: 74)
+                                .background(.subDisable)
+                                .cornerRadius(20)
+                            
+                        }
                     }
                 }
-            }
-            .onAppear {
-                guard
-                    let journey = coordinator.journeyManager.selectedJourney,
-                    let nodeIndex = coordinator.journeyManager.journeyIndex,
-                    let leg = journey.busLegIndex(forNodeIndex: nodeIndex)
-                else { return }
-                
-                vm.busLegIndex = leg
-                vm.start()
-            }
-            
-            .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
-                guard
-                    let j = coordinator.journeyManager.selectedJourney,
-                    let nodeIdx = coordinator.journeyManager.journeyIndex,
-                    let leg = j.busLegIndex(forNodeIndex: nodeIdx)
-                else { return }
-                
-                if vm.busLegIndex != leg {
+                .onAppear {
+                    guard
+                        let journey = coordinator.journeyManager.selectedJourney,
+                        let nodeIndex = coordinator.journeyManager.journeyIndex,
+                        let leg = journey.busLegIndex(forNodeIndex: nodeIndex)
+                    else { return }
+                    
                     vm.busLegIndex = leg
                     vm.start()
                 }
+                
+                .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
+                    guard
+                        let j = coordinator.journeyManager.selectedJourney,
+                        let nodeIdx = coordinator.journeyManager.journeyIndex,
+                        let leg = j.busLegIndex(forNodeIndex: nodeIdx)
+                    else { return }
+                    
+                    if vm.busLegIndex != leg {
+                        vm.busLegIndex = leg
+                        vm.start()
+                    }
+                }
+                .onDisappear { vm.stop() }
+                
             }
-            .onDisappear { vm.stop() }
-            
         }
     }
 }

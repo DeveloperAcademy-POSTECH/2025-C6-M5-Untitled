@@ -49,7 +49,7 @@ struct VoiceSearchView: View {
                     Button { vm.dismiss() } label: {
                         Image(systemName: "xmark")
                             .font(.title2)
-                            .foregroundColor(.primaryWhite)
+                            .foregroundColor(.primarywhite)
                             .padding(12)
                             .bold() // 이 친구들도 크기 어떻게 할건지..?
                     }

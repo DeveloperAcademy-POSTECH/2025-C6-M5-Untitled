@@ -110,9 +110,7 @@ struct RouteSuggestionView: View {
                     .frame(maxWidth: .infinity, maxHeight: 615)    // TODO: 나중에 패딩값으로 바꾸기
                     .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
                 VStack{
-                    Text("경로 선택")
-                        .font(.papermed16)
-                        .padding(.bottom, 10)
+                    TopBar(isMoving: false) { coordinator.popToRoot() }
                     OriginTextField(
                         location: $viewModel.origin,
                         isSearchMode: $isSearchMode,
@@ -150,34 +148,7 @@ struct RouteSuggestionView: View {
                         Text("현재 위치를 가져오는 중...")
                             .font(.caption)
                             .foregroundColor(.gray)
-//                             .padding(.top, 10)
-//                     }
-//                 }
-//             }
-//         }
-//         .padding([.leading, .trailing, .bottom], 10)
-//         .onAppear {
-//             viewModel.requestOrigin()
-//             user.currentLocation = viewModel.origin?.coordinate
-//         }
-//         .onChange(of: viewModel.origin) { _, newOrigin in
-//             print("[DEBUG] origin updated")
-//             viewModel.validateAndFetchRoute(
-//                 origin: newOrigin,
-//                 destination: viewModel.destination
-//             )
-//         }
-//         .onChange(of: viewModel.destination) { _, newDestination in
-//             print("[DEBUG] destination updated")
-//             viewModel.validateAndFetchRoute(
-//                 origin: viewModel.origin,
-//                 destination: newDestination
-//             )
-//         }
-//         .onChange(of: viewModel.routes) { _, _ in
-//             print("[DEBUG] routes updated")
-//             currentIndex = 0
-//         }
+                             .padding(.top, 10)
                     }
                 }
                 .padding([.leading, .trailing, .bottom], 10)
