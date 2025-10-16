@@ -10,6 +10,7 @@ import SwiftUI
 struct WholeJourney: View {
     var journey: Journey
     var journeyIndex: Int
+    var isBeforeRide: Bool
     
     var body: some View {
         ZStack{
@@ -20,7 +21,11 @@ struct WholeJourney: View {
             HStack{
                 ForEach(Array(journey.nodes.enumerated()), id: \.element.id) { index, node in
                     if index == journeyIndex {  // 활성 상태
-                        RouteCircle(status: .active, routeNode: node)
+                        if isBeforeRide {
+                            BlinkingRouteCircle(routeNode: node)
+                        } else {
+                            RouteCircle(status: .active, routeNode: node)
+                        }
                     } else {                    // 비활성 상태
                         RouteCircle(status: .disable, routeNode: node)
                     }
@@ -37,5 +42,5 @@ struct WholeJourney: View {
 }
 
 #Preview {
-    WholeJourney(journey: DummyData.journey, journeyIndex: 2)
+    WholeJourney(journey: DummyData.journey, journeyIndex: 2, isBeforeRide: true)
 }

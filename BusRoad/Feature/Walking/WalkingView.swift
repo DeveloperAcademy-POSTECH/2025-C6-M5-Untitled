@@ -23,7 +23,7 @@ struct WalkingView: View {
         // 임시 화면
         VStack {
             if let journey, let index {
-                WholeJourney(journey: journey, journeyIndex: index)
+                WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
             }
             
             Spacer()
