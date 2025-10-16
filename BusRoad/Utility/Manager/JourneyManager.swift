@@ -113,8 +113,7 @@ final class JourneyManager: ObservableObject {
         }
         
         // busNo에서 괄호()로 묶인 불필요한 정보 없애기
-        let cleanedBusNo = busNo.replacingOccurrences(of: #"\([^)]*\)"#, with: "", options: .regularExpression)
-        
+        let cleanedBusNo = cleanBusNumber(busNo)
         
         // stations 정보 중 필요한 정보만 뽑아내기
         let stationsInfo: [BusStation] = stations.compactMap { dict in
@@ -144,6 +143,23 @@ final class JourneyManager: ObservableObject {
             stations: stationsInfo,
             travelTime: travelTime
         )
+    }
+    
+    private func cleanBusNumber(_ busNo: String) -> String {
+        var result = busNo
+        let pattern = #"\([^()]*\)"#  // 한 단계 괄호 제거용 정규식
+        
+        // 안쪽 괄호부터 반복 제거
+        while let _ = result.range(of: pattern, options: .regularExpression) {
+            result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        }
+        
+        // 숫자로 끝날 경우 "번" 추가
+        if let lastChar = result.last, lastChar.isNumber {
+            result += "번"
+        }
+        
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     private func parseWalkNode(at index: Int, in subPath: [[String: Any]]) -> WalkRouteNode? {

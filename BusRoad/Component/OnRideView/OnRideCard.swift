@@ -3,7 +3,7 @@ import SwiftUI
 struct OnRideCard: View {
     
     let busStopName: String
-    let remainingStops: Int
+    let canAlight: Bool
     let progress: CGFloat
     
     
@@ -14,11 +14,11 @@ struct OnRideCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(busStopName)
                         .font(.prebold36)
-                        .foregroundStyle(remainingStops == 1 ? .subLight : .primaryHeavy)
+                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                     
                     Text("정류장에서 내려야 해요.")
                         .font(.prereg24)
-                        .foregroundStyle(remainingStops == 1 ? .subLight : .primaryHeavy)
+                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                 }
                 
                 Spacer()
@@ -38,29 +38,24 @@ struct OnRideCard: View {
             
             
             /// 남은 정류장 안내
-            HStack {
-                Spacer()
-                
-                HStack(spacing: 4) {
-                    Text("\(remainingStops)정류장")
-                        .font(.presemi20)
-                        .foregroundStyle(remainingStops == 1 ? .subLight : .primaryHeavy)
+                HStack {
+                    Spacer()
                     
-                    Text("남았어요")
-                        .font(.prereg20)
-                        .foregroundStyle(remainingStops == 1 ? .subLight : .primaryHeavy)
+                    Text(canAlight ? "곧 내려야 해요" : "")
+                        .font(.presemi20)
+                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                 }
-            }
             .padding(.horizontal, 40)
             .padding(.bottom, 11)
             
-            /// 남은정류장 progressbar
-            BusStopProgress(
-                progress: progress,
-                trackColor: remainingStops == 1 ? Color(.subNormal) : Color(.primaryNormal),
-                fillColor: remainingStops == 1 ? Color(.subHeavy): Color(.primaryDisable)
-            )
-            .padding(.horizontal, 40)
+                    
+                    /// 남은정류장 progressbar
+                    BusStopProgress(
+                        progress: progress,
+                        trackColor: canAlight ? Color(.subNormal) : Color(.primaryNormal),
+                        fillColor: canAlight ? Color(.subHeavy): Color(.primaryDisable)
+                    )
+                    .padding(.horizontal, 40)
         }
         .padding(.top, 60)
         .padding(.bottom, 45)
@@ -86,7 +81,7 @@ struct BusStopProgress: View {
         
         GeometryReader { geometry in
             let width = geometry.size.width
-            let progress = min(max(progress,0),1)
+            let progress = min(max(progress, 0), 1)
             
             ZStack(alignment: .leading) {
                 Rectangle()
@@ -116,7 +111,7 @@ struct BusStopProgress: View {
 #Preview {
     OnRideCard(
         busStopName: "Bus stop name",
-        remainingStops: 1,
+        canAlight: false,
         progress: 0.9
     )
 }

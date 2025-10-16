@@ -71,6 +71,20 @@ final class VoiceSearchViewModel: ObservableObject {
     }
     
     
+    /// 음성 인식 중단 (사용자가 직접 중단)
+    func cancelListening() {
+        
+        speechManager.stopRecording()
+        
+        recognizedText = ""
+        lastTranscript = ""
+        
+        state = .ready
+        
+        errorMessage = nil
+    }
+    
+    
     // MARK: - 프라이빗 메서드들
     private func setupSpeechManager() {
         // 녹음 상태
@@ -167,6 +181,6 @@ extension VoiceSearchViewModel {
     
     /// 마이크 버튼 활성화 여부
     var isMicButtonEnabled: Bool {
-        return state == .ready || state == .failed
+        return state == .ready || state == .failed || state == .listening
     }
 }

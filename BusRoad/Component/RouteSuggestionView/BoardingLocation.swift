@@ -19,7 +19,7 @@ struct BoardingLocation: View {
           .foregroundColor(Color.subLight)
           .padding([.top, .bottom], 5)
       HStack{
-        Text("\(route.busNo)번")
+        Text("\(route.busNo)")
             .font(.presemi24)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
