@@ -5,7 +5,11 @@ extension VoiceSearchView {
         switch vm.state {
         case .ready, .failed:
             vm.retry()
-        case .listening, .processing, .completed:
+            
+        case .listening:
+            vm.cancelListening()
+            
+        case .processing, .completed:
             break
         }
     }
