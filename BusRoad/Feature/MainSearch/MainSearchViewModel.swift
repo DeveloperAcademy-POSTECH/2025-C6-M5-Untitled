@@ -10,6 +10,7 @@ final class MainSearchViewModel: ObservableObject {
 
     // SearchManager의 변경을 View로 릴레이 (UI 갱신 보장)
     private var bag = Set<AnyCancellable>()
+    
     init() {
         searchManager.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
