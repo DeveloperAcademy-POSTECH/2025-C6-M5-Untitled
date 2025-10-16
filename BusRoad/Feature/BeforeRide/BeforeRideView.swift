@@ -13,7 +13,7 @@ struct BeforeRideView: View {
     var journey: Journey?
     var index: Int?
     
-    init(manager: JourneyManager = .shared) {
+    init(manager: JourneyManager = .shared) {   // TODO: 의존성 문제 해결(manager viewModel로 빼기)
         if let journey = manager.selectedJourney, let index = manager.journeyIndex {
             self.journey = journey
             self.index = index
@@ -36,14 +36,16 @@ struct BeforeRideView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    BeforeRideCard(
-                        waitingStopName: viewmodel.waitingStopName,
-                        waitingBusNO: viewmodel.waitingBusNO,
-                        remainingStopsToBoarding: $viewmodel.remainingStops,
-                        remainingTimeToBoarding: viewmodel.remainingTime
-                    )
+                    if let journey, let index, case let .bus(busNode) = journey.nodes[index] {
+                        BeforeRideCard(
+                            waitingStopName: busNode.stations[0].stationName,
+                            waitingBusNO: busNode.busNo,
+                            remainingStopsToBoarding: .constant(1),
+                            remainingTimeToBoarding: 1
+                        )
+                    }
                     
-                    if viewmodel.remainingStops == 1 {
+//                    if viewmodel.remainingStops == 1 {
                         Button {
                             coordinator.advanceJourneyStage()
                         } label: {
@@ -55,19 +57,19 @@ struct BeforeRideView: View {
                                 .cornerRadius(20)
                         }
                         .buttonStyle(.plain)
-                    } else {
-                        Button {
-                            // TODO: 비활성화 상태에서의 동작(토스트/알럿/햅틱 등)
-                            // “1정류장 남으면 버튼이 활성화돼요”
-                        } label: {
-                            Text("탔어요")
-                                .font(.premed32)
-                                .foregroundStyle(.subNeutral)
-                                .frame(width: 239, height: 74)
-                                .background(.subDisable)
-                                .cornerRadius(20)
-                        }
-                    }
+//                    } else {
+//                        Button {
+//                            // TODO: 비활성화 상태에서의 동작(토스트/알럿/햅틱 등)
+//                            // “1정류장 남으면 버튼이 활성화돼요”
+//                        } label: {
+//                            Text("탔어요")
+//                                .font(.premed32)
+//                                .foregroundStyle(.subNeutral)
+//                                .frame(width: 239, height: 74)
+//                                .background(.subDisable)
+//                                .cornerRadius(20)
+//                        }
+//                    }
                 }
             }
         }
