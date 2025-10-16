@@ -13,40 +13,6 @@ struct RouteSuggestionView: View {
     @StateObject private var viewModel = BusRouteViewModel()
     @State private var user = User(isOnBus: false)
     @State var currentIndex: Int = 0
-    
-//     var body: some View {
-//         VStack(spacing: 0){
-//             TopBar(isMoving: false) { coordinator.popToRoot() }
-//             Spacer()
-//                 .frame(height: 20)
-//             OriginTextField(
-//                 location: $viewModel.origin,
-//                 onRefreshTapped: { viewModel.requestOrigin() }
-//             )
-//             Spacer()
-//                 .frame(height: 8)
-//             DestinationTextField(location: $viewModel.destination)
-//             Spacer()
-//                 .frame(height: 22)
-//             LineDivider()
-            
-//             ZStack {
-//                 Color(.background)
-//                     .ignoresSafeArea()
-                
-//                 VStack(spacing: 0) {
-                    
-//                     RouteCardSlide(
-//                         currentIndex: $currentIndex,
-//                         routes: viewModel.routes,
-//                         errorMessage: viewModel.errorMessage
-//                     )
-//                     .padding(.top, 30)
-//                     .padding(.bottom, 45)
-                    
-//                     RouteSelectButton(currentIndex: $currentIndex,
-//                                       errorMessage: viewModel.errorMessage,
-//                                       routes: viewModel.getJourneyList(),
     @State var isSearchMode = false
     @State var hasSubmitted = false
     @FocusState var isFocused: Bool
@@ -104,54 +70,74 @@ struct RouteSuggestionView: View {
             )
         } else {
             ZStack {
-                Rectangle()
-                    .fill(Color.background)
-                    .stroke(Color.greyDisable, lineWidth: 0.5)
-                    .frame(maxWidth: .infinity, maxHeight: 615)    // TODO: 나중에 패딩값으로 바꾸기
-                    .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
-                VStack{
-                    TopBar(isMoving: false) { coordinator.popToRoot() }
-                    OriginTextField(
-                        location: $viewModel.origin,
-                        isSearchMode: $isSearchMode,
-                        locationType: $locationType,
-                        onRefreshTapped: { viewModel.requestOrigin() }
-                    )
+                Color.primarywhite
+                    .ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    // MARK: - 상단바
+                    VStack (spacing: 20) {
+                        TopBar(isMoving: false) { coordinator.popToRoot() }
+                            .padding(.horizontal, 8)
+                        
+                        VStack(spacing: 8) {
+                            OriginTextField(
+                                location: $viewModel.origin,
+                                isSearchMode: $isSearchMode,
+                                locationType: $locationType,
+                                onRefreshTapped: { viewModel.requestOrigin() }
+                            )
+                            
+                            DestinationTextField(
+                                location: $viewModel.destination,
+                                locationType: $locationType,
+                                isSearchMode: $isSearchMode
+                            )
+                            
+                        }
+                        .padding(.horizontal, 22)
+                        
+                    LineDivider()
+
+                    }
+                    .frame(height: 194)
                     
-                    DestinationTextField(
-                        location: $viewModel.destination,
-                        locationType: $locationType,
-                        isSearchMode: $isSearchMode
-                    )
-                    
-                    RouteCardSlide(
-                        currentIndex: $currentIndex,
-                        routes: $viewModel.routes,
-                        errorMessage: viewModel.errorMessage
-                    )
-                    .padding([.top, .bottom], 20)
-                    
-                    RouteSelectButton(currentIndex: $currentIndex,
-                                      errorMessage: viewModel.errorMessage,
-                                      routes: viewModel.routes,
-                                      onSelect: {
-                        viewModel.selectJourney(at: currentIndex)
-                        coordinator.push(.journeyFlow)
-                    },
-                                      retrySearch: {
-                        print(viewModel.errorMessage)
-                        coordinator.popToRoot() // MainSearch로 초기화
-                    }        
-                    )
-                    
-                    if viewModel.routes == nil {
-                        Text("현재 위치를 가져오는 중...")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                             .padding(.top, 10)
+                    ZStack {
+                        Color.background
+                            .ignoresSafeArea()
+                        
+                        // MARK: - 경로추천카드
+                        VStack(spacing:0) {
+                            RouteCardSlide(
+                                currentIndex: $currentIndex,
+                                routes: $viewModel.routes,
+                                errorMessage: viewModel.errorMessage
+                            )
+                            .padding(.horizontal, 44)
+                            .padding(.top, 30)
+                            .padding(.bottom, 39)
+                            
+//                            Spacer()
+                            
+                            // MARK: - 버튼
+                            
+                            RouteSelectButton(
+                                currentIndex: $currentIndex,
+                                errorMessage: viewModel.errorMessage,
+                                routes: viewModel.routes,
+                                onSelect: {
+                                    viewModel.selectJourney(at: currentIndex)
+                                    coordinator.push(.journeyFlow)
+                                },
+                                retrySearch: {
+                                    print(viewModel.errorMessage)
+                                    coordinator.popToRoot() // MainSearch로 초기화
+                                }
+                            )
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 74)
+                        }
                     }
                 }
-                .padding([.leading, .trailing, .bottom], 10)
                 .onAppear {
                     print("[DEBUG] onAppear")
                     if isFirstLoad {

@@ -14,18 +14,15 @@ struct DestinationTextField : View {
     @Binding var isSearchMode: Bool
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerSize: .init(width: 25, height: 25))
-                .stroke(Color.subStrong)
-                .frame(width: 350, height:50)
             
-          HStack(spacing: 10){
+          HStack(spacing: 12) {
                 Text("도착지")
                     .foregroundColor(Color.subPoint)
                     .font(.prereg20)
-                    .padding(.leading, 30)
+              
                 Divider()
                   .background(Color.greyDisable)
+                  .frame(height: 26)
               
                 Button(action: {
                     locationType = .destination
@@ -37,7 +34,12 @@ struct DestinationTextField : View {
                 }
                 Spacer()
             }
-            .frame(height: 30)
-        }
+          .padding(.leading, 20)
+          .padding(.trailing, 12)
+          .padding(.vertical, 12)
+          .overlay {
+              RoundedRectangle(cornerRadius: 25)
+                  .stroke(.subStrong, lineWidth: 1.5)
+          }
     }
 }

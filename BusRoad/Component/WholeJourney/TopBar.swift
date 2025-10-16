@@ -27,14 +27,15 @@ struct TopBar: View {
                 Button {
                     onXMark()
                 } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 18))
+                    Image("xbutton")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width:44, height:44)
                         .foregroundColor(.greyNormal)
-                        .padding(.trailing, 20)
                 }
             }
         }
-        .padding(.vertical, 12)
+//        .border(.black)
     }
 }
 
