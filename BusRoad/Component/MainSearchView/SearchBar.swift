@@ -58,7 +58,8 @@ private extension SearchBar {
     
     var searchBarBackground: some View {
         RoundedRectangle(cornerRadius: 25)
-            .fill(.white)
+            .fill(.primaryWhite
+            )
             .stroke(Color(.subStrong), lineWidth: 1.5)
     }
 }

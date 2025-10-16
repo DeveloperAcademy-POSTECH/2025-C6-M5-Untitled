@@ -9,4 +9,13 @@
 enum Status {
     case active
     case disable
+    
+    mutating func toggle() {
+        switch self {
+        case .active:
+            self = .disable
+        case .disable:
+            self = .active
+        }
+    }
 }

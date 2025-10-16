@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RouteCardSlide: View {
     @Binding var currentIndex: Int
-    var routes: [Journey]?
+    @Binding var routes: [Journey]?
     var errorMessage: String?
         
     var body: some View {
@@ -20,7 +20,7 @@ struct RouteCardSlide: View {
                 ZStack {
                     ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
                         let relativeIndex: CGFloat = CGFloat(index - currentIndex)
-                        RouteCard(journey: item)
+                        RouteCard(journey: item, index: index)
                             .frame(width: 300)
                             .padding(.horizontal, 30)
                             .offset(x: relativeIndex * 270)

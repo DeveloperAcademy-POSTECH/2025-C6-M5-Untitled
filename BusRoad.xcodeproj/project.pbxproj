@@ -310,8 +310,10 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BusRoad/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "백그라운드에서도 하차 알림을 제공하기 위해 위치가 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "버스 경로 추천을 위해 앱 사용 중 위치 정보를 이용합니다.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "\"말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.\"";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -350,8 +352,10 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BusRoad/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "백그라운드에서도 하차 알림을 제공하기 위해 위치가 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "버스 경로 추천을 위해 앱 사용 중 위치 정보를 이용합니다.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
-				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "\"말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.\"";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

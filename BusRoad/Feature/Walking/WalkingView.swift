@@ -41,8 +41,6 @@ struct WalkingView: View {
             ToDestination(vm:vm, journey: journey, index: index)
           }
         }
-        
-        
       }
       
     }

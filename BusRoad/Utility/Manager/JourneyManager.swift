@@ -9,7 +9,7 @@ final class JourneyManager: ObservableObject {
     @Published var journeyList: [Journey]?      // 스와이프할 journey list
     @Published var selectedJourney: Journey?    // 최종 선택된 journey
     @Published var journeyIndex: Int?
-
+    
     static let shared = JourneyManager()    // singleton manager
     
     let locationService = LocationService()
@@ -48,42 +48,49 @@ final class JourneyManager: ObservableObject {
         }
     }
     
-  func setJourneyList(journeys: [Journey]) {
-          self.journeyList = journeys.isEmpty ? nil : journeys
-      }
+    func setJourneyList(_ path: [[String: Any]]) {
+        // pathType: 1-지하철, 2-버스, 3-버스+지하철
+        
+        // MARK: 버스 경로만 모아보기(지하철 확장하면 고려해서 코드 전체 수정하기)
+        let filtered = path.filter { $0["pathType"] as? Int == 2 }
+        
+        let top3 = filtered.prefix(3)
+        
+        self.journeyList = top3.compactMap { parseJourney($0) }
+    }
     
-  public func parseJourney(_ data: [String: Any], routeType: String) -> Journey? {
-          guard let subPaths = data["subPath"] as? [[String: Any]],
-                let info = data["info"] as? [String: Any],
-                let totalTime = info["totalTime"] as? Int
-          else { return nil }
-          
-          var nodes: [RouteNode] = []
-          
-          for (i, sub) in subPaths.enumerated() {
-              let tType = sub["trafficType"] as? Int
-              // trafficType: 이동 수단 종류 (1-지하철, 2-버스, 3-도보)
-              switch tType {
-              case 1: // TODO: 지하철
-                  continue
-                  
-              case 2: // 버스
-                  if let bus = parseBusNode(sub) {
-                      nodes.append(.bus(bus))
-                  }
-                  
-              case 3: // 도보
-                  if let walk = parseWalkNode(at: i, in: subPaths) {
-                      nodes.append(.walk(walk))
-                  }
-                  
-              default:
-                  print("[DEBUG] 알 수 없는 교통 타입: \(String(describing: tType))")
-                  continue
-              }
-          }
-    return Journey(totalTime: totalTime, nodes: nodes, routeType: routeType)
+    public func parseJourney(_ data: [String: Any]) -> Journey? {
+        guard let subPaths = data["subPath"] as? [[String: Any]],
+              let info = data["info"] as? [String: Any],
+              let totalTime = info["totalTime"] as? Int
+        else { return nil }
+        
+        var nodes: [RouteNode] = []
+        
+        for (i, sub) in subPaths.enumerated() {
+            let tType = sub["trafficType"] as? Int
+            // trafficType: 이동 수단 종류 (1-지하철, 2-버스, 3-도보)
+            switch tType {
+            case 1: // TODO: 지하철
+                continue
+                
+            case 2: // 버스
+                if let bus = parseBusNode(sub) {
+                    nodes.append(.bus(bus))
+                }
+                
+            case 3: // 도보
+                if let walk = parseWalkNode(at: i, in: subPaths) {
+                    nodes.append(.walk(walk))
+                }
+                
+            default:
+                print("[DEBUG] 알 수 없는 교통 타입: \(String(describing: tType))")
+                continue
+            }
         }
+        return Journey(totalTime: totalTime, nodes: nodes)
+    }
     
     private func parseBusNode(_ sub: [String: Any]) -> BusRouteNode? {
         // 필수 데이터
@@ -106,8 +113,7 @@ final class JourneyManager: ObservableObject {
         }
         
         // busNo에서 괄호()로 묶인 불필요한 정보 없애기
-        let cleanedBusNo = busNo.replacingOccurrences(of: #"\([^)]*\)"#, with: "", options: .regularExpression)
-
+        let cleanedBusNo = cleanBusNumber(busNo)
         
         // stations 정보 중 필요한 정보만 뽑아내기
         let stationsInfo: [BusStation] = stations.compactMap { dict in
@@ -137,6 +143,23 @@ final class JourneyManager: ObservableObject {
             stations: stationsInfo,
             travelTime: travelTime
         )
+    }
+    
+    private func cleanBusNumber(_ busNo: String) -> String {
+        var result = busNo
+        let pattern = #"\([^()]*\)"#  // 한 단계 괄호 제거용 정규식
+        
+        // 안쪽 괄호부터 반복 제거
+        while let _ = result.range(of: pattern, options: .regularExpression) {
+            result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        }
+        
+        // 숫자로 끝날 경우 "번" 추가
+        if let lastChar = result.last, lastChar.isNumber {
+            result += "번"
+        }
+        
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     private func parseWalkNode(at index: Int, in subPath: [[String: Any]]) -> WalkRouteNode? {

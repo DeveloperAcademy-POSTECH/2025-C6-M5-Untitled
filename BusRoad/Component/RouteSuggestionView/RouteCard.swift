@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RouteCard: View {
     var journey: Journey
+    var index: Int
     
     var body: some View {
         ZStack{
@@ -18,7 +19,7 @@ struct RouteCard: View {
                 .cornerRadius(20)
             if let firstBusRoute = journey.firstBusRoute {
                 VStack(alignment:.leading){
-                    ETA(journey: journey)
+                    ETA(journey: journey, index: index)
                     Spacer()
                     BoardingLocation(route: firstBusRoute)
                     Spacer()

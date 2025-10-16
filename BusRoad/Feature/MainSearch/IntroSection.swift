@@ -4,6 +4,8 @@ struct IntroSection: View {
     @Binding var query: String
     var isFocused: FocusState<Bool>.Binding
     
+    @Binding var showHint: Bool
+    
     let onSubmit: () -> Void
     let onMicTap: () -> Void
     let onClear: () -> Void
@@ -27,6 +29,15 @@ struct IntroSection: View {
                     onClearTap: onClear
                 )
                 .padding(.horizontal, 22)
+                .overlay(alignment: .topTrailing) {
+                    if showHint {
+                        Image("voicetip")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 148, height: 47)
+                            .offset(x: -10, y: 67)
+                    }
+                }
             }
             .padding(.top, 265)
             .padding(.bottom, 445)
@@ -34,4 +45,19 @@ struct IntroSection: View {
             
         }
     }
+}
+
+#Preview {
+    @Previewable @State var showHint = true
+    @Previewable @State var text = ""
+    @FocusState var isFocused: Bool
+    
+    return IntroSection(
+        query: $text,
+        isFocused: $isFocused,
+        showHint: $showHint,
+        onSubmit: {},
+        onMicTap: {},
+        onClear: {}
+    )
 }

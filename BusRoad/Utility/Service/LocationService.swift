@@ -5,13 +5,13 @@
 //  Created by 강진 on 9/28/25.
 //
 
-import Foundation
-import CoreLocation
 import Combine
+import CoreLocation
+import Foundation
 
 @MainActor
 final class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
-
+    
     // Errors
     enum LocationError: LocalizedError {
         case servicesDisabled
@@ -19,7 +19,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         case timeout
         case busy
         case unknown
-
+        
         var errorDescription: String? {
             switch self {
             case .servicesDisabled:   return "위치 서비스가 비활성화되어 있습니다."
@@ -30,38 +30,43 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
             }
         }
     }
-
+    
     // MARK: - Public State
     @Published private(set) var location: CLLocation?
     @Published private(set) var authorizationStatus: CLAuthorizationStatus
-
+    
     // MARK: - Private
     private let manager = CLLocationManager()
     private var authContinuation: CheckedContinuation<Void, Error>?
     private var locationContinuation: CheckedContinuation<CLLocation, Error>?
     private var timeoutTask: Task<Void, Never>?
-
+    
     // MARK: - Init
     override init() {
         self.authorizationStatus = manager.authorizationStatus
         super.init()
         manager.delegate = self
         manager.desiredAccuracy = kCLLocationAccuracyBest
+        
+        // 백그라운드 업데이트 허용
+        manager.allowsBackgroundLocationUpdates = true
+        manager.pausesLocationUpdatesAutomatically = true
+        manager.activityType = .otherNavigation
     }
-
+    
     // MARK: - Public API
-
+    
     // 권한이 없으면 요청하고, 승인/거절 결과를 async로 대기
     func requestWhenInUseAuthorizationIfNeeded() async throws {
         guard CLLocationManager.locationServicesEnabled() else {
             throw LocationError.servicesDisabled
         }
-
+        
         let status = manager.authorizationStatus
         switch status {
         case .authorizedAlways, .authorizedWhenInUse:
             return
-
+            
         case .notDetermined:
             try await withCheckedThrowingContinuation { (cont: CheckedContinuation<Void, Error>) in
                 self.authContinuation = cont
@@ -70,31 +75,31 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
                     self?.manager.requestWhenInUseAuthorization()
                 }
             }
-
+            
         case .restricted, .denied:
             throw LocationError.authorizationDenied
-
+            
         @unknown default:
             throw LocationError.unknown
         }
     }
-
-
+    
+    
     // 1회성 현재 위치 가져오기 (권한 체크 포함). 기본 타임아웃 8초.
-    func requestOneShotLocation(timeout seconds: TimeInterval = 8) async throws -> CLLocation {
+    func requestOneShotLocation(timeout seconds: TimeInterval = 30) async throws -> CLLocation {
         // 권한 보장
         try await requestWhenInUseAuthorizationIfNeeded()
-
+        
         // 중복 요청 방지
         guard locationContinuation == nil else {
             throw LocationError.busy
         }
-
+        
         return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<CLLocation, Error>) in
             // 위치 요청 시작
             self.locationContinuation = cont
             self.manager.requestLocation()
-
+            
             // 타임아웃 태스크 설정
             self.timeoutTask?.cancel()
             self.timeoutTask = Task { [weak self] in
@@ -107,18 +112,18 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
             }
         }
     }
-
+    
     // 좌표만 필요한 경우 편의 메서드
-    func requestOneShotCoordinate(timeout seconds: TimeInterval = 8) async throws -> CLLocationCoordinate2D {
+    func requestOneShotCoordinate(timeout seconds: TimeInterval = 30) async throws -> CLLocationCoordinate2D {
         let loc = try await requestOneShotLocation(timeout: seconds)
         return loc.coordinate
     }
-
+    
     // MARK: - CLLocationManagerDelegate
-
+    
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
         authorizationStatus = manager.authorizationStatus
-
+        
         switch manager.authorizationStatus {
         case .authorizedWhenInUse, .authorizedAlways:
             authContinuation?.resume()
@@ -134,12 +139,12 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
             authContinuation = nil
         }
     }
-
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let loc = locations.last else { return }
         // 공개 상태 업데이트 (옵저버들이 사용할 수 있게)
         self.location = loc
-
+        
         // 대기 중인 1회 요청 완료 처리
         if let cont = locationContinuation {
             cont.resume(returning: loc)
@@ -148,7 +153,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         timeoutTask?.cancel()
         timeoutTask = nil
     }
-
+    
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         if let cont = locationContinuation {
             cont.resume(throwing: error)
@@ -159,3 +164,49 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         print("🚨 위치 실패: \(error.localizedDescription)")
     }
 }
+
+// 실시간 위치추적 기능
+// TODO: - extension 파일 추후 분리해야함
+extension LocationService {
+    func startContinuousUpdates(
+        // 20m 이동마다 업데이트되도록
+        distanceFilter: CLLocationDistance = 10,
+        accuracy: CLLocationAccuracy = kCLLocationAccuracyBest
+    ) async throws {
+        try await requestWhenInUseAuthorizationIfNeeded()
+        
+        manager.distanceFilter = distanceFilter
+        manager.desiredAccuracy = accuracy
+        
+        manager.startUpdatingLocation()
+    }
+    
+    func stopContinuousUpdates() {
+        manager.stopUpdatingLocation()
+    }
+}
+
+//#if DEBUG
+//import CoreLocation
+//
+//extension LocationService {
+//    /// 디버그용: 가짜 좌표를 일정 간격으로 흘려보내는 함수
+//    func playOnce(coordinates: [CLLocationCoordinate2D],
+//                  interval: TimeInterval = 0.5,
+//                  completion: (() -> Void)? = nil) {
+//        Task { @MainActor in
+//            for coord in coordinates {
+//                // 현재 좌표를 내부 퍼블리셔에 흘려보냄
+//                let loc = CLLocation(latitude: coord.latitude,
+//                                     longitude: coord.longitude)
+//                // LocationService 내부에 $location이 있을 거야
+//                // (즉, @Published var location: CLLocation?)
+//                self.location = loc
+//
+//                try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
+//            }
+//            completion?()
+//        }
+//    }
+//}
+//#endif
