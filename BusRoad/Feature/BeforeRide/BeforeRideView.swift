@@ -21,31 +21,45 @@ struct BeforeRideView: View {
     }
     
     var body: some View {
-        VStack(spacing: 0) {
+        
+        ZStack {
+            Color.primarywhite
+                .ignoresSafeArea()
             
-            TopBar(isMoving: true) { coordinator.popToRoot() }
-            
-            if let journey, let index {
-                WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
-            }
-            
-            LineDivider()
-            
-            ZStack {
-                Color(.background)
-                    .ignoresSafeArea()
+            VStack(spacing: 0) {
                 
-                VStack(spacing: 0) {
-                    if let journey, let index, case let .bus(busNode) = journey.nodes[index] {
-                        BeforeRideCard(
-                            waitingStopName: busNode.stations[0].stationName,
-                            waitingBusNO: busNode.busNo,
-                            remainingStopsToBoarding: .constant(1),
-                            remainingTimeToBoarding: 1
-                        )
+                VStack(spacing: 32) {
+                    
+                    TopBar(isMoving: true) { coordinator.popToRoot() }
+                        .padding(.horizontal, 8)
+                       
+                    
+                    if let journey, let index {
+                        WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
+                            .padding(.horizontal, 32)
                     }
                     
-//                    if viewmodel.remainingStops == 1 {
+                    LineDivider()
+                }
+                .frame(height: 144)
+                
+                ZStack {
+                    Color(.background)
+                        .ignoresSafeArea()
+                    
+                    VStack(spacing: 0) {
+                        if let journey, let index, case let .bus(busNode) = journey.nodes[index] {
+                            BeforeRideCard(
+                                waitingStopName: busNode.stations[0].stationName,
+                                waitingBusNO: busNode.busNo,
+                                remainingStopsToBoarding: .constant(1),
+                                remainingTimeToBoarding: 1
+                            )
+                            .padding(.horizontal, 24)
+                            .padding(.top, 28)
+                            .padding(.bottom,47)
+                        }
+                        
                         Button {
                             coordinator.advanceJourneyStage()
                         } label: {
@@ -57,19 +71,9 @@ struct BeforeRideView: View {
                                 .cornerRadius(20)
                         }
                         .buttonStyle(.plain)
-//                    } else {
-//                        Button {
-//                            // TODO: 비활성화 상태에서의 동작(토스트/알럿/햅틱 등)
-//                            // “1정류장 남으면 버튼이 활성화돼요”
-//                        } label: {
-//                            Text("탔어요")
-//                                .font(.premed32)
-//                                .foregroundStyle(.subNeutral)
-//                                .frame(width: 239, height: 74)
-//                                .background(.subDisable)
-//                                .cornerRadius(20)
-//                        }
-//                    }
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 74)
+                    }
                 }
             }
         }
@@ -77,5 +81,56 @@ struct BeforeRideView: View {
 }
 
 #Preview {
-    BeforeRideView()
+    let manager = JourneyManager.shared
+    
+    // 정류장들
+    let station1 = BusStation(index: 0, stationId: 1001, stationName: "포항공대 정문", stationCityCode: 37010, localStationId: "101")
+    let station2 = BusStation(index: 1, stationId: 1002, stationName: "죽도시장", stationCityCode: 37010, localStationId: "102")
+    let station3 = BusStation(index: 2, stationId: 1003, stationName: "포항역", stationCityCode: 37010, localStationId: "103")
+    let station4 = BusStation(index: 3, stationId: 1004, stationName: "포항시외버스터미널", stationCityCode: 37010, localStationId: "104")
+
+    // 버스 구간 1
+    let busNode1 = BusRouteNode(
+        start: LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231),
+        end: LocationInfo(name: "죽도시장", latitude: 36.0348, longitude: 129.3435),
+        busNo: "107",
+        busId: 107,
+        stations: [station1, station2],
+        travelTime: 15
+    )
+
+    // 도보 구간
+    let walkNode = WalkRouteNode(
+        start: LocationInfo(name: "죽도시장", latitude: 36.0348, longitude: 129.3435),
+        end: LocationInfo(name: "포항역", latitude: 36.0716, longitude: 129.3419),
+        travelTime: 10
+    )
+
+    // 버스 구간 2 (
+    let busNode2 = BusRouteNode(
+        start: LocationInfo(name: "포항역", latitude: 36.0716, longitude: 129.3419),
+        end: LocationInfo(name: "포항시외버스터미널", latitude: 36.0165, longitude: 129.3564),
+        busNo: "500",
+        busId: 500,
+        stations: [station3, station4],
+        travelTime: 18
+    )
+
+    // 전체 여정 구성
+    let journey = Journey(
+        totalTime: 43,
+        nodes: [
+            .bus(busNode1),
+            .walk(walkNode),
+            .bus(busNode2)
+        ]
+    )
+
+    // 매니저에 주입
+    manager.selectedJourney = journey
+    manager.journeyIndex = 0
+
+    // 프리뷰
+    return BeforeRideView(manager: manager)
+        .environmentObject(NavigationCoordinator())
 }

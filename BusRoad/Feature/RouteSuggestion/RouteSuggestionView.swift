@@ -116,7 +116,6 @@ struct RouteSuggestionView: View {
                             .padding(.top, 30)
                             .padding(.bottom, 39)
                             
-//                            Spacer()
                             
                             // MARK: - 버튼
                             

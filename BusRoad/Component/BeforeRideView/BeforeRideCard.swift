@@ -17,69 +17,59 @@ struct BeforeRideCard: View {
   
   
   var body: some View {
-      VStack(spacing: 0) {
-      HStack {
-        VStack(alignment: .leading, spacing: 8) {
-          Text(waitingStopName)
-            .font(.prebold36)
-            .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
-          
-          Text("정류장에서 타야 해요.")
-            .font(.prereg24)
-            .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
-        }
-        
-        Spacer()
-      }
-      .padding(.horizontal, 40)
       
-      HStack{
-        Text("\(waitingBusNO)")
-          .font(.presemi32)
-          .foregroundStyle(remainingStopsToBoarding == 1 ? .primaryNormal: .subLight)
-          .padding(.horizontal, 10)
-          .padding(.vertical, 3)
-          .background(
-            Rectangle()
-              .foregroundColor(remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy)
-              .cornerRadius(15)
-          )
-//        Text(remainingStopsToBoarding == 1 ? "잠시 후 도착" : "\(remainingTimeToBoarding)분 후 도착")
-//          .font(.premed20)
-//          .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
-        Spacer()
-      }
-      .padding(.horizontal, 40)
-      .padding(.top, 28)
-      
-      //TODO: 여기에 로티,이미지 파일 들어가야함
-      /// 버스 탑승 대기 이미지
-//      Rectangle()
-//        .cornerRadius(10)
-//        .foregroundStyle(.subPoint)
-//        .frame(width: 176, height: 146)
-//        .padding(.horizontal, 84)
-//        .padding(.top, 48)
-//        .padding(.bottom, 50)
+      ZStack {
           Rectangle()
-            .cornerRadius(10)
-            .foregroundStyle(.subPoint)
-            .frame(width: 200, height: 200)
-            .padding(.top, 20)
-            .padding(.bottom, 40)
+              .foregroundColor(remainingStopsToBoarding == 1 ? .primaryNormal : .subNormal)
+              .cornerRadius(20)
           
-      
-    }
-    
-    .padding(.top, 60)
-//    .padding(.bottom, 45)
-    .background(
-      RoundedRectangle(cornerRadius: 20, style: .continuous)
-        .fill(Color(remainingStopsToBoarding == 1 ? .primaryStrong : .primaryLight))
-    )
-    .padding(.horizontal, 24)
-    .padding(.top, 28)
-    .padding(.bottom, 47)
+          VStack(spacing: 20) {
+              
+              VStack(spacing: 28) {
+                  HStack {
+                      VStack(alignment: .leading, spacing: 8) {
+                          Text(waitingStopName)
+                              .font(.prebold36)
+                              .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
+                          
+                          Text("정류장에서 타야 해요.")
+                              .font(.prereg24)
+                              .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
+                      }
+                      Spacer()
+                  }
+                  .border(.yellow)
+                  
+                  HStack{
+                      Text("\(waitingBusNO)")
+                          .font(.presemi32)
+                          .foregroundStyle(
+                            remainingStopsToBoarding == 1 ? .primaryNormal: .subLight
+                          )
+                          .padding(.horizontal, 8)
+                          .padding(.vertical, 4)
+                          .background(
+                            Rectangle()
+                                .foregroundColor(
+                                    remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy
+                                )
+                                .cornerRadius(15)
+                          )
+                      
+                      Spacer()
+                  }
+                  .border(.yellow)
+              }
+              
+              //TODO: 여기에 로티,이미지 파일 들어가야함
+              Rectangle()
+                  .cornerRadius(10)
+                  .foregroundStyle(.subPoint)
+                  .frame(width: 200, height: 200)
+          }
+          .padding(.horizontal, 40)
+      }
+        
   }
 }
 
