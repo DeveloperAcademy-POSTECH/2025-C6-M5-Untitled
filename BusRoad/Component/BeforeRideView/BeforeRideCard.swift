@@ -34,7 +34,7 @@ struct BeforeRideCard: View {
       .padding(.horizontal, 40)
       
       HStack{
-        Text("\(waitingBusNO)번")
+        Text("\(waitingBusNO)")
           .font(.presemi32)
           .foregroundStyle(remainingStopsToBoarding == 1 ? .primaryNormal: .subLight)
           .padding(.horizontal, 10)
