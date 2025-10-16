@@ -129,8 +129,8 @@ extension Font {
         return .paper(type: .semibold, size: 36)
     }
     
-    static var papermed16: Font {
-        return .paper(type: .medium, size: 16)
+    static var papermed18: Font {
+        return .paper(type: .medium, size: 18)
     }
 }
  
