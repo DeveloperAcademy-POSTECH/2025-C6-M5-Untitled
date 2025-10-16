@@ -15,10 +15,10 @@ struct TopBar: View {
                 Spacer()
                 if isMoving {
                     Text("경로 이동")
-                        .font(.papermed16)
+                        .font(.papermed18)
                 } else {
                     Text("경로 탐색")
-                        .font(.papermed16)
+                        .font(.papermed18)
                 }
                 Spacer()
             }
@@ -34,7 +34,7 @@ struct TopBar: View {
                 }
             }
         }
-//        .frame(height: 44)  // 높이 고정
+        .padding(.vertical, 12)
     }
 }
 
