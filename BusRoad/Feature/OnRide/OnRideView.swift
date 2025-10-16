@@ -14,24 +14,28 @@ struct OnRideView: View {
     }
     
     var body: some View {
-        ZStack {
-            Color(.background)
-                .ignoresSafeArea()
+        VStack(spacing: 0) {
+            TopBar(isMoving: true) { coordinator.popToRoot() }
             
-            VStack(spacing: 47) {
+            if let journey, let index {
+                WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
+            }
+            
+            LineDivider()
+            
+            ZStack {
+                Color(.background)
+                    .ignoresSafeArea()
                 
-                if let journey, let index {
-                    WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-                }
-                
-                OnRideCard(
-                    busStopName: vm.stopName,
-                    canAlight: vm.canAlight,
-                    progress: vm.progress
-                )
-                .padding(.horizontal, 24)
-                
-//#if DEBUG
+                VStack(spacing: 0) {
+                    OnRideCard(
+                        busStopName: vm.stopName,
+                        canAlight: vm.canAlight,
+                        progress: vm.progress
+                    )
+                    .padding(.horizontal, 24)
+                    
+                    //#if DEBUG
 //                Button("환승 전체 데모 시작") {
 //                    vm.startFullTransferDemo()
 //                }
@@ -61,6 +65,7 @@ struct OnRideView: View {
                             .frame(width: 239, height: 74)
                             .background(.subDisable)
                             .cornerRadius(20)
+
                     }
                 }
             }

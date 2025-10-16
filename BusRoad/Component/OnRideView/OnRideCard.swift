@@ -8,8 +8,7 @@ struct OnRideCard: View {
     
     
     var body: some View {
-        
-        VStack {
+        VStack(spacing: 0) {
             
             HStack {
                 VStack(alignment: .leading, spacing: 8) {
@@ -25,7 +24,6 @@ struct OnRideCard: View {
                 Spacer()
             }
             .padding(.horizontal, 40)
-            
             
             
             //TODO: 여기에 로티,이미지 파일 들어가야함
@@ -47,8 +45,8 @@ struct OnRideCard: View {
                         .font(.presemi20)
                         .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                 }
-                .padding(.horizontal, 40)
-                
+            .padding(.horizontal, 40)
+            .padding(.bottom, 11)
             
                     
                     /// 남은정류장 progressbar
@@ -59,12 +57,15 @@ struct OnRideCard: View {
                     )
                     .padding(.horizontal, 40)
         }
-            .padding(.top, 60)
-            .padding(.bottom, 45)
-            .background(
-                RoundedRectangle(cornerRadius: 20, style: .continuous)
-                    .fill(Color(canAlight ? .primaryStrong : .primaryLight))
-            )
+        .padding(.top, 60)
+        .padding(.bottom, 45)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(remainingStops == 1 ? .primaryStrong : .primaryLight))
+        )
+        .padding(.horizontal, 24)
+        .padding(.top, 28)
+        .padding(.bottom, 47)
     }
 }
 

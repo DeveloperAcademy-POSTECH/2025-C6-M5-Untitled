@@ -18,8 +18,7 @@ struct WalkingView: View {
       self.journey = journey
       self.index = index
     }
-  }
-  
+    
   var body: some View {
     ZStack{
         Rectangle()
@@ -30,9 +29,7 @@ struct WalkingView: View {
       
       VStack {
         if let journey, let index {
-          WholeJourney(journey: journey, journeyIndex: index,
-//                       isBeforeRide: false
-          )
+          WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
             .padding(.top, 40)
 
           if vm.arrived {
