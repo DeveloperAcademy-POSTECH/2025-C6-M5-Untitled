@@ -17,25 +17,22 @@ struct BeforeRideCard: View {
   
   
   var body: some View {
-      GeometryReader { geometry in
-          let cardHeight = geometry.size.height
-          let cardWidth = geometry.size.width
-          
+      
           ZStack {
               Rectangle()
                   .foregroundColor(remainingStopsToBoarding == 1 ? .primaryNormal : .subNormal)
                   .cornerRadius(20)
               
-              VStack(spacing: 20) {
-                  VStack(spacing: 28) {
+              VStack(spacing: 20.wScaled) {
+                  VStack(spacing: 28.wScaled) {
                       HStack {
-                          VStack(alignment: .leading, spacing: 8) {
+                          VStack(alignment: .leading, spacing: 8.wScaled) {
                               Text(waitingStopName)
-                                  .font(.prebold36)
+                                  .font(.prebold36Scaled)
                                   .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
                               
                               Text("정류장에서 타야 해요.")
-                                  .font(.prereg24)
+                                  .font(.prereg24Scaled)
                                   .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
                           }
                           Spacer()
@@ -43,12 +40,12 @@ struct BeforeRideCard: View {
                       
                       HStack{
                           Text("\(waitingBusNO)")
-                              .font(.presemi32)
+                              .font(.presemi32Scaled)
                               .foregroundStyle(
                                 remainingStopsToBoarding == 1 ? .primaryNormal: .subLight
                               )
-                              .padding(.horizontal, 8)
-                              .padding(.vertical, 4)
+                              .padding(.horizontal, 8.wScaled)
+                              .padding(.vertical, 4.wScaled)
                               .background(
                                 Rectangle()
                                     .foregroundColor(
@@ -65,10 +62,10 @@ struct BeforeRideCard: View {
                   Rectangle()
                       .cornerRadius(10)
                       .foregroundStyle(.subPoint)
-                      .frame(width: cardWidth * 0.45, height: cardHeight * 0.35)
+                      .frame(width: 200.wScaled, height: 200.wScaled)
+                     
               }
-              .padding(.horizontal, cardHeight * 0.09)              
-          }
+              .padding(.horizontal, 40.wScaled)
       }
   }
 }
