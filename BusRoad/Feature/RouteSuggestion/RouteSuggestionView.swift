@@ -112,9 +112,9 @@ struct RouteSuggestionView: View {
                                 routes: $viewModel.routes,
                                 errorMessage: viewModel.errorMessage
                             )
-                            .padding(.horizontal, 44)
-                            .padding(.top, 30)
-                            .padding(.bottom, 39)
+                            .padding(.horizontal, 44.wScaled)
+                            .padding(.top, 30.wScaled)
+                            .padding(.bottom, 39.wScaled)
                             
                             
                             // MARK: - 버튼

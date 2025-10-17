@@ -21,7 +21,7 @@ struct RouteCardSlide: View {
                     ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
                         let relativeIndex: CGFloat = CGFloat(index - currentIndex)
                         RouteCard(journey: item, index: index)
-                            .offset(x: relativeIndex * 270)
+                            .offset(x: relativeIndex * 270.wScaled)
                             .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
                             .opacity(relativeIndex == 0 ? 1.0 : 0.3)
                             .zIndex(Double(routes.count) - Double(abs(index - currentIndex)))
