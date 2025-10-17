@@ -45,9 +45,9 @@ struct OnRideView: View {
                             canAlight: vm.canAlight,
                             progress: vm.progress
                         )
-                        .padding(.horizontal, 24)
-                        .padding(.top, 28)
-                        .padding(.bottom, 47)
+                        .padding(.horizontal, 24.wScaled)
+                        .padding(.top, 28.wScaled)
+                        .padding(.bottom, 47.wScaled)
                         
                         // 버튼 영역
                         if vm.canAlight {

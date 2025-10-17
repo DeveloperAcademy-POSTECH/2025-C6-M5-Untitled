@@ -8,55 +8,51 @@ struct OnRideCard: View {
     
     var body: some View {
         
-        GeometryReader { geometry in
-            let cardHeight = geometry.size.height
-            let cardWidth = geometry.size.width
         ZStack {
             
             RoundedRectangle(cornerRadius: 20)
                 .foregroundStyle(canAlight ? .primaryStrong : .primaryLight)
+            
+            VStack(spacing: 50.wScaled) {
                 
-                VStack(spacing: 50) {
-                    
-                    VStack(spacing: 48) {
-                        HStack {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text(busStopName)
-                                    .font(.prebold36)
-                                    .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
-                                
-                                Text("정류장에서 내려야 해요.")
-                                    .font(.prereg24)
-                                    .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
-                            }
+                VStack(spacing: 48.wScaled) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 8.wScaled) {
+                            Text(busStopName)
+                                .font(.prebold36Scaled)
+                                .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                             
-                            Spacer()
-                        }
-                        
-                        Rectangle()
-                            .cornerRadius(10)
-                            .foregroundStyle(.subPoint)
-                            .frame(width: cardWidth * 0.45, height: cardHeight * 0.35)
-                    }
-                    
-                    VStack(spacing: 11) {
-                        HStack {
-                            Spacer()
-                            
-                            Text(canAlight ? "곧 내려야 해요" : " ")
-                                .font(.presemi20)
+                            Text("정류장에서 내려야 해요.")
+                                .font(.prereg24Scaled)
                                 .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                         }
                         
-                        BusStopProgress(
-                            progress: progress,
-                            trackColor: canAlight ? Color(.subNormal) : Color(.primaryNormal),
-                            fillColor: canAlight ? Color(.subHeavy): Color(.primaryDisable)
-                        )
+                        Spacer()
                     }
+                    
+                    Rectangle()
+                        .cornerRadius(10)
+                        .foregroundStyle(.subPoint)
+                        .frame(width: 176.wScaled, height: 146.wScaled)
                 }
-                .padding(.horizontal, cardHeight * 0.09)
+                
+                VStack(spacing: 11 .wScaled) {
+                    HStack {
+                        Spacer()
+                        
+                        Text(canAlight ? "곧 내려야 해요" : " ")
+                            .font(.presemi20Scaled)
+                            .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                    }
+                    
+                    BusStopProgress(
+                        progress: progress,
+                        trackColor: canAlight ? Color(.subNormal) : Color(.primaryNormal),
+                        fillColor: canAlight ? Color(.subHeavy): Color(.primaryDisable)
+                    )
+                }
             }
+            .padding(.horizontal, 40.wScaled)
         }
     }
 }
