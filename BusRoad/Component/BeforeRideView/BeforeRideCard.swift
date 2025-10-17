@@ -17,59 +17,59 @@ struct BeforeRideCard: View {
   
   
   var body: some View {
-      
-      ZStack {
-          Rectangle()
-              .foregroundColor(remainingStopsToBoarding == 1 ? .primaryNormal : .subNormal)
-              .cornerRadius(20)
+      GeometryReader { geometry in
+          let cardHeight = geometry.size.height
+          let cardWidth = geometry.size.width
           
-          VStack(spacing: 20) {
-              
-              VStack(spacing: 28) {
-                  HStack {
-                      VStack(alignment: .leading, spacing: 8) {
-                          Text(waitingStopName)
-                              .font(.prebold36)
-                              .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
-                          
-                          Text("정류장에서 타야 해요.")
-                              .font(.prereg24)
-                              .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
-                      }
-                      Spacer()
-                  }
-                  .border(.yellow)
-                  
-                  HStack{
-                      Text("\(waitingBusNO)")
-                          .font(.presemi32)
-                          .foregroundStyle(
-                            remainingStopsToBoarding == 1 ? .primaryNormal: .subLight
-                          )
-                          .padding(.horizontal, 8)
-                          .padding(.vertical, 4)
-                          .background(
-                            Rectangle()
-                                .foregroundColor(
-                                    remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy
-                                )
-                                .cornerRadius(15)
-                          )
-                      
-                      Spacer()
-                  }
-                  .border(.yellow)
-              }
-              
-              //TODO: 여기에 로티,이미지 파일 들어가야함
+          ZStack {
               Rectangle()
-                  .cornerRadius(10)
-                  .foregroundStyle(.subPoint)
-                  .frame(width: 200, height: 200)
+                  .foregroundColor(remainingStopsToBoarding == 1 ? .primaryNormal : .subNormal)
+                  .cornerRadius(20)
+              
+              VStack(spacing: 20) {
+                  VStack(spacing: 28) {
+                      HStack {
+                          VStack(alignment: .leading, spacing: 8) {
+                              Text(waitingStopName)
+                                  .font(.prebold36)
+                                  .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
+                              
+                              Text("정류장에서 타야 해요.")
+                                  .font(.prereg24)
+                                  .foregroundStyle(remainingStopsToBoarding == 1 ? .subLight : .primaryHeavy)
+                          }
+                          Spacer()
+                      }
+                      
+                      HStack{
+                          Text("\(waitingBusNO)")
+                              .font(.presemi32)
+                              .foregroundStyle(
+                                remainingStopsToBoarding == 1 ? .primaryNormal: .subLight
+                              )
+                              .padding(.horizontal, 8)
+                              .padding(.vertical, 4)
+                              .background(
+                                Rectangle()
+                                    .foregroundColor(
+                                        remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy
+                                    )
+                                    .cornerRadius(15)
+                              )
+                          
+                          Spacer()
+                      }
+                  }
+                  
+                  //TODO: 여기에 로티,이미지 파일 들어가야함
+                  Rectangle()
+                      .cornerRadius(10)
+                      .foregroundStyle(.subPoint)
+                      .frame(width: cardWidth * 0.45, height: cardHeight * 0.35)
+              }
+              .padding(.horizontal, cardHeight * 0.09)              
           }
-          .padding(.horizontal, 40)
       }
-        
   }
 }
 

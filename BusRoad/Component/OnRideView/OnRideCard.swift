@@ -6,66 +6,58 @@ struct OnRideCard: View {
     let canAlight: Bool
     let progress: CGFloat
     
-    
     var body: some View {
-        VStack(spacing: 0) {
+        
+        GeometryReader { geometry in
+            let cardHeight = geometry.size.height
+            let cardWidth = geometry.size.width
+        ZStack {
             
-            HStack {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(busStopName)
-                        .font(.prebold36)
-                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
-                    
-                    Text("정류장에서 내려야 해요.")
-                        .font(.prereg24)
-                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
-                }
+            RoundedRectangle(cornerRadius: 20)
+                .foregroundStyle(canAlight ? .primaryStrong : .primaryLight)
                 
-                Spacer()
-            }
-            .padding(.horizontal, 40)
-            
-            
-            //TODO: 여기에 로티,이미지 파일 들어가야함
-            /// 버스 탑승 중 이미지
-            Rectangle()
-                .cornerRadius(10)
-                .foregroundStyle(.subPoint)
-                .frame(width: 176, height: 146)
-                .padding(.horizontal, 84)
-                .padding(.top, 48)
-                .padding(.bottom, 50)
-            
-            
-            /// 남은 정류장 안내
-                HStack {
-                    Spacer()
+                VStack(spacing: 50) {
                     
-                    Text(canAlight ? "곧 내려야 해요" : "")
-                        .font(.presemi20)
-                        .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                    VStack(spacing: 48) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(busStopName)
+                                    .font(.prebold36)
+                                    .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                                
+                                Text("정류장에서 내려야 해요.")
+                                    .font(.prereg24)
+                                    .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                            }
+                            
+                            Spacer()
+                        }
+                        
+                        Rectangle()
+                            .cornerRadius(10)
+                            .foregroundStyle(.subPoint)
+                            .frame(width: cardWidth * 0.45, height: cardHeight * 0.35)
+                    }
+                    
+                    VStack(spacing: 11) {
+                        HStack {
+                            Spacer()
+                            
+                            Text(canAlight ? "곧 내려야 해요" : " ")
+                                .font(.presemi20)
+                                .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                        }
+                        
+                        BusStopProgress(
+                            progress: progress,
+                            trackColor: canAlight ? Color(.subNormal) : Color(.primaryNormal),
+                            fillColor: canAlight ? Color(.subHeavy): Color(.primaryDisable)
+                        )
+                    }
                 }
-            .padding(.horizontal, 40)
-            .padding(.bottom, 11)
-            
-                    
-                    /// 남은정류장 progressbar
-                    BusStopProgress(
-                        progress: progress,
-                        trackColor: canAlight ? Color(.subNormal) : Color(.primaryNormal),
-                        fillColor: canAlight ? Color(.subHeavy): Color(.primaryDisable)
-                    )
-                    .padding(.horizontal, 40)
+                .padding(.horizontal, cardHeight * 0.09)
+            }
         }
-        .padding(.top, 60)
-        .padding(.bottom, 45)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                .fill(Color(canAlight ? .primaryStrong : .primaryLight))
-        )
-        .padding(.horizontal, 24)
-        .padding(.top, 28)
-        .padding(.bottom, 47)
     }
 }
 
@@ -111,7 +103,7 @@ struct BusStopProgress: View {
 #Preview {
     OnRideCard(
         busStopName: "Bus stop name",
-        canAlight: false,
+        canAlight: true,
         progress: 0.9
     )
 }

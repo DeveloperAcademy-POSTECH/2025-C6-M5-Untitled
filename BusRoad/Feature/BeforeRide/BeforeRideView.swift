@@ -57,7 +57,7 @@ struct BeforeRideView: View {
                             )
                             .padding(.horizontal, 24)
                             .padding(.top, 28)
-                            .padding(.bottom,47)
+                            .padding(.bottom, 47)
                         }
                         
                         Button {

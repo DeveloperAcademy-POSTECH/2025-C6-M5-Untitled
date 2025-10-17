@@ -35,7 +35,6 @@ struct TopBar: View {
                 }
             }
         }
-//        .border(.black)
     }
 }
 

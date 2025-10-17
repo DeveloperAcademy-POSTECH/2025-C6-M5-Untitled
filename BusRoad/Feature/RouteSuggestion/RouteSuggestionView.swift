@@ -1,10 +1,3 @@
-//
-//  Untitled.swift
-//  BusRoad
-//
-//  Created by 박난 on 9/23/25.
-//
-
 import CoreLocation
 import SwiftUI
 
@@ -18,6 +11,13 @@ struct RouteSuggestionView: View {
     @FocusState var isFocused: Bool
     @State var locationType: LocationType = .origin
     @State var isFirstLoad = true
+    
+    //TODO: - 프리뷰용 나중에 삭제
+    private let skipAutoFetch: Bool   // 프리뷰에서 자동 네트워크/계산 생략용
+    init(viewModel: BusRouteViewModel = BusRouteViewModel(), skipAutoFetch: Bool = false) {
+            _viewModel = StateObject(wrappedValue: viewModel)
+            self.skipAutoFetch = skipAutoFetch
+        }
     
     // MARK: - Helpers
     @MainActor func exitSearchMode() {
@@ -71,11 +71,11 @@ struct RouteSuggestionView: View {
         } else {
             ZStack {
                 Color.primarywhite
-                    .ignoresSafeArea()
+                    
                 
                 VStack(spacing: 0) {
                     // MARK: - 상단바
-                    VStack (spacing: 20) {
+                    VStack(spacing: 20) {
                         TopBar(isMoving: false) { coordinator.popToRoot() }
                             .padding(.horizontal, 8)
                         
@@ -139,6 +139,7 @@ struct RouteSuggestionView: View {
                 }
                 .onAppear {
                     print("[DEBUG] onAppear")
+                    guard !skipAutoFetch else { return }
                     if isFirstLoad {
                         viewModel.requestOrigin()
                         isFirstLoad = false
@@ -176,7 +177,32 @@ struct RouteSuggestionView: View {
         }
     }
 }
+
+
 #Preview {
-    RouteSuggestionView()
-        .environmentObject(NavigationCoordinator())
+    let coordinator = NavigationCoordinator()
+    let vm = BusRouteViewModel()
+
+    // 더미 데이터
+    let stationA = BusStation(index: 0, stationId: 1, stationName: "포항공대 정문", stationCityCode: 37010, localStationId: "A1")
+    let stationB = BusStation(index: 1, stationId: 2, stationName: "죽도시장",   stationCityCode: 37010, localStationId: "A2")
+
+    let bus1 = BusRouteNode(
+        start: LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231),
+        end:   LocationInfo(name: "죽도시장",   latitude: 36.0348, longitude: 129.3435),
+        busNo: "107", busId: 107, stations: [stationA, stationB], travelTime: 15
+    )
+    let bus2 = bus1
+    let bus3 = bus1
+
+    vm.routes = [
+        Journey(totalTime: 15, nodes: [.bus(bus1)]),
+        Journey(totalTime: 20, nodes: [.bus(bus2)]),
+        Journey(totalTime: 30, nodes: [.bus(bus3)])
+    ]
+    vm.origin = LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231)
+    vm.destination = LocationInfo(name: "죽도시장",   latitude: 36.0348, longitude: 129.3435)
+
+    return RouteSuggestionView(viewModel: vm, skipAutoFetch: true) 
+        .environmentObject(coordinator)
 }

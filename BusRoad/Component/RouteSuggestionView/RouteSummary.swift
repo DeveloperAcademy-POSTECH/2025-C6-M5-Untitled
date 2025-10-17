@@ -19,7 +19,7 @@ struct RouteSummary: View {
                     Image(systemName: "bus.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width:13, height: 13)
+                        .frame(width:17, height: 16)
                         .foregroundColor(Color.greyLight)
                 }
                 Text("환승 \(journey.transferCount)회")
@@ -35,7 +35,7 @@ struct RouteSummary: View {
                     Image(systemName: "figure.walk")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width:13, height:13)
+                        .frame(width:12, height:16)
                         
                         .foregroundColor(Color.greyLight)
                 }

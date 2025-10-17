@@ -19,18 +19,26 @@ struct RouteCard: View {
                     .foregroundColor(Color.primaryNormal)
                     .cornerRadius(20)
                 
-                VStack(spacing: 40){
+                VStack (spacing: 0) {
+                    Spacer()
                     
-                    VStack(alignment: .leading, spacing: 36) {
-                        ETA(journey: journey, index: index)
-                        BoardingLocation(route: firstBusRoute)
+                    VStack(spacing: 40) {
+                        
+                        VStack(alignment: .leading, spacing: 36) {
+                            ETA(journey: journey, index: index)
+                            BoardingLocation(route: firstBusRoute)
+                        }
+                        
+                        RouteSummary(journey: journey)
                     }
+                    .padding(.horizontal, 24)
                     
-                    RouteSummary(journey: journey)
+                    Spacer()
                 }
-                .padding(.horizontal,24)
             }
+            
         }
+
     }
 }
 
