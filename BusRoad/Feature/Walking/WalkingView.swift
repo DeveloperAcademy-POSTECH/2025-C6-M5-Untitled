@@ -9,6 +9,7 @@ import SwiftUI
 
 struct WalkingView: View {
     @ObservedObject var vm = WalkingViewModel()
+    @EnvironmentObject private var coordinator: NavigationCoordinator
     
     var journey: Journey?
     var index: Int?
@@ -22,21 +23,36 @@ struct WalkingView: View {
     
     var body: some View {
         ZStack {
-            Rectangle()
-                .fill(Color.background)
-                .stroke(Color.greyDisable, lineWidth: 0.5)
-                .frame(maxWidth: .infinity, maxHeight: 615)
-                .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
+            Color(.primarywhite)
+                .ignoresSafeArea()
             
-            VStack {
-                if let journey, let index {
-                    WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-                        .padding(.top, 40)
+            VStack(spacing: 0){
+                
+                VStack(spacing: 32) {
+                    TopBar(isMoving: true) { coordinator.popToRoot() }
+                        .padding(.horizontal, 8)
                     
-                    if vm.arrived {
-                        AtArrival(journey: journey, index: index)
-                    } else {
-                        ToDestination(vm:vm, journey: journey, index: index)
+                    if let journey, let index {
+                        WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
+                            .padding(.horizontal, 32)
+                    }
+                    
+                    LineDivider()
+                }
+                .frame(height: 144)
+                
+                ZStack {
+                    Color(.background)
+                        .ignoresSafeArea()
+                    
+                    VStack {
+                        if let journey, let index {
+                            if vm.arrived {
+                                AtArrival(journey: journey, index: index)
+                            } else {
+                                ToDestination(vm:vm, journey: journey, index: index)
+                            }
+                        }
                     }
                 }
             }

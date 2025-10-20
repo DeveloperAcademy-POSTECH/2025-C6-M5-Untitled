@@ -111,7 +111,3 @@ struct MainSearchView: View {
         isFocused = true
     }
 }
-//#Preview {
-//    MainSearchView()
-//        .environmentObject(NavigationCoordinator())
-//}

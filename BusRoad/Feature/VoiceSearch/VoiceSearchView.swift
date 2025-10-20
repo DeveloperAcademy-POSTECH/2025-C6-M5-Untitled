@@ -49,8 +49,9 @@ struct VoiceSearchView: View {
                     Spacer()
                     Button { vm.dismiss() } label: {
                         Image("xbutton-white")
-                            .frame(width: 44, height: 44)
-                            .aspectRatio(contentMode:.fit)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 28, height: 28)
                             .foregroundColor(.primarywhite)
                     }
                     .padding(.top, 13)
