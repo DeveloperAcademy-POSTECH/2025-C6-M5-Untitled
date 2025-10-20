@@ -14,6 +14,7 @@ final class VoiceSearchViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var lastTranscript: String = ""
     private var isSearchCompleted = false
+    private var isCancelled = false
     
     var onSearchCompleted: ((String) -> Void)?
     var onDismiss: (() -> Void)?
@@ -29,6 +30,7 @@ final class VoiceSearchViewModel: ObservableObject {
             return
         }
         isSearchCompleted = false
+        isCancelled = false
         
         
         state = .listening
@@ -49,6 +51,7 @@ final class VoiceSearchViewModel: ObservableObject {
     /// 재시도
     func retry() {
         isSearchCompleted = false
+        isCancelled = false
         
         speechManager.reset()
         startListening()
@@ -58,6 +61,7 @@ final class VoiceSearchViewModel: ObservableObject {
     func dismiss() {
         speechManager.stopRecording()
         isSearchCompleted = false
+        isCancelled = false
         
         onDismiss?()
     }
@@ -65,7 +69,7 @@ final class VoiceSearchViewModel: ObservableObject {
     /// 뷰가 나타날 때 자동 시작
     func onAppear() {
         Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
+            try? await Task.sleep(nanoseconds: 100_000_000)
             startListening()
         }
     }
@@ -74,14 +78,32 @@ final class VoiceSearchViewModel: ObservableObject {
     /// 음성 인식 중단 (사용자가 직접 중단)
     func cancelListening() {
         
+        print("[DEBUG] cancelListening 시작")
+
+        isCancelled = true
+        isSearchCompleted = true
+        
+        print("[DEBUG] 플래그 설정 완료 - isCancelled: \(isCancelled), isSearchCompleted: \(isSearchCompleted)")
+
+        
+        state = .failed
+        print("[DEBUG] state를 .fail로 변경")
+
+        
         speechManager.stopRecording()
+        print("[DEBUG] stopRecording 호출")
+
         
         recognizedText = ""
         lastTranscript = ""
-        
-        state = .ready
-        
         errorMessage = nil
+        
+//        Task {
+//              try? await Task.sleep(nanoseconds: 100_000_000)
+//              if self.state == .ready {
+//                  self.isSearchCompleted = false
+//              }
+//          }
     }
     
     
@@ -91,7 +113,9 @@ final class VoiceSearchViewModel: ObservableObject {
         speechManager.$isRecording
             .sink { [weak self] isRecording in
                 guard let self else { return }
-                if !isRecording && self.state == .listening { self.state = .processing }
+                if !isRecording && self.state == .listening && !self.isCancelled {
+                    self.state = .processing
+                }
             }
             .store(in: &cancellables)
         
@@ -119,26 +143,39 @@ final class VoiceSearchViewModel: ObservableObject {
             .sink { [weak self] isRecording, _ in
                 guard let self else { return }
                 guard !isRecording, self.state == .processing else { return }
+                guard !self.isCancelled else { return }
                 
                 let now = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
                 if !now.isEmpty { self.completeVoiceSearch(with: now); return }
                 
                 Task { @MainActor in
-                    try? await Task.sleep(nanoseconds: 500_000_000)
+                    try? await Task.sleep(nanoseconds: 100_000_000)
                     guard self.state == .processing else { return }
+                    guard !self.isCancelled else { return }
                     let later = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !later.isEmpty { self.completeVoiceSearch(with: later) }
-                    else { self.handleError("음성을 인식하지 못했습니다.") }
+                    if !later.isEmpty {
+                        self.completeVoiceSearch(with: later)
+                    } else { self.handleError("음성을 인식하지 못했습니다.") }
                 }
             }
             .store(in: &cancellables)
     }
     
     private func completeVoiceSearch(with text: String) {
+        guard !isCancelled else {
+            print("[DEBUG] 취소됨 - 검색 안 함")
+            return
+        }
+        guard !isSearchCompleted else {
+            print("[DEBUG] 이미 완료/취소됨")
+            return
+        }
+        
         isSearchCompleted = true
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return handleError("음성을 인식하지 못했습니다.") }
         
+        print("[DEBUG] 검색 실행: \(trimmed)")
         state = .completed
         recognizedText = trimmed
         
@@ -150,6 +187,7 @@ final class VoiceSearchViewModel: ObservableObject {
     
     private func handleError(_ message: String) {
         guard !isSearchCompleted else { return }
+        guard !isCancelled else { return }
         state = .failed
         errorMessage = message
     }
