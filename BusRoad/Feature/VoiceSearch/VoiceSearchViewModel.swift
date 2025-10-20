@@ -98,12 +98,6 @@ final class VoiceSearchViewModel: ObservableObject {
         lastTranscript = ""
         errorMessage = nil
         
-//        Task {
-//              try? await Task.sleep(nanoseconds: 100_000_000)
-//              if self.state == .ready {
-//                  self.isSearchCompleted = false
-//              }
-//          }
     }
     
     
