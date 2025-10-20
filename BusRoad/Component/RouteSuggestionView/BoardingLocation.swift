@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BoardingLocation: View {
     var route: BusRouteNode
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 24.wScaled){
             
@@ -16,11 +17,17 @@ struct BoardingLocation: View {
                 Text("탑승 정류장")
                     .font(.prereg20Scaled)
                     .foregroundColor(Color.subLight)
-                Text("\(route.start.name)")
-                    .font(.presemi32Scaled)
-                    .foregroundColor(Color.subLight)
+                
+                MarqueeText(
+                    text: route.start.name,
+                    font: .presemi32Scaled,
+                    uiFont: .presemi32Scaled,
+                    startDelay: 1.0,
+                    alignment: .leading
+                )
+                .foregroundColor(Color.subLight)
             }
-            
+           
             HStack(spacing: 8.wScaled) {
                 Text("\(route.busNo)")
                     .font(.presemi24)
@@ -37,5 +44,6 @@ struct BoardingLocation: View {
                     .foregroundColor(Color.subLight)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
