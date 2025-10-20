@@ -4,12 +4,14 @@ struct SearchModeSection: View {
     @Binding var query: String
     let results: [NaverLocalItem]          // vm.results의 요소 타입에 맞춰서
     var isFocused: FocusState<Bool>.Binding
-
+    
     let onBack: () -> Void
     let onSubmit: () -> Void
     let onClear: () -> Void
     let onMicTap: () -> Void
     let onSelect: (NaverLocalItem) -> Void
+    let hasSubmitted: Bool
+    let isLoading: Bool
     
     var body: some View {
         ZStack {
@@ -23,12 +25,14 @@ struct SearchModeSection: View {
             
         }
         .onAppear {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                isFocused.wrappedValue = true
+            if results.isEmpty && query.isEmpty {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    isFocused.wrappedValue = true
+                }
             }
         }
     }
-
+    
     private var header: some View {
         HStack(spacing: 0) {
             Button(action: onBack) {
@@ -37,10 +41,9 @@ struct SearchModeSection: View {
                     .font(.title3)
                     .frame(width: 44, height: 44)
                     .bold()
-                // bold가 들어가야하는건가..?
             }
             .buttonStyle(.plain)
-
+            
             SearchBar(
                 text: $query,
                 isFocused: isFocused,
@@ -53,32 +56,58 @@ struct SearchModeSection: View {
         .padding(.trailing, 20)
         .padding(.vertical, 8)
     }
-
+    
     private var list: some View {
         VStack {
-            if results.isEmpty && query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                Text("") // 필요 시 플레이스홀더
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 8)
-            }
-
-            ScrollView {
-                LazyVStack(spacing: 7) {
-                    ForEach(results) { item in
-                        PlaceCard(
-                            title: item.plainTitle,
-                            address: item.displayAddress,
-                            searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
-                        ) {
-                            // onTap
-                            onSelect(item)
+            // 검색어가 비어있을 때
+            if !hasSubmitted {
+                Spacer()
+                Spacer()
+            
+            // 로딩중일때
+            } else if isLoading {
+                Spacer()
+                
+                ProgressView()
+                    .controlSize(.large)
+                    .scaleEffect(1.5)
+                
+                Spacer()
+                
+                
+                // 검색어는 있지만 결과가 없을 때
+            } else if results.isEmpty {
+                Spacer()
+            
+                VStack(spacing: 6) {
+                    
+                    Text("검색 결과가 없어요.")
+                        .font(.presemi24)
+                        .foregroundStyle(.greyHeavy)
+                    Text("찾고 있는 장소를 다시 검색해 주세요.")
+                        .font(.prereg20)
+                        .foregroundStyle(.greyHeavy)
+                }
+                .padding(.bottom, 395.wScaled)
+            } else {
+                ScrollView {
+                    LazyVStack(spacing: 7) {
+                        ForEach(results) { item in
+                            PlaceCard(
+                                title: item.plainTitle,
+                                address: item.displayAddress,
+                                searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
+                            ) {
+                                // onTap
+                                onSelect(item)
+                            }
                         }
                     }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
+                .scrollDismissesKeyboard(.interactively)
             }
-            .scrollDismissesKeyboard(.interactively)
         }
     }
 }

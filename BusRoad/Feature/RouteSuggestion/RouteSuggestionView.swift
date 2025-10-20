@@ -66,7 +66,9 @@ struct RouteSuggestionView: View {
                     // 초기화
                     viewModel.resetManager()
                     isSearchMode = false
-                }
+                },
+                hasSubmitted: hasSubmitted,
+                isLoading: viewModel.isSearchLoading
             )
         } else {
             ZStack {
