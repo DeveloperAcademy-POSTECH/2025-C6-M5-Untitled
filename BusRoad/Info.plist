@@ -30,5 +30,15 @@
 	<array>
 		<string>location</string>
 	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UILaunchScreen</key>
+		<dict>
+			<key>Background color</key>
+			<string>primaryNormal</string>
+			<key>Image Name</key>
+			<string>Launch</string>
+		</dict>
+	</dict>
 </dict>
 </plist>
