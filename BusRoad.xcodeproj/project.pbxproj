@@ -22,7 +22,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Resource/dummyResource.swift,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
 		};

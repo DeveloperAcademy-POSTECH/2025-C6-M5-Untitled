@@ -21,12 +21,10 @@ struct RouteCardSlide: View {
                     ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
                         let relativeIndex: CGFloat = CGFloat(index - currentIndex)
                         RouteCard(journey: item, index: index)
-                            .frame(width: 300)
-                            .padding(.horizontal, 30)
-                            .offset(x: relativeIndex * 270)
-                            .opacity(relativeIndex == 0 ? 1.0 : 0.3)
+                            .offset(x: relativeIndex * 270.wScaled)
                             .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
-                            .zIndex(-abs(Double(relativeIndex)))
+                            .opacity(relativeIndex == 0 ? 1.0 : 0.3)
+                            .zIndex(Double(routes.count) - Double(abs(index - currentIndex)))
                     }
                 }
                 .gesture(

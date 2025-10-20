@@ -25,29 +25,29 @@ struct ETA: View {
     }
     
     var body: some View {
-        HStack{
-            VStack(alignment:.leading){
-                Text(timeText)
-                    .font(.presemi32)
-                    .foregroundColor(.subLight)
-                    .padding(.top, 50)
-                Text("\(estimatedArrivalTime) 도착 예정")
-                    .foregroundColor(Color.greyDisable)
-            }
-            Spacer()
-            
-            if index == 0  {
-                ZStack{
-                    RoundedRectangle(cornerRadius: 10)
-                        .foregroundColor(Color.primaryLight)
-                        .frame(width: 100, height: 40)
-                    
-                    Text("추천")
-                        .foregroundColor(.primaryStrong)
-                        .font(.presemi20)
+        VStack(alignment: .leading, spacing: 4.wScaled) {
+            HStack{
+                Spacer()
+                if index == 0  {
+                    ZStack{
+                        RoundedRectangle(cornerRadius: 15)
+                            .foregroundColor(Color.primaryLight)
+                            .frame(width: 100.wScaled, height: 40.wScaled)
+                        
+                        Text("추천")
+                            .foregroundColor(.primaryStrong)
+                            .font(.presemi20Scaled)
+                    }
                 }
-                .padding(.trailing, 20)
             }
+            
+            Text(timeText)
+                .font(.presemi32Scaled)
+                .foregroundColor(.subLight)
+            
+            Text("\(estimatedArrivalTime) 도착 예정")
+                .foregroundColor(Color.greyDisable)
+                .font(.prereg16Scaled)
         }
     }
 }

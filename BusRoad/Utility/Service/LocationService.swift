@@ -185,28 +185,3 @@ extension LocationService {
         manager.stopUpdatingLocation()
     }
 }
-
-//#if DEBUG
-//import CoreLocation
-//
-//extension LocationService {
-//    /// 디버그용: 가짜 좌표를 일정 간격으로 흘려보내는 함수
-//    func playOnce(coordinates: [CLLocationCoordinate2D],
-//                  interval: TimeInterval = 0.5,
-//                  completion: (() -> Void)? = nil) {
-//        Task { @MainActor in
-//            for coord in coordinates {
-//                // 현재 좌표를 내부 퍼블리셔에 흘려보냄
-//                let loc = CLLocation(latitude: coord.latitude,
-//                                     longitude: coord.longitude)
-//                // LocationService 내부에 $location이 있을 거야
-//                // (즉, @Published var location: CLLocation?)
-//                self.location = loc
-//
-//                try? await Task.sleep(nanoseconds: UInt64(interval * 1_000_000_000))
-//            }
-//            completion?()
-//        }
-//    }
-//}
-//#endif

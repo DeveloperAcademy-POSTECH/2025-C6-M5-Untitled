@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct RouteSelectButton: View {
-//    @StateObject private var viewModel = BusRouteViewModel()
+    //    @StateObject private var viewModel = BusRouteViewModel()
     @Binding var currentIndex: Int
     var errorMessage: String?
     var routes: [Journey]?
@@ -17,42 +17,40 @@ struct RouteSelectButton: View {
     
     var body: some View {
         if errorMessage == nil {
-            Button(
-                action: {
-                    if let routes {
-                        print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
-                        onSelect()
-                    } else {
-                        print("[DEBUG] routes가 존재하지 않습니다.")
-                    }
-                },
-                label: {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .frame(width: 240, height: 75)
-                            .foregroundColor(Color.subStrong)
-                        Text("이걸로 갈게요")
-                            .foregroundColor(Color.subLight)
-                            .font(.premed32)
-                    }
+            Button {
+                if let routes {
+                    print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
+                    onSelect()
+                } else {
+                    print("[DEBUG] routes가 존재하지 않습니다.")
                 }
-            )
+            } label: {
+                
+                Text("이걸로 갈게요")
+                    .foregroundColor(Color.subLight)
+                    .font(.premed32)
+                    .frame(width: 240, height: 75)
+                    .background(Color.subStrong)
+                    .cornerRadius(20)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 74)
+            
         } else {
-            Button(
-                action: {
-                    retrySearch()
-                },
-                label: {
-                    ZStack {
-                        RoundedRectangle(cornerRadius: 20)
-                            .frame(width: 240, height: 75)
-                            .foregroundColor(Color.subStrong)
-                        Text("다시 검색하기")
-                            .foregroundColor(Color.subLight)
-                            .font(.premed32)
-                    }
-                }
-            )
+            Button {
+                retrySearch()
+            } label: {
+                
+                Text("다시 검색하기")
+                    .foregroundColor(Color.subLight)
+                    .font(.premed32)
+                    .frame(width: 240, height: 75)
+                    .background(Color.subStrong)
+                    .cornerRadius(20)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 74)
+            
         }
     }
 }

@@ -16,43 +16,48 @@ struct OriginTextField : View {
     var onRefreshTapped: () -> Void
     
     var body: some View {
-        ZStack {
-            ZStack {
-                RoundedRectangle(cornerSize: .init(width: 25, height: 25))
-                    .stroke(Color.subStrong)
-                    .frame(width: 350, height:50)
-                    .foregroundColor(.clear)
-                HStack(spacing: 10){
-                    Text("출발지")
+        
+//        ZStack {
+//            RoundedRectangle(cornerSize: .init(width: 25, height: 25))
+//                .stroke(Color.subStrong)
+//                .frame(width: 349, height: 50)
+            
+            HStack(spacing: 12) {
+                Text("출발지")
+                    .foregroundColor(Color.greyNormal)
+                    .font(.prereg20)
+                
+                Divider()
+                    .background(Color.greyDisable)
+                    .frame(height: 26)
+                
+                Button(action: {
+                    locationType = .origin
+                    isSearchMode = true
+                }) {
+                    Text(location?.name ?? "출발지를 입력하세요")
+                        .font(.premed20)
                         .foregroundColor(Color.greyNormal)
-                        .font(.prereg20)
-                        .padding(.leading, 30)
-                    
-                    Divider()
-                        .background(Color.greyDisable)
-                    
-                    Button(action: {
-                        locationType = .origin
-                        isSearchMode = true
-                    }) {
-                        Text(location?.name ?? "출발지를 입력하세요")
-                            .font(.premed20)
-                            .foregroundColor(Color.greyNormal)
-                    }
-                    Spacer()
-                    Button(action: {
-                        self.onRefreshTapped()
-                    }, label: {
-                        Image(systemName:"arrow.clockwise")
-                            .resizable()
-                            .foregroundColor(Color.greyNormal)
-                            .frame(width:18, height: 18)
-                            .padding(.trailing, 10)
-                    })
-                    .padding(.trailing, 20)
                 }
-                .frame(height: 30)
+                
+                Spacer()
+                
+                Button(action: {
+                    self.onRefreshTapped()
+                }, label: {
+                    Image("update")
+                        .resizable()
+                        .foregroundColor(Color.greyNormal)
+                        .frame(width: 18, height: 20)
+                        .aspectRatio(contentMode: .fit)
+                })
             }
-        }
+            .padding(.leading, 20)
+            .padding(.trailing, 25)
+            .padding(.vertical, 12)
+            .overlay {
+                RoundedRectangle(cornerRadius: 25)
+                    .stroke(.subStrong, lineWidth: 1.5)
+            }
     }
 }

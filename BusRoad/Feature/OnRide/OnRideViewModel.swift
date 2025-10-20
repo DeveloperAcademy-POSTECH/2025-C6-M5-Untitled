@@ -141,12 +141,12 @@ extension OnRideViewModel {
             }
             .store(in: &bag)
         
-//#if !DEBUG
+
 Task {
     do { try await locationService.startContinuousUpdates() }
     catch { print("위치 업데이트 시작 실패: \(error)") }
 }
-//#endif
+
         
         proximity.start()
     }
@@ -163,66 +163,3 @@ Task {
         
     }
 }
-
-
-
-//#if DEBUG
-//extension OnRideViewModel {
-//    /// 🔥 가장 쉬운 풀-플로우 데모: 버스1 → 환승 → 버스2
-//    /// 실제 GPS/권한 없이, UI/상태 전환(카드색/버튼/프로그레스/환승) 전부 확인 가능
-//    func startFullTransferDemo() {
-//        // 1) 여정 주입: [bus, walk, bus]
-//        let leg1End = LocationInfo(name: "환승 정류장", latitude: 36.0348, longitude: 129.3340) // 1구간 하차 지점(타깃1)
-//        let leg2End = LocationInfo(name: "최종 하차(포항역)", latitude: 36.07160518, longitude: 129.3419282) // 2구간 하차 지점(타깃2)
-//
-//        let leg1Start = LocationInfo(name: "출발(대충 멀리)", latitude: leg1End.latitude + 0.006, longitude: leg1End.longitude) // 약 600~700m 북쪽
-//        let leg2Start = LocationInfo(name: "환승 후 승차", latitude: leg2End.latitude + 0.0035, longitude: leg2End.longitude)   // 약 350~400m 북쪽
-//
-//        let bus1 = BusRouteNode(start: leg1Start, end: leg1End, busNo: "가짜100", busId: 100, stations: [], travelTime: 12)
-//        let walk = WalkRouteNode(start: leg1End, end: leg2Start, travelTime: 3) // 실제 좌표는 비슷하게
-//        let bus2 = BusRouteNode(start: leg2Start, end: leg2End, busNo: "가짜200", busId: 200, stations: [], travelTime: 18)
-//
-//        let journey = Journey(totalTime: 33, nodes: [.bus(bus1), .walk(walk), .bus(bus2)])
-//        journeyManager.selectedJourney = journey
-//        journeyManager.journeyIndex = 0  // 현재 노드: bus1
-//        busLegIndex = 0                  // 현재 버스 구간: 0
-//
-//        // 2) 근접 감시/구독 준비
-//        start() // attachSelectedJourney + proximity.start + 거리 sink 세팅
-//
-//        // 3) 좌표 생성: “타깃을 향해 내려오는 직선 경로” (위도만 살짝씩 줄이는 간단한 방식)
-//        //    위도 0.001° ≈ 111m 라고 생각하면 됩니다.
-//        func approachPath(to target: LocationInfo, startLatOffset: Double, steps: Int) -> [CLLocationCoordinate2D] {
-//            let startLat = target.latitude + startLatOffset
-//            let lon = target.longitude
-//            let d = startLatOffset / Double(steps - 1)
-//            return (0..<steps).map { i in
-//                .init(latitude: startLat - Double(i) * d, longitude: lon)
-//            }
-//        }
-//
-//        let leg1Path = approachPath(to: leg1End, startLatOffset: 0.006, steps: 25)   // 대략 600~700m → 0m
-//        let leg2Path = approachPath(to: leg2End, startLatOffset: 0.0035, steps: 20)  // 대략 350~400m → 0m
-//
-//        // 4) 실제 스트림처럼 LocationService로 좌표를 흘려보냄
-//        locationService.playOnce(coordinates: leg1Path, interval: 0.35) { [weak self] in
-//            guard let self else { return }
-//
-//            // ▶️ 환승 처리: 여정 인덱스를 도보 → 다음 버스 구간으로 이동
-//            self.journeyManager.journeyIndex = 1 // 현재 노드: walk
-//            self.journeyManager.journeyIndex = 2 // 현재 노드: bus2
-//
-//            // 현재 버스 구간 계산 → ViewModel에게 전달
-//            if let j = self.journeyManager.selectedJourney,
-//               let nextLeg = j.busLegIndex(forNodeIndex: 2) {
-//                self.busLegIndex = nextLeg // didSet에서 attachSelectedJourney 호출 → 타깃/상태 리셋
-//            }
-//
-//            // 2구간 재생
-//            self.locationService.playOnce(coordinates: leg2Path, interval: 0.35) {
-//                print("✅ 풀-데모 완료(최종 하차 근접)")
-//            }
-//        }
-//    }
-//}
-//#endif

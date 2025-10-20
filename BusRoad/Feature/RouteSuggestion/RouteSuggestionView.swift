@@ -1,10 +1,3 @@
-//
-//  Untitled.swift
-//  BusRoad
-//
-//  Created by 박난 on 9/23/25.
-//
-
 import CoreLocation
 import SwiftUI
 
@@ -13,45 +6,18 @@ struct RouteSuggestionView: View {
     @StateObject private var viewModel = BusRouteViewModel()
     @State private var user = User(isOnBus: false)
     @State var currentIndex: Int = 0
-    
-//     var body: some View {
-//         VStack(spacing: 0){
-//             TopBar(isMoving: false) { coordinator.popToRoot() }
-//             Spacer()
-//                 .frame(height: 20)
-//             OriginTextField(
-//                 location: $viewModel.origin,
-//                 onRefreshTapped: { viewModel.requestOrigin() }
-//             )
-//             Spacer()
-//                 .frame(height: 8)
-//             DestinationTextField(location: $viewModel.destination)
-//             Spacer()
-//                 .frame(height: 22)
-//             LineDivider()
-            
-//             ZStack {
-//                 Color(.background)
-//                     .ignoresSafeArea()
-                
-//                 VStack(spacing: 0) {
-                    
-//                     RouteCardSlide(
-//                         currentIndex: $currentIndex,
-//                         routes: viewModel.routes,
-//                         errorMessage: viewModel.errorMessage
-//                     )
-//                     .padding(.top, 30)
-//                     .padding(.bottom, 45)
-                    
-//                     RouteSelectButton(currentIndex: $currentIndex,
-//                                       errorMessage: viewModel.errorMessage,
-//                                       routes: viewModel.getJourneyList(),
     @State var isSearchMode = false
     @State var hasSubmitted = false
     @FocusState var isFocused: Bool
     @State var locationType: LocationType = .origin
     @State var isFirstLoad = true
+    
+    //TODO: - 프리뷰용 나중에 삭제
+    private let skipAutoFetch: Bool   // 프리뷰에서 자동 네트워크/계산 생략용
+    init(viewModel: BusRouteViewModel = BusRouteViewModel(), skipAutoFetch: Bool = false) {
+            _viewModel = StateObject(wrappedValue: viewModel)
+            self.skipAutoFetch = skipAutoFetch
+        }
     
     // MARK: - Helpers
     @MainActor func exitSearchMode() {
@@ -104,56 +70,76 @@ struct RouteSuggestionView: View {
             )
         } else {
             ZStack {
-                Rectangle()
-                    .fill(Color.background)
-                    .stroke(Color.greyDisable, lineWidth: 0.5)
-                    .frame(maxWidth: .infinity, maxHeight: 615)    // TODO: 나중에 패딩값으로 바꾸기
-                    .offset(y: UIScreen.main.bounds.height / 2 - 615 / 2 - 10)
-                VStack{
-                    TopBar(isMoving: false) { coordinator.popToRoot() }
-                    OriginTextField(
-                        location: $viewModel.origin,
-                        isSearchMode: $isSearchMode,
-                        locationType: $locationType,
-                        onRefreshTapped: { viewModel.requestOrigin() }
-                    )
+                Color.primarywhite
                     
-                    DestinationTextField(
-                        location: $viewModel.destination,
-                        locationType: $locationType,
-                        isSearchMode: $isSearchMode
-                    )
+                
+                VStack(spacing: 0) {
+                    // MARK: - 상단바
+                    VStack(spacing: 20) {
+                        TopBar(isMoving: false) { coordinator.popToRoot() }
+                            .padding(.horizontal, 8)
+                        
+                        VStack(spacing: 8) {
+                            OriginTextField(
+                                location: $viewModel.origin,
+                                isSearchMode: $isSearchMode,
+                                locationType: $locationType,
+                                onRefreshTapped: { viewModel.requestOrigin() }
+                            )
+                            
+                            DestinationTextField(
+                                location: $viewModel.destination,
+                                locationType: $locationType,
+                                isSearchMode: $isSearchMode
+                            )
+                            
+                        }
+                        .padding(.horizontal, 22)
+                        
+                    LineDivider()
+
+                    }
+                    .frame(height: 194)
                     
-                    RouteCardSlide(
-                        currentIndex: $currentIndex,
-                        routes: $viewModel.routes,
-                        errorMessage: viewModel.errorMessage
-                    )
-                    .padding([.top, .bottom], 20)
-                    
-                    RouteSelectButton(currentIndex: $currentIndex,
-                                      errorMessage: viewModel.errorMessage,
-                                      routes: viewModel.routes,
-                                      onSelect: {
-                        viewModel.selectJourney(at: currentIndex)
-                        coordinator.push(.journeyFlow)
-                    },
-                                      retrySearch: {
-                        print(viewModel.errorMessage)
-                        coordinator.popToRoot() // MainSearch로 초기화
-                    }        
-                    )
-                    
-                    if viewModel.routes == nil {
-                        Text("현재 위치를 가져오는 중...")
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                             .padding(.top, 10)
+                    ZStack {
+                        Color.background
+                            .ignoresSafeArea()
+                        
+                        // MARK: - 경로추천카드
+                        VStack(spacing:0) {
+                            RouteCardSlide(
+                                currentIndex: $currentIndex,
+                                routes: $viewModel.routes,
+                                errorMessage: viewModel.errorMessage
+                            )
+                            .padding(.horizontal, 44.wScaled)
+                            .padding(.top, 30.wScaled)
+                            .padding(.bottom, 39.wScaled)
+                            
+                            
+                            // MARK: - 버튼
+                            
+                            RouteSelectButton(
+                                currentIndex: $currentIndex,
+                                errorMessage: viewModel.errorMessage,
+                                routes: viewModel.routes,
+                                onSelect: {
+                                    viewModel.selectJourney(at: currentIndex)
+                                    coordinator.push(.journeyFlow)
+                                },
+                                retrySearch: {
+                                    print(viewModel.errorMessage)
+                                    coordinator.popToRoot() // MainSearch로 초기화
+                                }
+                            )
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 74)
+                        }
                     }
                 }
-                .padding([.leading, .trailing, .bottom], 10)
                 .onAppear {
                     print("[DEBUG] onAppear")
+                    guard !skipAutoFetch else { return }
                     if isFirstLoad {
                         viewModel.requestOrigin()
                         isFirstLoad = false
@@ -191,7 +177,32 @@ struct RouteSuggestionView: View {
         }
     }
 }
+
+
 #Preview {
-    RouteSuggestionView()
-        .environmentObject(NavigationCoordinator())
+    let coordinator = NavigationCoordinator()
+    let vm = BusRouteViewModel()
+
+    // 더미 데이터
+    let stationA = BusStation(index: 0, stationId: 1, stationName: "포항공대 정문", stationCityCode: 37010, localStationId: "A1")
+    let stationB = BusStation(index: 1, stationId: 2, stationName: "죽도시장",   stationCityCode: 37010, localStationId: "A2")
+
+    let bus1 = BusRouteNode(
+        start: LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231),
+        end:   LocationInfo(name: "죽도시장",   latitude: 36.0348, longitude: 129.3435),
+        busNo: "107", busId: 107, stations: [stationA, stationB], travelTime: 15
+    )
+    let bus2 = bus1
+    let bus3 = bus1
+
+    vm.routes = [
+        Journey(totalTime: 15, nodes: [.bus(bus1)]),
+        Journey(totalTime: 20, nodes: [.bus(bus2)]),
+        Journey(totalTime: 30, nodes: [.bus(bus3)])
+    ]
+    vm.origin = LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231)
+    vm.destination = LocationInfo(name: "죽도시장",   latitude: 36.0348, longitude: 129.3435)
+
+    return RouteSuggestionView(viewModel: vm, skipAutoFetch: true) 
+        .environmentObject(coordinator)
 }

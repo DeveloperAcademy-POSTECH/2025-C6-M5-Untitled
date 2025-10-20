@@ -13,8 +13,4 @@ extension VoiceSearchView {
         case .ready, .failed, .listening, .processing, .completed: return .primaryNormal
         }
     }
-
-    var micIconName: String {
-        "mic.fill"
-    }
 }

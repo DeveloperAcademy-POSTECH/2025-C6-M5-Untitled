@@ -16,7 +16,7 @@ struct SearchBar: View {
         }
         .padding(.leading, 20) // 내부 패딩 값
         .padding(.trailing, 12) // 내부 패딩 값
-        .padding(.vertical, 9) // 내부 패딩 값
+        .padding(.vertical, 8.5) // 내부 패딩 값
         .background(searchBarBackground)
     }
 }
@@ -46,14 +46,11 @@ private extension SearchBar {
         Button {
             if text.isEmpty { onMicTap?() } else { onClearTap?() }
         } label: {
-            Image(systemName: text.isEmpty ? "mic.fill" : "xmark.circle.fill")
-                .font(.title2) //TODO: 아이콘 폰트 크기 논의 필요
-                .foregroundStyle(text.isEmpty ? .primaryNormal : .greyDisable )
-                .padding(12)
-                .animation(nil, value: text.isEmpty)
-                .frame(width: 44, height: 44)
+            if text.isEmpty { micButton } else { xButton }
         }
+        .animation(nil, value: text.isEmpty)
         .buttonStyle(.plain)
+        .frame(width: 44, height: 44)
     }
     
     var searchBarBackground: some View {
@@ -62,4 +59,20 @@ private extension SearchBar {
             )
             .stroke(Color(.subStrong), lineWidth: 1.5)
     }
+    
+    var micButton: some View {
+        Image("big-mic")
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 18, height: 24)
+    }
+    
+    var xButton: some View {
+        Image("gray.xbutton")
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(width: 20, height: 20)
+        
+    }
+    
 }

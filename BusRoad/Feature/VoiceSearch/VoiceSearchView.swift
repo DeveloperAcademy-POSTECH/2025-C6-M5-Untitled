@@ -5,7 +5,7 @@ struct VoiceSearchView: View {
     @StateObject var vm = VoiceSearchViewModel()
     @Environment(\.dismiss) private var dismiss
 
-    var onSearchCompleted: ((String) -> Void)? = nil
+    var onSearchCompleted: ((String) -> Void)?
 
     var body: some View {
         ZStack {
@@ -31,15 +31,16 @@ struct VoiceSearchView: View {
                             Circle()
                                 .fill(micButtonColor)
                                 .frame(width: 105, height: 105)
-                            Image(systemName: micIconName)
-                                .font(.system(size: 48, weight: .medium))
-                                .foregroundColor(micIconColor)
+                            Image("big-mic")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 60, height: 60)
                         }
                     }
                     .disabled(!vm.isMicButtonEnabled) // 준비/실패 외 상태에서는 탭 방지
                 }
                 .frame(width: 200, height: 200) // 화면 움직이지 않도록 frame 값
-                .padding(.bottom, 114)
+                .padding(.bottom, 114.wScaled)
             }
 
             // 닫기 버튼
@@ -47,11 +48,11 @@ struct VoiceSearchView: View {
                 HStack {
                     Spacer()
                     Button { vm.dismiss() } label: {
-                        Image(systemName: "xmark")
-                            .font(.title2)
+                        Image("xbutton-white")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 28, height: 28)
                             .foregroundColor(.primarywhite)
-                            .padding(12)
-                            .bold() // 이 친구들도 크기 어떻게 할건지..?
                     }
                     .padding(.top, 13)
                     .padding(.trailing, 24)

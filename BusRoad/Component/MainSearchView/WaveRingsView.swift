@@ -3,20 +3,20 @@ import SwiftUI
 struct WaveRingsView: View {
     @State private var animationTrigger = false
     
-    // 디자인 스펙
     private let baseSize: CGFloat = 105
-    private let maxScale: CGFloat = 312 / 105  // 최대 스케일
-    private let duration: Double = 3.0
-    private let ringCount: Int = 2  // 링 개수
-    private let waveInterval: Double = 0.8  // 파동 간격
+    private let duration: Double = 2.0
+    private let rings: [(scale: CGFloat, delay: Double)] = [
+        (312 / 105, 0.0),    // 첫 번째 원: 312까지
+        (250 / 105, 0.6)     // 두 번째 원:250까지
+    ]
     
     var body: some View {
         ZStack {
-            ForEach(0..<ringCount, id: \.self) { index in
+            ForEach(0..<rings.count, id: \.self) { index in
                 WaveRing(
-                    maxScale: maxScale,
+                    maxScale: rings[index].scale,
                     duration: duration,
-                    delay: Double(index) * waveInterval,
+                    delay: rings[index].delay,
                     animationTrigger: animationTrigger
                 )
             }
@@ -38,7 +38,7 @@ struct WaveRing: View {
     let animationTrigger: Bool
     
     @State private var scale: CGFloat = 0.001
-    @State private var opacity: Double = 0.4
+    @State private var opacity: Double = 0.2
     
     var body: some View {
         Circle()
@@ -74,7 +74,7 @@ struct WaveRing: View {
             opacity = 0.0
         }
         
-        // 애니메이션 끝나면 다시 시작 
+        // 애니메이션 끝나면 다시 시작
         DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             animateWave()
         }
@@ -83,5 +83,22 @@ struct WaveRing: View {
     private func reset() {
         scale = 0.001
         opacity = 0.0
+    }
+}
+
+// MARK: - Preview
+struct WaveRingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        ZStack {
+            Color.primaryNormal
+                .ignoresSafeArea()
+            
+            WaveRingsView()
+            Circle()
+                .foregroundColor(.subNormal)
+                .frame(width: 105, height: 105)
+            Image(systemName: "microphone.fill")
+                .font(.title)
+        }
     }
 }

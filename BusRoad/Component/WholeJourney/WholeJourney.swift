@@ -36,8 +36,6 @@ struct WholeJourney: View {
                 }
             }
         }
-        .padding(.horizontal, 30)
-        .padding(.vertical, 32)
     }
 }
 

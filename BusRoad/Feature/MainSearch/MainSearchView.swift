@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 private let kHasShownVoiceHint = "hasShownVoiceHint_v1"
 
@@ -111,7 +111,3 @@ struct MainSearchView: View {
         isFocused = true
     }
 }
-//#Preview {
-//    MainSearchView()
-//        .environmentObject(NavigationCoordinator())
-//}
