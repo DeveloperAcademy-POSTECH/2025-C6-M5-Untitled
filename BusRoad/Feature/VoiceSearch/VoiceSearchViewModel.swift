@@ -69,7 +69,7 @@ final class VoiceSearchViewModel: ObservableObject {
     /// 뷰가 나타날 때 자동 시작
     func onAppear() {
         Task {
-            try? await Task.sleep(nanoseconds: 100_000_000)
+            try? await Task.sleep(nanoseconds: 300_000_000)
             startListening()
         }
     }
@@ -143,7 +143,7 @@ final class VoiceSearchViewModel: ObservableObject {
                 if !now.isEmpty { self.completeVoiceSearch(with: now); return }
                 
                 Task { @MainActor in
-                    try? await Task.sleep(nanoseconds: 100_000_000)
+                    try? await Task.sleep(nanoseconds: 300_000_000)
                     guard self.state == .processing else { return }
                     guard !self.isCancelled else { return }
                     let later = self.lastTranscript.trimmingCharacters(in: .whitespacesAndNewlines)
