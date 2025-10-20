@@ -32,13 +32,8 @@
 	</array>
 	<key>UILaunchScreen</key>
 	<dict>
-		<key>UILaunchScreen</key>
-		<dict>
-			<key>Background color</key>
-			<string>primaryNormal</string>
-			<key>Image Name</key>
-			<string>Launch</string>
-		</dict>
+		<key>UIColorName</key>
+		<string>primaryNormal</string>
 	</dict>
 </dict>
 </plist>
