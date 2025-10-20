@@ -122,7 +122,7 @@ struct OnRideView: View {
     // 버스 구간 1
     let busNode1 = BusRouteNode(
         start: LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231),
-        end: LocationInfo(name: "죽도시장", latitude: 36.0348, longitude: 129.3435),
+        end: LocationInfo(name: "효곡동 행정복지센터", latitude: 36.0348, longitude: 129.3435),
         busNo: "107",
         busId: 107,
         stations: [station1, station2],
