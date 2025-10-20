@@ -1,5 +1,5 @@
-import SwiftUI
 import MapKit
+import SwiftUI
 
 private let kHasShownVoiceHint = "hasShownVoiceHint_v1"
 
