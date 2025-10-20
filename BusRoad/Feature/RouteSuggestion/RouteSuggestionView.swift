@@ -110,6 +110,7 @@ struct RouteSuggestionView: View {
                             RouteCardSlide(
                                 currentIndex: $currentIndex,
                                 routes: $viewModel.routes,
+                                viewModel: viewModel,
                                 errorMessage: viewModel.errorMessage
                             )
                             .padding(.horizontal, 44.wScaled)
@@ -120,8 +121,8 @@ struct RouteSuggestionView: View {
                             // MARK: - 버튼
                             
                             RouteSelectButton(
-                                currentIndex: $currentIndex,
-                                errorMessage: viewModel.errorMessage,
+                              viewModel: viewModel,
+                              currentIndex: $currentIndex,
                                 routes: viewModel.routes,
                                 onSelect: {
                                     viewModel.selectJourney(at: currentIndex)

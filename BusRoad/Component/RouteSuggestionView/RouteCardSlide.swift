@@ -10,12 +10,13 @@ import SwiftUI
 struct RouteCardSlide: View {
     @Binding var currentIndex: Int
     @Binding var routes: [Journey]?
+    @ObservedObject var viewModel: BusRouteViewModel
     var errorMessage: String?
         
     var body: some View {
         ZStack {
           if errorMessage != nil {
-                RouteErrorCard()
+            RouteErrorCard(viewModel: viewModel)
             } else if let routes {
                 ZStack {
                     ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
