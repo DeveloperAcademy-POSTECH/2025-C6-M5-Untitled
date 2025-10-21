@@ -22,8 +22,8 @@ struct SearchModeSection: View {
                 header
                 list
             }
-            
         }
+        .ignoresSafeArea(.keyboard)
         .onAppear {
             if results.isEmpty && query.isEmpty {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
@@ -58,56 +58,63 @@ struct SearchModeSection: View {
     }
     
     private var list: some View {
-        VStack {
-            // 검색어가 비어있을 때
-            if !hasSubmitted {
-                Spacer()
-                Spacer()
-            
-            // 로딩중일때
-            } else if isLoading {
-                Spacer()
-                
-                ProgressView()
-                    .controlSize(.large)
-                    .scaleEffect(1.5)
-                
-                Spacer()
-                
-                
-                // 검색어는 있지만 결과가 없을 때
-            } else if results.isEmpty {
-                Spacer()
-            
-                VStack(spacing: 6) {
+        GeometryReader { geo in
+            ScrollView {
+                VStack {
+                    // 검색 전 (제출 전)
+                    if !hasSubmitted {
+                        Spacer(minLength: 0)
+                        Spacer(minLength: 0)
                     
-                    Text("검색 결과가 없어요.")
-                        .font(.presemi24)
-                        .foregroundStyle(.greyHeavy)
-                    Text("찾고 있는 장소를 다시 검색해 주세요.")
-                        .font(.prereg20)
-                        .foregroundStyle(.greyHeavy)
-                }
-                .padding(.bottom, 395.wScaled)
-            } else {
-                ScrollView {
-                    LazyVStack(spacing: 7) {
-                        ForEach(results) { item in
-                            PlaceCard(
-                                title: item.plainTitle,
-                                address: item.displayAddress,
-                                searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
-                            ) {
-                                // onTap
-                                onSelect(item)
+                    // 로딩 중
+                    } else if isLoading {
+                        Spacer(minLength: 0)
+
+                        ProgressView()
+                            .controlSize(.large)
+                            .scaleEffect(1.5)
+                            .padding(.top, -150)
+
+                        Spacer(minLength: 0)
+                    
+                    // 검색어는 있지만 결과가 없을 때
+                    } else if results.isEmpty {
+                        Spacer(minLength: 0)
+
+                        VStack(spacing: 6) {
+                            Text("검색 결과가 없어요.")
+                                .font(.presemi24)
+                                .foregroundStyle(.greyHeavy)
+                            Text("찾고 있는 장소를 다시 검색해 주세요.")
+                                .font(.prereg20)
+                                .foregroundStyle(.greyHeavy)
+                        }
+                        .multilineTextAlignment(.center)
+                        .padding(.top, -150)
+
+                        Spacer(minLength: 0)
+
+                    } else {
+                        LazyVStack(spacing: 7) {
+                            ForEach(results) { item in
+                                PlaceCard(
+                                    title: item.plainTitle,
+                                    address: item.displayAddress,
+                                    searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
+                                ) {
+                                    // onTap
+                                    onSelect(item)
+                                }
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
                 }
-                .scrollDismissesKeyboard(.interactively)
+                // 스크롤 뷰의 가시 영역 높이를 최소 높이로 잡아 중앙 정렬이 가능하게 함
+                .frame(maxWidth: .infinity, minHeight: results.isEmpty || !hasSubmitted || isLoading ? geo.size.height : 0)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
     }
 }
