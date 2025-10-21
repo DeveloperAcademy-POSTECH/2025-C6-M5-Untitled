@@ -13,10 +13,17 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - 내부 상태
     private let loc = CLLocationManager()
-    private var route: MKRoute?
     private var stepIndex: Int = 0
     private var pendingDestination: CLLocationCoordinate2D?
     private var hasCalculatedRoute = false
+    private var route: MKRoute? {
+        didSet {
+            guard let route = route,
+                  let currentLocation = loc.location else { return }
+
+            updateWith(location: currentLocation, heading: loc.heading)
+        }
+    }
     
     // 다음 스텝 전환 거리 기준
     var stepSwitchDistance: CLLocationDistance = 6
@@ -170,8 +177,8 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let last = locations.last else { return }
-        updateWith(location: last, heading: manager.heading)
         tryCalculateIfReady()
+        updateWith(location: last, heading: manager.heading)
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
