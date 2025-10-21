@@ -61,6 +61,8 @@ struct SearchModeSection: View {
         GeometryReader { geo in
             ScrollView {
                 VStack {
+                    
+                    // 디버깅용
                     let _ = print("[SearchModeSection] hasSubmitted: \(hasSubmitted), isLoading: \(isLoading), results.count: \(results.count)")
 
                     // 검색 전 (제출 전)

@@ -52,17 +52,14 @@ final class VoiceSearchViewModel: ObservableObject {
     func retry() {
         isSearchCompleted = false
         isCancelled = false
-        
         speechManager.reset()
         startListening()
     }
     
     /// 화면 닫기
     func dismiss() {
-        speechManager.stopRecording()
-        isSearchCompleted = false
-        isCancelled = false
-        
+        print("[DEBUG] dismiss 호출")
+        cancelListening()
         onDismiss?()
     }
     
@@ -77,27 +74,27 @@ final class VoiceSearchViewModel: ObservableObject {
     
     /// 음성 인식 중단 (사용자가 직접 중단)
     func cancelListening() {
-        
         print("[DEBUG] cancelListening 시작")
-
+        
+        // 가장 먼저 취소 플래그 설정 (다른 어떤 코드보다 먼저!)
         isCancelled = true
-        isSearchCompleted = true
         
-        print("[DEBUG] 플래그 설정 완료 - isCancelled: \(isCancelled), isSearchCompleted: \(isSearchCompleted)")
-
+        print("[DEBUG] isCancelled 설정: \(isCancelled)")
         
-        state = .failed
-        print("[DEBUG] state를 .fail로 변경")
-
+        searchManager.reset()
+        print("[DEBUG] SearchManager 리셋 완료")
         
+        // 녹음 중지
         speechManager.stopRecording()
-        print("[DEBUG] stopRecording 호출")
-
         
+        // 상태 초기화
+        state = .ready
         recognizedText = ""
         lastTranscript = ""
         errorMessage = nil
+        isSearchCompleted = false
         
+        print("[DEBUG] cancelListening 완료")
     }
     
     
@@ -156,6 +153,8 @@ final class VoiceSearchViewModel: ObservableObject {
     }
     
     private func completeVoiceSearch(with text: String) {
+        print("[DEBUG] completeVoiceSearch 진입 - isCancelled: \(isCancelled)")
+        
         guard !isCancelled else {
             print("[DEBUG] 취소됨 - 검색 안 함")
             return
@@ -169,13 +168,26 @@ final class VoiceSearchViewModel: ObservableObject {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return handleError("음성을 인식하지 못했습니다.") }
         
-        print("[DEBUG] 검색 실행: \(trimmed)")
-        state = .completed
-        recognizedText = trimmed
+        print("[DEBUG] 검색 준비: \(trimmed)")
         
         Task { @MainActor in
-            await searchManager.searchWithVoiceResult(trimmed)
-            onSearchCompleted?(trimmed)
+            guard !self.isCancelled else {
+                print("[DEBUG] Task 시작 시점 - 취소 감지, 검색 중단")
+                return
+            }
+            
+            self.state = .completed
+            self.recognizedText = trimmed
+            print("[DEBUG] 검색 실행: \(trimmed)")
+            
+            await self.searchManager.searchWithVoiceResult(trimmed)
+            
+            guard !self.isCancelled else {
+                print("[DEBUG] 콜백 실행 전 - 취소 감지")
+                self.searchManager.reset()
+                return
+            }
+            self.onSearchCompleted?(trimmed)
         }
     }
     
@@ -208,7 +220,7 @@ extension VoiceSearchViewModel {
     
     /// 파동 애니메이션 표시 여부
     var showWaveAnimation: Bool {
-        return state == .listening
+        return state == .listening || state == .ready
     }
     
     /// 마이크 버튼 활성화 여부
