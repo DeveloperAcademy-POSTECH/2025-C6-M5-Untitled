@@ -64,7 +64,6 @@ struct BeforeRideCard: View {
                       }
                   }
                   
-                  //TODO: 여기에 로티,이미지 파일 들어가야함
                   LottieView(animation: .named("BeforeRiding"))
                     .playing(loopMode: .loop)  // 반복 재생
                     .animationSpeed(1.0)  // 재생 속도
