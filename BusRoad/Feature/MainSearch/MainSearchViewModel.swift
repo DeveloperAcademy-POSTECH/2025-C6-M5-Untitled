@@ -7,11 +7,17 @@ final class MainSearchViewModel: ObservableObject {
     
     let searchManager = SearchManager.shared
     let journeyManager = JourneyManager.shared
+    
+    @Published var hasSubmitted: Bool = false
 
     // SearchManager의 변경을 View로 릴레이 (UI 갱신 보장)
     private var bag = Set<AnyCancellable>()
     
     init() {
+        
+        searchManager.$hasSubmitted
+                   .assign(to: &$hasSubmitted)
+        
         searchManager.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &bag)
@@ -26,8 +32,6 @@ final class MainSearchViewModel: ObservableObject {
     var shouldShowSearchMode: Bool { searchManager.shouldShowSearchMode }
     var isLoading: Bool { searchManager.isLoading }
     var errorMessage: String? { searchManager.errorMessage }
-    var hasSubmitted: Bool { searchManager.hasSubmitted }
-
   
     func search() async { await searchManager.search() }
     func resetSearchMode() { searchManager.resetSearchMode() }

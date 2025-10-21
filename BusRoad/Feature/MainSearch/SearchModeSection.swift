@@ -10,7 +10,7 @@ struct SearchModeSection: View {
     let onClear: () -> Void
     let onMicTap: () -> Void
     let onSelect: (NaverLocalItem) -> Void
-    let hasSubmitted: Bool
+    @Binding var hasSubmitted: Bool
     let isLoading: Bool
     
     var body: some View {
@@ -61,6 +61,8 @@ struct SearchModeSection: View {
         GeometryReader { geo in
             ScrollView {
                 VStack {
+                    let _ = print("[SearchModeSection] hasSubmitted: \(hasSubmitted), isLoading: \(isLoading), results.count: \(results.count)")
+
                     // 검색 전 (제출 전)
                     if !hasSubmitted {
                         Spacer(minLength: 0)

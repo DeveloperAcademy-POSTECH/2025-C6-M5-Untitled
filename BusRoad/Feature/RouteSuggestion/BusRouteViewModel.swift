@@ -17,6 +17,8 @@ class BusRouteViewModel: ObservableObject {
     @Published var destination: LocationInfo?
     @Published var isSearching: Bool = false
     
+    @Published var hasSubmitted: Bool = false
+    
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
     private var bag = Set<AnyCancellable>()
@@ -37,6 +39,11 @@ class BusRouteViewModel: ObservableObject {
         journeyManager.$journeyList
             .assign(to: &$routes)
         
+        searchManager.$hasSubmitted
+            .assign(to: &$hasSubmitted)
+                
+        
+        
         // MainSearchViewModel과 같은 형식으로 query 프록시 제공하기 위함
         searchManager.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
@@ -52,7 +59,6 @@ class BusRouteViewModel: ObservableObject {
     var shouldShowSearchMode: Bool { searchManager.shouldShowSearchMode }
     var isSearchLoading: Bool { searchManager.isLoading }
     var searchErrorMessage: String? { searchManager.errorMessage }
-    var hasSubmitted:Bool {searchManager.hasSubmitted}
     
     func search() async { await searchManager.search() }
     func resetSearchMode() { searchManager.resetSearchMode() }

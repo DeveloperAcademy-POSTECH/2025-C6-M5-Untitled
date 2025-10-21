@@ -63,7 +63,7 @@ struct RouteSuggestionView: View {
                     viewModel.resetManager()
                     isSearchMode = false
                 },
-                hasSubmitted: viewModel.hasSubmitted,
+                hasSubmitted: $viewModel.hasSubmitted,
                 isLoading: viewModel.isSearchLoading
             )
         } else {

@@ -9,7 +9,6 @@ struct MainSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @StateObject private var vm = MainSearchViewModel()
 
-    @State private var hasSubmitted = false
     @State private var isSearchMode = false
     @State private var showHint = false
     @FocusState private var isFocused: Bool
@@ -38,7 +37,7 @@ struct MainSearchView: View {
                         isSearchMode = false
                         coordinator.push(.routeSuggestion)
                     },
-                    hasSubmitted: vm.hasSubmitted,
+                    hasSubmitted: $vm.hasSubmitted,
                     isLoading: vm.isLoading
                 )
             } else {
@@ -74,7 +73,6 @@ struct MainSearchView: View {
         .onChange(of: vm.shouldShowSearchMode) { _, show in
             if show {
                 isSearchMode = true
-                hasSubmitted = true
                 vm.resetSearchMode()
             }
         }
@@ -94,7 +92,6 @@ struct MainSearchView: View {
     @MainActor func exitSearchMode() {
         isSearchMode = false
         isFocused = false
-        hasSubmitted = false
         vm.query = ""
         vm.resetManager()
     }
@@ -103,14 +100,12 @@ struct MainSearchView: View {
         showHint = false
         isFocused = false
         isSearchMode = true
-        hasSubmitted = true
         Task { await vm.search() }
     }
 
     @MainActor func clearSearch() {
         showHint = false
         vm.query = ""
-        hasSubmitted = false
         isFocused = true
     }
 }

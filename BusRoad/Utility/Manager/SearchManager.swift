@@ -54,11 +54,12 @@ final class SearchManager: ObservableObject {
         query = text
         shouldShowSearchMode = true
         hasSubmitted = true
+        print("[SearchManager] hasSubmitted set to TRUE: \(hasSubmitted)")  
         await search()
+        print("[SearchManager] After search - hasSubmitted: \(hasSubmitted)")
     }
 
     func resetSearchMode() {
         shouldShowSearchMode = false
-        hasSubmitted = false
     }
 }
