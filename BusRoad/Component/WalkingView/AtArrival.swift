@@ -11,7 +11,7 @@ struct AtArrival: View {
 
     var body: some View {
         if case let .walk(node) = journey.nodes[index] {
-            if showVerifyingStop {
+            if showVerifyingStop && journey.nodes.count > 1 {
               VerifyingStop(showVerifyingStop: $showVerifyingStop, journey: journey, index: index)
             } else {
               VStack(alignment: .leading) {
@@ -49,9 +49,9 @@ struct AtArrival: View {
                     Text("했어요!")
                         .font(.prereg32)
                         .foregroundColor(.primaryHeavy)
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 80.wScaled)
                 }
-              .padding(.horizontal,30)
+              .padding(.horizontal,30.wScaled)
             }
         } else {
             Text("경로 정보 확인 불가")

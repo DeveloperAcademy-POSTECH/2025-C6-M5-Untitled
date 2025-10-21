@@ -51,9 +51,9 @@ struct VerifyingStop: View {
             }
             Spacer()
           }
-          .padding(.bottom,50)
+          .padding(.bottom, 50.wScaled)
         }
-        .padding(.horizontal, 30)
+        .padding(.horizontal, 30.wScaled)
         
       } else {
         Text("경로 정보 확인 불가")

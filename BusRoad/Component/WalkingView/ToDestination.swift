@@ -10,6 +10,7 @@ import CoreLocation
 
 struct ToDestination: View {
     @ObservedObject var vm = WalkingViewModel()
+    @EnvironmentObject var coordinator: NavigationCoordinator
     
     var journey: Journey
     var index: Int
@@ -18,49 +19,60 @@ struct ToDestination: View {
     var body: some View {
         
         if case let .walk(node) = journey.nodes[index] {
-            VStack(alignment: .leading) {
-                Spacer()
+            VStack(alignment: .leading, spacing: 0) {
                 Text(node.end.name)
                     .font(.presemi36)
                     .foregroundColor(.primaryHeavy)
+                    .padding(.top, 25.wScaled)
+                
                 Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
                     .font(.prereg36)
                     .foregroundColor(.primaryHeavy)
-                Spacer()
+                    .padding(.top, 12.wScaled)
+                    .padding(.bottom, 70.wScaled)
                 
                 HStack {
                     Spacer()
-                    VStack {
+                    ZStack{
+                        Circle()
+                            .frame(width: 18, height: 18)
+                            .foregroundColor(.subStrong.opacity(0.5))
+                            .offset(y: -100)
                         
-                        ZStack{
-                            
-                            Circle()
-                                .frame(width: 18, height: 18)
-                                .foregroundColor(.subStrong.opacity(0.5))
-                                .offset(y: -100)
-                            
-                            ArrowView(bearing: vm.arrowBearing, threshold: threshold)
-                                .frame(width: 160, height: 160)
-                                .padding(24)
-                        }
-                        Button("도착 시뮬레이션 (remain = 5)") {
-                            vm.arrived = true
-                        }
+                        ArrowView(bearing: vm.arrowBearing, threshold: threshold)
+                            .frame(width: 160, height: 160)
+                            .padding(24.wScaled)
                     }
                     Spacer()
                 }
+                .padding(.bottom, 76.wScaled)
                 
-                Spacer()
                 Text(vm.bigDistanceText)
                     .font(.presemi32)
                     .foregroundColor(.primaryHeavy)
                     .monospacedDigit()
+                    .padding(.bottom, 11.wScaled)
+                
                 Text("남았어요.")
                     .font(.prereg32)
                     .foregroundColor(.primaryHeavy)
-                    .padding(.bottom, 50)
+                    .padding(.bottom, 36.wScaled)
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button {
+                        coordinator.advanceJourneyStage()   // TODO: 나중에 상위뷰로 빼기
+                    } label: {
+                        Text("이미 목적지에 도착하셨나요?")
+                            .font(.premed12)
+                            .foregroundColor(.primaryHeavy)
+                            .underline()
+                            .padding(.bottom, 24.wScaled)
+                    }
+                    Spacer()
+                }
             }
-            .padding(.horizontal, 30)
+            .padding(.horizontal, 32.wScaled)
             .onAppear {
                 vm.setDestination(from: node)
             }

@@ -3,6 +3,7 @@ import Combine
 import MapKit
 import CoreLocation
 
+// TODO: 나중에 기능 분리하기(service)
 final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
     // MARK: - UI 상태
@@ -148,6 +149,8 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             let relative = (segmentBearing - headingValue + 360)
                 .truncatingRemainder(dividingBy: 360)
             arrowBearing = relative
+        } else {
+            arrowBearing = 0
         }
         
         // 3) 스텝 전환 (중간 경로 도달 시 다음 step으로 이동)
