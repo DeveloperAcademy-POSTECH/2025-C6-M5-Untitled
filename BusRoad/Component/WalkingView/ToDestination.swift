@@ -162,14 +162,6 @@ struct ArrowView: View {
     }
 }
 
-
-// TODO: threshold에서 붙을 때 쫀득하게 붙게(animation 좀더 느리게)
-// TODO: threhold 40도로 수정
-// TODO: 도착 애니메이션 수정
-// TODO: 도보 단계별 안내 전환할 때 수정
-// TODO: 이미 목적지 도착하셨나요? 버튼 추가
-// TODO: splashview에서 requestOrigin하도록 변경
-
 struct ArcPath: Shape {
     var startAngle: Double  // degrees
     var endAngle: Double    // degrees
