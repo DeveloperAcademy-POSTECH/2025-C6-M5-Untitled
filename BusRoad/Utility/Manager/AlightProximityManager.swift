@@ -17,8 +17,8 @@ final class AlightProximityManager: ObservableObject {
     // MARK: - 내부 상태
     private var cancellable: AnyCancellable?
     private var targetStop: LocationInfo?           // 감시 대상 정류장
-    private var enterRadius: CLLocationDistance = 150
-    private var exitRadius: CLLocationDistance = 190 // 반경(미터)
+    private var enterRadius: CLLocationDistance = 300
+    private var exitRadius: CLLocationDistance = 340 // 반경(미터)
     private var currentLegIndex: Int = 0            // 감시 중인 버스구간 인덱스
 
     // 상태 전이 감지를 위한 이전 값 보관
@@ -37,19 +37,25 @@ final class AlightProximityManager: ObservableObject {
     // MARK: - 설정/시작/중지
     
     /// 감시할 버스구간과 반경 설정 (시작은 `start()`에서)
-    func configure(busLegIndex: Int, enter: CLLocationDistance = 150, exit: CLLocationDistance = 190) {
-        self.currentLegIndex = busLegIndex
-        self.enterRadius = enter
-        self.exitRadius = max(exit, enter + 10)
-        
-        guard let journey = journeyManager.selectedJourney,
-              let stop = journey.alightStop(ofBusLeg: busLegIndex) else {
-            print("감시 대상 하차 정류장을 찾을 수 없습니다.")
-            self.targetStop = nil
-            return
+    func configure(busLegIndex: Int, enter: CLLocationDistance? = nil, exit: CLLocationDistance? = nil) {  
+            self.currentLegIndex = busLegIndex
+            
+            // 값이 전달되면 사용, 아니면 기본값 유지
+            if let enter = enter {
+                self.enterRadius = enter
+            }
+            if let exit = exit {
+                self.exitRadius = max(exit, self.enterRadius + 10)
+            }
+            
+            guard let journey = journeyManager.selectedJourney,
+                  let stop = journey.alightStop(ofBusLeg: busLegIndex) else {
+                print("감시 대상 하차 정류장을 찾을 수 없습니다.")
+                self.targetStop = nil
+                return
+            }
+            self.targetStop = stop
         }
-        self.targetStop = stop
-    }
 
     /// 실시간 감시 시작
     func start() {
