@@ -55,7 +55,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
       self.nextCards = []
   }
 
-  
   func setDestination(from node: WalkRouteNode) {
     let coordinate = CLLocationCoordinate2D(latitude: node.end.latitude, longitude: node.end.longitude)
     setDestination(coordinate)
