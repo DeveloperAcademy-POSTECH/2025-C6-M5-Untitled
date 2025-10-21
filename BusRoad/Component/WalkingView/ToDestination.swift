@@ -86,10 +86,11 @@ struct ArrowView: View {
             return bearing < 180 ? bearing : bearing - 360
         }
     }
+    
     private var angleDelta: Double {
         return abs(bearing < 180 ? bearing : bearing - 360)
     }
-    
+
     var body: some View {
         ZStack {
             if angleDelta > threshold {
@@ -113,7 +114,6 @@ struct ArrowView: View {
                 }
             }
             .rotationEffect(.degrees(smoothAngle))        // ← 보정된 값 적용
-            .animation(.easeInOut(duration: 0.25), value: smoothAngle)
         }
     }
 }
@@ -122,6 +122,8 @@ struct ArrowView: View {
 // TODO: threhold 40도로 수정
 // TODO: 도착 애니메이션 수정
 // TODO: 도보 단계별 안내 전환할 때 수정
+// TODO: 이미 목적지 도착하셨나요? 버튼 추가
+
 
 
 struct ArcPath: Shape {
