@@ -36,13 +36,12 @@ struct ToDestination: View {
                             
                             Circle()
                                 .frame(width: 18, height: 18)
-                                .foregroundColor(vm.arrowBearing > threshold && vm.arrowBearing < 360 - threshold ? .subStrong.opacity(0.5) : .subStrong)
+                                .foregroundColor(.subStrong.opacity(0.5))
                                 .offset(y: -100)
                             
                             ArrowView(bearing: vm.arrowBearing, threshold: threshold)
                                 .frame(width: 160, height: 160)
                                 .padding(24)
-                                .padding([.top], 8)
                         }
                         Button("도착 시뮬레이션 (remain = 5)") {
                             vm.arrived = true
@@ -78,23 +77,34 @@ struct ArrowView: View {
     let dotSize: CGFloat = 18
     let bearing: CLLocationDirection
     let threshold: Double   // 방향 허용 오차
+    let base: Double = -90
+    let pad: Double = 10
     
-    private var smoothAngle: Double {
-        if bearing < threshold || bearing > 360.0 - threshold {
-            return 0
+    @State private var smoothAngle: Double = 0
+    @State private var inDeadzone: Bool = true   // 현재 데드존(±threshold) 안인가?
+    
+    private var signedBearing: Double { bearing < 180 ? bearing : bearing - 360 } // -180..+180
+    private var angleDelta: Double { abs(signedBearing) }
+    
+    private var startAngle: Double {
+        if signedBearing > 0 {
+            return base + pad
         } else {
-            return bearing < 180 ? bearing : bearing - 360
+            return base - pad
+        }
+    }
+    private var endAngle: Double   {
+        if signedBearing > 0 {
+            return max(startAngle, base + smoothAngle - pad)
+        } else {
+            return min(startAngle, base + smoothAngle + pad)
         }
     }
     
-    private var angleDelta: Double {
-        return abs(bearing < 180 ? bearing : bearing - 360)
-    }
-
     var body: some View {
         ZStack {
-            if angleDelta > threshold {
-                ArcPath(relativeAngle: smoothAngle)
+            if startAngle != endAngle {
+                ArcPath(startAngle: startAngle, endAngle: endAngle)
                     .stroke(Color.subStrong.opacity(0.2),
                             style: StrokeStyle(lineWidth: 13, lineCap: .round))
                     .frame(width: 2 * radius, height: 2 * radius)
@@ -106,48 +116,79 @@ struct ArrowView: View {
                     .foregroundColor(.primaryNormal)
                     .symbolRenderingMode(.hierarchical)
                 
-                if angleDelta > threshold {
-                    Circle()
-                        .frame(width: dotSize, height: dotSize)
-                        .foregroundColor(.subStrong)
-                        .offset(y: -radius)
-                }
+                Circle()
+                    .frame(width: dotSize, height: dotSize)
+                    .foregroundColor(.subStrong)
+                    .offset(y: -radius)
             }
-            .rotationEffect(.degrees(smoothAngle))        // ← 보정된 값 적용
+            .rotationEffect(.degrees(smoothAngle))
+        }
+        .onChange(of: bearing) { _, newValue in
+            updateValues(newValue)
+        }
+        .onAppear {
+            updateValues(bearing) // 첫 렌더 시 상태 맞추기
         }
     }
+    
+    private func updateValues(_ newValue: CLLocationDirection) {
+        let newSigned = newValue < 180 ? newValue : newValue - 360
+        let nowInDeadzone = abs(newSigned) <= threshold
+        
+        switch (inDeadzone, nowInDeadzone) {
+        case (true, false):
+            // 데드존 → 바깥: "나가기" 순간
+            withAnimation(.easeInOut(duration: 0.25)) {
+                smoothAngle = newSigned
+            }
+            
+        case (false, true):
+            // 바깥 → 데드존: "들어오기" 순간
+            withAnimation(.easeOut(duration: 1.0)) {
+                smoothAngle = 0
+            }
+            // 즉시 붙이고 싶다면 위 withAnimation 대신: smoothAngle = 0
+            
+        case (false, false):
+            // 바깥에서 계속 바깥: 즉시 업데이트
+            smoothAngle = newSigned
+            
+        case (true, true):
+            // 계속 데드존: 0 고정
+            smoothAngle = 0
+        }
+        
+        inDeadzone = nowInDeadzone
+    }
 }
-// TODO: -180도랑 180도 사이에서 한바퀴 도는 거 수정
+
+
 // TODO: threshold에서 붙을 때 쫀득하게 붙게(animation 좀더 느리게)
 // TODO: threhold 40도로 수정
 // TODO: 도착 애니메이션 수정
 // TODO: 도보 단계별 안내 전환할 때 수정
 // TODO: 이미 목적지 도착하셨나요? 버튼 추가
-
-
+// TODO: splashview에서 requestOrigin하도록 변경
 
 struct ArcPath: Shape {
-    var relativeAngle: CLLocationDirection
+    var startAngle: Double  // degrees
+    var endAngle: Double    // degrees
+    
+    var animatableData: Double {
+        get { endAngle }
+        set { endAngle = newValue }
+    }
     
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         let radius = rect.width / 2
-        let startAngle: Angle
-        let endAngle: Angle
-        if relativeAngle > 0 {
-            startAngle = .degrees(10 - 90)
-            endAngle = .degrees(relativeAngle - 10 - 90)
-        } else {
-            startAngle = .degrees(-10 - 90)
-            endAngle = .degrees(relativeAngle + 10 - 90)
-        }
-        
         return Path { p in
             p.addArc(center: center,
                      radius: radius,
-                     startAngle: startAngle,
-                     endAngle: endAngle,
-                     clockwise: relativeAngle < 0) // 각도가 음수이면 시계 반대 방향으로 회전
+                     startAngle: .degrees(startAngle),
+                     endAngle:   .degrees(endAngle),
+                     clockwise: endAngle < startAngle)
         }
     }
 }
+
