@@ -38,7 +38,7 @@ struct WalkingAlert: View {
             } label:{
               ZStack{
                 Rectangle()
-                  .cornerRadius(30)
+                  .cornerRadius(100)
                   .foregroundColor(Color.primaryLight)
                   .frame(width: 128, height: 48)
                 Text("닫기")
@@ -52,7 +52,7 @@ struct WalkingAlert: View {
             } label:{
               ZStack{
                 Rectangle()
-                  .cornerRadius(30)
+                  .cornerRadius(100)
                   .foregroundColor(Color.subPoint)
                   .frame(width: 128, height: 48)
                 Text("완료하기")
