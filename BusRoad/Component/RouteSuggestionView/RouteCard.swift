@@ -14,35 +14,33 @@ struct RouteCard: View {
     var body: some View {
         
         if let firstBusRoute = journey.firstBusRoute {
-            ZStack {
-                Rectangle()
-                    .foregroundColor(Color.primaryNormal)
-                    .cornerRadius(20)
-                
-                VStack(spacing: 0) {
+            
+                ZStack {
+                    Rectangle()
+                        .foregroundColor(Color.primaryNormal)
+                        .cornerRadius(20)
                     
-                    VStack(spacing: 40.wScaled) {
+                    VStack(spacing: 0) {
                         
-                        VStack(alignment: .leading, spacing: 36.wScaled) {
-                            ETA(journey: journey, index: index)
-                            BoardingLocation(route: firstBusRoute)
+                        VStack(spacing: 40.wScaled) {
+                            
+                            VStack(alignment: .leading, spacing: 36.wScaled) {
+                                ETA(journey: journey, index: index)
+                                BoardingLocation(route: firstBusRoute)
+                            }
+                            
+                            RouteSummary(journey: journey)
                         }
-                        
-                        RouteSummary(journey: journey)
-                    }
-                    .padding(.horizontal, 24.wScaled)
-                    
+                        .padding(.horizontal, 24.wScaled)
                 }
             }
-            
         }
-
     }
 }
 
 #Preview {
     // MARK: - 더미 데이터
-    let start = LocationInfo(name: "포항공대 정문", latitude: 36.015149, longitude: 129.325116)
+    let start = LocationInfo(name: "포항공대 정문으로가시더라도계속이어서", latitude: 36.015149, longitude: 129.325116)
     let transferStop = LocationInfo(name: "중앙로 환승", latitude: 36.0348, longitude: 129.3340)
     let finalStop = LocationInfo(name: "포항역", latitude: 36.07160518, longitude: 129.3419282)
     
