@@ -26,6 +26,7 @@ final class MainSearchViewModel: ObservableObject {
     var shouldShowSearchMode: Bool { searchManager.shouldShowSearchMode }
     var isLoading: Bool { searchManager.isLoading }
     var errorMessage: String? { searchManager.errorMessage }
+    var hasSubmitted: Bool { searchManager.hasSubmitted }
 
   
     func search() async { await searchManager.search() }

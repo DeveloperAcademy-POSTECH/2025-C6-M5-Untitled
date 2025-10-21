@@ -7,7 +7,6 @@ struct RouteSuggestionView: View {
     @State private var user = User(isOnBus: false)
     @State var currentIndex: Int = 0
     @State var isSearchMode = false
-    @State var hasSubmitted = false
     @FocusState var isFocused: Bool
     @State var locationType: LocationType = .origin
     @State var isFirstLoad = true
@@ -23,20 +22,17 @@ struct RouteSuggestionView: View {
     @MainActor func exitSearchMode() {
         isSearchMode = false
         isFocused = false
-        hasSubmitted = false
         viewModel.query = ""
         // vm.results는 매니저가 관리하니 굳이 초기화 필요 없음
     }
     
     @MainActor func performSearch() {
         isSearchMode = true
-        hasSubmitted = true
         Task { await viewModel.search() }
     }
     
     @MainActor func clearSearch() {
         viewModel.query = ""
-        hasSubmitted = false
         isFocused = true
     }
     
@@ -67,7 +63,7 @@ struct RouteSuggestionView: View {
                     viewModel.resetManager()
                     isSearchMode = false
                 },
-                hasSubmitted: hasSubmitted,
+                hasSubmitted: viewModel.hasSubmitted,
                 isLoading: viewModel.isSearchLoading
             )
         } else {

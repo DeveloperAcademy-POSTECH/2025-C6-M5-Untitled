@@ -38,7 +38,7 @@ struct MainSearchView: View {
                         isSearchMode = false
                         coordinator.push(.routeSuggestion)
                     },
-                    hasSubmitted: hasSubmitted,
+                    hasSubmitted: vm.hasSubmitted,
                     isLoading: vm.isLoading
                 )
             } else {
