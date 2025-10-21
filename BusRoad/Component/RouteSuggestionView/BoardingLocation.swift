@@ -32,7 +32,7 @@ struct BoardingLocation: View {
                             .foregroundColor(Color.subNormal)
                     )
                 // TODO: 실시간 버스 도착 예정 시간으로 수정해야 함!! (실시간 API 활용 필요)
-                Text("3분 후 도착")
+                Text(" ")
                     .font(.prereg16Scaled)
                     .foregroundColor(Color.subLight)
             }
