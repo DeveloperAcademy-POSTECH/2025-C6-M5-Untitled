@@ -15,14 +15,14 @@ struct StopNavigationAlert: View {
   var body: some View {
     if isPresented {
       ZStack {
-        Color.black.opacity(0.6) // 배경 블러 느낌
+        Color.black
           .ignoresSafeArea()
         
         Rectangle()
-          .frame(width: 300, height: 207)
-          .cornerRadius(40)
+          .frame(width: 300, height: 199)
+          .cornerRadius(35)
           .foregroundColor(Color.background)
-        VStack(alignment:.leading, spacing: 16){
+        VStack(alignment:.center, spacing: 16){
           Text("경로 안내를 종료할까요?")
             .font(.presemi24)
             .foregroundColor(.primary)
@@ -39,12 +39,12 @@ struct StopNavigationAlert: View {
             } label:{
               ZStack{
                 Rectangle()
-                  .cornerRadius(30)
+                  .cornerRadius(100)
                   .foregroundColor(Color.primaryLight)
                   .frame(width: 128, height: 48)
-                Text("취소")
-                  .foregroundColor(Color.red)
-                  .font(.prereg18)
+                Text("닫기")
+                  .foregroundColor(Color.greyStrong)
+                  .font(.premed20)
               }
             }
             Button{
@@ -53,12 +53,12 @@ struct StopNavigationAlert: View {
             } label:{
               ZStack{
                 Rectangle()
-                  .cornerRadius(30)
-                  .foregroundColor(Color.subPoint)
+                  .cornerRadius(100)
+                  .foregroundColor(Color.cancelbutton)
                   .frame(width: 128, height: 48)
                 Text("종료하기")
                   .foregroundColor(Color.subLight)
-                  .font(.prereg18)
+                  .font(.premed20)
               }
             }
           }
