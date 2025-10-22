@@ -28,7 +28,7 @@ struct BeforeRideView: View {
             
             VStack(spacing: 0) {
                 
-                VStack(spacing: 32) {
+                VStack(spacing: 0) {
                     
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
@@ -36,12 +36,13 @@ struct BeforeRideView: View {
                     
                     if let journey, let index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
-                            .padding(.horizontal, 32)
+                            .padding(32)
                     }
                     
-                    LineDivider()
                 }
                 .frame(height: 144)
+                
+                LineDivider()
                 
                 ZStack {
                     Color(.background)

@@ -14,10 +14,14 @@ struct WholeJourney: View {
     
     var body: some View {
         ZStack{
-            Rectangle()
-                .frame(height: 4)
-                .foregroundColor(.primaryLight)
-                .padding(.horizontal, 2)    // 선 안 보이도록
+            
+            if journey.nodes.count > 1 {
+                Rectangle()
+                    .frame(height: 4)
+                    .foregroundColor(.primaryLight)
+                    .padding(.horizontal, 2)
+            }// 선 안 보이도록
+            
             HStack{
                 ForEach(Array(journey.nodes.enumerated()), id: \.element.id) { index, node in
                     if index == journeyIndex {  // 활성 상태
