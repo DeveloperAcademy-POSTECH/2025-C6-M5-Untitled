@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
 		926905012EA5DD1E00F6A9C7 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 926905002EA5DD1E00F6A9C7 /* Secrets.plist */; };
+    931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 931B33E82EA5DB5D00ED7944 /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -44,6 +45,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -57,6 +59,7 @@
 				60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */,
 				60A8CDA32E7CDFE500530B92 /* BusRoad */,
 				60A8CDA22E7CDFE500530B92 /* Products */,
+				931B33E52EA5DB1600ED7944 /* Secrets.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -89,6 +92,7 @@
 			);
 			name = BusRoad;
 			packageProductDependencies = (
+				931B33E82EA5DB5D00ED7944 /* Lottie */,
 			);
 			productName = BusRoad;
 			productReference = 60A8CDA12E7CDFE500530B92 /* BusRoad.app */;
@@ -119,6 +123,9 @@
 			);
 			mainGroup = 60A8CD982E7CDFE500530B92;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				931B33E72EA5DB5D00ED7944 /* XCRemoteSwiftPackageReference "lottie-spm" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 60A8CDA22E7CDFE500530B92 /* Products */;
 			projectDirPath = "";
@@ -414,6 +421,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		931B33E72EA5DB5D00ED7944 /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.5.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		931B33E82EA5DB5D00ED7944 /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 931B33E72EA5DB5D00ED7944 /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 60A8CD992E7CDFE500530B92 /* Project object */;
 }
