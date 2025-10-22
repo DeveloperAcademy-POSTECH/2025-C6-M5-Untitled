@@ -8,35 +8,38 @@
 import SwiftUI
 
 struct DestinationTextField : View {
+    @EnvironmentObject var coordinator: NavigationCoordinator
     @Binding var location: LocationInfo?
+    @Binding var locationType: LocationType
+    @Binding var isSearchMode: Bool
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerSize: .init(width: 10, height: 10))
-                .stroke(Color.black)
-                .frame(height:50)
             
-            HStack{
+          HStack(spacing: 12) {
                 Text("도착지")
-                    .padding(.leading, 10)
+                    .foregroundColor(Color.subPoint)
+                    .font(.prereg20)
+              
                 Divider()
-                
-                TextField(
-                    "도착지를 입력하세요",
-                    text: Binding(
-                        get: { self.location?.name ?? "" },
-                        set: { newName in
-                            if self.location == nil {
-                                self.location = LocationInfo(name: newName, latitude: 0, longitude: 0)
-                            } else {
-                                self.location?.name = newName
-                            }
-                        }
-                    )
-                )
+                  .background(Color.greyDisable)
+                  .frame(height: 26)
+              
+                Button(action: {
+                    locationType = .destination
+                    isSearchMode = true
+                }) {
+                    Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
+                        .foregroundColor(Color.greyHeavy)
+                        .font(.prereg20)
+                }
                 Spacer()
             }
-            .frame(height: 30)
-        }
+          .padding(.leading, 20)
+          .padding(.trailing, 12)
+          .padding(.vertical, 12)
+          .overlay {
+              RoundedRectangle(cornerRadius: 25)
+                  .stroke(.subStrong, lineWidth: 1.5)
+          }
     }
 }

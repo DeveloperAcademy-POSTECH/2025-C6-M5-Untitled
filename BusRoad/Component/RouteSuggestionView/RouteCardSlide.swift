@@ -8,66 +8,58 @@
 import SwiftUI
 
 struct RouteCardSlide: View {
-    //  @ObservedObject var viewModel: BusRouteViewModel    // viewModel은 컴포넌트와 직접적으로 연결되지 않도록 함
     @Binding var currentIndex: Int
-    var routes: [Journey]?
+    @Binding var routes: [Journey]?
+    @ObservedObject var viewModel: BusRouteViewModel
     var errorMessage: String?
     
-    //  @Binding var centerRoute: BusRoute?
-    
+//    private let cardWidth: CGFloat = 305.wScaled
+        
     var body: some View {
+      VStack(spacing: 8) {
         ZStack {
-            if let errorMessage {
-                VStack {
-                    Text("오류 발생")
-                        .font(.headline)
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                }
-            } else if let routes {  // TODO: Geometry 쓰지 말고 padding으로 바꾸기(Hi-fi 참고)
-                GeometryReader { geometry in
-                    let cardWidth = geometry.size.width * 0.8
-                    let cardSpacing = cardWidth * 0.9
-                    
-                    ZStack {
-                        ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
-                            let relativeIndex: CGFloat = CGFloat(index - currentIndex)
-                            
-                            RouteCard(journey: item, isFirstCard: index==0)
-                                .frame(width: cardWidth)
-                                .offset(x: CGFloat(relativeIndex) * cardSpacing)
-                                .opacity(relativeIndex == 0 ? 1.0 : 0.5)
-                                .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
-                                .zIndex(-abs(Double(relativeIndex)))
-                        }
-                    }
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .gesture(
-                        DragGesture()
-                            .onEnded { value in
-                                if abs(value.translation.width) < 50 {
-                                    return
-                                }
-                                
-                                if value.translation.width > 0 {
-                                    // 오른쪽 스와이프 -> 이전 카드
-                                    currentIndex = max(0, currentIndex - 1)
-                                } else {
-                                    // 왼쪽 스와이프 -> 다음 카드
-                                    currentIndex = min(routes.count - 1, currentIndex + 1)
-                                }
-                            }
-                    )
-                }
-                .animation(.spring(), value: currentIndex)
-            } else {
-                ProgressView("경로를 찾는 중...")
+          if errorMessage != nil {
+            RouteErrorCard(viewModel: viewModel)
+          } else if let routes {
+            ZStack {
+              ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
+                let relativeIndex: CGFloat = CGFloat(index - currentIndex)
+                RouteCard(journey: item, index: index)
+                  .offset(x: relativeIndex * 270.wScaled)
+                  .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
+                  .opacity(relativeIndex == 0 ? 1.0 : 0.3)
+                  .zIndex(Double(routes.count) - Double(abs(index - currentIndex)))
+                  .animation(.spring(), value: currentIndex)
+              }
             }
+            .gesture(
+              DragGesture()
+                .onEnded { value in
+                  if abs(value.translation.width) < 50 {
+                    return
+                  }
+                  
+                  if value.translation.width > 0 {
+                    currentIndex = max(0, currentIndex - 1)
+                  } else {
+                    currentIndex = min(routes.count - 1, currentIndex + 1)
+                  }
+                }
+            )
+          } else {
+            ProgressRouteCard()
+          }
         }
+        
+        if let routes = routes, routes.count > 1 {
+          HStack {
+            ForEach(0..<routes.count, id: \.self) { index in
+              Circle()
+                .fill(index == currentIndex ? Color.greyStrong : Color.greyStrong.opacity(0.3))
+                .frame(width: 8.wScaled, height: 8.wScaled)
+            }
+          }
+        }
+      }
     }
 }
-
-//#Preview {
-//    RouteCardSlide()
-//}

@@ -8,10 +8,19 @@ final class JourneyManager: ObservableObject {
     @Published var destination: LocationInfo?
     @Published var journeyList: [Journey]?      // 스와이프할 journey list
     @Published var selectedJourney: Journey?    // 최종 선택된 journey
-
+    @Published var journeyIndex: Int?
+    
     static let shared = JourneyManager()    // singleton manager
     
     let locationService = LocationService()
+    
+    func reset() {
+        self.origin = nil
+        self.destination = nil
+        self.journeyList = nil
+        self.selectedJourney = nil
+        self.journeyIndex = nil
+    }
     
     func setOrigin(_ origin: LocationInfo) {
         self.origin = origin
@@ -45,13 +54,12 @@ final class JourneyManager: ObservableObject {
         // MARK: 버스 경로만 모아보기(지하철 확장하면 고려해서 코드 전체 수정하기)
         let filtered = path.filter { $0["pathType"] as? Int == 2 }
         
-        // TODO: (진) 현재는 추천경로 순서대로 3개 뽑는데 나중에 최소시간/최소환승/최소도보로 뽑기
         let top3 = filtered.prefix(3)
         
         self.journeyList = top3.compactMap { parseJourney($0) }
     }
     
-    private func parseJourney(_ data: [String: Any]) -> Journey? {
+    public func parseJourney(_ data: [String: Any]) -> Journey? {
         guard let subPaths = data["subPath"] as? [[String: Any]],
               let info = data["info"] as? [String: Any],
               let totalTime = info["totalTime"] as? Int
@@ -75,7 +83,9 @@ final class JourneyManager: ObservableObject {
                 if let walk = parseWalkNode(at: i, in: subPaths) {
                     nodes.append(.walk(walk))
                 }
+                
             default:
+                print("[DEBUG] 알 수 없는 교통 타입: \(String(describing: tType))")
                 continue
             }
         }
@@ -102,6 +112,9 @@ final class JourneyManager: ObservableObject {
             return nil
         }
         
+        // busNo에서 괄호()로 묶인 불필요한 정보 없애기
+        let cleanedBusNo = cleanBusNumber(busNo)
+        
         // stations 정보 중 필요한 정보만 뽑아내기
         let stationsInfo: [BusStation] = stations.compactMap { dict in
             guard
@@ -123,13 +136,30 @@ final class JourneyManager: ObservableObject {
         }
         
         return BusRouteNode(
-            start: LocationInfo(name: startName, latitude: startX, longitude: startY),
-            end: LocationInfo(name: endName, latitude: endX, longitude: endY),
-            busNo: busNo,
+            start: LocationInfo(name: startName, latitude: startY, longitude: startX),
+            end: LocationInfo(name: endName, latitude: endY, longitude: endX),
+            busNo: cleanedBusNo,    // 버스 번호만 추출
             busId: busId,
             stations: stationsInfo,
             travelTime: travelTime
         )
+    }
+    
+    private func cleanBusNumber(_ busNo: String) -> String {
+        var result = busNo
+        let pattern = #"\([^()]*\)"#  // 한 단계 괄호 제거용 정규식
+        
+        // 안쪽 괄호부터 반복 제거
+        while let _ = result.range(of: pattern, options: .regularExpression) {
+            result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        }
+        
+        // 숫자로 끝날 경우 "번" 추가
+        if let lastChar = result.last, lastChar.isNumber {
+            result += "번"
+        }
+        
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
     private func parseWalkNode(at index: Int, in subPath: [[String: Any]]) -> WalkRouteNode? {
@@ -147,7 +177,7 @@ final class JourneyManager: ObservableObject {
             if let origin = self.origin {
                 return WalkRouteNode(
                     start: origin,
-                    end: LocationInfo(name: endName, latitude: endX, longitude: endY),
+                    end: LocationInfo(name: endName, latitude: endY, longitude: endX),
                     travelTime: travelTime
                 )
             }
@@ -164,7 +194,7 @@ final class JourneyManager: ObservableObject {
             
             if let destination = self.destination {
                 return WalkRouteNode(
-                    start: LocationInfo(name: startName, latitude: startX, longitude: startY),
+                    start: LocationInfo(name: startName, latitude: startY, longitude: startX),
                     end: destination,
                     travelTime: travelTime
                 )
@@ -195,8 +225,8 @@ final class JourneyManager: ObservableObject {
             else { return nil }
             
             return WalkRouteNode(
-                start: LocationInfo(name: startName, latitude: startX, longitude: startY),
-                end: LocationInfo(name: endName, latitude: endX, longitude: endY),
+                start: LocationInfo(name: startName, latitude: startY, longitude: startX),
+                end: LocationInfo(name: endName, latitude: endY, longitude: endX),
                 travelTime: travelTime
             )
         }

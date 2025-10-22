@@ -138,8 +138,6 @@ private extension SpeechRecognitionManager {
         // 요청
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
-        // iOS 13+ : 검색 용도 힌트 (선택)
-        if #available(iOS 13.0, *) { request.taskHint = .search }
         recognitionRequest = request
 
         // 입력 탭

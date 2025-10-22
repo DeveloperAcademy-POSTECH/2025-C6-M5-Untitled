@@ -1,32 +1,16 @@
 import SwiftUI
 
 extension VoiceSearchView {
-    var backgroundGradient: some View {
-        LinearGradient(
-            colors: [
-                Color.green.opacity(0.8),
-                Color.green.opacity(0.6),
-                Color.green.opacity(0.4)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-        .ignoresSafeArea()
-    }
 
     var micButtonColor: Color {
         switch vm.state {
-        case .ready, .failed, .listening, .processing, .completed: return .white
+        case .ready, .failed, .listening, .processing, .completed: return .subNormal
         }
     }
 
     var micIconColor: Color {
         switch vm.state {
-        case .ready, .failed, .listening, .processing, .completed: return .black
+        case .ready, .failed, .listening, .processing, .completed: return .primaryNormal
         }
-    }
-
-    var micIconName: String {
-        "mic.fill"
     }
 }

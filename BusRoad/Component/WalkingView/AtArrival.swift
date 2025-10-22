@@ -1,0 +1,62 @@
+import SwiftUI
+
+struct AtArrival: View {
+    var journey: Journey
+    var index: Int
+    @EnvironmentObject var coordinator: NavigationCoordinator
+    
+    @State private var scale: CGFloat = 0.0
+    @State private var isAnimating = false
+    @State private var showVerifyingStop = false
+
+    var body: some View {
+        if case let .walk(node) = journey.nodes[index] {
+            if showVerifyingStop && journey.nodes.count > 1 {
+              VerifyingStop(showVerifyingStop: $showVerifyingStop, journey: journey, index: index)
+            } else {
+              VStack(alignment: .leading) {
+                    Spacer()
+                    Text(node.end.name)
+                        .font(.presemi36Scaled)
+                        .foregroundColor(.primaryHeavy)
+                    
+                    Spacer()
+                    
+                HStack{
+                  Spacer()
+                  Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 148, weight: .bold))
+                    .foregroundColor(.subStrong)
+                    .rotation3DEffect(
+                      .degrees(isAnimating ? 360 : 0),
+                      axis: (x: 0, y: 1, z: 0)
+                    )
+                    .onAppear {
+                      withAnimation(.easeOut(duration: 2.0)) {
+                        isAnimating = true
+                      }
+                      DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                        showVerifyingStop = true
+                      }
+                    }
+                  Spacer()
+                }
+                    Spacer()
+                    
+                    Text("도착")
+                        .font(.presemi32Scaled)
+                        .foregroundColor(.primaryHeavy)
+                    Text("했어요!")
+                        .font(.prereg32Scaled)
+                        .foregroundColor(.primaryHeavy)
+                        .padding(.bottom, 80.wScaled)
+                }
+              .padding(.horizontal,30.wScaled)
+            }
+        } else {
+            Text("경로 정보 확인 불가")
+                .font(.presemi36Scaled)
+                .foregroundColor(.red)
+        }
+    }
+}

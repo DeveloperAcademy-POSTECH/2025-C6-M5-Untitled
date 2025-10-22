@@ -1,12 +1,16 @@
-import SwiftUI
 import MapKit
+import SwiftUI
+
+private let kHasShownVoiceHint = "hasShownVoiceHint_v1"
 
 struct MainSearchView: View {
+    @AppStorage(kHasShownVoiceHint) private var hasShownVoiceHint = false
+    
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @StateObject private var vm = MainSearchViewModel()
 
-    @State private var hasSubmitted = false
     @State private var isSearchMode = false
+    @State private var showHint = false
     @FocusState private var isFocused: Bool
 
     var body: some View {
@@ -20,6 +24,7 @@ struct MainSearchView: View {
                     onSubmit: { performSearch() },
                     onClear: { clearSearch() },
                     onMicTap: {
+                        showHint = false
                         isFocused = false
                         coordinator.push(.voiceSearch)
                     },
@@ -27,15 +32,22 @@ struct MainSearchView: View {
                         if let latitude = item.latitude, let longitude = item.longitude {
                             vm.setDestination(destination: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
                         }
+                        // 초기화
+                        vm.resetManager()
+                        isSearchMode = false
                         coordinator.push(.routeSuggestion)
-                    }
+                    },
+                    hasSubmitted: $vm.hasSubmitted,
+                    isLoading: vm.isLoading
                 )
             } else {
                 IntroSection(
                     query: Binding(get: { vm.query }, set: { vm.query = $0 }),
                     isFocused: $isFocused,
+                    showHint: $showHint,
                     onSubmit: { performSearch() },
                     onMicTap: {
+                        showHint = false
                         isFocused = false
                         coordinator.push(.voiceSearch)
                     },
@@ -47,18 +59,31 @@ struct MainSearchView: View {
         .animation(nil, value: vm.query)
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
+        .onAppear {   // GPS 하드웨어 웜업용
+            print("[DEBUG] requestOrigin")
+            vm.requestOrigin()
+        }
         .onChange(of: isFocused) { _, new in
             if new && !isSearchMode {
                 isSearchMode = true
                 DispatchQueue.main.async { isFocused = true }
             }
         }
-        // ✅ SearchManager가 올린 전환 신호 감시
+        // SearchManager가 올린 전환 신호 감시
         .onChange(of: vm.shouldShowSearchMode) { _, show in
             if show {
                 isSearchMode = true
-                hasSubmitted = true
                 vm.resetSearchMode()
+            }
+        }
+        .onChange(of: isSearchMode) { _, _ in
+            showHint = false
+        }
+        .onAppear {
+            guard !hasShownVoiceHint else { return }  // 이미 본 적 있으면 패스
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                showHint = true
+                hasShownVoiceHint = true
             }
         }
     }
@@ -67,24 +92,20 @@ struct MainSearchView: View {
     @MainActor func exitSearchMode() {
         isSearchMode = false
         isFocused = false
-        hasSubmitted = false
         vm.query = ""
-        // vm.results는 매니저가 관리하니 굳이 초기화 필요 없음
+        vm.resetManager()
     }
 
     @MainActor func performSearch() {
+        showHint = false
+        isFocused = false
         isSearchMode = true
-        hasSubmitted = true
         Task { await vm.search() }
     }
 
     @MainActor func clearSearch() {
+        showHint = false
         vm.query = ""
-        hasSubmitted = false
         isFocused = true
     }
 }
-//#Preview {
-//    MainSearchView()
-//        .environmentObject(NavigationCoordinator())
-//}
