@@ -16,16 +16,11 @@ struct OriginTextField : View {
     var onRefreshTapped: () -> Void
     
     var body: some View {
-        
-//        ZStack {
-//            RoundedRectangle(cornerSize: .init(width: 25, height: 25))
-//                .stroke(Color.subStrong)
-//                .frame(width: 349, height: 50)
             
             HStack(spacing: 12) {
                 Text("출발지")
                     .foregroundColor(Color.greyNormal)
-                    .font(.prereg20)
+                    .font(.prereg20Scaled)
                 
                 Divider()
                     .background(Color.greyDisable)
@@ -36,7 +31,7 @@ struct OriginTextField : View {
                     isSearchMode = true
                 }) {
                     Text(location?.name ?? "출발지를 입력하세요")
-                        .font(.premed20)
+                        .font(.prereg20Scaled)
                         .foregroundColor(Color.greyNormal)
                 }
                 

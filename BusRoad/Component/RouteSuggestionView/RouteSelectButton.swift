@@ -54,7 +54,21 @@ struct RouteSelectButton: View {
           viewModel.createWalkingJourneyIfNeeded()
           onSelect()
         } label: {
-            Text("도보 이동하기")
+          Text("도보 이동하기")
+            .foregroundColor(Color.subLight)
+            .font(.premed32)
+            .frame(width: 240, height: 75)
+            .background(Color.subStrong)
+            .cornerRadius(20)
+        }
+        .frame(maxWidth: .infinity)
+        .frame(height: 74)
+      }
+      else if viewModel.errorMessage == "출발지와 도착지가 같습니다."{
+        Button {
+          retrySearch()
+        } label: {
+            Text("처음으로")
                 .foregroundColor(Color.subLight)
                 .font(.premed32)
                 .frame(width: 240, height: 75)
@@ -63,6 +77,7 @@ struct RouteSelectButton: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: 74)
+      
       }
       else {
         Button {
