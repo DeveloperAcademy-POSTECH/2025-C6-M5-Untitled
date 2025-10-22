@@ -47,7 +47,9 @@ struct VoiceSearchView: View {
             VStack {
                 HStack {
                     Spacer()
-                    Button { vm.dismiss() } label: {
+                    Button {
+                        vm.dismiss()
+                    } label: {
                         Image("xbutton-white")
                             .resizable()
                             .aspectRatio(contentMode: .fit)
