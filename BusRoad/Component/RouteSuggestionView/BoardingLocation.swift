@@ -33,7 +33,7 @@ struct BoardingLocation: View {
                     .font(.presemi24)
                     .foregroundColor(.primaryHeavy)
                     .padding(.horizontal, 8.wScaled)
-                    .padding(.vertical, 4.wScaled)
+                    .padding(.vertical, 8.wScaled)
                     .background(
                         Rectangle()
                             .cornerRadius(15.wScaled)

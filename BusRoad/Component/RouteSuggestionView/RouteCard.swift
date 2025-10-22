@@ -32,6 +32,7 @@ struct RouteCard: View {
                             RouteSummary(journey: journey)
                         }
                         .padding(.horizontal, 24.wScaled)
+                        .padding(.vertical, 32.wScaled)
                 }
             }
         }

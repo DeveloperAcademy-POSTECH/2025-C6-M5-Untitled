@@ -61,6 +61,9 @@ struct CongratsView: View {
                   withAnimation(.easeOut(duration: 2.0)) {
                     isAnimating = true
                   }
+                  DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    coordinator.popToRoot()
+                  }
                 }
               Spacer()
             }
