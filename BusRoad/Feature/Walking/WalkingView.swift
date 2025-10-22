@@ -29,18 +29,18 @@ struct WalkingView: View {
       
       VStack(spacing: 0){
         
-        VStack(spacing: 32) {
+        VStack(spacing: 32.wScaled) {
           TopBar(isMoving: true) { coordinator.popToRoot() }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 8.wScaled)
           
           if let journey, let index {
             WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-              .padding(.horizontal, 32)
+              .padding(.horizontal, 32.wScaled)
           }
           
           LineDivider()
         }
-        .frame(height: 144)
+        .frame(height: 144.wScaled)
         
         ZStack {
           Color(.background)
@@ -58,7 +58,7 @@ struct WalkingView: View {
                 Button("이미 목적지에 도착하셨나요?") {
                   showAlert = true
                 }
-                .font(.premed12)
+                .font(.premed12Scaled)
                 .foregroundColor(.primaryHeavy)
                 .underline()
                 

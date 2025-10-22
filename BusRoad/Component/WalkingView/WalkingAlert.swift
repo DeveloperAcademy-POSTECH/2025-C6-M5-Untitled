@@ -18,21 +18,21 @@ struct WalkingAlert: View {
           .ignoresSafeArea()
         
         Rectangle()
-          .frame(width: 300, height: 199)
+          .frame(width: 300.wScaled, height: 199.wScaled)
           .cornerRadius(35)
           .foregroundColor(Color.background)
-        VStack(alignment:.center, spacing: 16){
+        VStack(alignment:.center, spacing: 16.wScaled){
           Text("혹시 이미 도착하셨나요?")
-            .font(.presemi24)
+            .font(.presemi24Scaled)
             .foregroundColor(.primary)
-            .padding(.leading, 8)
+            .padding(.leading, 8.wScaled)
           Text("목적지에 이미 도착하셨다면,\n직접 완료할 수 있어요.")
-            .font(.prereg20)
+            .font(.prereg20Scaled)
             .foregroundColor(.primary)
-            .lineSpacing(5)
+            .lineSpacing(5.wScaled)
             .multilineTextAlignment(.leading)
-            .padding(.leading, 8)
-          HStack(spacing: 16){
+            .padding(.leading, 8.wScaled)
+          HStack(spacing: 16.wScaled){
             Button{
               isPresented = false
             } label:{
@@ -40,10 +40,10 @@ struct WalkingAlert: View {
                 Rectangle()
                   .cornerRadius(100)
                   .foregroundColor(Color.primaryLight)
-                  .frame(width: 128, height: 48)
+                  .frame(width: 128.wScaled, height: 48.wScaled)
                 Text("닫기")
                   .foregroundColor(Color.greyStrong)
-                  .font(.premed20)
+                  .font(.premed20Scaled)
               }
             }
             Button{
@@ -54,10 +54,10 @@ struct WalkingAlert: View {
                 Rectangle()
                   .cornerRadius(100)
                   .foregroundColor(Color.subPoint)
-                  .frame(width: 128, height: 48)
+                  .frame(width: 128.wScaled, height: 48.wScaled)
                 Text("완료하기")
                   .foregroundColor(Color.primarywhite)
-                  .font(.premed20)
+                  .font(.premed20Scaled)
               }
             }
           }

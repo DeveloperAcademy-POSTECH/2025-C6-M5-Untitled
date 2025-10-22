@@ -18,10 +18,10 @@ struct TopBar: View {
         Spacer()
         if isMoving {
           Text("경로 이동")
-            .font(.papermed18)
+            .font(.papermed18Scaled)
         } else {
           Text("경로 탐색")
-            .font(.papermed18)
+            .font(.papermed18Scaled)
         }
         Spacer()
       }
@@ -39,7 +39,7 @@ struct TopBar: View {
           Image("xbutton")
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .frame(width:44, height:44)
+            .frame(width:44.wScaled, height:44.wScaled)
             .foregroundColor(.greyNormal)
         }
       }

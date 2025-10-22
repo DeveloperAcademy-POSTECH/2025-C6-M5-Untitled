@@ -19,21 +19,21 @@ struct StopNavigationAlert: View {
           .ignoresSafeArea()
         
         Rectangle()
-          .frame(width: 300, height: 199)
+          .frame(width: 300.wScaled, height: 199.wScaled)
           .cornerRadius(35)
           .foregroundColor(Color.background)
-        VStack(alignment:.center, spacing: 16){
+        VStack(alignment:.center, spacing: 16.wScaled){
           Text("경로 안내를 종료할까요?")
-            .font(.presemi24)
+            .font(.presemi24Scaled)
             .foregroundColor(.primary)
-            .padding(.leading, 8)
+            .padding(.leading, 8.wScaled)
           Text("페이지를 종료하면 경로 안내가\n종료돼요.")
-            .font(.prereg20)
+            .font(.prereg20Scaled)
             .foregroundColor(.primary)
-            .lineSpacing(5)
+            .lineSpacing(5.wScaled)
             .multilineTextAlignment(.leading)
-            .padding(.leading, 8)
-          HStack(spacing: 16){
+            .padding(.leading, 8.wScaled)
+          HStack(spacing: 16.wScaled){
             Button{
               isPresented = false
             } label:{
@@ -41,10 +41,10 @@ struct StopNavigationAlert: View {
                 Rectangle()
                   .cornerRadius(100)
                   .foregroundColor(Color.primaryLight)
-                  .frame(width: 128, height: 48)
+                  .frame(width: 128.wScaled, height: 48.wScaled)
                 Text("닫기")
                   .foregroundColor(Color.greyStrong)
-                  .font(.premed20)
+                  .font(.premed20Scaled)
               }
             }
             Button{
@@ -55,10 +55,10 @@ struct StopNavigationAlert: View {
                 Rectangle()
                   .cornerRadius(100)
                   .foregroundColor(Color.cancelbutton)
-                  .frame(width: 128, height: 48)
+                  .frame(width: 128.wScaled, height: 48.wScaled)
                 Text("종료하기")
                   .foregroundColor(Color.subLight)
-                  .font(.premed20)
+                  .font(.premed20Scaled)
               }
             }
           }
