@@ -61,8 +61,6 @@ struct WalkingView: View {
                 .font(.premed12Scaled)
                 .foregroundColor(.primaryHeavy)
                 .underline()
-                
-                Spacer()
               }
             }
           }

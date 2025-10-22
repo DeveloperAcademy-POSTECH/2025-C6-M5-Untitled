@@ -57,20 +57,7 @@ struct ToDestination: View {
                     .font(.prereg32Scaled)
                     .foregroundColor(.primaryHeavy)
                     .padding(.bottom, 36.wScaled)
-                Spacer()
-                HStack {
-                    Spacer()
-                    Button {
-                        coordinator.advanceJourneyStage()   // TODO: 나중에 상위뷰로 빼기
-                    } label: {
-                        Text("이미 목적지에 도착하셨나요?")
-                            .font(.premed12Scaled)
-                            .foregroundColor(.primaryHeavy)
-                            .underline()
-                            .padding(.bottom, 24.wScaled)
-                    }
-                    Spacer()
-                }
+//                Spacer()
             }
             .padding(.horizontal, 32.wScaled)
             .onAppear {

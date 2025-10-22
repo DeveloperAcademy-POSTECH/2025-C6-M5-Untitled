@@ -39,19 +39,10 @@ struct WholeJourney: View {
                     }
                 }
             }
-          } else {                    // 비활성 상태
-            RouteCircle(status: .disable, routeNode: node)
-          }
-          
-          if index != journey.nodes.count - 1 {   // 마지막 요소가 아니면 Spacer() 추가
-            Spacer()
-          }
         }
-      }
     }
-  }
 }
 
 #Preview {
-  WholeJourney(journey: DummyData.journey, journeyIndex: 2, isBeforeRide: true)
+    WholeJourney(journey: DummyData.journey, journeyIndex: 2, isBeforeRide: true)
 }
