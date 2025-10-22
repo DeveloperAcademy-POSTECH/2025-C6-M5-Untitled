@@ -1,4 +1,5 @@
 import SwiftUI
+import Lottie
 
 struct OnRideCard: View {
     
@@ -7,13 +8,12 @@ struct OnRideCard: View {
     let progress: CGFloat
     
     var body: some View {
-        
         ZStack {
             
             RoundedRectangle(cornerRadius: 20)
                 .foregroundStyle(canAlight ? .primaryStrong : .primaryLight)
             
-            VStack(spacing: 50.wScaled) {
+            VStack(spacing: 5.wScaled) {
                 
                 VStack(spacing: 48.wScaled) {
                     HStack {
@@ -35,10 +35,9 @@ struct OnRideCard: View {
                         Spacer()
                     }
                     
-                    Rectangle()
-                        .cornerRadius(10)
-                        .foregroundStyle(.subPoint)
-                        .frame(width: 176.wScaled, height: 146.wScaled)
+                    charAnimation
+                        .frame(height: 200.wScaled)
+                        .padding(.leading, 15.wScaled)
                 }
                 
                 VStack(spacing: 11 .wScaled) {
@@ -60,6 +59,27 @@ struct OnRideCard: View {
             .padding(.horizontal, 40.wScaled)
         }
     }
+    
+    // MARK: - 캐릭터 애니메이션
+    private var charAnimation: some View {
+        ZStack(alignment: .topLeading, content: {
+            // 배경 애니메이션 (tree.json)
+            LottieView(animation: .named("tree"))
+                .playing(loopMode: .loop)
+                .animationSpeed(1.0)
+                .frame(width: 127.wScaled, height: 110.wScaled)
+                .border(canAlight ? .primarywhite : Color.primaryStrong, width: 3)
+                .padding(.top, canAlight ? 12.wScaled : 0)
+            
+            // 메인 애니메이션 (조건에 따라 변경)
+            LottieView(animation: .named(canAlight ? "Yellow" : "OnRiding"))
+                .playing(loopMode: .loop)
+                .animationSpeed(1.0)
+                .frame(height: canAlight ? 222.wScaled : 200.wScaled)
+                .padding(.leading, canAlight ? 30.wScaled : -20.wScaled)
+        })
+    }
+    
 }
 
 // MARK: - Progressbar
@@ -104,7 +124,7 @@ struct BusStopProgress: View {
 #Preview {
     OnRideCard(
         busStopName: "Bus stop name",
-        canAlight: true,
+        canAlight: false,
         progress: 0.9
     )
 }

@@ -8,21 +8,20 @@
 
 /* Begin PBXBuildFile section */
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
-		926905012EA5DD1E00F6A9C7 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 926905002EA5DD1E00F6A9C7 /* Secrets.plist */; };
-    931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 931B33E82EA5DB5D00ED7944 /* Lottie */; };
+		931B33E62EA5DB1600ED7944 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
+		931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 931B33E82EA5DB5D00ED7944 /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		60A8CDA12E7CDFE500530B92 /* BusRoad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BusRoad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
-		926905002EA5DD1E00F6A9C7 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
+		931B33E52EA5DB1600ED7944 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
 		246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Application/Secrets.plist,
 				Info.plist,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
@@ -55,7 +54,6 @@
 		60A8CD982E7CDFE500530B92 = {
 			isa = PBXGroup;
 			children = (
-				926905002EA5DD1E00F6A9C7 /* Secrets.plist */,
 				60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */,
 				60A8CDA32E7CDFE500530B92 /* BusRoad */,
 				60A8CDA22E7CDFE500530B92 /* Products */,
@@ -141,7 +139,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				926905012EA5DD1E00F6A9C7 /* Secrets.plist in Resources */,
+				931B33E62EA5DB1600ED7944 /* Secrets.plist in Resources */,
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
