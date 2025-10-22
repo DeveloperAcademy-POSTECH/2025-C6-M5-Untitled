@@ -14,21 +14,23 @@ struct WalkingAlert: View {
   var body: some View {
     if isPresented {
       ZStack {
-        Color.black
+        Color.primaryblack
               .opacity(0.5)
           .ignoresSafeArea()
         
         VStack(alignment:.center){
           Text("목적지에 도착하셨나요?")
             .font(.presemi24Scaled)
-            .foregroundColor(.primary)
+            .foregroundColor(.primaryblack)
             .padding(.top, 18.wScaled)
             .padding(.bottom, 10.wScaled)
+            
           Text("목적지에 이미 도착하셨다면,\n직접 경로를 완료할 수 있어요.")
             .font(.prereg20Scaled)
-            .foregroundColor(.primary)
+            .foregroundColor(.primaryblack)
             .multilineTextAlignment(.center)
             .padding(.bottom, 24.wScaled)
+            
           HStack(spacing: 10.wScaled){
             Button{
               isPresented = false
@@ -36,10 +38,10 @@ struct WalkingAlert: View {
               ZStack{
                 Rectangle()
                   .cornerRadius(100)
-                  .foregroundColor(Color.greybutton.opacity(0.2))
+                  .foregroundColor(Color.greybutton)
                   .frame(width: 139.wScaled, height: 48.wScaled)
                 Text("닫기")
-                  .foregroundColor(Color.black)
+                  .foregroundColor(Color.primaryblack)
                   .font(.premed20Scaled)
               }
             }
