@@ -21,12 +21,12 @@ struct ToDestination: View {
         if case let .walk(node) = journey.nodes[index] {
             VStack(alignment: .leading, spacing: 0) {
                 Text(node.end.name)
-                    .font(.presemi36)
+                    .font(.presemi36Scaled)
                     .foregroundColor(.primaryHeavy)
                     .padding(.top, 25.wScaled)
                 
                 Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
-                    .font(.prereg36)
+                    .font(.prereg36Scaled)
                     .foregroundColor(.primaryHeavy)
                     .padding(.top, 12.wScaled)
                     .padding(.bottom, 70.wScaled)
@@ -48,13 +48,13 @@ struct ToDestination: View {
                 .padding(.bottom, 76.wScaled)
                 
                 Text(vm.bigDistanceText)
-                    .font(.presemi32)
+                    .font(.presemi32Scaled)
                     .foregroundColor(.primaryHeavy)
                     .monospacedDigit()
                     .padding(.bottom, 11.wScaled)
                 
                 Text("남았어요.")
-                    .font(.prereg32)
+                    .font(.prereg32Scaled)
                     .foregroundColor(.primaryHeavy)
                     .padding(.bottom, 36.wScaled)
                 Spacer()
@@ -64,7 +64,7 @@ struct ToDestination: View {
                         coordinator.advanceJourneyStage()   // TODO: 나중에 상위뷰로 빼기
                     } label: {
                         Text("이미 목적지에 도착하셨나요?")
-                            .font(.premed12)
+                            .font(.premed12Scaled)
                             .foregroundColor(.primaryHeavy)
                             .underline()
                             .padding(.bottom, 24.wScaled)
@@ -78,7 +78,7 @@ struct ToDestination: View {
             }
         } else {
             Text("경로 정보 확인 불가")
-                .font(.presemi36)
+                .font(.presemi36Scaled)
                 .foregroundColor(.red)
         }
     }

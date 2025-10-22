@@ -17,7 +17,7 @@ struct AtArrival: View {
               VStack(alignment: .leading) {
                     Spacer()
                     Text(node.end.name)
-                        .font(.presemi36)
+                        .font(.presemi36Scaled)
                         .foregroundColor(.primaryHeavy)
                     
                     Spacer()
@@ -44,10 +44,10 @@ struct AtArrival: View {
                     Spacer()
                     
                     Text("도착")
-                        .font(.presemi32)
+                        .font(.presemi32Scaled)
                         .foregroundColor(.primaryHeavy)
                     Text("했어요!")
-                        .font(.prereg32)
+                        .font(.prereg32Scaled)
                         .foregroundColor(.primaryHeavy)
                         .padding(.bottom, 80.wScaled)
                 }
@@ -55,7 +55,7 @@ struct AtArrival: View {
             }
         } else {
             Text("경로 정보 확인 불가")
-                .font(.presemi36)
+                .font(.presemi36Scaled)
                 .foregroundColor(.red)
         }
     }

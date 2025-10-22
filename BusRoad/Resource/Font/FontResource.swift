@@ -189,6 +189,10 @@ extension Font {
         return .preScaled(type: .medium, size: 24)
     }
     
+    static var premed12Scaled: Font {
+        return .preScaled(type: .medium, size: 12)
+    }
+    
     static var premed20Scaled: Font {
         return .preScaled(type: .medium, size: 20)
     }
