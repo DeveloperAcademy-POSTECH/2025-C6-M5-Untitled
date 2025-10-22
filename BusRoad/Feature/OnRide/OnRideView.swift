@@ -21,18 +21,21 @@ struct OnRideView: View {
             VStack(spacing: 0) {
                 
                 // 상단 고정 영역
-                VStack(spacing: 32) {
+                VStack(spacing: 0) {
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
                     
                     if let journey, let index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-                            .padding(.horizontal, 32)
+                            .padding(32)
                     }
                     
-                    LineDivider()
                 }
                 .frame(height: 144)
+                
+                LineDivider()
+                
+                
                 
                 // 하단 영역
                 ZStack {

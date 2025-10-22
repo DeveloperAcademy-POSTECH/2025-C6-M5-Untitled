@@ -73,7 +73,7 @@ struct RouteSuggestionView: View {
                 
                 VStack(spacing: 0) {
                     // MARK: - 상단바
-                    VStack(spacing: 20) {
+                    VStack(spacing: 0) {
                         TopBar(isMoving: false) { coordinator.popToRoot() }
                             .padding(.horizontal, 8)
                         
@@ -90,14 +90,14 @@ struct RouteSuggestionView: View {
                                 locationType: $locationType,
                                 isSearchMode: $isSearchMode
                             )
-                            
                         }
                         .padding(.horizontal, 22)
-                        
-                    LineDivider()
-
+                        .padding(.top, 20)
+                        .padding(.bottom, 22)
                     }
                     .frame(height: 194)
+                    
+                    LineDivider()
                     
                     ZStack {
                         Color.background

@@ -29,18 +29,18 @@ struct WalkingView: View {
       
       VStack(spacing: 0){
         
-        VStack(spacing: 32.wScaled) {
-          TopBar(isMoving: true) { coordinator.popToRoot() }
-            .padding(.horizontal, 8.wScaled)
-          
-          if let journey, let index {
-            WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-              .padding(.horizontal, 32.wScaled)
-          }
-          
-          LineDivider()
-        }
-        .frame(height: 144.wScaled)
+        VStack(spacing: 0) {
+                    TopBar(isMoving: true) { coordinator.popToRoot() }
+                        .padding(.horizontal, 8)
+                    
+                    if let journey, let index {
+                        WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
+                            .padding(32)
+                    }
+                }
+                .frame(height: 144)
+        
+        LineDivider()
         
         ZStack {
           Color(.background)
