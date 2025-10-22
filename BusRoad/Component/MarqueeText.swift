@@ -3,7 +3,7 @@ import SwiftUI
 public struct MarqueeText: View {
     public var text: String
     public var font: Font
-    public var uiFont: UIFont  // 👈 추가: 크기 계산용 UIFont
+    public var uiFont: UIFont
     public var startDelay: Double
     public var alignment: Alignment
     
@@ -66,7 +66,7 @@ public struct MarqueeText: View {
     public init(
         text: String,
         font: Font,
-        uiFont: UIFont,  // 👈 추가
+        uiFont: UIFont,
         startDelay: Double = 1.0,
         alignment: Alignment? = nil
     ) {

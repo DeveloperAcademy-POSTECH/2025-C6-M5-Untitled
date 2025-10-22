@@ -21,7 +21,7 @@ class SpeechRecognitionManager: ObservableObject {
     
     // 침묵 감지를 위한 타이머
     private var silenceTimer: Timer?
-    private let silenceThreshold: TimeInterval = 3.0 // 3초 TODO: 애니메이션 테스트를 위해 5초로 수정, 이후 3초로 수정할 예정
+    private let silenceThreshold: TimeInterval = 3.0 // 3초
     
     // MARK: - 초기화
     init() {
@@ -138,8 +138,6 @@ private extension SpeechRecognitionManager {
         // 요청
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
-        // iOS 13+ : 검색 용도 힌트 (선택)
-        if #available(iOS 13.0, *) { request.taskHint = .search }
         recognitionRequest = request
 
         // 입력 탭

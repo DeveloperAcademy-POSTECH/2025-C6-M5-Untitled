@@ -13,6 +13,7 @@ final class SearchManager: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     @Published var shouldShowSearchMode = false  // MainSearchView에서 onChange로 감시
+    @Published var hasSubmitted = false
 
     // 의존 서비스
     private let service: PlaceSearchService
@@ -27,6 +28,7 @@ final class SearchManager: ObservableObject {
         self.isLoading = false
         self.errorMessage = nil
         self.shouldShowSearchMode = false
+        self.hasSubmitted = false
     }
 
     // 일반 검색
@@ -35,6 +37,7 @@ final class SearchManager: ObservableObject {
         let kw = query.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !kw.isEmpty else { results = []; return }
 
+        hasSubmitted = true
         isLoading = true
         defer { isLoading = false }
 
@@ -50,8 +53,13 @@ final class SearchManager: ObservableObject {
     func searchWithVoiceResult(_ text: String) async {
         query = text
         shouldShowSearchMode = true
+        hasSubmitted = true
+        print("[SearchManager] hasSubmitted set to TRUE: \(hasSubmitted)")  
         await search()
+        print("[SearchManager] After search - hasSubmitted: \(hasSubmitted)")
     }
 
-    func resetSearchMode() { shouldShowSearchMode = false }
+    func resetSearchMode() {
+        shouldShowSearchMode = false
+    }
 }
