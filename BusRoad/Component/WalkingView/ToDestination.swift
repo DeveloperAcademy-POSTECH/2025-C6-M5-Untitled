@@ -20,10 +20,16 @@ struct ToDestination: View {
         
         if case let .walk(node) = journey.nodes[index] {
             VStack(alignment: .leading, spacing: 0) {
-                Text(node.end.name)
-                    .font(.presemi36Scaled)
-                    .foregroundColor(.primaryHeavy)
-                    .padding(.top, 25.wScaled)
+                MarqueeText(
+                    text: node.end.name,
+                    font: .presemi36Scaled,
+                    uiFont: .presemi36Scaled,
+                    startDelay: 1.0,
+                    alignment: .leading,
+                )
+                .foregroundColor(.primaryHeavy)
+                .padding(.top, 25.wScaled)
+
                 
                 Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
                     .font(.prereg36Scaled)

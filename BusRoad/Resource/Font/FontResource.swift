@@ -242,5 +242,9 @@ extension UIFont {
         pretendard(.semibold, size: 32.wScaled)
     }
     
+    static var presemi36Scaled: UIFont {
+        pretendard(.semibold, size: 36.wScaled)
+    }
+    
 }
     
