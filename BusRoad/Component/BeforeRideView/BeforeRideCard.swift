@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 
 struct BeforeRideCard: View {
@@ -57,22 +58,22 @@ struct BeforeRideCard: View {
                                         remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy
                                     )
                                     .cornerRadius(15)
-                            )
-                        
-                        Spacer()
-                    }
-                }
-                
-                //TODO: 여기에 로티,이미지 파일 들어가야함
-                Rectangle()
-                    .cornerRadius(10)
-                    .foregroundStyle(.subPoint)
+                              )
+                          
+                          Spacer()
+                      }
+                  }
+                  
+                  LottieView(animation: .named("BeforeRiding"))
+                    .playing(loopMode: .loop)  // 반복 재생
+                    .animationSpeed(1.0)  // 재생 속도
                     .frame(width: 200.wScaled, height: 200.wScaled)
-                
-            }
-            .padding(.horizontal, 40.wScaled)
-        }
-    }
+
+                     
+              }
+              .padding(.horizontal, 40.wScaled)
+      }
+  }
 }
 
 #Preview {
