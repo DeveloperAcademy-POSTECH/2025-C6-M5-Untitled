@@ -4,24 +4,24 @@ struct VoiceSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @StateObject var vm = VoiceSearchViewModel()
     @Environment(\.dismiss) private var dismiss
-
+    
     var onSearchCompleted: ((String) -> Void)?
-
+    
     var body: some View {
         ZStack {
             Color.primaryNormal
                 .ignoresSafeArea()
-
+            
             VStack {
                 Spacer()
-
+                
                 Text(vm.centerMessage)
                     .font(.premed28)
                     .foregroundStyle(.subLight)
                     .multilineTextAlignment(.center)
-
+                
                 Spacer()
-
+                
                 ZStack {
                     if vm.showWaveAnimation {
                         WaveRingsView()
@@ -37,12 +37,12 @@ struct VoiceSearchView: View {
                                 .frame(width: 60, height: 60)
                         }
                     }
-                    .disabled(!vm.isMicButtonEnabled) // 준비/실패 외 상태에서는 탭 방지
+//                  
                 }
                 .frame(width: 200, height: 200) // 화면 움직이지 않도록 frame 값
-                .padding(.bottom, 114.wScaled)
+                .padding(.bottom, 11.wScaled)
             }
-
+            
             // 닫기 버튼
             VStack {
                 HStack {

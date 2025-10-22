@@ -226,3 +226,17 @@ extension Font {
         return .paperScaled(type: .medium, size: 18)
     }
 }
+
+
+extension UIFont {
+    
+    static func pretendard(_ type: Font.Pre, size: CGFloat) -> UIFont {
+        return UIFont(name: type.value, size: size) ?? .systemFont(ofSize: size)
+    }
+    
+    static var presemi32Scaled: UIFont {
+        pretendard(.semibold, size: 32.wScaled)
+    }
+    
+}
+    

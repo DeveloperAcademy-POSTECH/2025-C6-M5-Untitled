@@ -16,13 +16,10 @@ final class OnRideViewModel: ObservableObject {
     // 어떤 버스 구간을 감시할지 (환승 고려용)
     @Published var busLegIndex: Int = 0 {
         didSet {
-            attachSelectedJourney(busLegIndex: busLegIndex, enter: enterRadiusMeters, exit: enterRadiusMeters+40)
+            attachSelectedJourney(busLegIndex: busLegIndex)
         }
     }
-    
-    // 노멀라이즈 기준
-    private var enterRadiusMeters: CLLocationDistance = 150
-    
+        
     // 의존성
     private let locationService: LocationService
     private let journeyManager: JourneyManager
@@ -61,7 +58,7 @@ final class OnRideViewModel: ObservableObject {
 extension OnRideViewModel {
     
     /// 선택 여정에서 하차 정류장 이름 세팅 + 근접 감시 대상/반경 지정
-    func attachSelectedJourney(busLegIndex: Int, enter: CLLocationDistance = 150, exit: CLLocationDistance = 190) {
+    func attachSelectedJourney(busLegIndex: Int) {
         guard let journey = journeyManager.selectedJourney else {
             print("⚠️ 선택된 여정이 없습니다.")
             return
@@ -72,11 +69,9 @@ extension OnRideViewModel {
             self.stopName = alight.name
         }
         
-        // progress 정규화 기준 저장
-        self.enterRadiusMeters = enter
         
         // 근접 감시 설정 + 콜백
-        proximity.configure(busLegIndex: busLegIndex, enter: enter, exit: exit)
+        proximity.configure(busLegIndex: busLegIndex)
         proximity.onEnterRadius = { [weak self] _, _ in
             self?.isNearAlight = true
             self?.canAlight = true
@@ -99,7 +94,7 @@ extension OnRideViewModel {
     /// 감시 시작 (외부에서 busLegIndex를 정했으면 그 값을 사용)
     func start() {
         // selectedJourney가 있고 busLegIndex가 유효하다는 전제하에 구성
-        attachSelectedJourney(busLegIndex: busLegIndex, enter: 150, exit: 190)
+        attachSelectedJourney(busLegIndex: busLegIndex)
         
         // 거리 스트림 구독 → progress 갱신
         bag.removeAll()

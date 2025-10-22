@@ -18,9 +18,14 @@ struct OnRideCard: View {
                 VStack(spacing: 48.wScaled) {
                     HStack {
                         VStack(alignment: .leading, spacing: 8.wScaled) {
-                            Text(busStopName)
-                                .font(.prebold36Scaled)
-                                .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                            MarqueeText(
+                                text: busStopName,
+                                font: .presemi32Scaled,
+                                uiFont: .presemi32Scaled,
+                                startDelay: 1.0,
+                                alignment: .leading
+                            )
+                            .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                             
                             Text("정류장에서 내려야 해요.")
                                 .font(.prereg24Scaled)

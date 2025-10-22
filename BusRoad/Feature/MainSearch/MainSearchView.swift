@@ -37,7 +37,9 @@ struct MainSearchView: View {
                         vm.resetManager()
                         isSearchMode = false
                         coordinator.push(.routeSuggestion)
-                    }
+                    },
+                    hasSubmitted: hasSubmitted,
+                    isLoading: vm.isLoading
                 )
             } else {
                 IntroSection(
@@ -94,11 +96,12 @@ struct MainSearchView: View {
         isFocused = false
         hasSubmitted = false
         vm.query = ""
-        // vm.results는 매니저가 관리하니 굳이 초기화 필요 없음
+        vm.resetManager()
     }
 
     @MainActor func performSearch() {
         showHint = false
+        isFocused = false
         isSearchMode = true
         hasSubmitted = true
         Task { await vm.search() }
