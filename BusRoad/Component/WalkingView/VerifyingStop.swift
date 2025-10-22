@@ -22,13 +22,13 @@ struct VerifyingStop: View {
         Spacer()
         
         Text(node.end.name)
-          .font(.presemi36)
+          .font(.presemi36Scaled)
           .foregroundColor(.primaryHeavy)
-          .padding(.bottom, 20)
+          .padding(.bottom, 20.wScaled)
         
         
         Text("정류장 이름이 맞는지\n확인해주세요.")
-          .font(.prereg32)
+          .font(.prereg32Scaled)
           .foregroundStyle(Color.primaryHeavy)
         
         Spacer()
@@ -43,21 +43,21 @@ struct VerifyingStop: View {
               Rectangle()
                 .cornerRadius(20)
                 .foregroundColor(.subStrong)
-                .frame(width: 240, height: 75)
+                .frame(width: 240.wScaled, height: 75.wScaled)
               Text("맞아요")
-                .font(.premed32)
+                .font(.premed32Scaled)
                 .foregroundColor(.subLight)
             }
           }
           Spacer()
         }
-        .padding(.bottom,50)
+        .padding(.bottom,50.wScaled)
       }
-      .padding(.horizontal, 30)
+      .padding(.horizontal, 30.wScaled)
       
     } else {
       Text("경로 정보 확인 불가")
-        .font(.presemi36)
+        .font(.presemi36Scaled)
         .foregroundColor(.red)
     }
   }

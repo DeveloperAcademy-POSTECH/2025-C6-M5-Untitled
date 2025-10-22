@@ -29,9 +29,9 @@ struct WholeJourney: View {
     ZStack{
       if !isWalkingOnly {
         Rectangle()
-          .frame(height: 4)
+          .frame(height: 4.wScaled)
           .foregroundColor(.primaryLight)
-          .padding(.horizontal, 2)    // 선 안 보이도록
+          .padding(.horizontal, 2.wScaled)    // 선 안 보이도록
       }
       HStack{
         ForEach(Array(journey.nodes.enumerated()), id: \.element.id) { index, node in

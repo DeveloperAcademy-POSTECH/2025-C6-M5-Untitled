@@ -18,11 +18,11 @@ struct CongratsView: View {
       Color(.primarywhite)
         .ignoresSafeArea()
       
-      VStack(spacing: 0){
+      VStack(spacing: 0.wScaled){
         
-        VStack(spacing: 32) {
+        VStack(spacing: 32.wScaled) {
           TopBar(isMoving: true) { coordinator.popToRoot() }
-            .padding(.horizontal, 8)
+            .padding(.horizontal, 8.wScaled)
           
           if let journey {
               WholeJourney(
@@ -30,12 +30,12 @@ struct CongratsView: View {
                   journeyIndex: journey.nodes.count - 1,
                   isBeforeRide: false
               )
-              .padding(.horizontal, 32)
+              .padding(.horizontal, 32.wScaled)
             }
           
           LineDivider()
         }
-        .frame(height: 144)
+        .frame(height: 144.wScaled)
         ZStack {
           Color(.background)
             .ignoresSafeArea()
@@ -43,7 +43,7 @@ struct CongratsView: View {
             Spacer()
             if let destination = JourneyManager.shared.destination {
               Text(destination.name)
-                .font(.presemi36)
+                .font(.presemi36Scaled)
                 .foregroundColor(.primaryHeavy)
             }
             Spacer()
@@ -51,7 +51,7 @@ struct CongratsView: View {
             HStack{
               Spacer()
               Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 148, weight: .bold))
+                .font(.system(size: 148.wScaled, weight: .bold))
                 .foregroundColor(.subStrong)
                 .rotation3DEffect(
                   .degrees(isAnimating ? 360 : 0),
@@ -67,14 +67,14 @@ struct CongratsView: View {
             Spacer()
             
             Text("도착")
-              .font(.presemi32)
+              .font(.presemi32Scaled)
               .foregroundColor(.primaryHeavy)
             Text("했어요!")
-              .font(.prereg32)
+              .font(.prereg32Scaled)
               .foregroundColor(.primaryHeavy)
-              .padding(.bottom, 80)
+              .padding(.bottom, 80.wScaled)
           }
-          .padding(.horizontal,30)
+          .padding(.horizontal,30.wScaled)
         }
       }
     }

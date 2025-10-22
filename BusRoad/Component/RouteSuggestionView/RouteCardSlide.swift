@@ -56,7 +56,7 @@ struct RouteCardSlide: View {
             ForEach(0..<routes.count, id: \.self) { index in
               Circle()
                 .fill(index == currentIndex ? Color.greyStrong : Color.greyStrong.opacity(0.3))
-                .frame(width: 8, height: 8)
+                .frame(width: 8.wScaled, height: 8.wScaled)
             }
           }
         }
