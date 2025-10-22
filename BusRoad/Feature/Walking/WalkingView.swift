@@ -8,27 +8,28 @@
 import SwiftUI
 
 struct WalkingView: View {
-    @ObservedObject var vm = WalkingViewModel()
-    @EnvironmentObject private var coordinator: NavigationCoordinator
-    
-    var journey: Journey?
-    var index: Int?
-    
-    init(manager: JourneyManager = .shared) {
-        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
-            self.journey = journey
-            self.index = index
-        }
+  @ObservedObject var vm = WalkingViewModel()
+  @EnvironmentObject private var coordinator: NavigationCoordinator
+  @State private var showAlert = false
+  
+  var journey: Journey?
+  var index: Int?
+  
+  init(manager: JourneyManager = .shared) {
+    if let journey = manager.selectedJourney, let index = manager.journeyIndex {
+      self.journey = journey
+      self.index = index
     }
-    
-    var body: some View {
-        ZStack {
-            Color(.primarywhite)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0){
-                
-                VStack(spacing: 0) {
+  }
+  
+  var body: some View {
+    ZStack {
+      Color(.primarywhite)
+        .ignoresSafeArea()
+      
+      VStack(spacing: 0){
+        
+        VStack(spacing: 0) {
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
                     
@@ -38,24 +39,38 @@ struct WalkingView: View {
                     }
                 }
                 .frame(height: 144)
+        
+        LineDivider()
+        
+        ZStack {
+          Color(.background)
+            .ignoresSafeArea()
+          
+          VStack {
+            if let journey, let index {
+              if vm.arrived {
+                AtArrival(journey: journey, index: index)
+              } else {
+                ToDestination(vm:vm, journey: journey, index: index)
                 
-                LineDivider()
+                Spacer()
                 
-                ZStack {
-                    Color(.background)
-                        .ignoresSafeArea()
-                    
-                    VStack {
-                        if let journey, let index {
-                            if vm.arrived {
-                                AtArrival(journey: journey, index: index)
-                            } else {
-                                ToDestination(vm:vm, journey: journey, index: index)
-                            }
-                        }
-                    }
+                Button("이미 목적지에 도착하셨나요?") {
+                  showAlert = true
                 }
+                .font(.premed12Scaled)
+                .foregroundColor(.primaryHeavy)
+                .underline()
+                
+                Spacer()
+              }
             }
+          }
         }
+      }
+      .overlay(
+        WalkingAlert(isPresented: $showAlert)
+      )
     }
+  }
 }

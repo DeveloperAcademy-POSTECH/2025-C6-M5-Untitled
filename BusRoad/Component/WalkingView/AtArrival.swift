@@ -11,13 +11,13 @@ struct AtArrival: View {
 
     var body: some View {
         if case let .walk(node) = journey.nodes[index] {
-            if showVerifyingStop {
+            if showVerifyingStop && journey.nodes.count > 1 {
               VerifyingStop(showVerifyingStop: $showVerifyingStop, journey: journey, index: index)
             } else {
               VStack(alignment: .leading) {
                     Spacer()
                     Text(node.end.name)
-                        .font(.presemi36)
+                        .font(.presemi36Scaled)
                         .foregroundColor(.primaryHeavy)
                     
                     Spacer()
@@ -44,18 +44,18 @@ struct AtArrival: View {
                     Spacer()
                     
                     Text("도착")
-                        .font(.presemi32)
+                        .font(.presemi32Scaled)
                         .foregroundColor(.primaryHeavy)
                     Text("했어요!")
-                        .font(.prereg32)
+                        .font(.prereg32Scaled)
                         .foregroundColor(.primaryHeavy)
-                        .padding(.bottom, 80)
+                        .padding(.bottom, 80.wScaled)
                 }
-              .padding(.horizontal,30)
+              .padding(.horizontal,30.wScaled)
             }
         } else {
             Text("경로 정보 확인 불가")
-                .font(.presemi36)
+                .font(.presemi36Scaled)
                 .foregroundColor(.red)
         }
     }

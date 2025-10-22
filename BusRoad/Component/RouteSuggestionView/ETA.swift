@@ -21,7 +21,14 @@ struct ETA: View {
     var timeText: String {
         let hours = journey.totalTime / 60
         let minutes = journey.totalTime % 60
-        return hours > 0 ? "\(hours)시간 \(minutes)분" : "\(minutes)분"
+      
+      if hours > 0 && minutes > 0 {
+          return "\(hours)시간 \(minutes)분"
+      } else if hours > 0 && minutes == 0 {
+          return "\(hours)시간"
+      } else {
+          return "\(minutes)분"
+      }
     }
     
     var body: some View {
