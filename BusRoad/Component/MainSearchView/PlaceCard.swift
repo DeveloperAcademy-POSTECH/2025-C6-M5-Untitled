@@ -12,24 +12,26 @@ struct PlaceCard: View {
                 
                 if let query = searchQuery, !query.isEmpty {
                     Text(title.highlightedText(searchQuery: query))
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .truncationMode(.tail)
                         .font(.presemi24)
                         .foregroundStyle(.primaryHeavy)
+                        .fixedSize(horizontal: false, vertical: true)
                     
                     
                 } else {
                     Text(title)
                         .font(.presemi24)
                         .foregroundStyle(.primaryHeavy)
-                        .lineLimit(1)
+                        .lineLimit(2)
                         .truncationMode(.tail)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
 
                 Text(address)
                     .font(.prereg18)
                     .foregroundStyle(.greyNormal)
-                    .lineLimit(1)
+                    .lineLimit(2)
                     .truncationMode(.tail)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -86,13 +88,13 @@ extension String {
 #Preview {
     VStack(spacing: 7) {
         PlaceCard(
-            title: "포항 영일대해수욕장",
-            address: "경북 포항시 북구 두호동 685",
+            title: "포항 공과대학교 박태준 학술정보관",
+            address: "경기도 용인시 처인구 중부대로 1440번길 7 303호",
             searchQuery: "포항",
             onTap: {}
         )
         PlaceCard(
-            title: "테라로사 포스텍점",
+            title: "가나다라마바사아자차카타파하아에이오우",
             address: "포항시 남구 청암로 87",
             searchQuery: "포항",
             onTap: {}
