@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct RouteCard: View {
+    var allJourneys: [Journey]
     var journey: Journey
     var index: Int
     
@@ -25,7 +26,7 @@ struct RouteCard: View {
                         VStack(spacing: 40.wScaled) {
                             
                             VStack(alignment: .leading, spacing: 36.wScaled) {
-                                ETA(journey: journey, index: index)
+                              ETA(journeys: allJourneys, journey: journey, index: index)
                                 BoardingLocation(route: firstBusRoute)
                             }
                             
@@ -71,8 +72,12 @@ struct RouteCard: View {
         totalTime: 18 + 5 + 22,
         nodes: [.bus(leg1), .walk(walk), .bus(leg2)]
     )
+  
+  let allDummyJourneys = [
+    sampleJourney,
+]
     
-    return RouteCard(journey: sampleJourney, index: 0)
+    return RouteCard(allJourneys: allDummyJourneys, journey: sampleJourney, index: 0)
         .previewLayout(.sizeThatFits)
         .padding()
         .background(Color(.systemBackground))
