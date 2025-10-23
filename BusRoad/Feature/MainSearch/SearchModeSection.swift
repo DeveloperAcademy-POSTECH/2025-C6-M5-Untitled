@@ -77,7 +77,7 @@ struct SearchModeSection: View {
                         ProgressView()
                             .controlSize(.large)
                             .scaleEffect(1.5)
-                            .padding(.top, -150)
+                            .padding(.top, -100)
 
                         Spacer(minLength: 0)
                     
@@ -94,7 +94,7 @@ struct SearchModeSection: View {
                                 .foregroundStyle(.greyHeavy)
                         }
                         .multilineTextAlignment(.center)
-                        .padding(.top, -150)
+                        .padding(.top, -100)
 
                         Spacer(minLength: 0)
 

@@ -24,7 +24,7 @@ struct RouteCardSlide: View {
             ZStack {
               ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
                 let relativeIndex: CGFloat = CGFloat(index - currentIndex)
-                RouteCard(journey: item, index: index)
+                RouteCard(allJourneys: routes, journey: item, index: index)
                   .offset(x: relativeIndex * 270.wScaled)
                   .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
                   .opacity(relativeIndex == 0 ? 1.0 : 0.3)
@@ -59,6 +59,7 @@ struct RouteCardSlide: View {
                 .frame(width: 8.wScaled, height: 8.wScaled)
             }
           }
+          .padding(.top, 7.wScaled)
         }
       }
     }

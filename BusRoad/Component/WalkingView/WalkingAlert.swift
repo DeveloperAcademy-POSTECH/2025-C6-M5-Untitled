@@ -14,35 +14,34 @@ struct WalkingAlert: View {
   var body: some View {
     if isPresented {
       ZStack {
-        Color.black
+        Color.primaryblack
+              .opacity(0.5)
           .ignoresSafeArea()
         
-        Rectangle()
-          .frame(width: 300.wScaled, height: 199.wScaled)
-          .cornerRadius(35)
-          .foregroundColor(Color.background)
-        VStack(alignment:.center, spacing: 16.wScaled){
-          Text("혹시 이미 도착하셨나요?")
+        VStack(alignment:.center){
+          Text("목적지에 도착하셨나요?")
             .font(.presemi24Scaled)
-            .foregroundColor(.primary)
-            .padding(.leading, 8.wScaled)
-          Text("목적지에 이미 도착하셨다면,\n직접 완료할 수 있어요.")
+            .foregroundColor(.primaryblack)
+            .padding(.top, 18.wScaled)
+            .padding(.bottom, 10.wScaled)
+            
+          Text("목적지에 이미 도착하셨다면,\n직접 경로를 완료할 수 있어요.")
             .font(.prereg20Scaled)
-            .foregroundColor(.primary)
-            .lineSpacing(5.wScaled)
-            .multilineTextAlignment(.leading)
-            .padding(.leading, 8.wScaled)
-          HStack(spacing: 16.wScaled){
+            .foregroundColor(.primaryblack)
+            .multilineTextAlignment(.center)
+            .padding(.bottom, 24.wScaled)
+            
+          HStack(spacing: 10.wScaled){
             Button{
               isPresented = false
             } label:{
               ZStack{
                 Rectangle()
                   .cornerRadius(100)
-                  .foregroundColor(Color.primaryLight)
-                  .frame(width: 128.wScaled, height: 48.wScaled)
+                  .foregroundColor(Color.greybutton)
+                  .frame(width: 139.wScaled, height: 48.wScaled)
                 Text("닫기")
-                  .foregroundColor(Color.greyStrong)
+                  .foregroundColor(Color.primaryblack)
                   .font(.premed20Scaled)
               }
             }
@@ -54,7 +53,7 @@ struct WalkingAlert: View {
                 Rectangle()
                   .cornerRadius(100)
                   .foregroundColor(Color.subPoint)
-                  .frame(width: 128.wScaled, height: 48.wScaled)
+                  .frame(width: 139.wScaled, height: 48.wScaled)
                 Text("완료하기")
                   .foregroundColor(Color.primarywhite)
                   .font(.premed20Scaled)
@@ -62,8 +61,19 @@ struct WalkingAlert: View {
             }
           }
         }
-        .padding()
+        .padding(.vertical, 15.wScaled)
+        .frame(width: 320.wScaled)
+          
+        .background(
+            RoundedRectangle(cornerRadius: 35)
+            .fill(.regularMaterial) // 내부 색상
+            .overlay(
+                RoundedRectangle(cornerRadius: 35)
+                    .stroke(Color.primarywhite, lineWidth: 0.5)
+                    )
+        )
       }
+      .background(.clear)
     }
   }
 }

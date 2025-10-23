@@ -38,6 +38,17 @@ struct RouteErrorCard: View {
             .font(.premed20)
             .foregroundColor(Color.subLight)
           
+        } else if viewModel.errorMessage == "출발지와 도착지가 같습니다." {
+          Text("출발지와 도착지가\n같은 곳이에요.😮")
+            .font(.presemi24)
+            .foregroundColor(Color.subLight)
+            .multilineTextAlignment(.center)
+            .lineSpacing(5)
+          
+          Text("다시 검색해주세요.")
+            .font(.premed20)
+            .foregroundColor(Color.subLight)
+          
         } else {
           Text("앗, 문제가 발생했어요😵")
             .font(.presemi24)

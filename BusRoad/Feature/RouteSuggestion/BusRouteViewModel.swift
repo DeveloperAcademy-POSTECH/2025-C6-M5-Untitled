@@ -82,14 +82,22 @@ class BusRouteViewModel: ObservableObject {
         }
         
         let distanceInMeters = origin.asCLLocation.distance(from: destination.asCLLocation)
-        
-        // 거리가 700m 미만이면 API를 호출하지 않고 에러 메시지를 설정
+      
+      // 목적지와 출발지가 같으면 API를 호출하지 않고 에러 메시지를 설정
+      if origin.latitude == destination.latitude && origin.longitude == destination.longitude {
+          print("🚨 출발지와 목적지가 동일해 API를 호출하지 않습니다.")
+          self.errorMessage = "출발지와 도착지가 같습니다."
+          self.routes = []
+          return
+      }
+      
         if distanceInMeters < 700 {
             print("🚨 거리가 너무 가까워 API를 호출하지 않습니다.")
             self.errorMessage = "출발지와 목적지가 너무 가깝습니다."
             self.routes = []
             return
         }
+      
         print("➡️ ViewModel: 출발지/목적지 준비 완료! 경로 검색을 시작합니다.")
         
         fetchRoute(
