@@ -42,9 +42,14 @@ struct CongratsView: View {
           VStack(alignment: .leading) {
             Spacer()
             if let destination = JourneyManager.shared.destination {
-              Text(destination.name)
-                .font(.presemi36Scaled)
-                .foregroundColor(.primaryHeavy)
+              MarqueeText(
+                  text: destination.name,
+                  font: .presemi36Scaled,
+                  uiFont: .presemi36Scaled,
+                  startDelay: 1.0,
+                  alignment: .leading
+              )
+              .foregroundColor(Color.primaryHeavy)
             }
             Spacer()
             
@@ -61,6 +66,9 @@ struct CongratsView: View {
                   withAnimation(.easeOut(duration: 2.0)) {
                     isAnimating = true
                   }
+//                  DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+//                    coordinator.popToRoot()
+//                  }
                 }
               Spacer()
             }

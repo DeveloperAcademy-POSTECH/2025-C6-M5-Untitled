@@ -69,6 +69,7 @@ struct RouteSuggestionView: View {
         } else {
             ZStack {
                 Color.primarywhite
+                .ignoresSafeArea()
                     
                 
                 VStack(spacing: 0) {
@@ -113,7 +114,7 @@ struct RouteSuggestionView: View {
                             )
                             .padding(.horizontal, 44.wScaled)
                             .padding(.top, 30.wScaled)
-                            .padding(.bottom, 39.wScaled)
+                            .padding(.bottom, 30.wScaled)
                             
                             
                             // MARK: - 버튼
