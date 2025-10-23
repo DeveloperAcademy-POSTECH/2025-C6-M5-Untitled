@@ -22,16 +22,16 @@ struct StopNavigationAlert: View {
           Text("경로 안내를 종료할까요?")
             .font(.presemi24Scaled)
             .foregroundColor(.primaryblack)
-            .padding(.top, 18.wScaled)
+            .padding(.top, 20.wScaled)
             .padding(.bottom, 10.wScaled)
             
-          Text("페이지를 나가면\n경로 안내가 종료돼요.")
+          Text("페이지를 나가면 경로 안내가\n종료돼요.")
             .font(.prereg20Scaled)
             .foregroundColor(.primaryblack)
            .multilineTextAlignment(.center)
-           .padding(.bottom, 24.wScaled)
+           .padding(.bottom, 36.wScaled)
             
-          HStack(spacing: 10.wScaled){
+          HStack(spacing: 9.wScaled){
             Button{
               isPresented = false
             } label:{
@@ -40,7 +40,7 @@ struct StopNavigationAlert: View {
                   .cornerRadius(100)
                   .foregroundColor(Color.greybutton)
                   .frame(width: 139.wScaled, height: 48.wScaled)
-                Text("닫기")
+                Text("취소")
                   .foregroundColor(Color.primaryblack)
                   .font(.premed20Scaled)
               }
@@ -61,7 +61,7 @@ struct StopNavigationAlert: View {
             }
           }
         }
-        .padding(.vertical, 15.wScaled)
+        .padding(.vertical, 20.wScaled)
         .frame(width: 320.wScaled)
         .background(
             RoundedRectangle(cornerRadius: 35)
