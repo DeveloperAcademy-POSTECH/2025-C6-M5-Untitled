@@ -14,7 +14,7 @@ struct ToDestination: View {
     
     var journey: Journey
     var index: Int
-    let threshold: Double = 40  // 방향 허용 오차
+    let threshold: Double = 30  // 방향 허용 오차
     
     var body: some View {
         
@@ -143,13 +143,13 @@ struct ArrowView: View {
         switch (inDeadzone, nowInDeadzone) {
         case (true, false):
             // 데드존 → 바깥: "나가기" 순간
-            withAnimation(.easeInOut(duration: 0.25)) {
+            withAnimation(.easeIn(duration: 0.5)) {
                 smoothAngle = newSigned
             }
             
         case (false, true):
             // 바깥 → 데드존: "들어오기" 순간
-            withAnimation(.easeOut(duration: 1.0)) {
+            withAnimation(.easeOut(duration: 0.5)) {
                 smoothAngle = 0
             }
             // 즉시 붙이고 싶다면 위 withAnimation 대신: smoothAngle = 0
