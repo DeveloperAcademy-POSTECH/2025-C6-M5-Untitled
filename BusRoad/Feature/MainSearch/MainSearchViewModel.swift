@@ -28,7 +28,7 @@ final class MainSearchViewModel: ObservableObject {
         get { searchManager.query }
         set { searchManager.query = newValue }
     }
-    var results: [NaverLocalItem] { searchManager.results }
+    var results: [PlaceSummary] { searchManager.results }
     var shouldShowSearchMode: Bool { searchManager.shouldShowSearchMode }
     var isLoading: Bool { searchManager.isLoading }
     var errorMessage: String? { searchManager.errorMessage }

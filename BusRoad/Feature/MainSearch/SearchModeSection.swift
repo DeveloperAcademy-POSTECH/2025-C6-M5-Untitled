@@ -2,14 +2,14 @@ import SwiftUI
 
 struct SearchModeSection: View {
     @Binding var query: String
-    let results: [NaverLocalItem]          // vm.results의 요소 타입에 맞춰서
+    let results: [PlaceSummary]          // vm.results의 요소 타입에 맞춰서
     var isFocused: FocusState<Bool>.Binding
     
     let onBack: () -> Void
     let onSubmit: () -> Void
     let onClear: () -> Void
     let onMicTap: () -> Void
-    let onSelect: (NaverLocalItem) -> Void
+    let onSelect: (PlaceSummary) -> Void
     @Binding var hasSubmitted: Bool
     let isLoading: Bool
     
@@ -102,8 +102,8 @@ struct SearchModeSection: View {
                         LazyVStack(spacing: 7) {
                             ForEach(results) { item in
                                 PlaceCard(
-                                    title: item.plainTitle,
-                                    address: item.displayAddress,
+                                    title: item.name,
+                                    address: item.address,
                                     searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
                                 ) {
                                     // onTap
