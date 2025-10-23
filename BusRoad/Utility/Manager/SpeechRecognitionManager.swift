@@ -21,7 +21,9 @@ class SpeechRecognitionManager: ObservableObject {
     
     // 침묵 감지를 위한 타이머
     private var silenceTimer: Timer?
-    private let silenceThreshold: TimeInterval = 3.0 // 3초
+    private let initialSilenceThreshold: TimeInterval = 3.0// 첫 입력 대기시간
+    private let subsequentSilenceThreshold: TimeInterval = 0.5 // 침묵 이후 감지 시간
+    private var hasReceivedFirstResult = false // 첫 음성 입력 받았는지 여부
     
     // MARK: - 초기화
     init() {
@@ -71,7 +73,9 @@ class SpeechRecognitionManager: ObservableObject {
     func reset() {
         stopRecording()
         recognizedText = ""
+        hasReceivedFirstResult = false
         errorMessage = nil
+        print("[Speech] 완전 초기화")
     }
 }
 
@@ -159,6 +163,7 @@ private extension SpeechRecognitionManager {
         isRecording = true
         recognizedText = ""
         errorMessage = nil
+        hasReceivedFirstResult = false
 
         startSilenceTimer()
     }
@@ -173,8 +178,15 @@ private extension SpeechRecognitionManager {
         if let result = result {
             recognizedText = result.bestTranscription.formattedString
             
+            // 처음 버튼 누르고 난 후
+            if !hasReceivedFirstResult && !recognizedText.isEmpty {
+                hasReceivedFirstResult = true
+                print("[Speech] 첫 음성인식 완료, 빠른 침묵 감지 모드로 전환")
+            }
+            
             // 최종 결과가 나왔으면 타이머 재시작, 아니면 계속 진행
             if result.isFinal {
+                print("[Speech] 최종결과 수신, 녹음 중지")
                 stopRecording()
             } else {
                 restartSilenceTimer()
@@ -184,8 +196,13 @@ private extension SpeechRecognitionManager {
     
     /// 침묵 타이머 시작
     func startSilenceTimer() {
-        silenceTimer = Timer.scheduledTimer(withTimeInterval: silenceThreshold, repeats: false) { [weak self] _ in
+        let threshold = hasReceivedFirstResult ? subsequentSilenceThreshold : initialSilenceThreshold
+        
+        print("[Speech] 침묵 타이머 시작 - \(threshold)초 대기 (첫입력: \(!hasReceivedFirstResult))")
+        
+        silenceTimer = Timer.scheduledTimer(withTimeInterval: threshold, repeats: false) { [weak self] _ in
             Task { @MainActor in
+                print("[Speech] 침묵감지 -> 녹음 자동 중지")
                 self?.stopRecording()
             }
         }
@@ -194,6 +211,7 @@ private extension SpeechRecognitionManager {
     /// 침묵 타이머 재시작
     func restartSilenceTimer() {
         silenceTimer?.invalidate()
+        print("[Speech] 음성 입력 감지 → 타이머 재시작")
         startSilenceTimer()
     }
     
