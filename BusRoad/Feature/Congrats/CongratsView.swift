@@ -23,7 +23,7 @@ struct CongratsView: View {
         
         VStack(spacing: 32.wScaled) {
           TopBar(isMoving: true) { coordinator.popToRoot() }
-            .padding(.horizontal, 8.wScaled)
+            .padding(.horizontal, 8)
           
           if let journey {
               WholeJourney(
@@ -31,12 +31,12 @@ struct CongratsView: View {
                   journeyIndex: journey.nodes.count - 1,
                   isBeforeRide: false
               )
-              .padding(.horizontal, 32.wScaled)
+              .padding(.horizontal, 32)
             }
           
           LineDivider()
         }
-        .frame(height: 144.wScaled)
+        .frame(height: 144)
         ZStack {
           Color(.background)
             .ignoresSafeArea()
@@ -54,7 +54,7 @@ struct CongratsView: View {
                   )
                   .foregroundColor(Color.primaryHeavy)
                 }
-                .offset(y: showArrivalConfirmation ? 150 : 0) // 👈 아래로 140 이동
+                .offset(y: showArrivalConfirmation ? 150.wScaled : 0) // 👈 아래로 140 이동
                   .animation(.easeOut(duration: 1.0), value: showArrivalConfirmation)
               }
               Spacer()

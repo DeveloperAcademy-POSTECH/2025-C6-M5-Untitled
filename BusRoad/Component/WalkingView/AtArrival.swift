@@ -8,39 +8,45 @@ struct AtArrival: View {
     @State private var scale: CGFloat = 0.0
     @State private var isAnimating = false
     @State private var showVerifyingStop = false
-
+    
     var body: some View {
         if case let .walk(node) = journey.nodes[index] {
             if showVerifyingStop && journey.nodes.count > 1 {
-              VerifyingStop(showVerifyingStop: $showVerifyingStop, journey: journey, index: index)
+                VerifyingStop(showVerifyingStop: $showVerifyingStop, journey: journey, index: index)
             } else {
-              VStack(alignment: .leading) {
-                    Spacer()
-                    Text(node.end.name)
-                        .font(.presemi36Scaled)
-                        .foregroundColor(.primaryHeavy)
-                    
+                VStack(alignment: .leading) {
                     Spacer()
                     
-                HStack{
-                  Spacer()
-                  Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 148, weight: .bold))
-                    .foregroundColor(.subStrong)
-                    .rotation3DEffect(
-                      .degrees(isAnimating ? 360 : 0),
-                      axis: (x: 0, y: 1, z: 0)
+                    MarqueeText(
+                        text: node.end.name,
+                        font: .presemi36Scaled,
+                        uiFont: .presemi36Scaled,
+                        startDelay: 1.0,
+                        alignment: .leading,
                     )
-                    .onAppear {
-                      withAnimation(.easeOut(duration: 2.0)) {
-                        isAnimating = true
-                      }
-                      DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                        showVerifyingStop = true
-                      }
+                    .foregroundColor(.primaryHeavy)
+                    
+                    Spacer()
+                    
+                    HStack{
+                        Spacer()
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 148, weight: .bold))
+                            .foregroundColor(.subStrong)
+                            .rotation3DEffect(
+                                .degrees(isAnimating ? 360 : 0),
+                                axis: (x: 0, y: 1, z: 0)
+                            )
+                            .onAppear {
+                                withAnimation(.easeOut(duration: 2.0)) {
+                                    isAnimating = true
+                                }
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                    showVerifyingStop = true
+                                }
+                            }
+                        Spacer()
                     }
-                  Spacer()
-                }
                     Spacer()
                     
                     Text("도착")
@@ -51,7 +57,7 @@ struct AtArrival: View {
                         .foregroundColor(.primaryHeavy)
                         .padding(.bottom, 80.wScaled)
                 }
-              .padding(.horizontal,30.wScaled)
+                .padding(.horizontal,30.wScaled)
             }
         } else {
             Text("경로 정보 확인 불가")
