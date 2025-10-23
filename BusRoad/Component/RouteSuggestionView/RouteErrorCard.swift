@@ -15,7 +15,6 @@ struct RouteErrorCard: View {
       Rectangle()
         .foregroundColor(Color.primaryNormal)
         .cornerRadius(20)
-        .frame(height: 430.wScaled)
       VStack(spacing: 8) {
         if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다." {
           Text("출발지와 도착지가\n가까이 있어요!")

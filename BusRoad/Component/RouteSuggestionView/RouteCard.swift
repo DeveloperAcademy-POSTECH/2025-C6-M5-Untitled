@@ -20,7 +20,6 @@ struct RouteCard: View {
                     Rectangle()
                         .foregroundColor(Color.primaryNormal)
                         .cornerRadius(20)
-                        .frame(height: 430.wScaled)
                     
                     VStack(spacing: 0) {
                         
