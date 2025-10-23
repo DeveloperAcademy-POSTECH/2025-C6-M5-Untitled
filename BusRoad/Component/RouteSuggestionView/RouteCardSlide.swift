@@ -59,7 +59,10 @@ struct RouteCardSlide: View {
                 .frame(width: 8.wScaled, height: 8.wScaled)
             }
           }
-          .padding(.top, 7.wScaled)
+          .padding(.top, 6.wScaled)
+        }else{
+          Spacer()
+              .frame(height: 14.wScaled)
         }
       }
     }

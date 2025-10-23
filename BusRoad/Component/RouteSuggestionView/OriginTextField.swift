@@ -30,9 +30,12 @@ struct OriginTextField : View {
                     locationType = .origin
                     isSearchMode = true
                 }) {
+                  HStack{
                     Text(location?.name ?? "출발지를 입력하세요")
-                        .font(.prereg20Scaled)
-                        .foregroundColor(Color.greyNormal)
+                      .font(.prereg20Scaled)
+                      .foregroundColor(Color.greyNormal)
+                    Spacer()
+                  }
                 }
                 
                 Spacer()
