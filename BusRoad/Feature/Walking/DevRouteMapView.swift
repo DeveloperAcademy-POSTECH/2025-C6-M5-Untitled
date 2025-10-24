@@ -45,13 +45,16 @@ struct DevRouteMapView: UIViewRepresentable {
             let polyline = MKPolyline(coordinates: tmapCoordinates, count: tmapCoordinates.count)
             mapView.addOverlay(polyline)
             
-            // 지도 영역 설정 (경로 전체가 보이도록)
-            let rect = polyline.boundingMapRect
-            mapView.setVisibleMapRect(
-                rect,
-                edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50),
-                animated: true
-            )
+            // 최초 1회만 지도 영역 설정
+            if !context.coordinator.hasSetInitialRegion {
+                let rect = polyline.boundingMapRect
+                mapView.setVisibleMapRect(
+                    rect,
+                    edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50),
+                    animated: true
+                )
+                context.coordinator.hasSetInitialRegion = true
+            }
         } else if let destination = destination {
             // TMAP 좌표가 없을 때 목적지만 표시
             let annotation = MKPointAnnotation()
@@ -59,22 +62,25 @@ struct DevRouteMapView: UIViewRepresentable {
             annotation.title = "목적지"
             mapView.addAnnotation(annotation)
             
-            // 현재 위치와 목적지가 보이도록 영역 설정
-            if let userLoc = userLocation {
-                let coordinates = [userLoc.coordinate, destination]
-                let rect = MKPolyline(coordinates: coordinates, count: 2).boundingMapRect
-                mapView.setVisibleMapRect(
-                    rect,
-                    edgePadding: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100),
-                    animated: true
-                )
-            } else {
-                let region = MKCoordinateRegion(
-                    center: destination,
-                    latitudinalMeters: 1000,
-                    longitudinalMeters: 1000
-                )
-                mapView.setRegion(region, animated: true)
+            // 최초 1회만 지도 영역 설정
+            if !context.coordinator.hasSetInitialRegion {
+                if let userLoc = userLocation {
+                    let coordinates = [userLoc.coordinate, destination]
+                    let rect = MKPolyline(coordinates: coordinates, count: 2).boundingMapRect
+                    mapView.setVisibleMapRect(
+                        rect,
+                        edgePadding: UIEdgeInsets(top: 100, left: 100, bottom: 100, right: 100),
+                        animated: true
+                    )
+                } else {
+                    let region = MKCoordinateRegion(
+                        center: destination,
+                        latitudinalMeters: 1000,
+                        longitudinalMeters: 1000
+                    )
+                    mapView.setRegion(region, animated: true)
+                }
+                context.coordinator.hasSetInitialRegion = true
             }
         }
     }
@@ -84,6 +90,8 @@ struct DevRouteMapView: UIViewRepresentable {
     }
     
     final class Coordinator: NSObject, MKMapViewDelegate {
+        var hasSetInitialRegion = false
+        
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             if let polyline = overlay as? MKPolyline {
                 let renderer = MKPolylineRenderer(polyline: polyline)
