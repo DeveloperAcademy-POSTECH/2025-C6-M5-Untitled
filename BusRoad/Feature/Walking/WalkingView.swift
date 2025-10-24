@@ -41,7 +41,15 @@ struct WalkingView: View {
                     }
                 }
                 .frame(height: 144)
-                
+                .onChange(of: vm.arrived) { _, newValue in
+                    if newValue,
+                       let journey = journey,
+                       let index = index,
+                       index == journey.nodes.count - 1 {
+                        coordinator.advanceJourneyStage()
+                    }
+                }
+              
                 LineDivider()
                 
                 ZStack {
@@ -90,8 +98,8 @@ struct WalkingView: View {
                             .padding(.horizontal, 18.wScaled)
                             .background(
                                 UnevenRoundedRectangle(
-                                    topLeadingRadius: 12,
-                                    bottomLeadingRadius: 12
+                                    topLeadingRadius: 10,
+                                    bottomLeadingRadius: 10
                                 )
                                 .fill(Color.subStrong)
                             )
@@ -108,7 +116,7 @@ struct WalkingView: View {
             DevRouteMapView(
                 tmapCoordinates: vm.tmapCoordinates,
                 userLocation: vm.loc.location,
-                destination: vm.pendingDestination    
+                destination: vm.pendingDestination
             )
             .presentationDetents([.fraction(0.4), .large])
             .presentationDragIndicator(.visible)
