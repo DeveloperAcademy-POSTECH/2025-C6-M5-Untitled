@@ -31,10 +31,11 @@ struct OriginTextField : View {
         locationType = .origin
         isSearchMode = true
         if let name = location?.name, name != "현위치" {
+          let searchText = (name == "현위치") ? "" : name
           DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             NotificationCenter.default.post(
               name: .didSetPresetDestination,
-              object: name
+              object: searchText
             )
           }
         }
