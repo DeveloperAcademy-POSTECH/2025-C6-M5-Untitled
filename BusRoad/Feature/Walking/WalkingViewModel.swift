@@ -17,6 +17,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private var stepIndex: Int = 0
     var pendingDestination: CLLocationCoordinate2D?
     private var hasCalculatedRoute = false
+    private var currentSegmentIndex: Int = 0 // 현재 진행중인 구간 추적
     
     // TMAP 경로 데이터 저장
     var tmapCoordinates: [CLLocationCoordinate2D] = []
@@ -59,6 +60,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         bigDistanceText = "-- m"
         arrowBearing = 0
         nextCards = []
+        currentSegmentIndex = 0
     }
     
     // MARK: - Route Calculation
@@ -134,7 +136,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - Apple Maps Fallback
     private func fallbackToAppleMaps(origin: CLLocationCoordinate2D, dest: CLLocationCoordinate2D) {
-        print("⚠️ Apple Maps로 fallback")
+        print("Apple Maps로 fallback")
         
         let req = MKDirections.Request()
         req.source = MKMapItem(placemark: MKPlacemark(coordinate: origin))
@@ -233,25 +235,41 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     // MARK: - TMAP 거리 계산
     private func calculateRemainDistance(from userLocation: CLLocation) -> CLLocationDistance {
         guard !tmapCoordinates.isEmpty else { return 0 }
+        guard currentSegmentIndex < tmapCoordinates.count else { return 0 }
         
-        // 가장 가까운 경로상의 점 찾기
-        var minDistance = CLLocationDistance.greatestFiniteMagnitude
-        var closestIndex = 0
-        
-        for (index, coord) in tmapCoordinates.enumerated() {
-            let pointLocation = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
-            let distance = userLocation.distance(from: pointLocation)
+        // 현재 구간의 다음 점만 확인 (한 번에 한 칸씩만!)
+        if currentSegmentIndex < tmapCoordinates.count - 1 {
+            let nextPointIndex = currentSegmentIndex + 1
+            let nextPointLocation = CLLocation(
+                latitude: tmapCoordinates[nextPointIndex].latitude,
+                longitude: tmapCoordinates[nextPointIndex].longitude
+            )
+            let distanceToNext = userLocation.distance(from: nextPointLocation)
             
-            if distance < minDistance {
-                minDistance = distance
-                closestIndex = index
+            // 다음 점을 15m 이내로 통과하면 구간 업데이트
+            if distanceToNext < 15 {
+                currentSegmentIndex = nextPointIndex
+                print("구간 \(nextPointIndex) 통과")
             }
         }
         
-        // 남은 경로 거리 계산
-        var remainingDistance: CLLocationDistance = 0
+        // 다음 목표 지점 설정 (현재 구간의 다음 점)
+        let targetIndex: Int
+        if currentSegmentIndex < tmapCoordinates.count - 1 {
+            targetIndex = currentSegmentIndex + 1
+        } else {
+            targetIndex = tmapCoordinates.count - 1
+        }
         
-        for i in closestIndex..<(tmapCoordinates.count - 1) {
+        // 현재 위치 → 다음 목표 지점
+        let targetLocation = CLLocation(
+            latitude: tmapCoordinates[targetIndex].latitude,
+            longitude: tmapCoordinates[targetIndex].longitude
+        )
+        var remainingDistance = userLocation.distance(from: targetLocation)
+        
+        // 다음 목표 지점 → 끝까지
+        for i in targetIndex..<(tmapCoordinates.count - 1) {
             let from = CLLocation(
                 latitude: tmapCoordinates[i].latitude,
                 longitude: tmapCoordinates[i].longitude
@@ -269,32 +287,47 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     // MARK: - 다음 좌표 찾기
     private func findNextCoordinate(from userLocation: CLLocation) -> CLLocationCoordinate2D? {
         guard !tmapCoordinates.isEmpty else { return nil }
-        
-        var minDistance = CLLocationDistance.greatestFiniteMagnitude
-        var closestIndex = 0
-        
-        for (index, coord) in tmapCoordinates.enumerated() {
-            let pointLocation = CLLocation(latitude: coord.latitude, longitude: coord.longitude)
-            let distance = userLocation.distance(from: pointLocation)
-            
-            if distance < minDistance {
-                minDistance = distance
-                closestIndex = index
-            }
+        guard currentSegmentIndex < tmapCoordinates.count else {
+            return tmapCoordinates.last
         }
         
-        // 다음 좌표 반환 (최소 10m 이상 떨어진 점)
-        for i in (closestIndex + 1)..<tmapCoordinates.count {
+        let minTargetDistance: CLLocationDistance = 15
+        
+        // 현재 구간의 다음 점부터 시작 (현재 점은 제외)
+        let searchStartIndex = currentSegmentIndex + 1
+        
+        guard searchStartIndex < tmapCoordinates.count else {
+            // 마지막 구간이면 목적지 반환
+            return tmapCoordinates.last
+        }
+        
+        var bestIndex = searchStartIndex  // 최소값을 다음 점으로
+        var bestDistance: CLLocationDistance = 0
+        
+        // 다음 점부터 탐색
+        for i in searchStartIndex..<tmapCoordinates.count {
             let nextLocation = CLLocation(
                 latitude: tmapCoordinates[i].latitude,
                 longitude: tmapCoordinates[i].longitude
             )
-            if userLocation.distance(from: nextLocation) > 10 {
+            let distance = userLocation.distance(from: nextLocation)
+            
+            // 15m 이상인 첫 번째 점 발견
+            if distance > minTargetDistance {
+                print("다음 목표: index \(i) (거리 \(Int(distance))m)")
                 return tmapCoordinates[i]
+            }
+            
+            // 가장 먼 점 기록
+            if distance > bestDistance {
+                bestDistance = distance
+                bestIndex = i
             }
         }
         
-        return tmapCoordinates.last
+        // 15m 이상인 점이 없으면 가장 먼 점 반환
+        print("가장 먼 점: index \(bestIndex) (거리 \(Int(bestDistance))m)")
+        return tmapCoordinates[bestIndex]
     }
     
     // MARK: - Geometry Helpers

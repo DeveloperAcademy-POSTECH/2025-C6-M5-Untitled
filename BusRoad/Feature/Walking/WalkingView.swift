@@ -92,8 +92,10 @@ struct WalkingView: View {
                     Button {
                         showDevSheet = true
                     } label: {
-                        Image(systemName: "wrench.adjustable")
+                        Image(systemName: "map")
+                            .foregroundColor(.greyLight)
                             .padding(8)
+                            .background(.subPoint)
                     }
                 }
                 Spacer()
@@ -104,7 +106,7 @@ struct WalkingView: View {
             DevRouteMapView(
                 tmapCoordinates: vm.tmapCoordinates,
                 userLocation: vm.loc.location,
-                destination: vm.pendingDestination    
+                destination: vm.pendingDestination
             )
             .presentationDetents([.fraction(0.4), .large])
             .presentationDragIndicator(.visible)
