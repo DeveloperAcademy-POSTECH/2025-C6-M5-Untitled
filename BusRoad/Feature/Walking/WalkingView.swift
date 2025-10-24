@@ -41,7 +41,15 @@ struct WalkingView: View {
                     }
                 }
                 .frame(height: 144)
-                
+                .onChange(of: vm.arrived) { _, newValue in
+                    if newValue,
+                       let journey = journey,
+                       let index = index,
+                       index == journey.nodes.count - 1 {
+                        coordinator.advanceJourneyStage()
+                    }
+                }
+              
                 LineDivider()
                 
                 ZStack {
