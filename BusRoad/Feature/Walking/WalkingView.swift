@@ -12,7 +12,6 @@ struct WalkingView: View {
   @ObservedObject var vm = WalkingViewModel()
   @EnvironmentObject private var coordinator: NavigationCoordinator
   @State private var showAlert = false
-  @State private var showDebugMap = false  // ✨ 추가
   
   var journey: Journey?
   var index: Int?
