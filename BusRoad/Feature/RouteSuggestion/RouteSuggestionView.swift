@@ -90,6 +90,7 @@ struct RouteSuggestionView: View {
                                 location: $viewModel.origin,
                                 isSearchMode: $isSearchMode,
                                 locationType: $locationType,
+                                userDidSelectOrigin: $viewModel.userDidSelectOrigin,
                                 onRefreshTapped: {
                                     viewModel.userDidSelectOrigin = false
                                     viewModel.requestOrigin() }

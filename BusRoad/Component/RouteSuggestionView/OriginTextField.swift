@@ -12,6 +12,7 @@ struct OriginTextField : View {
     @Binding var location: LocationInfo?
     @Binding var isSearchMode: Bool
     @Binding var locationType: LocationType
+    @Binding var userDidSelectOrigin: Bool
     
     var onRefreshTapped: () -> Void
     
@@ -19,7 +20,7 @@ struct OriginTextField : View {
             
             HStack(spacing: 12) {
                 Text("출발지")
-                    .foregroundColor(Color.greyNormal)
+                    .foregroundColor(Color.subPoint)
                     .font(.prereg20Scaled)
                 
                 Divider()
@@ -33,7 +34,7 @@ struct OriginTextField : View {
                   HStack{
                     Text(location?.name ?? "출발지를 입력하세요")
                       .font(.prereg20Scaled)
-                      .foregroundColor(Color.greyNormal)
+                      .foregroundColor(userDidSelectOrigin ? .greyHeavy : .greyNormal)
                     Spacer()
                   }
                 }
