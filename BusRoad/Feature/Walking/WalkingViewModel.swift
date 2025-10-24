@@ -13,11 +13,19 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var arrived: Bool = false
     
     // MARK: - 내부 상태
-     private let loc = CLLocationManager()
-     private var stepIndex: Int = 0
-     private var pendingDestination: CLLocationCoordinate2D?
-     private var hasCalculatedRoute = false
-    
+    private let loc = CLLocationManager()
+    private var stepIndex: Int = 0
+    private var pendingDestination: CLLocationCoordinate2D?
+    private var hasCalculatedRoute = false
+//    var route: MKRoute? {
+//        didSet {
+//            guard let route = route,
+//                  let currentLocation = loc.location else { return }
+//
+//            updateWith(location: currentLocation, heading: loc.heading)
+//        }
+//    }
+//    
     // TMAP 경로 데이터 저장
     private var tmapCoordinates: [CLLocationCoordinate2D] = []
     private var tmapTotalDistance: Int = 0

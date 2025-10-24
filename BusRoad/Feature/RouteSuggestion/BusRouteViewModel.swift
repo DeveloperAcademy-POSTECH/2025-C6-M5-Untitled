@@ -18,6 +18,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var isSearching: Bool = false
     
     @Published var hasSubmitted: Bool = false
+    @Published var userDidSelectOrigin: Bool = false
     
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
@@ -68,6 +69,7 @@ class BusRouteViewModel: ObservableObject {
     }
     func setOrigin(origin: LocationInfo) {
         journeyManager.setOrigin(origin)
+        userDidSelectOrigin = true
     }
     
     func resetManager() {
@@ -231,6 +233,12 @@ class BusRouteViewModel: ObservableObject {
     }
     
     func requestOrigin() {
+        
+        if userDidSelectOrigin {
+               print("[DEBUG] 사용자가 출발지를 선택했으므로 현위치로 바꾸지 않습니다")
+               return
+           }
+        
         print("[DEBUG] requestOrigin started")
         journeyManager.requestOrigin()
         print("[DEBUG] requestOrigin finished")

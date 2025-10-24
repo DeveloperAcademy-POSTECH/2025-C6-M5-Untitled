@@ -28,9 +28,12 @@ struct DestinationTextField : View {
                     locationType = .destination
                     isSearchMode = true
                 }) {
+                  HStack{
                     Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
-                        .foregroundColor(Color.greyHeavy)
-                        .font(.prereg20)
+                      .foregroundColor(Color.greyHeavy)
+                      .font(.prereg20)
+                    Spacer()
+                  }
                 }
                 Spacer()
             }

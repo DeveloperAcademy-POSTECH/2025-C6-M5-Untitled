@@ -90,7 +90,9 @@ struct RouteSuggestionView: View {
                                 location: $viewModel.origin,
                                 isSearchMode: $isSearchMode,
                                 locationType: $locationType,
-                                onRefreshTapped: { viewModel.requestOrigin() }
+                                onRefreshTapped: {
+                                    viewModel.userDidSelectOrigin = false
+                                    viewModel.requestOrigin() }
                             )
                             
                             DestinationTextField(
@@ -121,7 +123,7 @@ struct RouteSuggestionView: View {
                             )
                             .padding(.horizontal, 44.wScaled)
                             .padding(.top, 30.wScaled)
-                            .padding(.bottom, 30.wScaled)
+                            .padding(.bottom, 17.wScaled)
                             
                             
                             // MARK: - 버튼
@@ -148,7 +150,9 @@ struct RouteSuggestionView: View {
                     print("[DEBUG] onAppear")
                     guard !skipAutoFetch else { return }
                     if isFirstLoad {
-                        viewModel.requestOrigin()
+                        if !viewModel.userDidSelectOrigin {
+                            viewModel.requestOrigin()
+                        }
                         isFirstLoad = false
                     }
                     user.currentLocation = viewModel.origin?.coordinate
