@@ -14,9 +14,9 @@ struct RouteSuggestionView: View {
     //TODO: - 프리뷰용 나중에 삭제
     private let skipAutoFetch: Bool   // 프리뷰에서 자동 네트워크/계산 생략용
     init(viewModel: BusRouteViewModel = BusRouteViewModel(), skipAutoFetch: Bool = false) {
-            _viewModel = StateObject(wrappedValue: viewModel)
-            self.skipAutoFetch = skipAutoFetch
-        }
+        _viewModel = StateObject(wrappedValue: viewModel)
+        self.skipAutoFetch = skipAutoFetch
+    }
     
     // MARK: - Helpers
     @MainActor func exitSearchMode() {
@@ -50,14 +50,21 @@ struct RouteSuggestionView: View {
                     coordinator.push(.voiceSearch)
                 },
                 onSelect: { item in
-                    if let latitude = item.latitude, let longitude = item.longitude {
-                        switch locationType {
-                        case .origin:
-                            print(LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
-                            viewModel.setOrigin(origin: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
-                        case .destination:
-                            viewModel.setDestination(destination: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
-                        }
+                    
+                    switch locationType {
+                    case .origin:
+                        print(LocationInfo(name: item.name, latitude: item.latitude, longitude: item.longitude))
+                        viewModel.setOrigin(origin: LocationInfo(
+                            name: item.name,
+                            latitude: item.latitude,    // 바로 사용!
+                            longitude: item.longitude   // 바로 사용!
+                        ))
+                    case .destination:
+                        viewModel.setDestination(destination: LocationInfo(
+                            name: item.name,
+                            latitude: item.latitude,
+                            longitude: item.longitude
+                        ))
                     }
                     // 초기화
                     viewModel.resetManager()
@@ -69,8 +76,8 @@ struct RouteSuggestionView: View {
         } else {
             ZStack {
                 Color.primarywhite
-                .ignoresSafeArea()
-                    
+                    .ignoresSafeArea()
+                
                 
                 VStack(spacing: 0) {
                     // MARK: - 상단바
@@ -83,7 +90,9 @@ struct RouteSuggestionView: View {
                                 location: $viewModel.origin,
                                 isSearchMode: $isSearchMode,
                                 locationType: $locationType,
-                                onRefreshTapped: { viewModel.requestOrigin() }
+                                onRefreshTapped: {
+                                    viewModel.userDidSelectOrigin = false
+                                    viewModel.requestOrigin() }
                             )
                             
                             DestinationTextField(
@@ -114,14 +123,14 @@ struct RouteSuggestionView: View {
                             )
                             .padding(.horizontal, 44.wScaled)
                             .padding(.top, 30.wScaled)
-                            .padding(.bottom, 28.wScaled)
+                            .padding(.bottom, 17.wScaled)
                             
                             
                             // MARK: - 버튼
                             
                             RouteSelectButton(
-                              viewModel: viewModel,
-                              currentIndex: $currentIndex,
+                                viewModel: viewModel,
+                                currentIndex: $currentIndex,
                                 routes: viewModel.routes,
                                 onSelect: {
                                     viewModel.selectJourney(at: currentIndex)
@@ -141,7 +150,9 @@ struct RouteSuggestionView: View {
                     print("[DEBUG] onAppear")
                     guard !skipAutoFetch else { return }
                     if isFirstLoad {
-                        viewModel.requestOrigin()
+                        if !viewModel.userDidSelectOrigin {
+                            viewModel.requestOrigin()
+                        }
                         isFirstLoad = false
                     }
                     user.currentLocation = viewModel.origin?.coordinate
@@ -182,11 +193,11 @@ struct RouteSuggestionView: View {
 #Preview {
     let coordinator = NavigationCoordinator()
     let vm = BusRouteViewModel()
-
+    
     // 더미 데이터
     let stationA = BusStation(index: 0, stationId: 1, stationName: "효자동 행정복지센터ㅇㅇㅇㅇㅇ", stationCityCode: 37010, localStationId: "A1")
     let stationB = BusStation(index: 1, stationId: 2, stationName: "죽도시장",   stationCityCode: 37010, localStationId: "A2")
-
+    
     let bus1 = BusRouteNode(
         start: LocationInfo(name: "효자동 행정복지센터ㅇㅇㅇㅇㅇ", latitude: 36.0186, longitude: 129.3231),
         end:   LocationInfo(name: "죽도시장",   latitude: 36.0348, longitude: 129.3435),
@@ -194,7 +205,7 @@ struct RouteSuggestionView: View {
     )
     let bus2 = bus1
     let bus3 = bus1
-
+    
     vm.routes = [
         Journey(totalTime: 15, nodes: [.bus(bus1)]),
         Journey(totalTime: 20, nodes: [.bus(bus2)]),
@@ -202,7 +213,7 @@ struct RouteSuggestionView: View {
     ]
     vm.origin = LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231)
     vm.destination = LocationInfo(name: "죽도시장",   latitude: 36.0348, longitude: 129.3435)
-
-    return RouteSuggestionView(viewModel: vm, skipAutoFetch: true) 
+    
+    return RouteSuggestionView(viewModel: vm, skipAutoFetch: true)
         .environmentObject(coordinator)
 }

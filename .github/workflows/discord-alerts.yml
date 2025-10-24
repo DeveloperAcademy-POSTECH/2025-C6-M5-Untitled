@@ -1,0 +1,126 @@
+# .github/workflows/discord-alerts.yml
+name: PR → Discord alerts (open / merged / 5 approvals)
+
+on:
+  pull_request:
+    types: [opened, closed]   # open/close(merge)에 반응
+  pull_request_review:
+    types: [submitted, dismissed]  # 리뷰 승인/해제 변화에 반응
+
+permissions:
+  pull-requests: write   # 라벨 추가/조회용
+  contents: read
+
+env:
+  REQUIRED_APPROVALS: "5"
+
+jobs:
+  pr-open-close-or-approvals:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Handle PR events & review threshold
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const required = parseInt(process.env.REQUIRED_APPROVALS, 10);
+            const {owner, repo} = context.repo;
+            const payload = context.payload;
+            const pr = payload.pull_request;
+            const prNumber = pr.number;
+
+            const webhook = process.env.DISCORD_WEBHOOK_URL;
+            if (!webhook) {
+              core.setFailed("DISCORD_WEBHOOK_URL secret is missing");
+              return;
+            }
+
+            // 공통 embed
+            const baseEmbed = {
+              title: pr.title,
+              url: pr.html_url,
+              fields: [
+                { name: "Repository", value: `${owner}/${repo}`, inline: true },
+                { name: "Author", value: pr.user?.login || "-", inline: true },
+                { name: "PR #", value: String(prNumber), inline: true }
+              ]
+            };
+
+            // 1) PR open 알림
+            if (context.eventName === "pull_request" && payload.action === "opened") {
+              const content = {
+                username: "GitHub PR Alerts",
+                content: "🆕 **PR opened**",
+                embeds: [baseEmbed]
+              };
+              await fetch(webhook, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(content) });
+              core.info("Sent: PR opened");
+              return;
+            }
+
+            // 2) PR merge(닫힘이면서 merged=true) 알림
+            if (context.eventName === "pull_request" && payload.action === "closed" && pr.merged) {
+              const content = {
+                username: "GitHub PR Alerts",
+                content: "🎉 **PR merged**",
+                embeds: [baseEmbed]
+              };
+              await fetch(webhook, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(content) });
+              core.info("Sent: PR merged");
+              return;
+            }
+
+            // 3) 리뷰 5명 이상 달성 알림 (중복 방지 라벨)
+            if (context.eventName === "pull_request_review") {
+              // 최신 리뷰 상태 집계 (유저별 마지막 리뷰만 반영)
+              const reviews = await github.paginate(
+                github.rest.pulls.listReviews,
+                { owner, repo, pull_number: prNumber }
+              );
+              const lastByUser = new Map();
+              for (const r of reviews) {
+                const key = r.user?.id || r.user?.login;
+                if (!key) continue;
+                const prev = lastByUser.get(key);
+                if (!prev || new Date(r.submitted_at) > new Date(prev.submitted_at)) {
+                  lastByUser.set(key, r);
+                }
+              }
+              const approvedCount = [...lastByUser.values()].filter(r => r.state === "APPROVED").length;
+
+              // PR 최신 상태/라벨 조회
+              const { data: prData } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+              const hasLabel = prData.labels?.some(l => l.name === "5-approvals-reached");
+
+              if (approvedCount >= required && !hasLabel && prData.state === "open") {
+                // 라벨 존재 보장
+                try {
+                  await github.rest.issues.getLabel({ owner, repo, name: "5-approvals-reached" });
+                } catch {
+                  await github.rest.issues.createLabel({
+                    owner, repo,
+                    name: "5-approvals-reached",
+                    color: "0e8a16",
+                    description: "Reached 5 approvals"
+                  });
+                }
+                await github.rest.issues.addLabels({
+                  owner, repo, issue_number: prNumber, labels: ["5-approvals-reached"]
+                });
+
+                const content = {
+                  username: "GitHub PR Alerts",
+                  content: `✅ **${required} approvals reached!**`,
+                  embeds: [{
+                    ...baseEmbed,
+                    description: `This PR has **${approvedCount}** approvals.`
+                  }]
+                };
+                await fetch(webhook, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(content) });
+                core.info(`Sent: ${required} approvals reached`);
+              } else {
+                core.info(`No notify. approvals=${approvedCount}, required=${required}, hasLabel=${hasLabel}, prState=${prData.state}`);
+              }
+            }
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}

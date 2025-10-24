@@ -1,10 +1,3 @@
-//
-//  RouteCardSlide.swift
-//  C6test
-//
-//  Created by 강진 on 9/25/25.
-//
-
 import SwiftUI
 
 struct RouteCardSlide: View {
@@ -13,57 +6,57 @@ struct RouteCardSlide: View {
     @ObservedObject var viewModel: BusRouteViewModel
     var errorMessage: String?
     
-//    private let cardWidth: CGFloat = 305.wScaled
-        
     var body: some View {
-      VStack(spacing: 8) {
-        ZStack {
-          if errorMessage != nil {
-            RouteErrorCard(viewModel: viewModel)
-          } else if let routes {
+        VStack(spacing: 0) {
             ZStack {
-              ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
-                let relativeIndex: CGFloat = CGFloat(index - currentIndex)
-                RouteCard(allJourneys: routes, journey: item, index: index)
-                  .offset(x: relativeIndex * 270.wScaled)
-                  .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
-                  .opacity(relativeIndex == 0 ? 1.0 : 0.3)
-                  .zIndex(Double(routes.count) - Double(abs(index - currentIndex)))
-                  .animation(.spring(), value: currentIndex)
-              }
-            }
-            .gesture(
-              DragGesture()
-                .onEnded { value in
-                  if abs(value.translation.width) < 50 {
-                    return
-                  }
-                  
-                  if value.translation.width > 0 {
-                    currentIndex = max(0, currentIndex - 1)
-                  } else {
-                    currentIndex = min(routes.count - 1, currentIndex + 1)
-                  }
+                if errorMessage != nil {
+                    RouteErrorCard(viewModel: viewModel)
+                } else if let routes {
+                    ZStack {
+                        ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
+                            let relativeIndex: CGFloat = CGFloat(index - currentIndex)
+                            RouteCard(allJourneys: routes, journey: item, index: index)
+                                .offset(x: relativeIndex * 270.wScaled)
+                                .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
+                                .opacity(relativeIndex == 0 ? 1.0 : 0.3)
+                                .zIndex(Double(routes.count) - Double(abs(index - currentIndex)))
+                                .animation(.spring(), value: currentIndex)
+                        }
+                    }
+                    .gesture(
+                        DragGesture()
+                            .onEnded { value in
+                                if abs(value.translation.width) < 50 {
+                                    return
+                                }
+                                
+                                if value.translation.width > 0 {
+                                    currentIndex = max(0, currentIndex - 1)
+                                } else {
+                                    currentIndex = min(routes.count - 1, currentIndex + 1)
+                                }
+                            }
+                    )
+                } else {
+                    ProgressRouteCard()
                 }
-            )
-          } else {
-            ProgressRouteCard()
-          }
-        }
-        
-        if let routes = routes, routes.count > 1 {
-          HStack {
-            ForEach(0..<routes.count, id: \.self) { index in
-              Circle()
-                .fill(index == currentIndex ? Color.greyStrong : Color.greyStrong.opacity(0.3))
-                .frame(width: 8.wScaled, height: 8.wScaled)
             }
-          }
-          .padding(.top, 6.wScaled)
-        }else{
-          Spacer()
-              .frame(height: 14.wScaled)
+            
+            // 항상 28 높이의 공간 차지
+            if let routes = routes, routes.count > 1 {
+                HStack {
+                    ForEach(0..<routes.count, id: \.self) { index in
+                        Circle()
+                            .fill(index == currentIndex ? Color.greyStrong : Color.greyStrong.opacity(0.3))
+                            .frame(width: 8.wScaled, height: 8.wScaled)
+                    }
+                }
+                .frame(height: 28.wScaled)
+            } else {
+                // 에러나 로딩 상태일 때도 동일한 높이 유지
+                Color.clear
+                    .frame(height: 28.wScaled)
+            }
         }
-      }
     }
 }
