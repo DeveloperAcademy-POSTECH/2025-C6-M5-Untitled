@@ -8,28 +8,29 @@
 import SwiftUI
 
 struct WalkingView: View {
-  @ObservedObject var vm = WalkingViewModel()
-  @EnvironmentObject private var coordinator: NavigationCoordinator
-  @State private var showAlert = false
-  
-  var journey: Journey?
-  var index: Int?
-  
-  init(manager: JourneyManager = .shared) {
-    if let journey = manager.selectedJourney, let index = manager.journeyIndex {
-      self.journey = journey
-      self.index = index
+    @ObservedObject var vm = WalkingViewModel()
+    @EnvironmentObject private var coordinator: NavigationCoordinator
+    @State private var showAlert = false
+    @State private var showDevSheet = false  // [CHECK] 개발자용 맵 시트 상태
+    
+    var journey: Journey?
+    var index: Int?
+    
+    init(manager: JourneyManager = .shared) {
+        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
+            self.journey = journey
+            self.index = index
+        }
     }
-  }
-  
-  var body: some View {
-    ZStack {
-      Color(.primarywhite)
-        .ignoresSafeArea()
-      
-      VStack(spacing: 0){
-        
-        VStack(spacing: 0) {
+    
+    var body: some View {
+        ZStack {
+            Color(.primarywhite)
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0){
+                
+                VStack(spacing: 0) {
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
                     
@@ -39,36 +40,61 @@ struct WalkingView: View {
                     }
                 }
                 .frame(height: 144)
-        
-        LineDivider()
-        
-        ZStack {
-          Color(.background)
-            .ignoresSafeArea()
-          
-          VStack {
-            if let journey, let index {
-              if vm.arrived {
-                AtArrival(journey: journey, index: index)
-              } else {
-                ToDestination(vm:vm, journey: journey, index: index)
                 
-                Spacer()
+                LineDivider()
                 
-                Button("이미 목적지에 도착하셨나요?") {
-                  showAlert = true
+                ZStack {
+                    Color(.background)
+                        .ignoresSafeArea()
+                    
+                    VStack {
+                        if let journey, let index {
+                            if vm.arrived {
+                                AtArrival(journey: journey, index: index)
+                            } else {
+                                ToDestination(vm:vm, journey: journey, index: index)
+                                
+                                Spacer()
+                                
+                                
+                                Button {
+                                    showAlert = true
+                                } label: {
+                                    Text("이미 목적지에 도착하셨나요?")
+                                        .font(.premed12Scaled)
+                                        .foregroundColor(.primaryHeavy)
+                                        .underline()
+                                }
+                                
+                            }
+                        }
+                    }
                 }
-                .font(.premed12Scaled)
-                .foregroundColor(.primaryHeavy)
-                .underline()
-              }
             }
-          }
+            .overlay(
+                WalkingAlert(isPresented: $showAlert)
+            )
+            
+            // [CHECK] 개발자용 뷰 버튼
+            VStack {
+                Spacer()
+                HStack {
+                    Spacer()
+                    Button {
+                        showDevSheet = true
+                    } label: {
+                        Image(systemName: "wrench.adjustable")
+                            .padding(8)
+                    }
+                }
+                Spacer()
+            }
         }
-      }
-      .overlay(
-        WalkingAlert(isPresented: $showAlert)
-      )
+        // [CHECK] 개발자용 바텀 시트
+        .sheet(isPresented: $showDevSheet) {
+            DevRouteMapView(route: vm.route)
+                .presentationDetents([.fraction(0.4), .large])  // 반만/전체 표시
+                .presentationDragIndicator(.visible)    // 위에 바 표시
+        }
     }
-  }
 }

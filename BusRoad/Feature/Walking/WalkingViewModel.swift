@@ -17,7 +17,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private var stepIndex: Int = 0
     private var pendingDestination: CLLocationCoordinate2D?
     private var hasCalculatedRoute = false
-    private var route: MKRoute? {
+    var route: MKRoute? {
         didSet {
             guard let route = route,
                   let currentLocation = loc.location else { return }
