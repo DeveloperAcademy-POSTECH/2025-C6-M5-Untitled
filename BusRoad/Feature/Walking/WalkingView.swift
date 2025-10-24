@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct WalkingView: View {
   @ObservedObject var vm = WalkingViewModel()
   @EnvironmentObject private var coordinator: NavigationCoordinator
   @State private var showAlert = false
+  @State private var showDebugMap = false  // ✨ 추가
   
   var journey: Journey?
   var index: Int?
@@ -30,15 +32,15 @@ struct WalkingView: View {
       VStack(spacing: 0){
         
         VStack(spacing: 0) {
-                    TopBar(isMoving: true) { coordinator.popToRoot() }
-                        .padding(.horizontal, 8)
-                    
-                    if let journey, let index {
-                        WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-                            .padding(32)
-                    }
-                }
-                .frame(height: 144)
+          TopBar(isMoving: true) { coordinator.popToRoot() }
+            .padding(.horizontal, 8)
+          
+          if let journey, let index {
+            WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
+              .padding(32)
+          }
+        }
+        .frame(height: 144)
         
         LineDivider()
         
@@ -47,11 +49,12 @@ struct WalkingView: View {
             .ignoresSafeArea()
           
           VStack {
+           
             if let journey, let index {
               if vm.arrived {
                 AtArrival(journey: journey, index: index)
               } else {
-                ToDestination(vm:vm, journey: journey, index: index)
+                ToDestination(vm: vm, journey: journey, index: index)
                 
                 Spacer()
                 
