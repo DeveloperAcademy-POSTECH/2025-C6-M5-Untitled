@@ -1,10 +1,3 @@
-//
-//  RouteCard.swift
-//  C6test
-//
-//  Created by 강진 on 9/25/25.
-//
-
 import SwiftUI
 
 struct RouteCard: View {
@@ -22,7 +15,8 @@ struct RouteCard: View {
                         .cornerRadius(20)
                     
                     VStack(spacing: 0) {
-                        
+                        Spacer()
+                                                
                         VStack(spacing: 40.wScaled) {
                             
                             VStack(alignment: .leading, spacing: 36.wScaled) {
@@ -31,9 +25,10 @@ struct RouteCard: View {
                             }
                             
                             RouteSummary(journey: journey)
+                            
                         }
                         .padding(.horizontal, 24.wScaled)
-                        .padding(.vertical, 32.wScaled)
+                      Spacer()
                 }
             }
         }

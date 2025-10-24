@@ -116,7 +116,7 @@ struct RouteSuggestionView: View {
                             )
                             .padding(.horizontal, 44.wScaled)
                             .padding(.top, 30.wScaled)
-                            .padding(.bottom, 30.wScaled)
+                            .padding(.bottom, 17.wScaled)
                             
                             
                             // MARK: - 버튼
