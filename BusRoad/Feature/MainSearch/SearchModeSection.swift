@@ -13,6 +13,8 @@ struct SearchModeSection: View {
     @Binding var hasSubmitted: Bool
     let isLoading: Bool
     
+    @State private var submittedQuery: String = ""
+    
     var body: some View {
         ZStack {
             Color.background
@@ -31,6 +33,11 @@ struct SearchModeSection: View {
                 }
             }
         }
+        .onChange(of: hasSubmitted) { _, newValue in
+                   if newValue {
+                       submittedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+                   }
+               }
     }
     
     private var header: some View {
@@ -61,10 +68,6 @@ struct SearchModeSection: View {
         GeometryReader { geo in
             ScrollView {
                 VStack {
-                    
-                    // 디버깅용
-                    let _ = print("[SearchModeSection] hasSubmitted: \(hasSubmitted), isLoading: \(isLoading), results.count: \(results.count)")
-
                     // 검색 전 (제출 전)
                     if !hasSubmitted {
                         Spacer(minLength: 0)
@@ -104,7 +107,7 @@ struct SearchModeSection: View {
                                 PlaceCard(
                                     title: item.name,
                                     address: item.address,
-                                    searchQuery: query.trimmingCharacters(in: .whitespacesAndNewlines)
+                                    searchQuery: submittedQuery
                                 ) {
                                     // onTap
                                     onSelect(item)
