@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import MapKit
 
 struct WalkingView: View {
     @ObservedObject var vm = WalkingViewModel()

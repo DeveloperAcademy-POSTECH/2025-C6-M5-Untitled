@@ -50,14 +50,21 @@ struct RouteSuggestionView: View {
                     coordinator.push(.voiceSearch)
                 },
                 onSelect: { item in
-                    if let latitude = item.latitude, let longitude = item.longitude {
-                        switch locationType {
-                        case .origin:
-                            print(LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
-                            viewModel.setOrigin(origin: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
-                        case .destination:
-                            viewModel.setDestination(destination: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
-                        }
+                    
+                    switch locationType {
+                    case .origin:
+                        print(LocationInfo(name: item.name, latitude: item.latitude, longitude: item.longitude))
+                        viewModel.setOrigin(origin: LocationInfo(
+                            name: item.name,
+                            latitude: item.latitude,    // 바로 사용!
+                            longitude: item.longitude   // 바로 사용!
+                        ))
+                    case .destination:
+                        viewModel.setDestination(destination: LocationInfo(
+                            name: item.name,
+                            latitude: item.latitude,
+                            longitude: item.longitude
+                        ))
                     }
                     // 초기화
                     viewModel.resetManager()

@@ -29,9 +29,13 @@ struct MainSearchView: View {
                         coordinator.push(.voiceSearch)
                     },
                     onSelect: { item in
-                        if let latitude = item.latitude, let longitude = item.longitude {
-                            vm.setDestination(destination: LocationInfo(name: item.plainTitle, latitude: latitude, longitude: longitude))
-                        }
+                       
+                        vm.setDestination(destination: LocationInfo(
+                            name: item.name,
+                            latitude: item.latitude,
+                            longitude: item.longitude
+                        ))
+                        
                         // 초기화
                         vm.resetManager()
                         isSearchMode = false
