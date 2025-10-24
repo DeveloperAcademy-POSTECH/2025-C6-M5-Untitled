@@ -93,9 +93,13 @@ struct WalkingView: View {
         }
         // [CHECK] 개발자용 바텀 시트
         .sheet(isPresented: $showDevSheet) {
-            DevRouteMapView(route: vm.route)
-                .presentationDetents([.fraction(0.4), .large])  // 반만/전체 표시
-                .presentationDragIndicator(.visible)    // 위에 바 표시
+            DevRouteMapView(
+                tmapCoordinates: vm.tmapCoordinates,
+                userLocation: vm.loc.location,
+                destination: vm.pendingDestination    
+            )
+            .presentationDetents([.fraction(0.4), .large])
+            .presentationDragIndicator(.visible)
         }
     }
 }
