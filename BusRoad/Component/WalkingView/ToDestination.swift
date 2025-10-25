@@ -32,7 +32,7 @@ struct ToDestination: View {
 
                 
                 Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
-                    .font(.prereg36Scaled)
+                    .font(.prereg32Scaled)
                     .foregroundColor(.primaryHeavy)
                     .padding(.top, 12.wScaled)
                     .padding(.bottom, 70.wScaled)
