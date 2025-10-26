@@ -39,7 +39,7 @@ struct RouteSelectButton: View {
             Button {
                 retrySearch()
             } label: {
-                Text("도착지 수정하기")
+                Text("다시 검색하기")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
                     .frame(width: 240, height: 75)

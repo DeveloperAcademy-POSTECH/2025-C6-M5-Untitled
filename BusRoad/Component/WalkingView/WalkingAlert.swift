@@ -22,16 +22,10 @@ struct WalkingAlert: View {
           Text("목적지에 도착하셨나요?")
             .font(.presemi24Scaled)
             .foregroundColor(.primaryblack)
-            .padding(.top, 18.wScaled)
-            .padding(.bottom, 10.wScaled)
+            .padding(.top, 20.wScaled)
+            .padding(.bottom, 36.wScaled)
             
-          Text("목적지에 이미 도착하셨다면,\n직접 경로를 완료할 수 있어요.")
-            .font(.prereg20Scaled)
-            .foregroundColor(.primaryblack)
-            .multilineTextAlignment(.center)
-            .padding(.bottom, 24.wScaled)
-            
-          HStack(spacing: 10.wScaled){
+          HStack(spacing: 9.wScaled){
             Button{
               isPresented = false
             } label:{
@@ -40,7 +34,7 @@ struct WalkingAlert: View {
                   .cornerRadius(100)
                   .foregroundColor(Color.greybutton)
                   .frame(width: 139.wScaled, height: 48.wScaled)
-                Text("닫기")
+                Text("아니요")
                   .foregroundColor(Color.primaryblack)
                   .font(.premed20Scaled)
               }
@@ -54,14 +48,14 @@ struct WalkingAlert: View {
                   .cornerRadius(100)
                   .foregroundColor(Color.subPoint)
                   .frame(width: 139.wScaled, height: 48.wScaled)
-                Text("완료하기")
+                Text("네")
                   .foregroundColor(Color.primarywhite)
                   .font(.premed20Scaled)
               }
             }
           }
         }
-        .padding(.vertical, 15.wScaled)
+        .padding(.vertical, 20.wScaled)
         .frame(width: 320.wScaled)
           
         .background(

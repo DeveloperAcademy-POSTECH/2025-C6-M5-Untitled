@@ -17,13 +17,13 @@ struct RouteErrorCard: View {
         .cornerRadius(20)
       VStack(spacing: 8) {
         if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다." {
-          Text("출발지와 도착지가 가까워요😮")
+          Text("출발지와 도착지가\n가까이 있어요!")
             .font(.presemi24)
             .foregroundColor(Color.subLight)
             .multilineTextAlignment(.center)
             .lineSpacing(5)
           
-          Text("도보로 바로 안내해드릴게요.")
+          Text("도보 경로 안내를 시작할게요.")
             .font(.premed20)
             .foregroundColor(Color.subLight)
           
@@ -34,12 +34,12 @@ struct RouteErrorCard: View {
             .multilineTextAlignment(.center)
             .lineSpacing(5)
           
-          Text("도착지를 수정해주세요.")
+          Text("다른 장소를 검색해주세요.")
             .font(.premed20)
             .foregroundColor(Color.subLight)
           
         } else if viewModel.errorMessage == "출발지와 도착지가 같습니다." {
-          Text("출발지와 도착지가\n같은 곳이에요.😮")
+          Text("출발지와 도착지가\n같은 곳이에요😵")
             .font(.presemi24)
             .foregroundColor(Color.subLight)
             .multilineTextAlignment(.center)
@@ -56,7 +56,7 @@ struct RouteErrorCard: View {
             .multilineTextAlignment(.center)
             .lineSpacing(5)
           
-          Text("경로를 다시 검색해주세요.")
+          Text("경로를 새로고침 해주세요.")
             .font(.premed20)
             .foregroundColor(Color.subLight)
         }

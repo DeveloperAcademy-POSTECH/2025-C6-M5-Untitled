@@ -68,7 +68,7 @@ struct OnRideCard: View {
                 .playing(loopMode: .loop)
                 .animationSpeed(1.0)
                 .frame(width: 127.wScaled, height: 110.wScaled)
-                .border(canAlight ? .primarywhite : Color.primaryStrong, width: 3)
+                .border(canAlight ? .primarywhite : Color.primaryStrong, width: 2)
                 .padding(.top, canAlight ? 12.wScaled : 0)
             
             // 메인 애니메이션 (조건에 따라 변경)
