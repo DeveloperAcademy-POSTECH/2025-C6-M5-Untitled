@@ -4,6 +4,7 @@ struct RouteCard: View {
     var allJourneys: [Journey]
     var journey: Journey
     var index: Int
+    var isActive: Bool = true
     
     var body: some View {
         
@@ -21,7 +22,7 @@ struct RouteCard: View {
                             
                             VStack(alignment: .leading, spacing: 36.wScaled) {
                               ETA(journeys: allJourneys, journey: journey, index: index)
-                                BoardingLocation(route: firstBusRoute)
+                                BoardingLocation(route: firstBusRoute, isActive: isActive)
                             }
                             
                             RouteSummary(journey: journey)
