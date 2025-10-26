@@ -19,7 +19,7 @@ final class OnRideViewModel: ObservableObject {
             attachSelectedJourney(busLegIndex: busLegIndex)
         }
     }
-        
+    
     // 의존성
     private let locationService: LocationService
     private let journeyManager: JourneyManager
@@ -52,15 +52,14 @@ final class OnRideViewModel: ObservableObject {
                   journeyManager: journeyManager,
                   proximity: proximity)
     }
-}
-
-// MARK: - 설정/시작/중지
-extension OnRideViewModel {
+    
+    
+    // MARK: - 설정/시작/중지
     
     /// 선택 여정에서 하차 정류장 이름 세팅 + 근접 감시 대상/반경 지정
     func attachSelectedJourney(busLegIndex: Int) {
         guard let journey = journeyManager.selectedJourney else {
-            print("⚠️ 선택된 여정이 없습니다.")
+            print("선택된 여정이 없습니다.")
             return
         }
         
@@ -136,12 +135,12 @@ extension OnRideViewModel {
             }
             .store(in: &bag)
         
-
-Task {
-    do { try await locationService.startContinuousUpdates() }
-    catch { print("위치 업데이트 시작 실패: \(error)") }
-}
-
+        
+        Task {
+            do { try await locationService.startContinuousUpdates() }
+            catch { print("위치 업데이트 시작 실패: \(error)") }
+        }
+        
         
         proximity.start()
     }
@@ -158,3 +157,4 @@ Task {
         
     }
 }
+

@@ -56,7 +56,7 @@ struct PlaceCard: View {
 
 // TODO: extension은 파일 따로 만들기
 
-// MARK: - 텍스트 하이라이트 헬퍼
+// MARK: - 텍스트 하이라이트
 extension String {
     /// 검색어와 일치하는 부분을 찾아서 AttributedString으로 변환
     func highlightedText(searchQuery: String, highlightColor: Color = Color.subPoint) -> AttributedString {
