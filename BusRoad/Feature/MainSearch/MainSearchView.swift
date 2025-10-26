@@ -85,10 +85,8 @@ struct MainSearchView: View {
         }
         .onAppear {
             guard !hasShownVoiceHint else { return }  // 이미 본 적 있으면 패스
-            DispatchQueue.main.asyncAfter(deadline: .now()) {
                 showHint = true
                 hasShownVoiceHint = true
-            }
         }
     }
 
