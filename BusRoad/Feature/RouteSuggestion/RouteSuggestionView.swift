@@ -90,6 +90,7 @@ struct RouteSuggestionView: View {
                                 location: $viewModel.origin,
                                 isSearchMode: $isSearchMode,
                                 locationType: $locationType,
+                                userDidSelectOrigin: $viewModel.userDidSelectOrigin,
                                 onRefreshTapped: {
                                     viewModel.userDidSelectOrigin = false
                                     viewModel.requestOrigin() }
@@ -160,6 +161,24 @@ struct RouteSuggestionView: View {
                         origin: viewModel.origin,
                         destination: viewModel.destination
                     )
+                }
+                .task {
+                    NotificationCenter.default.addObserver(
+                        forName: .didSetPresetDestination,
+                        object: nil,
+                        queue: .main
+                    ) { notification in
+                        if let destinationName = notification.object as? String {
+                            viewModel.query = destinationName
+                            isSearchMode = true
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                isFocused = true
+                            }
+                            Task {
+                                await viewModel.search()
+                            }
+                        }
+                    }
                 }
                 .onChange(of: viewModel.origin) { _, newOrigin in
                     if !isFirstLoad {

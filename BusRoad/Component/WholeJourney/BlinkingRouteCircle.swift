@@ -10,7 +10,10 @@ import SwiftUI
 struct BlinkingRouteCircle: View {
     @State var status: Status = .active
     var routeNode: RouteNode    // 버스, 도보 노드에 따라 아이콘 변화
-    let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
+    
+    var activeToDisableDuration: Double = 0.6
+    var disableToActiveDuration: Double = 0.8
+    var activeHoldDuration: Double = 0.3
     
     var iconName: String {
         switch routeNode {
@@ -46,14 +49,39 @@ struct BlinkingRouteCircle: View {
             .font(.system(size: 18))
             .foregroundColor(iconColor)
         }
-        .onReceive(timer) { _ in
-            withAnimation(.easeInOut(duration: 0.5)) {
-                status.toggle()
-            }
+        .onAppear {
+            startBlinkingLoop()
         }
     }
 }
 
-#Preview {
-    BlinkingRouteCircle(routeNode: DummyData.busNode.asRouteNode)
+private extension BlinkingRouteCircle {
+    
+    
+    func startBlinkingLoop() {
+        changeToActive()
+    }
+    
+    func changeToActive() {
+        withAnimation(.easeInOut(duration: disableToActiveDuration)) {
+            status = .active
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + disableToActiveDuration + activeHoldDuration) {
+            changeToDisable()
+        }
+    }
+    
+    func changeToDisable() {
+        withAnimation(.easeInOut(duration: activeToDisableDuration)) {
+            status = .disable
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + activeToDisableDuration) {
+            changeToActive()
+        }
+    }
 }
+
+
+//#Preview {
+//    BlinkingRouteCircle(routeNode: DummyData.busNode.asRouteNode)
+//}

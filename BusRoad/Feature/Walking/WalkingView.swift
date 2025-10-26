@@ -80,31 +80,43 @@ struct WalkingView: View {
                     }
                 }
             }
-            .overlay(
-                WalkingAlert(isPresented: $showAlert)
-            )
             
             // [CHECK] 개발자용 뷰 버튼
             VStack {
-                Spacer()
+                Spacer()    // 높이 144(고정) + 120.wScaled(변동)
+                    .frame(height: 144 + 120.wScaled)
+                    
                 HStack {
                     Spacer()
                     Button {
                         showDevSheet = true
                     } label: {
-                        Image(systemName: "wrench.adjustable")
-                            .padding(8)
+                        Image(systemName: "map.fill")
+                            .font(.system(size: 20.wScaled, weight: .bold))
+                            .foregroundColor(.subLight)
+                            .padding(.vertical, 12.wScaled)
+                            .padding(.horizontal, 18.wScaled)
+                            .background(
+                                UnevenRoundedRectangle(
+                                    topLeadingRadius: 10,
+                                    bottomLeadingRadius: 10
+                                )
+                                .fill(Color.subStrong)
+                            )
                     }
                 }
                 Spacer()
             }
+            .overlay(
+                WalkingAlert(isPresented: $showAlert)
+            )
         }
         // [CHECK] 개발자용 바텀 시트
         .sheet(isPresented: $showDevSheet) {
             DevRouteMapView(
                 tmapCoordinates: vm.tmapCoordinates,
                 userLocation: vm.loc.location,
-                destination: vm.pendingDestination    
+                destination: vm.pendingDestination
             )
             .presentationDetents([.fraction(0.4), .large])
             .presentationDragIndicator(.visible)
