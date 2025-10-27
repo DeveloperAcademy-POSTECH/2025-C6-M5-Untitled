@@ -55,7 +55,6 @@ final class OnRideViewModel: ObservableObject {
     
     
     // MARK: - 설정/시작/중지
-    
     /// 선택 여정에서 하차 정류장 이름 세팅 + 근접 감시 대상/반경 지정
     func attachSelectedJourney(busLegIndex: Int) {
         guard let journey = journeyManager.selectedJourney else {

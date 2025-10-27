@@ -16,3 +16,9 @@ struct LocationInfo: Equatable, Hashable {
         CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
     }
 }
+
+extension LocationInfo {
+    var asCLLocation: CLLocation {
+        return CLLocation(latitude: self.latitude, longitude: self.longitude)
+    }
+}

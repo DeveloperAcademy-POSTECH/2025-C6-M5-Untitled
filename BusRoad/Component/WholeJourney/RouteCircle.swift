@@ -7,7 +7,7 @@
 import SwiftUI
 
 struct RouteCircle: View {
-    var status: Status          // 활성, 비활성에 따라 색깔 변화
+    var status: NodeStatus          // 활성, 비활성에 따라 색깔 변화
     var routeNode: RouteNode    // 버스, 도보 노드에 따라 아이콘 변화
     
     var iconName: String {

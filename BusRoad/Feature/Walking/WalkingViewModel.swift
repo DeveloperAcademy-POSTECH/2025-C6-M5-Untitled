@@ -5,7 +5,7 @@ import MapKit
 import SwiftUI
 
 // TODO: 나중에 기능 분리하기(service)
-final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
+final class WalkingViewModel: NSObject, ObservableObject {
     
     @Published var bigDistanceText: String = "-- m"
     @Published var arrowBearing: CLLocationDirection = 0
@@ -187,32 +187,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         }
     }
     
-    // MARK: - CLLocationManagerDelegate
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        if manager.authorizationStatus == .authorizedAlways ||
-            manager.authorizationStatus == .authorizedWhenInUse {
-            manager.startUpdatingLocation()
-            manager.startUpdatingHeading()
-            tryCalculateIfReady()
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        if let loc = manager.location {
-            updateWithTmapRoute(location: loc, heading: newHeading)
-        }
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let last = locations.last else { return }
-        tryCalculateIfReady()
-        updateWithTmapRoute(location: last, heading: manager.heading)
-    }
-    
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        print("Location error: \(error.localizedDescription)")
-    }
-    
     // MARK: - TMAP 경로 기반 위치 업데이트
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
         guard !tmapCoordinates.isEmpty else {
@@ -347,5 +321,32 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         let x = cos(φ1) * sin(φ2) - sin(φ1) * cos(φ2) * cos(dλ)
         let θ = atan2(y, x) * 180 / .pi
         return fmod(θ + 360, 360)
+    }
+}
+
+extension WalkingViewModel: CLLocationManagerDelegate {
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        if manager.authorizationStatus == .authorizedAlways ||
+            manager.authorizationStatus == .authorizedWhenInUse {
+            manager.startUpdatingLocation()
+            manager.startUpdatingHeading()
+            tryCalculateIfReady()
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        if let loc = manager.location {
+            updateWithTmapRoute(location: loc, heading: newHeading)
+        }
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        guard let last = locations.last else { return }
+        tryCalculateIfReady()
+        updateWithTmapRoute(location: last, heading: manager.heading)
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location error: \(error.localizedDescription)")
     }
 }

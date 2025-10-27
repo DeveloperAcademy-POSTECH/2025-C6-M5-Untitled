@@ -4,7 +4,6 @@ import SwiftUI
 struct RouteSuggestionView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
-    @State private var user = User(isOnBus: false)
     @State var currentIndex: Int = 0
     @State var isSearchMode = false
     @FocusState var isFocused: Bool
@@ -156,7 +155,6 @@ struct RouteSuggestionView: View {
                         }
                         isFirstLoad = false
                     }
-                    user.currentLocation = viewModel.origin?.coordinate
                     viewModel.validateAndFetchRoute(
                         origin: viewModel.origin,
                         destination: viewModel.destination
@@ -182,7 +180,6 @@ struct RouteSuggestionView: View {
 //                }
                 .onChange(of: viewModel.origin) { _, newOrigin in
                     if !isFirstLoad {
-                        user.currentLocation = viewModel.origin?.coordinate
                         print("[DEBUG] origin updated")
                         viewModel.validateAndFetchRoute(
                             origin: newOrigin,
