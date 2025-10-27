@@ -58,22 +58,22 @@ struct BeforeRideCard: View {
                                         remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy
                                     )
                                     .cornerRadius(15)
-                              )
-                          
-                          Spacer()
-                      }
-                  }
-                  
-                  LottieView(animation: .named("BeforeRiding"))
+                            )
+                        
+                        Spacer()
+                    }
+                }
+                
+                LottieView(animation: .named("BeforeRiding"))
                     .playing(loopMode: .loop)  // 반복 재생
                     .animationSpeed(1.0)  // 재생 속도
                     .frame(width: 200.wScaled, height: 200.wScaled)
-
-                     
-              }
-              .padding(.horizontal, 40.wScaled)
-      }
-  }
+                
+                
+            }
+            .padding(.horizontal, 40.wScaled)
+        }
+    }
 }
 
 #Preview {

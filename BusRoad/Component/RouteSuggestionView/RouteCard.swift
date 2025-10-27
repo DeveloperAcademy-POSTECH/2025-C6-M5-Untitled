@@ -10,26 +10,26 @@ struct RouteCard: View {
         
         if let firstBusRoute = journey.firstBusRoute {
             
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(Color.primaryNormal)
-                        .cornerRadius(20)
+            ZStack {
+                Rectangle()
+                    .foregroundColor(Color.primaryNormal)
+                    .cornerRadius(20)
+                
+                VStack(spacing: 0) {
+                    Spacer()
                     
-                    VStack(spacing: 0) {
-                        Spacer()
-                                                
-                        VStack(spacing: 40.wScaled) {
-                            
-                            VStack(alignment: .leading, spacing: 36.wScaled) {
-                              ETA(journeys: allJourneys, journey: journey, index: index)
-                                BoardingLocation(route: firstBusRoute, isActive: isActive)
-                            }
-                            
-                            RouteSummary(journey: journey)
-                            
+                    VStack(spacing: 40.wScaled) {
+                        
+                        VStack(alignment: .leading, spacing: 36.wScaled) {
+                            ETA(journeys: allJourneys, journey: journey, index: index)
+                            BoardingLocation(route: firstBusRoute, isActive: isActive)
                         }
-                        .padding(.horizontal, 24.wScaled)
-                      Spacer()
+                        
+                        RouteSummary(journey: journey)
+                        
+                    }
+                    .padding(.horizontal, 24.wScaled)
+                    Spacer()
                 }
             }
         }
@@ -68,10 +68,10 @@ struct RouteCard: View {
         totalTime: 18 + 5 + 22,
         nodes: [.bus(leg1), .walk(walk), .bus(leg2)]
     )
-  
-  let allDummyJourneys = [
-    sampleJourney,
-]
+    
+    let allDummyJourneys = [
+        sampleJourney,
+    ]
     
     return RouteCard(allJourneys: allDummyJourneys, journey: sampleJourney, index: 0)
         .previewLayout(.sizeThatFits)

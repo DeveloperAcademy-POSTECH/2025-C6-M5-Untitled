@@ -4,25 +4,21 @@ import SwiftUI
 struct RouteSuggestionView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
-    @State var currentIndex: Int = 0
-    @State var isSearchMode = false
     @FocusState var isFocused: Bool // 이건 남겨 두셔야합니다!
-    @State var locationType: LocationType = .origin
-    @State var isFirstLoad = true
-
+    
     var body: some View {
-        if isSearchMode {
+        if viewModel.isSearchMode {
             SearchModeSection(
                 query: Binding(get: { viewModel.query }, set: { viewModel.query = $0 }),
                 results: viewModel.results,
                 isFocused: $isFocused,
                 onBack: {
                     viewModel.exitSearchMode()
-                    isSearchMode = false
+                    viewModel.isSearchMode = false
                     isFocused = false
                 },
                 onSubmit: {
-                    isSearchMode = true
+                    viewModel.isSearchMode = true
                     isFocused = false
                     Task { await viewModel.performSearch() }
                 },
@@ -35,8 +31,8 @@ struct RouteSuggestionView: View {
                     coordinator.push(.voiceSearch)
                 },
                 onSelect: { item in
-                    viewModel.selectPlace(item: item, locationType: locationType)
-                    isSearchMode = false
+                    viewModel.selectPlace(item: item, locationType: viewModel.locationType)
+                    viewModel.isSearchMode = false
                 },
                 hasSubmitted: $viewModel.hasSubmitted,
                 isLoading: viewModel.isSearchLoading
@@ -56,8 +52,8 @@ struct RouteSuggestionView: View {
                         VStack(spacing: 8) {
                             OriginTextField(
                                 location: $viewModel.origin,
-                                isSearchMode: $isSearchMode,
-                                locationType: $locationType,
+                                isSearchMode: $viewModel.isSearchMode,
+                                locationType: $viewModel.locationType,
                                 userDidSelectOrigin: $viewModel.userDidSelectOrigin,
                                 onRefreshTapped: {
                                     viewModel.userDidSelectOrigin = false
@@ -66,8 +62,8 @@ struct RouteSuggestionView: View {
                             
                             DestinationTextField(
                                 location: $viewModel.destination,
-                                locationType: $locationType,
-                                isSearchMode: $isSearchMode
+                                locationType: $viewModel.locationType,
+                                isSearchMode: $viewModel.isSearchMode
                             )
                         }
                         .padding(.horizontal, 22)
@@ -85,7 +81,7 @@ struct RouteSuggestionView: View {
                         // MARK: - 경로추천카드
                         VStack(spacing:0) {
                             RouteCardSlide(
-                                currentIndex: $currentIndex,
+                                currentIndex: $viewModel.currentIndex,
                                 routes: $viewModel.routes,
                                 viewModel: viewModel,
                                 errorMessage: viewModel.errorMessage
@@ -99,10 +95,10 @@ struct RouteSuggestionView: View {
                             
                             RouteSelectButton(
                                 viewModel: viewModel,
-                                currentIndex: $currentIndex,
+                                currentIndex: $viewModel.currentIndex,
                                 routes: viewModel.routes,
                                 onSelect: {
-                                    viewModel.selectJourney(at: currentIndex)
+                                    viewModel.selectJourney(at: viewModel.currentIndex)
                                     coordinator.push(.journeyFlow)
                                 },
                                 retrySearch: {
@@ -117,37 +113,37 @@ struct RouteSuggestionView: View {
                 }
                 .onAppear {
                     print("[DEBUG] onAppear")
-                    if isFirstLoad {
+                    if viewModel.isFirstLoad {
                         if !viewModel.userDidSelectOrigin {
                             viewModel.requestOrigin()
                         }
-                        isFirstLoad = false
+                        viewModel.isFirstLoad = false
                     }
                     viewModel.validateAndFetchRoute(
                         origin: viewModel.origin,
                         destination: viewModel.destination
                     )
                 }
-//                .task {
-//                    NotificationCenter.default.addObserver(
-//                        forName: .didSetPresetDestination,
-//                        object: nil,
-//                        queue: .main
-//                    ) { notification in
-//                        if let destinationName = notification.object as? String {
-//                            viewModel.query = destinationName
-//                            isSearchMode = true
-//                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//                                isFocused = true
-//                            }
-//                            Task {
-//                                await viewModel.search()
-//                            }
-//                        }
-//                    }
-//                }
+                //                .task {
+                //                    NotificationCenter.default.addObserver(
+                //                        forName: .didSetPresetDestination,
+                //                        object: nil,
+                //                        queue: .main
+                //                    ) { notification in
+                //                        if let destinationName = notification.object as? String {
+                //                            viewModel.query = destinationName
+                //                            isSearchMode = true
+                //                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                //                                isFocused = true
+                //                            }
+                //                            Task {
+                //                                await viewModel.search()
+                //                            }
+                //                        }
+                //                    }
+                //                }
                 .onChange(of: viewModel.origin) { _, newOrigin in
-                    if !isFirstLoad {
+                    if !viewModel.isFirstLoad {
                         print("[DEBUG] origin updated")
                         viewModel.validateAndFetchRoute(
                             origin: newOrigin,
@@ -156,7 +152,7 @@ struct RouteSuggestionView: View {
                     }
                 }
                 .onChange(of: viewModel.destination) { _, newDestination in
-                    if !isFirstLoad {
+                    if !viewModel.isFirstLoad {
                         print("[DEBUG] destination updated")
                         viewModel.validateAndFetchRoute(
                             origin: viewModel.origin,
@@ -166,7 +162,7 @@ struct RouteSuggestionView: View {
                 }
                 .onChange(of: viewModel.routes) { _, _ in
                     print("[DEBUG] routes updated")
-                    currentIndex = 0
+                    viewModel.currentIndex = 0
                 }
             }
         }

@@ -5,14 +5,25 @@ import SwiftUI
 
 @MainActor
 class BusRouteViewModel: ObservableObject {
+    
+    // 경로 설정 관련
     @Published var routes: [Journey]?
-    @Published var isLoading: Bool = false
-    @Published var errorMessage: String?
+    @Published var currentIndex: Int = 0
+    
+    // 출발지, 목적지 값 관련
     @Published var origin: LocationInfo?
     @Published var destination: LocationInfo?
-    @Published var isSearching: Bool = false
-    @Published var hasSubmitted: Bool = false
     @Published var userDidSelectOrigin: Bool = false
+    @Published var isFirstLoad = true
+    @Published var locationType: LocationType = .origin
+
+    // 에러 케이스 분류용
+    @Published var errorMessage: String?
+    
+    //검색에 필요한 데이터
+    @Published var hasSubmitted: Bool = false
+    @Published var isSearchMode = false
+    @Published var isLoading: Bool = false
     
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
@@ -36,7 +47,7 @@ class BusRouteViewModel: ObservableObject {
         
         searchManager.$hasSubmitted
             .assign(to: &$hasSubmitted)
-
+        
         // MainSearchViewModel과 같은 형식으로 query 프록시 제공하기 위함
         searchManager.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
@@ -78,23 +89,14 @@ class BusRouteViewModel: ObservableObject {
             return
         }
         
-        let distanceInMeters = origin.asCLLocation.distance(from: destination.asCLLocation)
-      
-      // 목적지와 출발지가 같으면 API를 호출하지 않고 에러 메시지를 설정
-      if origin.latitude == destination.latitude && origin.longitude == destination.longitude {
-          print("🚨 출발지와 목적지가 동일해 API를 호출하지 않습니다.")
-          self.errorMessage = "출발지와 도착지가 같습니다."
-          self.routes = []
-          return
-      }
-      
-        if distanceInMeters < 700 {
-            print("🚨 거리가 너무 가까워 API를 호출하지 않습니다.")
-            self.errorMessage = "출발지와 목적지가 너무 가깝습니다."
+        // 목적지와 출발지가 같으면 API를 호출하지 않고 에러 메시지를 설정
+        if origin.latitude == destination.latitude && origin.longitude == destination.longitude {
+            print("🚨 출발지와 목적지가 동일해 API를 호출하지 않습니다.")
+            self.errorMessage = "출발지와 도착지가 같습니다."
             self.routes = []
             return
         }
-      
+        
         print("➡️ ViewModel: 출발지/목적지 준비 완료! 경로 검색을 시작합니다.")
         
         fetchRoute(
@@ -103,7 +105,6 @@ class BusRouteViewModel: ObservableObject {
             endX: destination.longitude,
             endY: destination.latitude
         )
-        print("[DEBUG] Route 준비 완료!")
     }
     
     private func fetchRoute(startX: Double, startY: Double, endX: Double, endY: Double) {
@@ -158,11 +159,6 @@ class BusRouteViewModel: ObservableObject {
                             case "-98":
                                 if let origin = self.origin, let destination = self.destination {
                                     let distance = origin.asCLLocation.distance(from: destination.asCLLocation)
-                                    if distance > 30000 {
-                                        self.errorMessage = "지원하지 않는 교통수단이 포함되어 있습니다."
-                                        self.routes = []
-                                        return
-                                    }
                                 }
                                 self.errorMessage = "검색 결과가 없습니다."
                             case "500":
@@ -226,13 +222,13 @@ class BusRouteViewModel: ObservableObject {
             }
         }
     }
-
+    
     func requestOrigin() {
         
         if userDidSelectOrigin {
-               print("[DEBUG] 사용자가 출발지를 선택했으므로 현위치로 바꾸지 않습니다")
-               return
-           }
+            print("[DEBUG] 사용자가 출발지를 선택했으므로 현위치로 바꾸지 않습니다")
+            return
+        }
         
         print("[DEBUG] requestOrigin started")
         journeyManager.requestOrigin()
@@ -280,17 +276,17 @@ extension BusRouteViewModel {
     func exitSearchMode() {
         query = ""
     }
-
+    
     /// 검색 수행
     func performSearch() async {
         await search()
     }
-
+    
     /// 검색어 초기화
     func clearQuery() {
         query = ""
     }
-
+    
     /// 장소 선택 (출발지/목적지)
     func selectPlace(item: PlaceSummary, locationType: LocationType) {
         switch locationType {
