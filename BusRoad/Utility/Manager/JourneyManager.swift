@@ -13,7 +13,7 @@ final class JourneyManager: ObservableObject {
     
     let locationService = LocationService()
     
-    private init() { }
+    private init() { }  // 무한 호출 방지
     
     func reset() {
         self.origin = nil
