@@ -6,6 +6,7 @@ public struct MarqueeText: View {
     public var uiFont: UIFont
     public var startDelay: Double
     public var alignment: Alignment
+    public var shouldAnimate: Bool = true
     
     @State private var animate = false
     var isCompact = false
@@ -41,7 +42,7 @@ public struct MarqueeText: View {
                 }
             }
             .onAppear {
-                if needsScrolling {
+                if needsScrolling && shouldAnimate {
                     DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
                         self.animate = true
                     }
@@ -53,9 +54,18 @@ public struct MarqueeText: View {
                 
                 self.animate = false
                 
-                if newNeedsScrolling {
+                if newNeedsScrolling && shouldAnimate {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         self.animate = true
+                    }
+                }
+            }
+            .onChange(of: shouldAnimate) { _, newValue in
+                animate = false
+                
+                if newValue && needsScrolling {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + startDelay) {
+                        animate = true
                     }
                 }
             }
@@ -68,13 +78,15 @@ public struct MarqueeText: View {
         font: Font,
         uiFont: UIFont,
         startDelay: Double = 1.0,
-        alignment: Alignment? = nil
+        alignment: Alignment? = nil,
+        shouldAnimate: Bool = true
     ) {
         self.text = text
         self.font = font
         self.uiFont = uiFont
         self.startDelay = startDelay
         self.alignment = alignment ?? .leading
+        self.shouldAnimate = shouldAnimate
     }
 }
 

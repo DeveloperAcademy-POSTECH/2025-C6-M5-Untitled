@@ -121,11 +121,12 @@ final class JourneyManager: ObservableObject {
                 let index = dict["index"] as? Int,
                 let stationId = dict["stationID"] as? Int,
                 let stationName = dict["stationName"] as? String,
-                let stationCityCode = dict["stationCityCode"] as? Int,
-                let localStationId = dict["localStationID"] as? String
+                let stationCityCode = dict["stationCityCode"] as? Int
             else {
                 return nil
             }
+            
+            let localStationId = dict["localStationID"] as? String
             
             return BusStation(index: index,
                               stationId: stationId,
