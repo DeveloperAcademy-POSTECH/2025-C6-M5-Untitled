@@ -9,6 +9,7 @@ import SwiftUI
 
 struct BoardingLocation: View {
     var route: BusRouteNode
+    var isActive: Bool = true
     
     var body: some View {
         VStack(alignment: .leading, spacing: 24.wScaled){
@@ -23,7 +24,8 @@ struct BoardingLocation: View {
                     font: .presemi32Scaled,
                     uiFont: .presemi32Scaled,
                     startDelay: 1.0,
-                    alignment: .leading
+                    alignment: .leading,
+                    shouldAnimate: isActive
                 )
                 .foregroundColor(Color.subLight)
             }
