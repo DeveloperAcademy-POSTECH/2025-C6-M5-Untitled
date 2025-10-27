@@ -5,24 +5,12 @@
 //  Created by 박난 on 9/23/25.
 //
 
-import SwiftUI
 import MapKit
+import SwiftUI
 
 struct WalkingView: View {
-    @ObservedObject var vm = WalkingViewModel()
+    @ObservedObject var viewModel = WalkingViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    @State private var showAlert = false
-    @State private var showDevSheet = false  // [CHECK] 개발자용 맵 시트 상태
-    
-    var journey: Journey?
-    var index: Int?
-    
-    init(manager: JourneyManager = .shared) {
-        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
-            self.journey = journey
-            self.index = index
-        }
-    }
     
     var body: some View {
         ZStack {
@@ -35,16 +23,16 @@ struct WalkingView: View {
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
                     
-                    if let journey, let index {
+                    if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
                             .padding(32)
                     }
                 }
                 .frame(height: 144)
-                .onChange(of: vm.arrived) { _, newValue in
+                .onChange(of: viewModel.arrived) { _, newValue in
                     if newValue,
-                       let journey = journey,
-                       let index = index,
+                       let journey = viewModel.journey,
+                       let index = viewModel.journeyIndex,
                        index == journey.nodes.count - 1 {
                         coordinator.advanceJourneyStage()
                     }
@@ -57,17 +45,17 @@ struct WalkingView: View {
                         .ignoresSafeArea()
                     
                     VStack {
-                        if let journey, let index {
-                            if vm.arrived {
+                        if let journey = viewModel.journey, let index = viewModel.journeyIndex {
+                            if viewModel.arrived {
                                 AtArrival(journey: journey, index: index)
                             } else {
-                                ToDestination(vm:vm, journey: journey, index: index)
+                                ToDestination(vm:viewModel, journey: journey, index: index)
                                 
                                 Spacer()
                                 
                                 
                                 Button {
-                                    showAlert = true
+                                    viewModel.showAlert = true
                                 } label: {
                                     Text("이미 목적지에 도착하셨나요?")
                                         .font(.premed12Scaled)
@@ -81,7 +69,7 @@ struct WalkingView: View {
                 }
             }
             
-            // [CHECK] 개발자용 뷰 버튼
+            // 맵뷰 버튼
             VStack {
                 Spacer()    // 높이 144(고정) + 120.wScaled(변동)
                     .frame(height: 144 + 120.wScaled)
@@ -89,7 +77,7 @@ struct WalkingView: View {
                 HStack {
                     Spacer()
                     Button {
-                        showDevSheet = true
+                        viewModel.showDevSheet = true
                     } label: {
                         Image(systemName: "map.fill")
                             .font(.system(size: 20.wScaled, weight: .bold))
@@ -108,15 +96,15 @@ struct WalkingView: View {
                 Spacer()
             }
             .overlay(
-                WalkingAlert(isPresented: $showAlert)
+                WalkingAlert(isPresented: $viewModel.showAlert)
             )
         }
-        // [CHECK] 개발자용 바텀 시트
-        .sheet(isPresented: $showDevSheet) {
+        // 맵뷰 바텀 시트
+        .sheet(isPresented: $viewModel.showDevSheet) {
             DevRouteMapView(
-                tmapCoordinates: vm.tmapCoordinates,
-                userLocation: vm.loc.location,
-                destination: vm.pendingDestination
+                tmapCoordinates: viewModel.tmapCoordinates,
+                userLocation: viewModel.loc.location,
+                destination: viewModel.pendingDestination
             )
             .presentationDetents([.fraction(0.4), .large])
             .presentationDragIndicator(.visible)

@@ -1,36 +1,45 @@
-import SwiftUI
+
 import Combine
-import MapKit
 import CoreLocation
+import MapKit
+import SwiftUI
 
 // TODO: 나중에 기능 분리하기(service)
 final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
-    // MARK: - UI 상태
     @Published var bigDistanceText: String = "-- m"
     @Published var arrowBearing: CLLocationDirection = 0
     @Published var nextCards: [String] = []
     @Published var arrived: Bool = false
+    @Published var journey: Journey?
+    @Published var journeyIndex: Int?
+    @Published var showAlert: Bool = false
+    @Published var showDevSheet: Bool = false
     
-    // MARK: - 내부 상태
-    let loc = CLLocationManager()
     private var stepIndex: Int = 0
-    var pendingDestination: CLLocationCoordinate2D?
     private var hasCalculatedRoute = false
     private var currentSegmentIndex: Int = 0 // 현재 진행중인 구간 추적
-    
-    // TMAP 경로 데이터 저장
-    var tmapCoordinates: [CLLocationCoordinate2D] = []
     private var tmapTotalDistance: Int = 0
-    
     private var stepSwitchDistance: CLLocationDistance = 6
+    private var journeyManager: JourneyManager
     
-    override init() {
+    let loc = CLLocationManager()
+    var pendingDestination: CLLocationCoordinate2D?
+    var tmapCoordinates: [CLLocationCoordinate2D] = []
+    
+    init(journeyManager: JourneyManager = .shared) {
+        self.journeyManager = journeyManager
         super.init()
         loc.delegate = self
         loc.desiredAccuracy = kCLLocationAccuracyBest
         loc.headingFilter = 1
         loc.headingOrientation = .portrait
+        
+        if let journey = journeyManager.selectedJourney,
+           let index = journeyManager.journeyIndex {
+            self.journey = journey
+            self.journeyIndex = index
+        }
     }
     
     // MARK: - Public
