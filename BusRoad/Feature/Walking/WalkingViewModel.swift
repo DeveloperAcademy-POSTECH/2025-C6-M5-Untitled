@@ -4,7 +4,6 @@ import CoreLocation
 import MapKit
 import SwiftUI
 
-// TODO: 나중에 기능 분리하기(service)
 final class WalkingViewModel: NSObject, ObservableObject {
     
     @Published var bigDistanceText: String = "-- m"
