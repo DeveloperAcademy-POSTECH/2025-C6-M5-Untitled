@@ -13,7 +13,7 @@ final class SearchManager: ObservableObject {
     @Published var results: [PlaceSummary] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
-    @Published var shouldShowSearchMode = false  // MainSearchView에서 onChange로 감시
+    @Published var shouldShowSearchMode = false
     @Published var hasSubmitted = false
     
     // 의존 서비스
@@ -59,7 +59,7 @@ final class SearchManager: ObservableObject {
                     size: 15
                 )
             }
-                else {
+            else {
                 print("[SearchManager] 정확도순 키워드 검색")
                 keywordResults = try await service.searchByKeyword(
                     keyword: kw,
@@ -99,8 +99,6 @@ final class SearchManager: ObservableObject {
     func searchWithVoiceResult(_ text: String) async {
         query = text
         shouldShowSearchMode = true
-        hasSubmitted = true
-        print("[SearchManager] hasSubmitted set to TRUE: \(hasSubmitted)")
         await search()
         print("[SearchManager] After search - hasSubmitted: \(hasSubmitted)")
     }
