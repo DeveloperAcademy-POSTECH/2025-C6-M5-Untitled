@@ -3,6 +3,7 @@ import Combine
 import CoreLocation
 import SwiftUI
 
+@MainActor
 class BusRouteViewModel: ObservableObject {
     @Published var routes: [Journey]?
     @Published var isLoading: Bool = false
@@ -270,5 +271,42 @@ extension BusRouteViewModel {
         JourneyManager.shared.selectedJourney = walkingJourney
         JourneyManager.shared.journeyIndex = 0
         print("도보 경로 Journey 생성 완료")
+    }
+}
+
+// MARK: - 검색과 관련된 메서드들
+extension BusRouteViewModel {
+    /// 검색 모드 종료
+    func exitSearchMode() {
+        query = ""
+    }
+
+    /// 검색 수행
+    func performSearch() async {
+        await search()
+    }
+
+    /// 검색어 초기화
+    func clearQuery() {
+        query = ""
+    }
+
+    /// 장소 선택 (출발지/목적지)
+    func selectPlace(item: PlaceSummary, locationType: LocationType) {
+        switch locationType {
+        case .origin:
+            setOrigin(origin: LocationInfo(
+                name: item.name,
+                latitude: item.latitude,
+                longitude: item.longitude
+            ))
+        case .destination:
+            setDestination(destination: LocationInfo(
+                name: item.name,
+                latitude: item.latitude,
+                longitude: item.longitude
+            ))
+        }
+        resetManager()
     }
 }
