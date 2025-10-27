@@ -4,7 +4,6 @@ import MapKit
 
 @MainActor
 final class MainSearchViewModel: ObservableObject {
-    
     let searchManager = SearchManager.shared
     let journeyManager = JourneyManager.shared
     
@@ -14,7 +13,6 @@ final class MainSearchViewModel: ObservableObject {
     private var bag = Set<AnyCancellable>()
     
     init() {
-        
         searchManager.$hasSubmitted
                    .assign(to: &$hasSubmitted)
         

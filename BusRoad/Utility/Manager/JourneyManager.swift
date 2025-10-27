@@ -3,7 +3,6 @@ import Combine
 import Foundation
 
 final class JourneyManager: ObservableObject {
-    // TODO: 변수 순서 컨벤션 맞춰서 조정하기
     @Published var origin: LocationInfo?
     @Published var destination: LocationInfo?
     @Published var journeyList: [Journey]?      // 스와이프할 journey list
@@ -13,6 +12,8 @@ final class JourneyManager: ObservableObject {
     static let shared = JourneyManager()    // singleton manager
     
     let locationService = LocationService()
+    
+    private init() { }
     
     func reset() {
         self.origin = nil
