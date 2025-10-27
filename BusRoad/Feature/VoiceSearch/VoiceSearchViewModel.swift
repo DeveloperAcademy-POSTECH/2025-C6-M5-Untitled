@@ -95,6 +95,20 @@ final class VoiceSearchViewModel: ObservableObject {
         print("[DEBUG] cancelListening 완료")
     }
     
+    /// 사용자가 버튼을 눌렀을 때 
+    func handleMicButtonTap() {
+        switch state {
+        case .ready, .failed:
+            retry()
+            
+        case .listening:
+            cancelListening()
+            
+        case .processing, .completed:
+            break
+        }
+    }
+    
     // MARK: - 프라이빗 메서드들
     private func setupSpeechManager() {
         // 녹음 상태
