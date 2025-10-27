@@ -12,7 +12,6 @@ struct BusRoadApp: App {
     @StateObject var coordinator = NavigationCoordinator()
     var body: some Scene {
         WindowGroup {
-//            ContentView()
             AppNavigationView()
                 .environmentObject(coordinator)
         }
