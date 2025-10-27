@@ -162,24 +162,24 @@ struct RouteSuggestionView: View {
                         destination: viewModel.destination
                     )
                 }
-                .task {
-                    NotificationCenter.default.addObserver(
-                        forName: .didSetPresetDestination,
-                        object: nil,
-                        queue: .main
-                    ) { notification in
-                        if let destinationName = notification.object as? String {
-                            viewModel.query = destinationName
-                            isSearchMode = true
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                isFocused = true
-                            }
-                            Task {
-                                await viewModel.search()
-                            }
-                        }
-                    }
-                }
+//                .task {
+//                    NotificationCenter.default.addObserver(
+//                        forName: .didSetPresetDestination,
+//                        object: nil,
+//                        queue: .main
+//                    ) { notification in
+//                        if let destinationName = notification.object as? String {
+//                            viewModel.query = destinationName
+//                            isSearchMode = true
+//                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//                                isFocused = true
+//                            }
+//                            Task {
+//                                await viewModel.search()
+//                            }
+//                        }
+//                    }
+//                }
                 .onChange(of: viewModel.origin) { _, newOrigin in
                     if !isFirstLoad {
                         user.currentLocation = viewModel.origin?.coordinate

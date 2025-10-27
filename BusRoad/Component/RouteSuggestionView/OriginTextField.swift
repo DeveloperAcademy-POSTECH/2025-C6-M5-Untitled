@@ -30,15 +30,15 @@ struct OriginTextField : View {
       Button(action: {
         locationType = .origin
         isSearchMode = true
-        if let name = location?.name, name != "현위치" {
-          let searchText = (name == "현위치") ? "" : name
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            NotificationCenter.default.post(
-              name: .didSetPresetDestination,
-              object: searchText
-            )
-          }
-        }
+//        if let name = location?.name, name != "현위치" {
+//          let searchText = (name == "현위치") ? "" : name
+//          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//            NotificationCenter.default.post(
+//              name: .didSetPresetDestination,
+//              object: searchText
+//            )
+//          }
+//        }
       }) {
         HStack{
           Text(location?.name ?? "출발지를 입력하세요")

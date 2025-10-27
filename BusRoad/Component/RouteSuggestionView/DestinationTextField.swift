@@ -27,14 +27,14 @@ struct DestinationTextField : View {
       Button(action: {
         locationType = .destination
         isSearchMode = true
-        if let name = location?.name {
-          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            NotificationCenter.default.post(
-              name: .didSetPresetDestination,
-              object: name
-            )
-          }
-        }
+//        if let name = location?.name {
+//          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+//            NotificationCenter.default.post(
+//              name: .didSetPresetDestination,
+//              object: name
+//            )
+//          }
+//        }
       }) {
         HStack{
           Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
@@ -57,9 +57,9 @@ struct DestinationTextField : View {
 }
 
 
-extension Notification.Name {
-    static let didSetPresetDestination = Notification.Name("didSetPresetDestination")
-}
+//extension Notification.Name {
+//    static let didSetPresetDestination = Notification.Name("didSetPresetDestination")
+//}
 
 #Preview {
   @Previewable @State var location: LocationInfo? = .init(name: "아주 긴 텍스트는 어떻게 보이는지 보기위해서 아주 긴 텍스트를 입력합니다.", latitude: 0, longitude: 0)
