@@ -6,7 +6,7 @@ import Combine
 @MainActor
 final class AlightProximityManager: ObservableObject {
 
-    // MARK: - 공개 상태 (UI 디버깅 용도)
+    // MARK: - UI 디버깅 용도
     @Published private(set) var lastDistance: CLLocationDistance?   // 마지막 계산 거리(m)
     @Published private(set) var isInsideRadius: Bool = false        // 반경 안/밖 상태
 
@@ -20,9 +20,6 @@ final class AlightProximityManager: ObservableObject {
     private var enterRadius: CLLocationDistance = 300
     private var exitRadius: CLLocationDistance = 340 // 반경(미터)
     private var currentLegIndex: Int = 0            // 감시 중인 버스구간 인덱스
-
-    // 상태 전이 감지를 위한 이전 값 보관
-    private var wasInside: Bool = false
 
     // MARK: - 콜백
     var onEnterRadius: ((LocationInfo, CLLocationDistance) -> Void)?
@@ -78,10 +75,9 @@ final class AlightProximityManager: ObservableObject {
         cancellable = nil
         lastDistance = nil
         isInsideRadius = false
-        wasInside = false
     }
 
-    // MARK: - 거리 계산/상태 전이
+    // MARK: - 거리 계산/상태 바꾸기
     private func evaluate(current: CLLocation) {
         guard let target = targetStop else { return }
         let t = CLLocation(latitude: target.latitude, longitude: target.longitude)
