@@ -2,10 +2,8 @@ import SwiftUI
 
 struct VoiceSearchView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    @StateObject var vm = VoiceSearchViewModel()
-    @Environment(\.dismiss) private var dismiss
+    @StateObject var viewModel = VoiceSearchViewModel()
     
-    var onSearchCompleted: ((String) -> Void)?
     
     var body: some View {
         ZStack {
@@ -15,7 +13,7 @@ struct VoiceSearchView: View {
             VStack {
                 Spacer()
                 
-                Text(vm.centerMessage)
+                Text(viewModel.centerMessage)
                     .font(.premed28)
                     .foregroundStyle(.subLight)
                     .multilineTextAlignment(.center)
@@ -23,13 +21,13 @@ struct VoiceSearchView: View {
                 Spacer()
                 
                 ZStack {
-                    if vm.showWaveAnimation {
+                    if viewModel.showWaveAnimation {
                         WaveRingsView()
                     }
-                    Button(action: handleMicButtonTap) {
+                    Button(action: viewModel.handleMicButtonTap) {
                         ZStack {
                             Circle()
-                                .fill(micButtonColor)
+                                .fill(.subNormal)
                                 .frame(width: 105, height: 105)
                             Image("big-mic")
                                 .resizable()
@@ -37,7 +35,6 @@ struct VoiceSearchView: View {
                                 .frame(width: 60, height: 60)
                         }
                     }
-//                  
                 }
                 .frame(width: 200, height: 200) // 화면 움직이지 않도록 frame 값
                 .padding(.bottom, 11.wScaled)
@@ -48,7 +45,7 @@ struct VoiceSearchView: View {
                 HStack {
                     Spacer()
                     Button {
-                        vm.dismiss()
+                        viewModel.dismiss()
                     } label: {
                         Image("xbutton-white")
                             .resizable()
@@ -65,17 +62,17 @@ struct VoiceSearchView: View {
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
             // 1) 완료 시: 외부 콜백(있으면) -> pop
-            vm.onSearchCompleted = { text in
-                onSearchCompleted?(text)
+            viewModel.onSearchCompleted = { text in
                 coordinator.pop()
             }
+            
             // 2) 닫기(X) 시 pop
-            vm.onDismiss = { coordinator.pop() }
+            viewModel.onDismiss = { coordinator.pop() }
             // 3) 실제 리스닝 시작/바인딩
-            vm.onAppear()
+            viewModel.onAppear()
         }
         .onDisappear {
-            vm.stopListening()
+            viewModel.stopListening()
         }
     }
 }

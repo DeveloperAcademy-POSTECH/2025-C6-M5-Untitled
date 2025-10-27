@@ -3,12 +3,7 @@ import Combine
 import CoreLocation
 import SwiftUI
 
-extension LocationInfo {
-    var asCLLocation: CLLocation {
-        return CLLocation(latitude: self.latitude, longitude: self.longitude)
-    }
-}
-
+@MainActor
 class BusRouteViewModel: ObservableObject {
     @Published var routes: [Journey]?
     @Published var isLoading: Bool = false
@@ -16,7 +11,6 @@ class BusRouteViewModel: ObservableObject {
     @Published var origin: LocationInfo?
     @Published var destination: LocationInfo?
     @Published var isSearching: Bool = false
-    
     @Published var hasSubmitted: Bool = false
     @Published var userDidSelectOrigin: Bool = false
     
@@ -42,9 +36,7 @@ class BusRouteViewModel: ObservableObject {
         
         searchManager.$hasSubmitted
             .assign(to: &$hasSubmitted)
-                
-        
-        
+
         // MainSearchViewModel과 같은 형식으로 query 프록시 제공하기 위함
         searchManager.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
@@ -56,17 +48,20 @@ class BusRouteViewModel: ObservableObject {
         get { searchManager.query }
         set { searchManager.query = newValue }
     }
+    
     var results: [PlaceSummary] { searchManager.results }
     var shouldShowSearchMode: Bool { searchManager.shouldShowSearchMode }
     var isSearchLoading: Bool { searchManager.isLoading }
     var searchErrorMessage: String? { searchManager.errorMessage }
     
     func search() async { await searchManager.search() }
+    
     func resetSearchMode() { searchManager.resetSearchMode() }
     
     func setDestination(destination: LocationInfo) {
         journeyManager.setDestination(destination)
     }
+    
     func setOrigin(origin: LocationInfo) {
         journeyManager.setOrigin(origin)
         userDidSelectOrigin = true
@@ -225,13 +220,13 @@ class BusRouteViewModel: ObservableObject {
                         }
                         
                     }
-                }catch {
+                } catch {
                     self.errorMessage = "데이터 처리 중 오류가 발생했습니다."
                 }
             }
         }
     }
-    
+
     func requestOrigin() {
         
         if userDidSelectOrigin {
@@ -276,5 +271,42 @@ extension BusRouteViewModel {
         JourneyManager.shared.selectedJourney = walkingJourney
         JourneyManager.shared.journeyIndex = 0
         print("도보 경로 Journey 생성 완료")
+    }
+}
+
+// MARK: - 검색과 관련된 메서드들
+extension BusRouteViewModel {
+    /// 검색 모드 종료
+    func exitSearchMode() {
+        query = ""
+    }
+
+    /// 검색 수행
+    func performSearch() async {
+        await search()
+    }
+
+    /// 검색어 초기화
+    func clearQuery() {
+        query = ""
+    }
+
+    /// 장소 선택 (출발지/목적지)
+    func selectPlace(item: PlaceSummary, locationType: LocationType) {
+        switch locationType {
+        case .origin:
+            setOrigin(origin: LocationInfo(
+                name: item.name,
+                latitude: item.latitude,
+                longitude: item.longitude
+            ))
+        case .destination:
+            setDestination(destination: LocationInfo(
+                name: item.name,
+                latitude: item.latitude,
+                longitude: item.longitude
+            ))
+        }
+        resetManager()
     }
 }

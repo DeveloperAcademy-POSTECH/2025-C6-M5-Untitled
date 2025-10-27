@@ -22,7 +22,6 @@ final class VoiceSearchViewModel: ObservableObject {
     init() { setupSpeechManager() }
     
     // MARK: - 공개 메서드들
-    
     /// 음성 인식 시작
     func startListening() {
         guard speechManager.isAvailable else {
@@ -71,7 +70,6 @@ final class VoiceSearchViewModel: ObservableObject {
         }
     }
     
-    
     /// 음성 인식 중단 (사용자가 직접 중단)
     func cancelListening() {
         print("[DEBUG] cancelListening 시작")
@@ -97,6 +95,19 @@ final class VoiceSearchViewModel: ObservableObject {
         print("[DEBUG] cancelListening 완료")
     }
     
+    /// 사용자가 버튼을 눌렀을 때 
+    func handleMicButtonTap() {
+        switch state {
+        case .ready, .failed:
+            retry()
+            
+        case .listening:
+            cancelListening()
+            
+        case .processing, .completed:
+            break
+        }
+    }
     
     // MARK: - 프라이빗 메서드들
     private func setupSpeechManager() {
@@ -198,6 +209,7 @@ final class VoiceSearchViewModel: ObservableObject {
         errorMessage = message
     }
 }
+
 // MARK: - 편의 확장
 extension VoiceSearchViewModel {
     

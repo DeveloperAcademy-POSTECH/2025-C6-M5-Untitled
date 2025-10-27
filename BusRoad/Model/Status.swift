@@ -6,7 +6,7 @@
 //
 
 // WholeJourney의 RouteCircle 컴포넌트 상태 표시
-enum Status {
+enum NodeStatus {
     case active
     case disable
     

@@ -33,11 +33,16 @@ struct SearchModeSection: View {
                 }
             }
         }
-        .onChange(of: hasSubmitted) { _, newValue in
-                   if newValue {
-                       submittedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-                   }
-               }
+//        .onChange(of: hasSubmitted) { _, newValue in
+//            if newValue {
+//                submittedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+//            }
+//        }
+        .onChange(of: results) { _, newResults in
+            if !newResults.isEmpty && !query.isEmpty {
+                submittedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+        }
     }
     
     private var header: some View {
@@ -72,22 +77,22 @@ struct SearchModeSection: View {
                     if !hasSubmitted {
                         Spacer(minLength: 0)
                         Spacer(minLength: 0)
-                    
-                    // 로딩 중
+                        
+                        // 로딩 중
                     } else if isLoading {
                         Spacer(minLength: 0)
-
+                        
                         ProgressView()
                             .controlSize(.large)
                             .scaleEffect(1.5)
                             .padding(.top, -100)
-
+                        
                         Spacer(minLength: 0)
-                    
-                    // 검색어는 있지만 결과가 없을 때
+                        
+                        // 검색어는 있지만 결과가 없을 때
                     } else if results.isEmpty {
                         Spacer(minLength: 0)
-
+                        
                         VStack(spacing: 6) {
                             Text("검색 결과가 없어요.")
                                 .font(.presemi24)
@@ -98,9 +103,9 @@ struct SearchModeSection: View {
                         }
                         .multilineTextAlignment(.center)
                         .padding(.top, -100)
-
+                        
                         Spacer(minLength: 0)
-
+                        
                     } else {
                         LazyVStack(spacing: 7) {
                             ForEach(results) { item in
