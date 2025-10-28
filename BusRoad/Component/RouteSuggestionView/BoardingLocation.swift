@@ -29,7 +29,7 @@ struct BoardingLocation: View {
                 )
                 .foregroundColor(Color.subLight)
             }
-           
+            
             HStack(spacing: 8.wScaled) {
                 Text("\(route.busNo)")
                     .font(.presemi24)

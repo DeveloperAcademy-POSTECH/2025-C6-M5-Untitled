@@ -15,7 +15,7 @@ struct RouteSelectButton: View {
     var retrySearch: () -> Void
     
     var body: some View {
-      if viewModel.errorMessage == nil {
+        if viewModel.errorMessage == nil {
             Button {
                 if let routes {
                     print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
@@ -49,53 +49,53 @@ struct RouteSelectButton: View {
             .frame(maxWidth: .infinity)
             .frame(height: 74)
         }
-      else if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다."{
-        Button {
-          viewModel.createWalkingJourneyIfNeeded()
-          onSelect()
-        } label: {
-          Text("도보 이동하기")
-            .foregroundColor(Color.subLight)
-            .font(.premed32)
-            .frame(width: 240, height: 75)
-            .background(Color.subStrong)
-            .cornerRadius(20)
+        else if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다."{
+            Button {
+                viewModel.createWalkingJourneyIfNeeded()
+                onSelect()
+            } label: {
+                Text("도보 이동하기")
+                    .foregroundColor(Color.subLight)
+                    .font(.premed32)
+                    .frame(width: 240, height: 75)
+                    .background(Color.subStrong)
+                    .cornerRadius(20)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 74)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 74)
-      }
-      else if viewModel.errorMessage == "출발지와 도착지가 같습니다."{
-        Button {
-          retrySearch()
-        } label: {
-            Text("처음으로")
-                .foregroundColor(Color.subLight)
-                .font(.premed32)
-                .frame(width: 240, height: 75)
-                .background(Color.subStrong)
-                .cornerRadius(20)
+        else if viewModel.errorMessage == "출발지와 도착지가 같습니다."{
+            Button {
+                retrySearch()
+            } label: {
+                Text("처음으로")
+                    .foregroundColor(Color.subLight)
+                    .font(.premed32)
+                    .frame(width: 240, height: 75)
+                    .background(Color.subStrong)
+                    .cornerRadius(20)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 74)
+            
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 74)
-      
-      }
-      else {
-        Button {
-          if let origin = viewModel.origin, let destination = viewModel.destination {
-                      viewModel.validateAndFetchRoute(origin: origin, destination: destination)
-                  } else {
-                      retrySearch()
-                  }
-        } label: {
-            Text("새로고침 하기")
-                .foregroundColor(Color.subLight)
-                .font(.premed32)
-                .frame(width: 240, height: 75)
-                .background(Color.subStrong)
-                .cornerRadius(20)
+        else {
+            Button {
+                if let origin = viewModel.origin, let destination = viewModel.destination {
+                    viewModel.validateAndFetchRoute(origin: origin, destination: destination)
+                } else {
+                    retrySearch()
+                }
+            } label: {
+                Text("새로고침 하기")
+                    .foregroundColor(Color.subLight)
+                    .font(.premed32)
+                    .frame(width: 240, height: 75)
+                    .background(Color.subStrong)
+                    .cornerRadius(20)
+            }
+            .frame(maxWidth: .infinity)
+            .frame(height: 74)
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: 74)
-      }
     }
 }

@@ -11,7 +11,7 @@ struct ProgressRouteCard: View {
         ZStack {
             Rectangle()
                 .foregroundColor(Color.primaryNormal)
-//                .frame(width: 305, height: 423)
+            //                .frame(width: 305, height: 423)
                 .cornerRadius(20)
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: .primaryLight))

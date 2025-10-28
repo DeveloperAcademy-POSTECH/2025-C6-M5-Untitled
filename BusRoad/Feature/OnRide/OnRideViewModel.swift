@@ -4,6 +4,11 @@ import CoreLocation
 
 @MainActor
 final class OnRideViewModel: ObservableObject {
+    
+    // 어떤 경로인지
+    @Published var journey: Journey?
+    @Published var index: Int?
+    
     // UI 상태
     @Published var stopName: String = ""
     @Published var isNearAlight: Bool = false
@@ -40,6 +45,11 @@ final class OnRideViewModel: ObservableObject {
         self.locationService = locationService
         self.journeyManager = journeyManager
         self.proximity = proximity
+        
+        journeyManager.$selectedJourney
+            .assign(to: &$journey)
+        journeyManager.$journeyIndex
+            .assign(to: &$index)
     }
     
     // convenience init
@@ -74,7 +84,7 @@ final class OnRideViewModel: ObservableObject {
             self?.isNearAlight = true
             self?.canAlight = true
             let generator = UINotificationFeedbackGenerator()
-
+            
             for i in 0..<3 {
                 DispatchQueue.main.asyncAfter(deadline: .now() + (1.0 * Double(i))) {
                     generator.notificationOccurred(.success)

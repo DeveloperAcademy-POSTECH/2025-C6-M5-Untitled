@@ -36,7 +36,7 @@ struct RouteSummary: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width:12.wScaled.minimum(12), height:16.wScaled.minimum(16))
-                        
+                    
                         .foregroundColor(Color.greyLight)
                 }
                 Text("도보 \(journey.walkingTime)분")

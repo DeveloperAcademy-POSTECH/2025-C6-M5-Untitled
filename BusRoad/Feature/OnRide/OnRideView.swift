@@ -1,17 +1,8 @@
 import SwiftUI
 
 struct OnRideView: View {
-    @StateObject private var vm = OnRideViewModel()
+    @StateObject private var viewModel = OnRideViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    var journey: Journey?
-    var index: Int?
-    
-    init(manager: JourneyManager = .shared) {
-        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
-            self.journey = journey
-            self.index = index
-        }
-    }
     
     var body: some View {
         ZStack {
@@ -25,7 +16,7 @@ struct OnRideView: View {
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
                     
-                    if let journey, let index {
+                    if let journey = viewModel.journey, let index = viewModel.index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
                             .padding(32)
                     }
@@ -44,16 +35,16 @@ struct OnRideView: View {
                     
                     VStack(spacing: 0) {
                         OnRideCard(
-                            busStopName: vm.stopName,
-                            canAlight: vm.canAlight,
-                            progress: vm.progress
+                            busStopName: viewModel.stopName,
+                            canAlight: viewModel.canAlight,
+                            progress: viewModel.progress
                         )
                         .padding(.horizontal, 24.wScaled)
                         .padding(.top, 28.wScaled)
                         .padding(.bottom, 47.wScaled)
                         
                         // 버튼 영역
-                        if vm.canAlight {
+                        if viewModel.canAlight {
                             Button {
                                 coordinator.advanceJourneyStage()
                             } label: {
@@ -93,8 +84,8 @@ struct OnRideView: View {
                         let leg = journey.busLegIndex(forNodeIndex: nodeIndex)
                     else { return }
                     
-                    vm.busLegIndex = leg
-                    vm.start()
+                    viewModel.busLegIndex = leg
+                    viewModel.start()
                 }
                 .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
                     guard
@@ -103,16 +94,17 @@ struct OnRideView: View {
                         let leg = j.busLegIndex(forNodeIndex: nodeIdx)
                     else { return }
                     
-                    if vm.busLegIndex != leg {
-                        vm.busLegIndex = leg
-                        vm.start()
+                    if viewModel.busLegIndex != leg {
+                        viewModel.busLegIndex = leg
+                        viewModel.start()
                     }
                 }
-                .onDisappear { vm.stop() }
+                .onDisappear { viewModel.stop() }
             }
         }
     }
 }
+
 #Preview {
     let manager = JourneyManager.shared
     
@@ -160,10 +152,12 @@ struct OnRideView: View {
     )
     
     // 매니저에 주입
-    manager.selectedJourney = journey
-    manager.journeyIndex = 0
+    do {
+        manager.selectedJourney = journey
+        manager.journeyIndex = 0
+    }
     
     // 프리뷰
-    return OnRideView(manager: manager)
+    return OnRideView()
         .environmentObject(NavigationCoordinator())
 }

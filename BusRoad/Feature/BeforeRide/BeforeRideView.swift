@@ -10,15 +10,6 @@ import SwiftUI
 struct BeforeRideView: View {
     @StateObject private var viewmodel = BeforeRideViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    var journey: Journey?
-    var index: Int?
-    
-    init(manager: JourneyManager = .shared) {   // TODO: 의존성 문제 해결(manager viewModel로 빼기)
-        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
-            self.journey = journey
-            self.index = index
-        }
-    }
     
     var body: some View {
         
@@ -29,16 +20,13 @@ struct BeforeRideView: View {
             VStack(spacing: 0) {
                 
                 VStack(spacing: 0) {
-                    
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
-                       
                     
-                    if let journey, let index {
+                    if let journey = viewmodel.journey, let index = viewmodel.index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
                             .padding(32)
                     }
-                    
                 }
                 .frame(height: 144)
                 
@@ -49,7 +37,9 @@ struct BeforeRideView: View {
                         .ignoresSafeArea()
                     
                     VStack(spacing: 0) {
-                        if let journey, let index, case let .bus(busNode) = journey.nodes[index] {
+                        if let journey = viewmodel.journey,
+                           let index = viewmodel.index,
+                           case let .bus(busNode) = journey.nodes[index] {
                             BeforeRideCard(
                                 waitingStopName: busNode.stations[0].stationName,
                                 waitingBusNO: busNode.busNo,
@@ -89,7 +79,7 @@ struct BeforeRideView: View {
     let station2 = BusStation(index: 1, stationId: 1002, stationName: "죽도시장", stationCityCode: 37010, localStationId: "102")
     let station3 = BusStation(index: 2, stationId: 1003, stationName: "포항역", stationCityCode: 37010, localStationId: "103")
     let station4 = BusStation(index: 3, stationId: 1004, stationName: "포항시외버스터미널", stationCityCode: 37010, localStationId: "104")
-
+    
     // 버스 구간 1
     let busNode1 = BusRouteNode(
         start: LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231),
@@ -99,15 +89,15 @@ struct BeforeRideView: View {
         stations: [station1, station2],
         travelTime: 15
     )
-
+    
     // 도보 구간
     let walkNode = WalkRouteNode(
         start: LocationInfo(name: "죽도시장", latitude: 36.0348, longitude: 129.3435),
         end: LocationInfo(name: "포항역", latitude: 36.0716, longitude: 129.3419),
         travelTime: 10
     )
-
-    // 버스 구간 2 (
+    
+    // 버스 구간 2
     let busNode2 = BusRouteNode(
         start: LocationInfo(name: "포항역", latitude: 36.0716, longitude: 129.3419),
         end: LocationInfo(name: "포항시외버스터미널", latitude: 36.0165, longitude: 129.3564),
@@ -116,7 +106,7 @@ struct BeforeRideView: View {
         stations: [station3, station4],
         travelTime: 18
     )
-
+    
     // 전체 여정 구성
     let journey = Journey(
         totalTime: 43,
@@ -126,12 +116,13 @@ struct BeforeRideView: View {
             .bus(busNode2)
         ]
     )
-
+    
     // 매니저에 주입
-    manager.selectedJourney = journey
-    manager.journeyIndex = 0
+    do {
+        manager.selectedJourney = journey
+        manager.journeyIndex = 0
+    }
 
-    // 프리뷰
-    return BeforeRideView(manager: manager)
+    return BeforeRideView()
         .environmentObject(NavigationCoordinator())
 }

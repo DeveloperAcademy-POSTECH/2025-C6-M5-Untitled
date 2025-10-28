@@ -20,11 +20,11 @@ struct RouteCardSlide: View {
                                       index: index,
                                       isActive: currentIndex == index
                             )
-                                .offset(x: relativeIndex * 270.wScaled)
-                                .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
-                                .opacity(relativeIndex == 0 ? 1.0 : 0.3)
-                                .zIndex(Double(routes.count) - Double(abs(index - currentIndex)))
-                                .animation(.spring(), value: currentIndex)
+                            .offset(x: relativeIndex * 270.wScaled)
+                            .scaleEffect(relativeIndex == 0 ? 1.0 : 0.9)
+                            .opacity(relativeIndex == 0 ? 1.0 : 0.3)
+                            .zIndex(Double(routes.count) - Double(abs(index - currentIndex)))
+                            .animation(.spring(), value: currentIndex)
                         }
                     }
                     .gesture(

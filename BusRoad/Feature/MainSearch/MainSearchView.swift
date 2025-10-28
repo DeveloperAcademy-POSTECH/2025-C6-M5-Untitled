@@ -1,113 +1,94 @@
 import MapKit
 import SwiftUI
 
-private let kHasShownVoiceHint = "hasShownVoiceHint_v1"
-
 struct MainSearchView: View {
-    @AppStorage(kHasShownVoiceHint) private var hasShownVoiceHint = false
     
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    @StateObject private var vm = MainSearchViewModel()
-
-    @State private var isSearchMode = false
-    @State private var showHint = false
+    @StateObject private var viewModel = MainSearchViewModel()
     @FocusState private var isFocused: Bool
-
+    
     var body: some View {
         Group {
-            if isSearchMode {
+            if viewModel.isSearchMode {
                 SearchModeSection(
-                    query: Binding(get: { vm.query }, set: { vm.query = $0 }),
-                    results: vm.results,
+                    query: Binding(
+                        get: { viewModel.query },
+                        set: { viewModel.query = $0 }
+                    ),
+                    results: viewModel.results,
                     isFocused: $isFocused,
-                    onBack: { exitSearchMode() },
-                    onSubmit: { performSearch() },
-                    onClear: { clearSearch() },
+                    onBack: {
+                        viewModel.exitSearchMode()
+                        isFocused = false
+                    },
+                    onSubmit: {
+                        isFocused = false
+                        Task { await viewModel.performSearch() }
+                    },
+                    onClear: {
+                        viewModel.clearQuery()
+                        isFocused = true
+                    },
                     onMicTap: {
-                        showHint = false
+                        viewModel.handleMicTap()
                         isFocused = false
                         coordinator.push(.voiceSearch)
                     },
                     onSelect: { item in
-                       
-                        vm.setDestination(destination: LocationInfo(
-                            name: item.name,
-                            latitude: item.latitude,
-                            longitude: item.longitude
-                        ))
-                        
-                        // 초기화
-                        vm.resetManager()
-                        isSearchMode = false
+                        viewModel.selectPlace(item: item)
                         coordinator.push(.routeSuggestion)
                     },
-                    hasSubmitted: $vm.hasSubmitted,
-                    isLoading: vm.isLoading
+                    hasSubmitted: $viewModel.hasSubmitted,
+                    isLoading: viewModel.isLoading
                 )
             } else {
                 IntroSection(
-                    query: Binding(get: { vm.query }, set: { vm.query = $0 }),
+                    query: Binding(get: { viewModel.query }, set: { viewModel.query = $0 }),
                     isFocused: $isFocused,
-                    showHint: $showHint,
-                    onSubmit: { performSearch() },
+                    showHint: $viewModel.showHint,
+                    onSubmit: {
+                        isFocused = false
+                        Task { await viewModel.performSearch() }
+                    },
                     onMicTap: {
-                        showHint = false
+                        viewModel.handleMicTap()
                         isFocused = false
                         coordinator.push(.voiceSearch)
                     },
-                    onClear: { clearSearch() }
+                    onClear: {
+                        viewModel.clearQuery()
+                        isFocused = true
+                    }
                 )
             }
         }
         .onTapGesture { isFocused = false }
-        .animation(nil, value: vm.query)
+        .animation(nil, value: viewModel.query)
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
         .onAppear {   // GPS 하드웨어 웜업용
             print("[DEBUG] requestOrigin")
-            vm.requestOrigin()
+            viewModel.requestOrigin()
         }
         .onChange(of: isFocused) { _, new in
-            if new && !isSearchMode {
-                isSearchMode = true
+            if new && !viewModel.isSearchMode {
+                viewModel.isSearchMode = true
                 DispatchQueue.main.async { isFocused = true }
             }
         }
-        // SearchManager가 올린 전환 신호 감시
-        .onChange(of: vm.shouldShowSearchMode) { _, show in
+        .onChange(of: viewModel.shouldShowSearchMode) { _, show in
             if show {
-                isSearchMode = true
-                vm.resetSearchMode()
+                viewModel.isSearchMode = true
+                viewModel.resetSearchMode()
             }
         }
-        .onChange(of: isSearchMode) { _, _ in
-            showHint = false
+        .onChange(of: viewModel.isSearchMode) { _, _ in
+            viewModel.showHint = false
         }
         .onAppear {
-            guard !hasShownVoiceHint else { return }  // 이미 본 적 있으면 패스
-                showHint = true
-                hasShownVoiceHint = true
+            guard !viewModel.hasShownVoiceHint else { return }  // 이미 본 적 있으면 패스
+            viewModel.showHint = true
+            viewModel.hasShownVoiceHint = true
         }
-    }
-
-    // MARK: - Helpers
-    @MainActor func exitSearchMode() {
-        isSearchMode = false
-        isFocused = false
-        vm.query = ""
-        vm.resetManager()
-    }
-
-    @MainActor func performSearch() {
-        showHint = false
-        isFocused = false
-        isSearchMode = true
-        Task { await vm.search() }
-    }
-
-    @MainActor func clearSearch() {
-        showHint = false
-        vm.query = ""
-        isFocused = true
     }
 }
