@@ -11,4 +11,6 @@ struct BusStation {
     let stationName: String
     let stationCityCode: Int
     let localStationId: String?   // 필요한 게 stationId인지 localStationId인지 아직 몰라서 일단 다 가져옴
+    let latitude: Double
+    let longitude: Double
 }

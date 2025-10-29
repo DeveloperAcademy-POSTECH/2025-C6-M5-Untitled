@@ -122,7 +122,11 @@ final class JourneyManager: ObservableObject {
                 let index = dict["index"] as? Int,
                 let stationId = dict["stationID"] as? Int,
                 let stationName = dict["stationName"] as? String,
-                let stationCityCode = dict["stationCityCode"] as? Int
+                let stationCityCode = dict["stationCityCode"] as? Int,
+                let xString = dict["x"] as? String,
+                let yString = dict["y"] as? String,
+                let longitude = Double(xString),
+                let latitude = Double(yString)
             else {
                 return nil
             }
@@ -133,7 +137,9 @@ final class JourneyManager: ObservableObject {
                               stationId: stationId,
                               stationName: stationName,
                               stationCityCode: stationCityCode,
-                              localStationId: localStationId
+                              localStationId: localStationId,
+                              latitude: latitude,
+                              longitude: longitude
             )
         }
         
