@@ -10,12 +10,42 @@
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
 		931B33E62EA5DB1600ED7944 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 931B33E82EA5DB5D00ED7944 /* Lottie */; };
+		FEFDE9E22EB23C5200733205 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEFDE9E12EB23C5200733205 /* WidgetKit.framework */; };
+		FEFDE9E42EB23C5200733205 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEFDE9E32EB23C5200733205 /* SwiftUI.framework */; };
+		FEFDE9F12EB23C5300733205 /* ProgressWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FEFDE9DF2EB23C5200733205 /* ProgressWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FEFDE9EF2EB23C5300733205 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 60A8CD992E7CDFE500530B92 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FEFDE9DE2EB23C5200733205;
+			remoteInfo = ProgressWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		FEFDE9F22EB23C5300733205 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FEFDE9F12EB23C5300733205 /* ProgressWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		60A8CDA12E7CDFE500530B92 /* BusRoad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BusRoad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		931B33E52EA5DB1600ED7944 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
+		FEFDE9DF2EB23C5200733205 /* ProgressWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ProgressWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEFDE9E12EB23C5200733205 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		FEFDE9E32EB23C5200733205 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -24,6 +54,20 @@
 			membershipExceptions = (
 				Application/Secrets.plist,
 				Info.plist,
+			);
+			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
+		};
+		FEFDE9F62EB23C5300733205 /* Exceptions for "ProgressWidget" folder in "ProgressWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = FEFDE9DE2EB23C5200733205 /* ProgressWidgetExtension */;
+		};
+		FEFDE9FA2EB23CB500733205 /* Exceptions for "ProgressWidget" folder in "BusRoad" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				ProgressWidgetLiveActivity.swift,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
 		};
@@ -38,6 +82,15 @@
 			path = BusRoad;
 			sourceTree = "<group>";
 		};
+		FEFDE9E52EB23C5200733205 /* ProgressWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				FEFDE9FA2EB23CB500733205 /* Exceptions for "ProgressWidget" folder in "BusRoad" target */,
+				FEFDE9F62EB23C5300733205 /* Exceptions for "ProgressWidget" folder in "ProgressWidgetExtension" target */,
+			);
+			path = ProgressWidget;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,6 +102,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FEFDE9DC2EB23C5200733205 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FEFDE9E42EB23C5200733205 /* SwiftUI.framework in Frameworks */,
+				FEFDE9E22EB23C5200733205 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -57,6 +119,8 @@
 			children = (
 				60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */,
 				60A8CDA32E7CDFE500530B92 /* BusRoad */,
+				FEFDE9E52EB23C5200733205 /* ProgressWidget */,
+				FEFDE9E02EB23C5200733205 /* Frameworks */,
 				60A8CDA22E7CDFE500530B92 /* Products */,
 				931B33E52EA5DB1600ED7944 /* Secrets.plist */,
 			);
@@ -66,8 +130,18 @@
 			isa = PBXGroup;
 			children = (
 				60A8CDA12E7CDFE500530B92 /* BusRoad.app */,
+				FEFDE9DF2EB23C5200733205 /* ProgressWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		FEFDE9E02EB23C5200733205 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FEFDE9E12EB23C5200733205 /* WidgetKit.framework */,
+				FEFDE9E32EB23C5200733205 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -81,10 +155,12 @@
 				60A8CD9E2E7CDFE500530B92 /* Frameworks */,
 				60A8CD9F2E7CDFE500530B92 /* Resources */,
 				60A8CDB12E7CE82300530B92 /* Run Script */,
+				FEFDE9F22EB23C5300733205 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				FEFDE9F02EB23C5300733205 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				60A8CDA32E7CDFE500530B92 /* BusRoad */,
@@ -96,6 +172,28 @@
 			productName = BusRoad;
 			productReference = 60A8CDA12E7CDFE500530B92 /* BusRoad.app */;
 			productType = "com.apple.product-type.application";
+		};
+		FEFDE9DE2EB23C5200733205 /* ProgressWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FEFDE9F52EB23C5300733205 /* Build configuration list for PBXNativeTarget "ProgressWidgetExtension" */;
+			buildPhases = (
+				FEFDE9DB2EB23C5200733205 /* Sources */,
+				FEFDE9DC2EB23C5200733205 /* Frameworks */,
+				FEFDE9DD2EB23C5200733205 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FEFDE9E52EB23C5200733205 /* ProgressWidget */,
+			);
+			name = ProgressWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = ProgressWidgetExtension;
+			productReference = FEFDE9DF2EB23C5200733205 /* ProgressWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -109,6 +207,9 @@
 				TargetAttributes = {
 					60A8CDA02E7CDFE500530B92 = {
 						CreatedOnToolsVersion = 26.0;
+					};
+					FEFDE9DE2EB23C5200733205 = {
+						CreatedOnToolsVersion = 26.0.1;
 					};
 				};
 			};
@@ -131,6 +232,7 @@
 			projectRoot = "";
 			targets = (
 				60A8CDA02E7CDFE500530B92 /* BusRoad */,
+				FEFDE9DE2EB23C5200733205 /* ProgressWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -142,6 +244,13 @@
 			files = (
 				931B33E62EA5DB1600ED7944 /* Secrets.plist in Resources */,
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FEFDE9DD2EB23C5200733205 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -178,7 +287,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FEFDE9DB2EB23C5200733205 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FEFDE9F02EB23C5300733205 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FEFDE9DE2EB23C5200733205 /* ProgressWidgetExtension */;
+			targetProxy = FEFDE9EF2EB23C5300733205 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		60A8CDAA2E7CDFE700530B92 /* Debug */ = {
@@ -324,6 +448,7 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "버스 경로 추천을 위해 앱 사용 중 위치 정보를 이용합니다.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -373,6 +498,7 @@
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "버스 경로 추천을 위해 앱 사용 중 위치 정보를 이용합니다.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
@@ -402,6 +528,76 @@
 			};
 			name = Release;
 		};
+		FEFDE9F32EB23C5300733205 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = Y485RHY5J6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProgressWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ProgressWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.untitled.BusRoad.ProgressWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Untitled;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FEFDE9F42EB23C5300733205 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = Y485RHY5J6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ProgressWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ProgressWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.untitled.BusRoad.ProgressWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Untitled;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -419,6 +615,15 @@
 			buildConfigurations = (
 				60A8CDAD2E7CDFE700530B92 /* Debug */,
 				60A8CDAE2E7CDFE700530B92 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FEFDE9F52EB23C5300733205 /* Build configuration list for PBXNativeTarget "ProgressWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FEFDE9F32EB23C5300733205 /* Debug */,
+				FEFDE9F42EB23C5300733205 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
