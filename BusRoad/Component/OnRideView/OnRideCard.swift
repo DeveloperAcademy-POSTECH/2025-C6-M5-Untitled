@@ -131,11 +131,11 @@ struct BusStopProgress: View {
     }
 }
 
-#Preview {
-    OnRideCard(
-        busStopName: "Bus stop name",
-        canAlight: false,
-        progress: 0.9,
-        remainingStations: 2
-    )
-}
+//#Preview {
+//    OnRideCard(
+//        busStopName: "Bus stop name",
+//        canAlight: false,
+//        progress: 0.9,
+//        remainingStations: 2
+//    )
+//}
