@@ -1,4 +1,5 @@
 import Foundation
+import UIKit
 import CoreLocation
 import Combine
 
@@ -202,9 +203,22 @@ final class AlightProximityManager: ObservableObject {
         if remainingStations == 2 {
             canAlight = true
             print("[AlightProximityManager] 내릴 준비 - 버튼 활성화!")
+            
+            playHapticFeedback()
         }
         
         onStationPassed?(index, name)
+    }
+    
+    private func playHapticFeedback() {
+        let generator = UINotificationFeedbackGenerator()
+        
+        // 3번 연속 진동
+        for i in 0..<3 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + (0.3 * Double(i))) {
+                generator.notificationOccurred(.success)
+            }
+        }
     }
 }
 
