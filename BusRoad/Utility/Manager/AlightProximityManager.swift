@@ -119,7 +119,7 @@ final class AlightProximityManager: ObservableObject {
         // 목적지까지 현재 거리
         let distanceToDestination = currentLocation.distance(from: destinationLocation)
         
-        // 진행률 계산 (원래 방식)
+        // 진행률 계산
         updateProgress(distanceToDestination: distanceToDestination)
         
         // 모든 정류장 지났으면 종료

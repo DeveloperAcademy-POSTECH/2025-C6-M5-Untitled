@@ -6,6 +6,8 @@ struct OnRideCard: View {
     let busStopName: String
     let canAlight: Bool
     let progress: CGFloat
+    let remainingStations: Int
+    let hasArrived: Bool
     
     var body: some View {
         ZStack {
@@ -43,10 +45,18 @@ struct OnRideCard: View {
                 VStack(spacing: 11 .wScaled) {
                     HStack {
                         Spacer()
-                        
-                        Text(canAlight ? "곧 내려야 해요" : " ")
-                            .font(.presemi20Scaled)
-                            .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                        if hasArrived {
+                            Text("목적지에 도착했어요")
+                                .font(.presemi20Scaled)
+                                .foregroundStyle(canAlight ? .subNormal : .primaryStrong)
+                        } else {
+                            Text("\(remainingStations)정류장 ")
+                                .font(.presemi20Scaled)
+                                .foregroundStyle(canAlight ? .subNormal : .primaryStrong) +
+                            Text("남았어요")
+                                .font(.prereg20Scaled)
+                                .foregroundStyle(canAlight ? .subNormal : .primaryStrong)
+                        }
                     }
                     
                     BusStopProgress(
@@ -125,6 +135,7 @@ struct BusStopProgress: View {
     OnRideCard(
         busStopName: "Bus stop name",
         canAlight: false,
-        progress: 0.9
+        progress: 0.9,
+        remainingStations: 2
     )
 }
