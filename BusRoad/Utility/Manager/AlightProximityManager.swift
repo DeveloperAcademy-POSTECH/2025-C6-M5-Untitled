@@ -23,7 +23,7 @@ final class AlightProximityManager: ObservableObject {
     private var cancellable: AnyCancellable?
     private var stations: [BusStation] = []  // 모든 정류장 리스트
     private var hasEnteredRadius: Bool = false // 정류장 안에 들어갔는지
-    private let detectionRadius: CLLocationDistance = 20  // 20m 반경
+    private let detectionRadius: CLLocationDistance = 10  // 10m 반경
     private var initialDistance: CLLocationDistance?        // 목적지까지 초기 거리
     private var recentDistances: [CLLocationDistance] = []  // GPS 튀는 것 방지
     private let smoothCount: Int = 5                        // 최근 N개 평균
@@ -153,6 +153,8 @@ final class AlightProximityManager: ObservableObject {
                 // 마지막 정류장이면 진입만 해도 도착으로 바뀜
                 if isLastStation {
                     hasArrived = true
+                    progress = 1.0
+                    maxProgress = 1.0
                     print("[AlightProximityManager] 목적지 도착!")
                 }
             }
