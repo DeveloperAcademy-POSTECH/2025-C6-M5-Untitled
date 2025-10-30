@@ -61,8 +61,8 @@ struct OnRideCard: View {
                     
                     BusStopProgress(
                         progress: progress,
-                        trackColor: canAlight ? Color(.subNormal) : Color(.primaryNormal),
-                        fillColor: canAlight ? Color(.subHeavy): Color(.primaryDisable)
+                        trackColor: canAlight ? Color(.subHeavy) : Color(.primaryDisable),
+                        fillColor: canAlight ? Color(.subNormal): Color(.primaryNormal)
                     )
                 }
             }
