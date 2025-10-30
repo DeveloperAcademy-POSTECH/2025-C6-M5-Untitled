@@ -126,18 +126,26 @@ final class AlightProximityManager: ObservableObject {
         
         let nextStationIndex = currentStationIndex
         
+        // 출발지(첫 번째 정류장) 위치
+        guard let startStation = stations.first else { return }
+        let startLocation = CLLocation(
+            latitude: startStation.latitude,
+            longitude: startStation.longitude
+        )
+        
         // 목적지(마지막 정류장) 위치
         guard let destination = stations.last else { return }
         let destinationLocation = CLLocation(
             latitude: destination.latitude,
             longitude: destination.longitude
         )
-        
-        // 목적지까지 현재 거리
-        let distanceToDestination = currentLocation.distance(from: destinationLocation)
-        
+                
         // 진행률 계산
-        updateProgress(distanceToDestination: distanceToDestination)
+        updateProgress(
+                startLocation: startLocation,
+                destinationLocation: destinationLocation,
+                currentLocation: currentLocation
+            )
         
         // 모든 정류장 지났으면 종료
         guard nextStationIndex < stations.count else {
@@ -182,21 +190,29 @@ final class AlightProximityManager: ObservableObject {
     }
     
     // 진행률 계산
-    private func updateProgress(distanceToDestination: CLLocationDistance) {
-        // 최초 업데이트에서 초기 거리 저장
+    private func updateProgress(
+        startLocation: CLLocation,
+        destinationLocation: CLLocation,
+        currentLocation: CLLocation
+    ) {
+        // 최초 업데이트에서 총 거리 저장 (첫 정류장 → 마지막 정류장)
         if initialDistance == nil {
-            initialDistance = distanceToDestination
-            print("[AlightProximityManager] 초기 목적지까지 거리: \(Int(distanceToDestination))m")
+            let totalDistance = startLocation.distance(from: destinationLocation)
+            initialDistance = totalDistance
+            print("[AlightProximityManager] 총 이동 거리: \(Int(totalDistance))m")
         }
         
+        // 현재 위치에서 목적지까지 남은 거리
+        let remainingDistance = currentLocation.distance(from: destinationLocation)
+        
         // 최근 N개 이동 평균 (GPS 튀는 것 방지)
-        recentDistances.append(distanceToDestination)
+        recentDistances.append(remainingDistance)
         if recentDistances.count > smoothCount {
             recentDistances.removeFirst()
         }
         let smoothed = recentDistances.reduce(0, +) / Double(recentDistances.count)
         
-        // 진행률: 1 - (현재/초기)
+        // 진행률: 1 - (남은거리/총거리)
         if let total = initialDistance, total > 0 {
             let ratio = 1.0 - (smoothed / total)
             let clamped = CGFloat(min(max(ratio, 0), 1))
