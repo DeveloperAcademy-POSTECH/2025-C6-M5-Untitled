@@ -55,9 +55,13 @@ final class JourneyManager: ObservableObject {
         // MARK: 버스 경로만 모아보기(지하철 확장하면 고려해서 코드 전체 수정하기)
         let filtered = path.filter { $0["pathType"] as? Int == 2 }
         
-        let top3 = filtered.prefix(3)
+        let journeys = filtered.compactMap { parseJourney($0) }
         
-        self.journeyList = top3.compactMap { parseJourney($0) }
+        let clusteredJourneys = clusterJourneys(journeys)   // 버스루트 같고 버스번호만 다르면 합치기
+        
+        let top3 = clusteredJourneys.prefix(3)  // 합친 루트 중에 3개만 모아보기
+        
+        self.journeyList = Array(top3)
     }
     
     public func parseJourney(_ data: [String: Any]) -> Journey? {
@@ -146,7 +150,7 @@ final class JourneyManager: ObservableObject {
         return BusRouteNode(
             start: LocationInfo(name: startName, latitude: startY, longitude: startX),
             end: LocationInfo(name: endName, latitude: endY, longitude: endX),
-            busNo: cleanedBusNo,    // 버스 번호만 추출
+            busNo: [cleanedBusNo],    // 버스 번호만 추출
             busId: busId,
             stations: stationsInfo,
             travelTime: travelTime
@@ -240,4 +244,41 @@ final class JourneyManager: ObservableObject {
         }
         return nil
     }
+    
+    func clusterJourneys(_ journeys: [Journey]) -> [Journey] {
+        var clusters: [String: Journey] = [:]
+        
+        for journey in journeys {
+            let signature = journey.nodes.compactMap { node -> String? in
+                switch node {
+                case .bus(let b):
+                    let ids = b.stations.map { String($0.stationId) }
+                    return ids.joined(separator: ",")
+                case .walk:
+                    return nil // 도보는 무시 (버스 정류장 기준으로 판단)
+                }
+            }.joined(separator: "|") // 여러 버스 구간은 '|'로 구분
+
+            if var existing = clusters[signature] {
+                // 같은 경로면 busNo 통합
+                let mergedNodes = zip(existing.nodes, journey.nodes).map { (lhs, rhs) -> RouteNode in
+                    switch (lhs, rhs) {
+                    case let (.bus(b1), .bus(b2)):
+                        var merged = b1
+                        merged.busNo = Array(Set(b1.busNo + b2.busNo))
+                        return .bus(merged)
+                    default:
+                        return lhs
+                    }
+                }
+                existing.nodes = mergedNodes
+                clusters[signature] = existing
+            } else {
+                clusters[signature] = journey
+            }
+        }
+        
+        return Array(clusters.values)
+    }
+
 }

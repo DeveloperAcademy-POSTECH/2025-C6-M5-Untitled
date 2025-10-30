@@ -31,16 +31,18 @@ struct BoardingLocation: View {
             }
             
             HStack(spacing: 8.wScaled) {
-                Text("\(route.busNo)")
-                    .font(.presemi24)
-                    .foregroundColor(.primaryHeavy)
-                    .padding(.horizontal, 8.wScaled)
-                    .padding(.vertical, 8.wScaled)
-                    .background(
-                        Rectangle()
-                            .cornerRadius(15.wScaled)
-                            .foregroundColor(Color.subNormal)
-                    )
+                ForEach(route.busNo, id: \.self) { bus in
+                    Text(bus)
+                        .font(.presemi24)
+                        .foregroundColor(.primaryHeavy)
+                        .padding(.horizontal, 8.wScaled)
+                        .padding(.vertical, 8.wScaled)
+                        .background(
+                            Rectangle()
+                                .cornerRadius(15.wScaled)
+                                .foregroundColor(Color.subNormal)
+                        )
+                }
                 // TODO: 실시간 버스 도착 예정 시간으로 수정해야 함!! (실시간 API 활용 필요)
                 Text(" ")
                     .font(.prereg16Scaled)
