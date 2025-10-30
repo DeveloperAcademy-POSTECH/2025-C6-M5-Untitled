@@ -15,9 +15,11 @@ final class AlightProximityManager: ObservableObject {
     @Published private(set) var progress: CGFloat = 0 // 진행률
     @Published private(set) var hasArrived: Bool = false // 목적지 도착여부
     
+    
     // MARK: - 의존성
     private let locationService: LocationService
     private let journeyManager: JourneyManager
+    private let voiceManager: VoiceAnnouncementManager
     
     // MARK: - 내부 상태
     private var cancellable: AnyCancellable?
@@ -28,14 +30,18 @@ final class AlightProximityManager: ObservableObject {
     private var recentDistances: [CLLocationDistance] = []  // GPS 튀는 것 방지
     private let smoothCount: Int = 5                        // 최근 N개 평균
     private var maxProgress: CGFloat = 0                    // 뒤로가기 금지
+    private var shouldAnnounce: Bool = false
     
     // MARK: - 콜백
     var onStationPassed: ((Int, String) -> Void)?
     
     // MARK: - Init
-    init(locationService: LocationService, journeyManager: JourneyManager) {
+    init(locationService: LocationService,
+         journeyManager: JourneyManager,
+         voiceManager: VoiceAnnouncementManager) {
         self.locationService = locationService
         self.journeyManager = journeyManager
+        self.voiceManager = voiceManager
     }
     
     // MARK: - 설정/시작/중지
@@ -103,6 +109,16 @@ final class AlightProximityManager: ObservableObject {
         initialDistance = nil
         recentDistances.removeAll()
         maxProgress = 0
+    }
+    
+    func enableVoiceAnnouncement() {
+        shouldAnnounce = true
+        print("[AlightProximityManager] 음성 안내 활성화")
+    }
+    
+    func disableVoiceAnnouncement() {
+        shouldAnnounce = false
+        print("[AlightProximityManager] 음성 안내 비활성화")
     }
     
     // MARK: - 정류장 근접 확인
@@ -202,14 +218,27 @@ final class AlightProximityManager: ObservableObject {
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)개")
         
+        
         if remainingStations == 2 {
             canAlight = true
             print("[AlightProximityManager] 내릴 준비 - 버튼 활성화!")
             
-            playHapticFeedback()
+            if shouldAnnounce {
+                playHapticFeedback()
+                voiceManager.announceTwoStations()
+            }
         }
-        
+        else if remainingStations == 1 {
+            print("[AlightProximityManager] 다음 정류장 하차!")
+            
+            
+            if shouldAnnounce {
+                playHapticFeedback()
+                voiceManager.announceOneStation()
+            }
+        }
         onStationPassed?(index, name)
+        
     }
     
     private func playHapticFeedback() {
@@ -221,6 +250,10 @@ final class AlightProximityManager: ObservableObject {
                 generator.notificationOccurred(.success)
             }
         }
+    }
+    
+    func testVoiceAnnouncement() {
+        voiceManager.announceTwoStations()
     }
 }
 

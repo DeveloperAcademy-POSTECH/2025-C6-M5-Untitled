@@ -71,6 +71,7 @@ struct BeforeRideView: View {
         }
         .onAppear {
             proximityManager.configure(busLegIndex: 0)
+            proximityManager.disableVoiceAnnouncement()
             proximityManager.start()
             
             print("[BeforeRideView] 정류장 추적 시작")

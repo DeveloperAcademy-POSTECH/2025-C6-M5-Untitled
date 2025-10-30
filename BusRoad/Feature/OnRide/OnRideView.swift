@@ -82,6 +82,8 @@ struct OnRideView: View {
                     }
                 }
                 .onAppear {
+                    proximityManager.enableVoiceAnnouncement()
+                    
                     guard
                         let journey = coordinator.journeyManager.selectedJourney,
                         let nodeIndex = coordinator.journeyManager.journeyIndex,
@@ -104,6 +106,7 @@ struct OnRideView: View {
                     }
                 }
                 .onDisappear {
+                    proximityManager.disableVoiceAnnouncement()
                     proximityManager.stop()
                 }
             }
