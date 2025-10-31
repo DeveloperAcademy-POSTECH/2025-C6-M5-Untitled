@@ -12,7 +12,7 @@ struct BusRouteNode {
     let start: LocationInfo
     let end: LocationInfo
     var busNo: [String]         // 리스트로 받음. 바뀔 수 있도록 var
-    let busId: Int
+    var busId: [Int]            // 리스트로 받음.
     let stations: [BusStation]  // [start ~ end] stations
     let travelTime: Int
     
