@@ -14,11 +14,11 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var journeyIndex: Int?
     @Published var showAlert: Bool = false
     @Published var showDevSheet: Bool = false
+    @Published var tmapTotalDistance: Int = 0
     
     private var stepIndex: Int = 0
     private var hasCalculatedRoute = false
     private var currentSegmentIndex: Int = 0 // 현재 진행중인 구간 추적
-    private var tmapTotalDistance: Int = 0
     private var stepSwitchDistance: CLLocationDistance = 6
     private var journeyManager: JourneyManager
     
@@ -106,23 +106,30 @@ final class WalkingViewModel: NSObject, ObservableObject {
     private func applyTmapRoute(_ tmapResponse: TmapPedestrianResponse) {
         // 1. 총 거리 저장
         if let totalDistance = tmapResponse.features.first?.properties.totalDistance {
-            self.tmapTotalDistance = totalDistance
-            self.bigDistanceText = "\(totalDistance) m"
-            print("TMAP 총 거리: \(totalDistance)m")
-        }
+                let actualTotalDistance = Double(totalDistance)
+                self.tmapTotalDistance = totalDistance
+                ProgressLiveActivityManager.totalDistance = actualTotalDistance // Manager static 변수 업데이트
+                self.bigDistanceText = "\(totalDistance) m"
+                print("TMAP 총 거리: \(totalDistance)m")
+
+                ProgressLiveActivityManager.shared.updateActivity(
+                    newLeftDistance: actualTotalDistance,
+                    stage: "목적지 도보"
+                )
+            }
         
         // 2. 모든 좌표 모으기
         var allCoordinates: [CLLocationCoordinate2D] = []
         
         for feature in tmapResponse.features {
             let coords = feature.geometry.coordinates
-                for coord in coords {
-                    if coord.count >= 2 {
-                        let coordinate = CLLocationCoordinate2D(
-                            latitude: coord[1],   // 위도
-                            longitude: coord[0]   // 경도
-                        )
-                        allCoordinates.append(coordinate)
+            for coord in coords {
+                if coord.count >= 2 {
+                    let coordinate = CLLocationCoordinate2D(
+                        latitude: coord[1],   // 위도
+                        longitude: coord[0]   // 경도
+                    )
+                    allCoordinates.append(coordinate)
                 }
             }
         }
@@ -182,6 +189,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
             
             self.tmapCoordinates = coords
             self.tmapTotalDistance = Int(shortest.distance)
+            ProgressLiveActivityManager.totalDistance = Double(shortest.distance)
             self.bigDistanceText = "\(Int(shortest.distance)) m"
         }
     }
@@ -197,6 +205,12 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 1. 남은 거리 계산
         let remainDistance = calculateRemainDistance(from: location)
         bigDistanceText = "\(Int(remainDistance)) m"
+        
+        let currentStage = "목적지 도보" // 또는 "도보"
+        ProgressLiveActivityManager.shared.updateActivity(
+            newLeftDistance: remainDistance,
+            stage: currentStage
+        )
         
         // 2. 도착 체크
         if remainDistance < stepSwitchDistance {

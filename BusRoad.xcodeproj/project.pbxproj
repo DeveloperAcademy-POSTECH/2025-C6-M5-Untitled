@@ -67,9 +67,25 @@
 		FEFDE9FA2EB23CB500733205 /* Exceptions for "ProgressWidget" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				ProgressWidgetLiveActivity.swift,
+				JourneyLite.swift,
+				ProgressLiveActivity.swift,
+				ProgressLiveActivityManager.swift,
+				RouteStage.swift,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
+		};
+		FEFDED1F2EB305EB00733205 /* Exceptions for "BusRoad" folder in "ProgressWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resource/Color.xcassets,
+				"Resource/Font/Paperlogy-5Medium.ttf",
+				"Resource/Font/Paperlogy-6SemiBold.ttf",
+				"Resource/Font/Pretendard-Bold.otf",
+				"Resource/Font/Pretendard-Medium.otf",
+				"Resource/Font/Pretendard-Regular.otf",
+				"Resource/Font/Pretendard-SemiBold.otf",
+			);
+			target = FEFDE9DE2EB23C5200733205 /* ProgressWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -78,6 +94,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */,
+				FEFDED1F2EB305EB00733205 /* Exceptions for "BusRoad" folder in "ProgressWidgetExtension" target */,
 			);
 			path = BusRoad;
 			sourceTree = "<group>";
@@ -214,7 +231,7 @@
 				};
 			};
 			buildConfigurationList = 60A8CD9C2E7CDFE500530B92 /* Build configuration list for PBXProject "BusRoad" */;
-			developmentRegion = en;
+			developmentRegion = ko;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
@@ -549,10 +566,10 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.untitled.BusRoad.ProgressWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.untitled.BusRoad.BusRoadWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Untitled;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = UntitledBusWidget;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -584,10 +601,10 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.untitled.BusRoad.ProgressWidget;
+				PRODUCT_BUNDLE_IDENTIFIER = com.untitled.BusRoad.BusRoadWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = Untitled;
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = UntitledBusWidget;
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;

@@ -10,6 +10,7 @@ import SwiftUI
 struct RouteSelectButton: View {
     @ObservedObject var viewModel = BusRouteViewModel()
     @Binding var currentIndex: Int
+    @State private var currentStage: RouteStage?
     var routes: [Journey]?
     var onSelect: () -> Void
     var retrySearch: () -> Void
@@ -26,7 +27,7 @@ struct RouteSelectButton: View {
             } label: {
                 
                 Text("이걸로 갈게요")
-                    .foregroundColor(Color.subLight)
+                    .foregroundStyle(Color.subLight)
                     .font(.premed32)
                     .frame(width: 240, height: 75)
                     .background(Color.subStrong)
@@ -53,6 +54,20 @@ struct RouteSelectButton: View {
             Button {
                 viewModel.createWalkingJourneyIfNeeded()
                 onSelect()
+                
+                if JourneyManager.shared.selectedJourney != nil {
+                    let distance = WalkingViewModel().tmapTotalDistance
+                    let walkNodeLite = RouteNodeLite.walk(WalkNodeLite(totalDistance: Int(distance)))
+                    let liteJourney = JourneyLite(nodes: [walkNodeLite])
+                    
+                    ProgressLiveActivityManager.shared.startActivity(
+                        journey: liteJourney,
+                        stage: RouteStage.walkingToDestination.rawValue,
+                        journeyIndex: 0,
+                        isBeforeRide: false
+                    )
+                }
+                
             } label: {
                 Text("도보 이동하기")
                     .foregroundColor(Color.subLight)

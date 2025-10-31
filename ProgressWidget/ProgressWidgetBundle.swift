@@ -12,6 +12,6 @@ import SwiftUI
 struct ProgressWidgetBundle: WidgetBundle {
     var body: some Widget {
 //        ProgressWidget()
-        ProgressWidgetLiveActivity()
+        ProgressLiveActivity()
     }
 }
