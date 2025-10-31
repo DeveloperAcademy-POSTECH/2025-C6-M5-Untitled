@@ -55,9 +55,13 @@ final class JourneyManager: ObservableObject {
         // MARK: 버스 경로만 모아보기(지하철 확장하면 고려해서 코드 전체 수정하기)
         let filtered = path.filter { $0["pathType"] as? Int == 2 }
         
-        let top3 = filtered.prefix(3)
+        let journeys = filtered.compactMap { parseJourney($0) }
         
-        self.journeyList = top3.compactMap { parseJourney($0) }
+        let clusteredJourneys = clusterJourneys(journeys)   // 버스루트 같고 버스번호만 다르면 합치기
+        
+        let top3 = clusteredJourneys.prefix(3)  // 합친 루트 중에 3개만 모아보기
+        
+        self.journeyList = Array(top3)
     }
     
     public func parseJourney(_ data: [String: Any]) -> Journey? {
@@ -122,7 +126,12 @@ final class JourneyManager: ObservableObject {
                 let index = dict["index"] as? Int,
                 let stationId = dict["stationID"] as? Int,
                 let stationName = dict["stationName"] as? String,
-                let stationCityCode = dict["stationCityCode"] as? Int
+                let stationCityCode = dict["stationCityCode"] as? Int,
+                let arsId = dict["arsID"] as? String,
+                let xString = dict["x"] as? String,
+                let yString = dict["y"] as? String,
+                let longitude = Double(xString),
+                let latitude = Double(yString)
             else {
                 return nil
             }
@@ -133,15 +142,18 @@ final class JourneyManager: ObservableObject {
                               stationId: stationId,
                               stationName: stationName,
                               stationCityCode: stationCityCode,
-                              localStationId: localStationId
+                              localStationId: localStationId,
+                              nodeId: arsId,
+                              latitude: latitude,
+                              longitude: longitude
             )
         }
         
         return BusRouteNode(
             start: LocationInfo(name: startName, latitude: startY, longitude: startX),
             end: LocationInfo(name: endName, latitude: endY, longitude: endX),
-            busNo: cleanedBusNo,    // 버스 번호만 추출
-            busId: busId,
+            busNo: [cleanedBusNo],    // 버스 번호만 추출
+            busId: [busId],
             stations: stationsInfo,
             travelTime: travelTime
         )
@@ -234,4 +246,64 @@ final class JourneyManager: ObservableObject {
         }
         return nil
     }
+    
+    func clusterJourneys(_ journeys: [Journey]) -> [Journey] {
+        var clusters: [String: Journey] = [:]
+        var order: [String] = []  // 입력 순서 유지용
+        
+        for journey in journeys {
+            // 시그니처: 정류장 ID 기반으로
+            let signature = journey.nodes.compactMap { node -> String? in
+                switch node {
+                case .bus(let b):
+                    let ids = b.stations.map { String($0.stationId) }
+                    return ids.joined(separator: ",")
+                case .walk:
+                    return nil
+                }
+            }.joined(separator: "|") // 여러 버스 구간은 '|'로 구분
+
+            // 이미 같은 경로가 있는 경우 → 병합
+            if var existing = clusters[signature] {
+                let mergedNodes = zip(existing.nodes, journey.nodes).map { (lhs, rhs) -> RouteNode in
+                    switch (lhs, rhs) {
+                    case let (.bus(b1), .bus(b2)):
+                        var merged = b1
+                        
+                        // busNo와 busId를 (no, id) 쌍으로 묶어서 병합
+                        let pairs1 = Array(zip(b1.busNo, b1.busId))
+                        let pairs2 = Array(zip(b2.busNo, b2.busId))
+                        
+                        // 중복 제거 (Set은 순서 없으므로 Dictionary 기반 중복 제거)
+                        var mergedDict: [String: Int] = [:]
+                        for (no, id) in pairs1 + pairs2 {
+                            if mergedDict[no] == nil { // 첫 등장한 순서 유지
+                                mergedDict[no] = id
+                            }
+                        }
+                        
+                        // 다시 배열로 복원 (순서 유지)
+                        merged.busNo = Array(mergedDict.keys)
+                        merged.busId = Array(mergedDict.values)
+                        
+                        return .bus(merged)
+                    default:
+                        return lhs
+                    }
+                }
+                
+                existing.nodes = mergedNodes
+                clusters[signature] = existing
+            } else {
+                // 처음 본 경로
+                clusters[signature] = journey
+                order.append(signature)
+            }
+        }
+
+        // 입력 순서 유지하여 반환
+        return order.compactMap { clusters[$0] }
+    }
+
+
 }

@@ -22,7 +22,6 @@
 		246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Application/Secrets.plist,
 				Info.plist,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
@@ -320,9 +319,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BusRoad/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "어디로드";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "백그라운드에서도 하차 알림을 제공하기 위해 위치가 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "버스 탑승 중 하차 알림을 위해 위치 정보가 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "버스 경로 추천을 위해 앱 사용 중 위치 정보를 이용합니다.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -369,9 +368,9 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = BusRoad/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "어디로드";
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "백그라운드에서도 하차 알림을 제공하기 위해 위치가 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "버스 탑승 중 하차 알림을 위해 위치 정보가 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "버스 경로 추천을 위해 앱 사용 중 위치 정보를 이용합니다.";
-				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\"음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.\"";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "음성 검색 기능을 사용하기 위해 마이크 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "말씀하신 내용을 텍스트로 변환하기 위해 음성 인식 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

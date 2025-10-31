@@ -12,7 +12,7 @@ import Lottie
 struct BeforeRideCard: View {
     
     let waitingStopName: String
-    let waitingBusNO: String
+    let waitingBusNO: [String]
     @Binding var remainingStopsToBoarding: Int
     let remainingTimeToBoarding: Int
     
@@ -45,20 +45,22 @@ struct BeforeRideCard: View {
                     }
                     
                     HStack{
-                        Text("\(waitingBusNO)")
-                            .font(.presemi32Scaled)
-                            .foregroundStyle(
-                                remainingStopsToBoarding == 1 ? .primaryNormal: .subLight
-                            )
-                            .padding(.horizontal, 8.wScaled)
-                            .padding(.vertical, 4.wScaled)
-                            .background(
-                                Rectangle()
-                                    .foregroundColor(
-                                        remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy
-                                    )
-                                    .cornerRadius(15)
-                            )
+                        ForEach(waitingBusNO, id: \.self) { bus in
+                            Text(bus)
+                                .font(.presemi32Scaled)
+                                .foregroundStyle(
+                                    remainingStopsToBoarding == 1 ? .primaryNormal : .subLight
+                                )
+                                .padding(.horizontal, 8.wScaled)
+                                .padding(.vertical, 4.wScaled)
+                                .background(
+                                    Rectangle()
+                                        .foregroundColor(
+                                            remainingStopsToBoarding == 1 ? .subNormal : .primaryHeavy
+                                        )
+                                        .cornerRadius(15)
+                                )
+                        }
                         
                         Spacer()
                     }
@@ -77,5 +79,5 @@ struct BeforeRideCard: View {
 }
 
 #Preview {
-    BeforeRideCard(waitingStopName: "포항역", waitingBusNO: "122", remainingStopsToBoarding: .constant(1), remainingTimeToBoarding: 3)
+    BeforeRideCard(waitingStopName: "포항역", waitingBusNO: ["122"], remainingStopsToBoarding: .constant(1), remainingTimeToBoarding: 3)
 }
