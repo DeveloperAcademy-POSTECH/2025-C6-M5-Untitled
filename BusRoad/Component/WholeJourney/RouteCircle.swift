@@ -47,6 +47,6 @@ struct RouteCircle: View {
     }
 }
 
-#Preview {
-    RouteCircle(status: .active, routeNode: DummyData.busNode.asRouteNode)
-}
+//#Preview {
+//    RouteCircle(status: .active, routeNode: DummyData.busNode.asRouteNode)
+//}

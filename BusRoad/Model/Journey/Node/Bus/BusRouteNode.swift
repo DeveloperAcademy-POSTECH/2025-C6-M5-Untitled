@@ -11,8 +11,8 @@ struct BusRouteNode {
     let id = UUID()
     let start: LocationInfo
     let end: LocationInfo
-    let busNo: String
-    let busId: Int
+    var busNo: [String]         // 리스트로 받음. 바뀔 수 있도록 var
+    var busId: [Int]            // 리스트로 받음.
     let stations: [BusStation]  // [start ~ end] stations
     let travelTime: Int
     

@@ -18,10 +18,10 @@ struct TopBar: View {
         Spacer()
         if isMoving {
           Text("경로 이동")
-            .font(.papermed18Scaled)
+            .font(.presemi18Scaled)
         } else {
           Text("경로 탐색")
-            .font(.papermed18Scaled)
+            .font(.presemi18Scaled)
         }
         Spacer()
       }

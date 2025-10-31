@@ -42,7 +42,7 @@ struct WholeJourney: View {
         }
     }
 }
-
-#Preview {
-    WholeJourney(journey: DummyData.journey, journeyIndex: 2, isBeforeRide: true)
-}
+//
+//#Preview {
+//    WholeJourney(journey: DummyData.journey, journeyIndex: 2, isBeforeRide: true)
+//}

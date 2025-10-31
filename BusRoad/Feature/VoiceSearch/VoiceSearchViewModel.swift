@@ -189,8 +189,9 @@ final class VoiceSearchViewModel: ObservableObject {
             
             self.state = .completed
             self.recognizedText = trimmed
-            print("[DEBUG] 검색 실행: \(trimmed)")
+            self.onSearchCompleted?(trimmed)
             
+            print("[DEBUG] 검색 실행: \(trimmed)")
             await self.searchManager.searchWithVoiceResult(trimmed)
             
             guard !self.isCancelled else {
@@ -198,7 +199,6 @@ final class VoiceSearchViewModel: ObservableObject {
                 self.searchManager.reset()
                 return
             }
-            self.onSearchCompleted?(trimmed)
         }
     }
     

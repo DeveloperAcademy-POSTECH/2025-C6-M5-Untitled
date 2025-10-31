@@ -4,7 +4,7 @@ import SwiftUI
 struct RouteSuggestionView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
-    @FocusState var isFocused: Bool // 이건 남겨 두셔야합니다!
+    @FocusState var isFocused: Bool 
     
     var body: some View {
         if viewModel.isSearchMode {
