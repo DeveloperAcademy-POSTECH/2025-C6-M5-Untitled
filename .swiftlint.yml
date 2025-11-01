@@ -19,15 +19,6 @@ only_rules:
   - duplicate_imports
   - unused_import
 
-# 기본 세트 끄고, 아래 것만 검사
-only_rules:
-  - force_unwrapping
-  - force_cast
-  - force_try
-  - implicitly_unwrapped_optional
-  - duplicate_imports
-  - unused_import
-
 # 사고 예방 규칙 (모두 에러 처리)
 force_unwrapping: error               # 강제 언래핑 금지
 force_cast: error                     # 강제 캐스팅 금지

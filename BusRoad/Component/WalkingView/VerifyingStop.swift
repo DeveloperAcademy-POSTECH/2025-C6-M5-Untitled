@@ -43,6 +43,15 @@ struct VerifyingStop: View {
                     Button {
                         coordinator.advanceJourneyStage()
                         showVerifyingStop = false
+                        
+                        if case let .bus(busnode) = journey.nodes[index + 1] {
+                            ProgressLiveActivityManager.shared.updateStage(
+                                stage: RouteStage.waitingForBus.rawValue,
+                                destination: busnode.end.name,
+                                totalBusStops: busnode.stations.count,
+                                totalDistance: 0
+                            )
+                        }
                     } label: {
                         ZStack{
                             Rectangle()

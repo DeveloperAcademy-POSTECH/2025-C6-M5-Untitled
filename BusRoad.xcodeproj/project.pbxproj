@@ -52,6 +52,7 @@
 		246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Application/Secrets.plist,
 				Info.plist,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
@@ -66,7 +67,6 @@
 		FEFDE9FA2EB23CB500733205 /* Exceptions for "ProgressWidget" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				JourneyLite.swift,
 				ProgressLiveActivity.swift,
 				ProgressLiveActivityManager.swift,
 				RouteStage.swift,

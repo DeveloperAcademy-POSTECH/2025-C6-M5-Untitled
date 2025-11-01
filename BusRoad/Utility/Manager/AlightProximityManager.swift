@@ -9,6 +9,7 @@ final class AlightProximityManager: ObservableObject {
     
     // MARK: - Published Properties
     @Published private(set) var currentStationIndex: Int = 0 // 현재까지 지나간 정류장
+    @Published var stations: [BusStation] = []  // 모든 정류장 리스트
     @Published private(set) var remainingStations: Int = 0 // 남은 정류장 개수
     @Published private(set) var lastDistance: CLLocationDistance? // 다음 정류장까지 거리
     @Published private(set) var canAlight: Bool = false // 내릴 수 있는지(2정류장 남았을때)
@@ -23,7 +24,6 @@ final class AlightProximityManager: ObservableObject {
     
     // MARK: - 내부 상태
     private var cancellable: AnyCancellable?
-    private var stations: [BusStation] = []  // 모든 정류장 리스트
     private var hasEnteredRadius: Bool = false // 정류장 안에 들어갔는지
     private let detectionRadius: CLLocationDistance = 10  // 10m 반경
     private var initialDistance: CLLocationDistance?        // 목적지까지 초기 거리
@@ -66,6 +66,10 @@ final class AlightProximityManager: ObservableObject {
         initialDistance = nil
         recentDistances.removeAll()
         maxProgress = 0
+        
+        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
+        
+        //여기에 start 함수 추가
     }
     
     func start() {
@@ -234,6 +238,7 @@ final class AlightProximityManager: ObservableObject {
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)개")
         
+        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
         
         if remainingStations == 2 {
             canAlight = true

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct BeforeRideView: View {
-    @StateObject private var viewmodel = BeforeRideViewModel()
+    @StateObject private var viewModel = BeforeRideViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @EnvironmentObject var proximityManager: AlightProximityManager
     
@@ -24,7 +24,7 @@ struct BeforeRideView: View {
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
                     
-                    if let journey = viewmodel.journey, let index = viewmodel.index {
+                    if let journey = viewModel.journey, let index = viewModel.index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
                             .padding(32)
                     }
@@ -38,8 +38,8 @@ struct BeforeRideView: View {
                         .ignoresSafeArea()
                     
                     VStack(spacing: 0) {
-                        if let journey = viewmodel.journey,
-                           let index = viewmodel.index,
+                        if let journey = viewModel.journey,
+                           let index = viewModel.index,
                            case let .bus(busNode) = journey.nodes[index] {
                             BeforeRideCard(
                                 waitingStopName: busNode.stations[0].stationName,
@@ -54,6 +54,16 @@ struct BeforeRideView: View {
                         
                         Button {
                             coordinator.advanceJourneyStage()
+                            
+                            if let index = viewModel.index, let journey = viewModel.journey,
+                               case let .bus(busnode) = journey.nodes[index + 1] {
+                                ProgressLiveActivityManager.shared.updateStage(
+                                    stage: RouteStage.onBus.rawValue,
+                                    destination: busnode.end.name,
+                                    totalBusStops: busnode.stations.count,
+                                    totalDistance: 10
+                                )
+                            }
                         } label: {
                             Text("탔어요")
                                 .font(.premed32)

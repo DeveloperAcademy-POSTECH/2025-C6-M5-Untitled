@@ -34,6 +34,7 @@ struct TopBar: View {
             withAnimation(.none) {
               showAlert = true
             }
+              ProgressLiveActivityManager.shared.endActivity()
           }
         } label: {
           Image("xbutton")

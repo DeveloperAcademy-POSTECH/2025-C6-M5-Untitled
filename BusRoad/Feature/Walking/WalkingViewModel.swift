@@ -112,9 +112,8 @@ final class WalkingViewModel: NSObject, ObservableObject {
                 self.bigDistanceText = "\(totalDistance) m"
                 print("TMAP 총 거리: \(totalDistance)m")
 
-                ProgressLiveActivityManager.shared.updateActivity(
-                    newLeftDistance: actualTotalDistance,
-                    stage: "목적지 도보"
+                ProgressLiveActivityManager.shared.updateWalkingActivity(
+                    newLeftDistance: actualTotalDistance
                 )
             }
         
@@ -207,9 +206,8 @@ final class WalkingViewModel: NSObject, ObservableObject {
         bigDistanceText = "\(Int(remainDistance)) m"
         
         let currentStage = "목적지 도보" // 또는 "도보"
-        ProgressLiveActivityManager.shared.updateActivity(
-            newLeftDistance: remainDistance,
-            stage: currentStage
+        ProgressLiveActivityManager.shared.updateWalkingActivity(
+            newLeftDistance: remainDistance
         )
         
         // 2. 도착 체크

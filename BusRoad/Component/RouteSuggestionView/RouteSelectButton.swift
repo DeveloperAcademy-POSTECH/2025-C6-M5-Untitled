@@ -21,6 +21,29 @@ struct RouteSelectButton: View {
                 if let routes {
                     print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
                     onSelect()
+                    
+                    if let selectedJourney = JourneyManager.shared.selectedJourney {
+                        if let firstNode = selectedJourney.nodes.first {
+                            switch firstNode {
+                            case .walk(let walkNode):
+                                ProgressLiveActivityManager.shared.startActivity(
+                                    totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                    totalBusStops: 0,
+                                    stage: RouteStage.walkingToBus.rawValue,
+                                    destination: walkNode.end.name
+                                )
+                            case .bus(let busNode):
+                                let destinationName = selectedJourney.busSegments.first?.end.name ?? "목적지"
+                                ProgressLiveActivityManager.shared.startActivity(
+                                    totalDistance: 0,
+                                    totalBusStops: busNode.stations.count,
+                                    stage: RouteStage.waitingForBus.rawValue,
+                                    destination: destinationName
+                                )
+                            }
+                        }
+                    }
+                    
                 } else {
                     print("[DEBUG] routes가 존재하지 않습니다.")
                 }
@@ -55,17 +78,15 @@ struct RouteSelectButton: View {
                 viewModel.createWalkingJourneyIfNeeded()
                 onSelect()
                 
-                if JourneyManager.shared.selectedJourney != nil {
-                    let distance = WalkingViewModel().tmapTotalDistance
-                    let walkNodeLite = RouteNodeLite.walk(WalkNodeLite(totalDistance: Int(distance)))
-                    let liteJourney = JourneyLite(nodes: [walkNodeLite])
-                    
-                    ProgressLiveActivityManager.shared.startActivity(
-                        journey: liteJourney,
-                        stage: RouteStage.walkingToDestination.rawValue,
-                        journeyIndex: 0,
-                        isBeforeRide: false
-                    )
+                if let selectedJourney = JourneyManager.shared.selectedJourney {
+                    if case let .walk(node) = selectedJourney.nodes.first{
+                        ProgressLiveActivityManager.shared.startActivity(
+                            totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                            totalBusStops: 0,
+                            stage: RouteStage.walkingToDestination.rawValue,
+                            destination: node.end.name
+                        )
+                    }
                 }
                 
             } label: {

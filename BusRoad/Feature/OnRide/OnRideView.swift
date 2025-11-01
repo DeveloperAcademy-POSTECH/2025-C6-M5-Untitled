@@ -51,6 +51,32 @@ struct OnRideView: View {
                             Button {
                                 proximityManager.stop()
                                 coordinator.advanceJourneyStage()
+                                
+                                let journey = JourneyManager.shared.selectedJourney
+                                
+                                if let journey = JourneyManager.shared.selectedJourney,
+                                   let currentIndex = JourneyManager.shared.journeyIndex,
+                                   currentIndex < journey.nodes.count - 1 {
+                                    
+                                    if let index = viewModel.index, let journey = viewModel.journey,
+                                       case let .bus(busnode) = journey.nodes[index + 1] {
+                                        ProgressLiveActivityManager.shared.updateStage(
+                                            stage: RouteStage.waitingForBus.rawValue,
+                                            destination: busnode.end.name,
+                                            totalBusStops: busnode.stations.count,
+                                            totalDistance: 0
+                                        )
+                                    } else if let index = viewModel.index, let journey = viewModel.journey,
+                                              case let .walk(node) = journey.nodes[index + 1] {
+                                        ProgressLiveActivityManager.shared.updateStage(
+                                            stage: RouteStage.walkingToBus.rawValue,
+                                            destination: node.end.name,
+                                            totalBusStops: 0,
+                                            totalDistance: Double(WalkingViewModel().tmapTotalDistance)
+                                        )
+                                    }
+                                }
+                                
                             } label: {
                                 Text("내렸어요")
                                     .font(.premed32)
