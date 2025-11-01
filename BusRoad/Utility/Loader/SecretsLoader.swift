@@ -23,4 +23,5 @@ enum Secrets {
     static let naverClientSecret = _SecretsLoader.string(for: "NAVER_CLIENT_SECRET")
     static let kakaoApiKey = _SecretsLoader.string(for: "KAKAO_API_KEY")
     static let tmapApiKey = _SecretsLoader.string(for: "TMAP_API_KEY")
+    static let tagoApiKey = _SecretsLoader.string(for: "TAGO_API_KEY")
 }
