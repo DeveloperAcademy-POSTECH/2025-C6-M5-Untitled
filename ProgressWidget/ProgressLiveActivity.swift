@@ -25,7 +25,7 @@ struct ProgressLiveActivity: Widget {
             // 잠금화면 영역 (Lock Screen View)
             VStack {
                 Spacer(minLength: 30)
-                HStack{
+                HStack(alignment: .top){
                     Image(RouteStage(rawValue: context.state.stage)?.image(forDarkMode: context.state.isDarkMode) ?? "QuestionMark")
                         .resizable()
                         .frame(width: 42, height: 42)
@@ -47,7 +47,7 @@ struct ProgressLiveActivity: Widget {
                             .font(.premed12)
                             .foregroundColor(context.state.isDarkMode ? .greyDisable : .greyNormal)
                     }
-                    .frame(height: 60)
+//                    .frame(height: 60)
                 }
                 .padding(.horizontal, 30)
                 .frame(maxWidth: .infinity,  alignment: .leading)
@@ -60,7 +60,7 @@ struct ProgressLiveActivity: Widget {
                 Spacer(minLength: 30)
             }
             .activitySystemActionForegroundColor(Color.black)
-            .background(context.state.isDarkMode ? Color.black : Color.white)
+//            .background(context.state.isDarkMode ? Color.black : Color.white)
         } dynamicIsland: { context in
             // Dynamic Island View
             DynamicIsland {
