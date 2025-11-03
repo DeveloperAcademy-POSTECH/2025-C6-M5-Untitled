@@ -26,9 +26,7 @@ struct OnRideView: View {
                 .frame(height: 144)
                 
                 LineDivider()
-                
-                
-                
+                                
                 // 하단 영역
                 ZStack {
                     Color(.background)
@@ -44,7 +42,7 @@ struct OnRideView: View {
                         )
                         .padding(.horizontal, 24.wScaled)
                         .padding(.top, 28.wScaled)
-                        .padding(.bottom, 47.wScaled)
+                        .padding(.bottom, 30.wScaled)
                         
                         // 버튼 영역
                         if proximityManager.canAlight {
@@ -55,30 +53,29 @@ struct OnRideView: View {
                                 Text("내렸어요")
                                     .font(.premed32)
                                     .foregroundStyle(.subLight)
-                                    .frame(width: 239, height: 74)
+                                    .frame(width: 344.wScaled, height: 64)
                                     .background(.subStrong)
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 74)
+                            .frame(height: 64)
                         } else {
                             Button {
                                 // TODO: 비활성화 상태에서의 동작(토스트 등)
                                 // "1정류장 남으면 버튼이 활성화돼요"
                             } label: {
                                 Text("내렸어요")
+                                    .foregroundColor(Color.subNeutral)
                                     .font(.premed32)
-                                    .foregroundStyle(.subNeutral)
-                                    .frame(width: 239, height: 74)
-                                    .background(.subDisable)
+                                    .frame(width: 344.wScaled, height: 64)
+                                    .background(Color.subDisable)
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 74)
+                            .frame(height: 64)
                         }
-                        
                     }
                 }
                 .onAppear {
