@@ -158,7 +158,7 @@ final class ProgressLiveActivityManager {
         )
         
         Task {
-            await currentActivity.update(using: updatedState)
+            await currentActivity.update(ActivityContent(state: updatedState, staleDate: nil))
         }
     }
     
@@ -274,4 +274,3 @@ final class ProgressLiveActivityManager {
         }
     }
 }
-
