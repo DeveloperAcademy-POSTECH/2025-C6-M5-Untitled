@@ -38,7 +38,7 @@ final class ProgressLiveActivityManager {
             return 0.0
         }
     }
-
+    
     private func splitTextToFit(text: String, maxCharactersPerLine: Int) -> String {
         guard text.count > maxCharactersPerLine else {
             return text // 1줄이면 그대로 반환
@@ -51,10 +51,10 @@ final class ProgressLiveActivityManager {
         
         // 두 번째 줄의 시작 공백 제거
         let trimmedRemainingText = remainingText.drop { $0.isWhitespace }
-            return "\(firstLine)\n\(trimmedRemainingText)"
+        return "\(firstLine)\n\(trimmedRemainingText)"
     }
-
-
+    
+    
     static func description(for stage: String, destination: String) -> String {
         
         let baseText: String
@@ -122,7 +122,10 @@ final class ProgressLiveActivityManager {
         )
         
         do {
-            let activity = try Activity<ProgressAttributes>.request(attributes: attributes, contentState: contentState)
+            let activity = try Activity<ProgressAttributes>.request(
+                attributes: attributes,
+                content: ActivityContent(state: contentState, staleDate: nil)
+            )
             currentActivity = activity
             print("Activity started successfully with stage: \(stage)")
         } catch {
@@ -264,10 +267,11 @@ final class ProgressLiveActivityManager {
     func endActivity() {
         Task {
             for activity in Activity<ProgressAttributes>.activities {
-                await activity.end(dismissalPolicy: .after(Date().addingTimeInterval(3)))
+                await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .after(Date().addingTimeInterval(3)))
             }
             currentActivity = nil
             print("Activity ended.")
         }
     }
 }
+
