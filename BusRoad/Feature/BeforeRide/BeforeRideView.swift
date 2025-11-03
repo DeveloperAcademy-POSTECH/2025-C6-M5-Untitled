@@ -56,12 +56,13 @@ struct BeforeRideView: View {
                             coordinator.advanceJourneyStage()
                             
                             if let index = viewModel.index, let journey = viewModel.journey,
-                               case let .bus(busnode) = journey.nodes[index + 1] {
+                               case let .bus(busnode) = journey.nodes[index] {
                                 ProgressLiveActivityManager.shared.updateStage(
-                                    stage: RouteStage.onBus.rawValue,
-                                    destination: busnode.end.name,
-                                    totalBusStops: busnode.stations.count,
-                                    totalDistance: 10
+                                    nextStage: RouteStage.onBus.rawValue,
+                                    nextDestination: busnode.end.name,
+                                    totalDistance: 10,
+                                    remainingBusStops: busnode.stations.count,
+                                    busTravelTime: busnode.travelTime
                                 )
                             }
                         } label: {

@@ -61,19 +61,31 @@ struct OnRideView: View {
                                     if let index = viewModel.index, let journey = viewModel.journey,
                                        case let .bus(busnode) = journey.nodes[index + 1] {
                                         ProgressLiveActivityManager.shared.updateStage(
-                                            stage: RouteStage.waitingForBus.rawValue,
-                                            destination: busnode.end.name,
-                                            totalBusStops: busnode.stations.count,
-                                            totalDistance: 0
+                                            nextStage: RouteStage.waitingForBus.rawValue,
+                                            nextDestination: busnode.end.name,
+                                            totalDistance: 0,
+                                            remainingBusStops: busnode.stations.count,
+                                            busTravelTime: busnode.travelTime
                                         )
                                     } else if let index = viewModel.index, let journey = viewModel.journey,
                                               case let .walk(node) = journey.nodes[index + 1] {
-                                        ProgressLiveActivityManager.shared.updateStage(
-                                            stage: RouteStage.walkingToBus.rawValue,
-                                            destination: node.end.name,
-                                            totalBusStops: 0,
-                                            totalDistance: Double(WalkingViewModel().tmapTotalDistance)
-                                        )
+                                        if journey.nodes.count - 1 == index + 1{
+                                            ProgressLiveActivityManager.shared.updateStage(
+                                                nextStage: RouteStage.walkingToDestination.rawValue,
+                                                nextDestination: node.end.name,
+                                                totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                                remainingBusStops: 0,
+                                                busTravelTime: 0
+                                            )
+                                        } else {
+                                            ProgressLiveActivityManager.shared.updateStage(
+                                                nextStage: RouteStage.walkingToBus.rawValue,
+                                                nextDestination: node.end.name,
+                                                totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                                remainingBusStops: 0,
+                                                busTravelTime: 0
+                                            )
+                                        }
                                     }
                                 }
                                 

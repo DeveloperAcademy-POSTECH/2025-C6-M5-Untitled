@@ -224,6 +224,9 @@ final class AlightProximityManager: ObservableObject {
             // 항상 최대값 유지
             maxProgress = max(maxProgress, clamped)
             progress = maxProgress
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: Double(self.progress))
+            }
         } else {
             progress = 0
         }
@@ -240,7 +243,7 @@ final class AlightProximityManager: ObservableObject {
         
         ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
         
-        if remainingStations == 2 {
+        if remainingStations <= 2 {
             canAlight = true
             print("[AlightProximityManager] 내릴 준비 - 버튼 활성화!")
             

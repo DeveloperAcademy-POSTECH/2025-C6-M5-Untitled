@@ -28,17 +28,19 @@ struct RouteSelectButton: View {
                             case .walk(let walkNode):
                                 ProgressLiveActivityManager.shared.startActivity(
                                     totalDistance: Double(WalkingViewModel().tmapTotalDistance),
-                                    totalBusStops: 0,
                                     stage: RouteStage.walkingToBus.rawValue,
-                                    destination: walkNode.end.name
+                                    destination: walkNode.end.name,
+                                    remainingBusStops: 0,
+                                    busTravelTime: 0
                                 )
                             case .bus(let busNode):
                                 let destinationName = selectedJourney.busSegments.first?.end.name ?? "목적지"
                                 ProgressLiveActivityManager.shared.startActivity(
                                     totalDistance: 0,
-                                    totalBusStops: busNode.stations.count,
                                     stage: RouteStage.waitingForBus.rawValue,
-                                    destination: destinationName
+                                    destination: destinationName,
+                                    remainingBusStops: busNode.stations.count,
+                                    busTravelTime: busNode.travelTime
                                 )
                             }
                         }
@@ -82,9 +84,10 @@ struct RouteSelectButton: View {
                     if case let .walk(node) = selectedJourney.nodes.first{
                         ProgressLiveActivityManager.shared.startActivity(
                             totalDistance: Double(WalkingViewModel().tmapTotalDistance),
-                            totalBusStops: 0,
                             stage: RouteStage.walkingToDestination.rawValue,
-                            destination: node.end.name
+                            destination: node.end.name,
+                            remainingBusStops: 0,
+                            busTravelTime: 0
                         )
                     }
                 }

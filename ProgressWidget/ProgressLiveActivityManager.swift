@@ -9,20 +9,23 @@ final class ProgressLiveActivityManager {
     
     static var totalDistance: Double = 1.0
     static var leftDistance: Double = 0.0
-    static var totalBusStops: Int = 1
+    static var busProgress: Double = 0.0
     static var remainingBusStops: Int = 0
     static var destination: String = ""
+    static var busTravelTime: Int = 0
+    static var maxProgressValue: Double = 0.0
+    static var currentProgressValue: Double = 0.0
     
     private var currentActivity: Activity<ProgressAttributes>?
     private var maxProgress: Double = 0.0
+    private var isStageUpdating = false
     
     private init() {}
     
-    static func progress(for stage: String, totalDistance: Double, leftDistance: Double, totalBusStops: Int, remainingBusStops: Int) -> Double {
+    static func progress(for stage: String, totalDistance: Double, leftDistance: Double, busProgess: Double, remainingBusStops: Int) -> Double {
         let total = max(1.0, totalDistance)
         let left = leftDistance
-        let totalStops = Double(totalBusStops)
-        let passedStops = totalStops - Double(remainingBusStops)
+        let busProgress = busProgress
         
         switch stage {
         case "walkingToBus", "walkingToDestination":
@@ -30,7 +33,7 @@ final class ProgressLiveActivityManager {
         case "waitingForBus":
             return 0.0
         case "onBus":
-            return totalStops > 0 ? max(0, min(passedStops / totalStops, 1.0)) : 0.0
+            return busProgress
         default:
             return 0.0
         }
@@ -51,61 +54,73 @@ final class ProgressLiveActivityManager {
         }
     }
     
-    static func subDescription(for stage: String, leftDistance: Double) -> String {
+    static func subDescription(for stage: String, leftDistance: Double, remainingBusStops: Int, busTravelTime: Int) -> String {
         switch stage {
         case "walkingToBus", "walkingToDestination":
-            let minutesLeft = Int(leftDistance / 70)
+            let minutesLeft = Int(leftDistance / 70) + 1
             return "\(minutesLeft)분 남았어요"
         case "onBus":
             return "\(remainingBusStops)정류장 남았어요"
         case "waitingForBus":
-            return "min동안 타아해요"
+            let hours = busTravelTime / 60
+            let minutes = busTravelTime % 60
+            if hours > 0 && minutes == 0 {
+                return "\(hours)시간 동안 타야해요"
+            } else if hours > 0 {
+                return "\(hours)시간 \(minutes)분 동안 타아해요"
+            } else {
+                return "\(minutes)분 동안 타야해요"
+            }
         default:
             return ""
         }
     }
     
-    func startActivity(totalDistance: Double, totalBusStops: Int, stage: String, destination: String) {
+    func startActivity(totalDistance: Double, stage: String, destination: String, remainingBusStops: Int, busTravelTime: Int) {
         Self.totalDistance = totalDistance
-        Self.totalBusStops = totalBusStops
         Self.destination = destination
+        Self.remainingBusStops = remainingBusStops
+        Self.busTravelTime = busTravelTime
+        Self.maxProgressValue = 0.0
+        Self.currentProgressValue = 0.0
+        self.maxProgress = 0.0
         
         let attributes = ProgressAttributes()
-        let initialSubDesc = ProgressLiveActivityManager.subDescription(for: stage, leftDistance: Self.totalDistance)
         
         let contentState = ProgressAttributes.ContentState(
             stage: stage,
             leftDistance: Self.leftDistance,
             totalDistance: Self.totalDistance,
-            destination: destination,
-            subDescription: initialSubDesc,
-            maxProgressValue: 0.0,
-            currentProgressValue: 0.0,
-            totalBusStops: Self.totalBusStops,
-            remainingBusStops: Self.remainingBusStops
-            )
-            
-            do {
-                let activity = try Activity<ProgressAttributes>.request(attributes: attributes, contentState: contentState)
-                currentActivity = activity
-                print("Activity started successfully with stage: \(stage)")
-            } catch {
-                print("Failed to start activity: \(error)")
-            }
+            destination: Self.destination,
+            subDescription: Self.subDescription(for: stage, leftDistance: Self.leftDistance, remainingBusStops: remainingBusStops, busTravelTime: busTravelTime),
+            maxProgressValue: Self.maxProgressValue,
+            currentProgressValue: Self.currentProgressValue,
+            busProgress: Self.busProgress,
+            remainingBusStops: Self.remainingBusStops,
+            busTravelTime: Self.busTravelTime
+        )
+        
+        do {
+            let activity = try Activity<ProgressAttributes>.request(attributes: attributes, contentState: contentState)
+            currentActivity = activity
+            print("Activity started successfully with stage: \(stage)")
+        } catch {
+            print("Failed to start activity: \(error)")
+        }
     }
     
-    func updateWalkingActivity(newLeftDistance: Double) {
+    func updateWalkingActivity(stage: String, newLeftDistance: Double) {
         guard let currentActivity = currentActivity else { return }
-        let stage = currentActivity.contentState.stage
+        guard !isStageUpdating else { return } // 🚫 stage 업데이트 중이면 무시
         
-        let currentProgress = Self.progress(for: stage, totalDistance: Self.totalDistance, leftDistance: newLeftDistance, totalBusStops: 0, remainingBusStops: 0)
+        let currentProgress = Self.progress(for: stage, totalDistance: Self.totalDistance, leftDistance: newLeftDistance, busProgess: 0, remainingBusStops: 0)
         
         maxProgress = max(maxProgress, currentProgress)
         
-        let subDescription = Self.subDescription(for: stage, leftDistance: newLeftDistance)
+        let subDescription = Self.subDescription(for: stage, leftDistance: newLeftDistance, remainingBusStops: 0, busTravelTime: 0)
         print("Updated subDescription: \(subDescription)")
         
-        let updatedContentState = ProgressAttributes.ContentState(
+        let updatedState = ProgressAttributes.ContentState(
             stage: stage,
             leftDistance: newLeftDistance,
             totalDistance: Self.totalDistance,
@@ -113,69 +128,115 @@ final class ProgressLiveActivityManager {
             subDescription: subDescription,
             maxProgressValue: maxProgress,
             currentProgressValue: currentProgress,
-            totalBusStops: 0,
-            remainingBusStops: 0
+            busProgress: 0,
+            remainingBusStops: 0,
+            busTravelTime: Self.busTravelTime
         )
         
         Task {
-            await currentActivity.update(using: updatedContentState)
+            await currentActivity.update(using: updatedState)
         }
     }
     
-    func updateStage(stage: String, destination: String, totalBusStops: Int, totalDistance: Double) {
-        guard let currentActivity = currentActivity else { return }
-
-        Self.destination = destination
-        Self.totalBusStops = totalBusStops
+    func updateStage(nextStage: String, nextDestination: String, totalDistance: Double, remainingBusStops: Int, busTravelTime: Int) {
+        guard !isStageUpdating else {
+            print("[LiveActivity] Stage update skipped - already updating")
+            return
+        }
+        isStageUpdating = true  // 🚫 다른 업데이트 잠금
+        
+        guard let activity = Activity<ProgressAttributes>.activities.first else {
+            print("[LiveActivity] No active activity found")
+            isStageUpdating = false
+            return
+        }
+        
+        Self.remainingBusStops = remainingBusStops
+        Self.destination = nextDestination
         Self.totalDistance = totalDistance
-
-        var updatedState = currentActivity.content.state
-        updatedState.stage = stage
-        updatedState.destination = destination
-        updatedState.totalBusStops = totalBusStops
-        updatedState.totalDistance = totalDistance
-
-        Task {
-            do {
-                await currentActivity.update(using: updatedState)
-                print("[LiveActivity] updateStage 성공: \(stage)")
-            } catch {
-                print("[LiveActivity] updateStage 실패:", error)
+        Self.busTravelTime = busTravelTime
+        
+        let subDescription = Self.subDescription(
+            for: nextStage,
+            leftDistance: totalDistance,
+            remainingBusStops: remainingBusStops,
+            busTravelTime: busTravelTime
+        )
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            var updatedState = activity.content.state
+            updatedState.stage = nextStage
+            updatedState.destination = nextDestination
+            updatedState.remainingBusStops = remainingBusStops
+            updatedState.busProgress = 0
+            updatedState.totalDistance = totalDistance
+            updatedState.subDescription = subDescription
+            updatedState.busTravelTime = busTravelTime
+            updatedState.maxProgressValue = 0
+            updatedState.currentProgressValue = 0
+            
+            Task {
+                await activity.update(ActivityContent(state: updatedState, staleDate: nil))
+                print("[LiveActivity] Successfully updated to stage: \(nextStage)")
+                self.isStageUpdating = false // ✅ 해제
             }
         }
     }
-
+    
     func updateRemainingBusStops(remaining: Int) {
-        guard let currentActivity = currentActivity else { return }
-        let stage = currentActivity.contentState.stage
+        guard let activity = Activity<ProgressAttributes>.activities.first else {
+            print("[LiveActivity] No active activity found for remaining bus stops update")
+            return
+        }
         
         Self.remainingBusStops = remaining
         
-        // 현재 버스 진행률 계산
-        let totalStops = Double(Self.totalBusStops)
-        let passedStops = totalStops - Double(remaining)
-        let currentBusProgress = totalStops > 0 ? max(0, min(passedStops / totalStops, 1.0)) : 0.0
-
-        // maxProgressValue를 현재 버스 진행률로 설정 (역행 방지 로직 사용하지 않음)
-        let newMaxProgressValue = currentBusProgress
-        
-        // subDescription 업데이트
-        let subDescription = Self.subDescription(for: stage, leftDistance: currentActivity.contentState.leftDistance ?? 0)
-        
-        let updatedContent = ProgressAttributes.ContentState(
-            stage: stage,
-            leftDistance: currentActivity.contentState.leftDistance,
-            totalDistance: currentActivity.contentState.totalDistance,
-            destination: currentActivity.contentState.destination,
-            subDescription: subDescription,
-            maxProgressValue: newMaxProgressValue,
-            currentProgressValue: currentBusProgress,
-            totalBusStops: Self.totalBusStops,
-            remainingBusStops: remaining
+        var updatedState = activity.content.state
+        updatedState.remainingBusStops = remaining
+        updatedState.subDescription = Self.subDescription(
+            for: updatedState.stage,
+            leftDistance: updatedState.leftDistance ?? 0,
+            remainingBusStops: remaining,
+            busTravelTime: updatedState.busTravelTime
         )
-
+        
         Task {
-            await currentActivity.update(using: updatedContent)
+            await activity.update(ActivityContent(state: updatedState, staleDate: nil))
+            print("[LiveActivity] Updated remaining bus stops: \(remaining)")
+        }
+    }
+    
+    func updateBusProgress(busProgress: Double) {
+        guard let activity = Activity<ProgressAttributes>.activities.first else {
+            print("[LiveActivity] No active activity found for bus progress update")
+            return
+        }
+        
+        Self.busProgress = busProgress
+        
+        let currentStage = activity.content.state.stage
+        let currentLeftDistance = activity.content.state.leftDistance ?? activity.content.state.totalDistance
+        let currentRemainingBusStops = activity.content.state.remainingBusStops
+        
+        // 현재 progress 계산
+        let progressValue = ProgressLiveActivityManager.progress(
+            for: currentStage,
+            totalDistance: activity.content.state.totalDistance,
+            leftDistance: currentLeftDistance,
+            busProgess: busProgress,
+            remainingBusStops: currentRemainingBusStops
+        )
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            var updatedState = activity.content.state
+            updatedState.busProgress = busProgress
+            updatedState.currentProgressValue = progressValue
+            updatedState.maxProgressValue = max(updatedState.maxProgressValue, progressValue)
+            
+            Task {
+                await activity.update(ActivityContent(state: updatedState, staleDate: nil))
+                print("[LiveActivity] Updated bus progress: \(busProgress), progressValue: \(progressValue)")
+            }
         }
     }
     
@@ -186,20 +247,6 @@ final class ProgressLiveActivityManager {
             }
             currentActivity = nil
             print("Activity ended.")
-        }
-    }
-}
-
-extension ProgressAttributes.ContentState {
-    private struct AssociatedKeys {
-        static var subDescription = "subDescription"
-    }
-    private var _subDescription: String? {
-        get {
-            return objc_getAssociatedObject(self, &AssociatedKeys.subDescription) as? String
-        }
-        set {
-            objc_setAssociatedObject(self, &AssociatedKeys.subDescription, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
         }
     }
 }

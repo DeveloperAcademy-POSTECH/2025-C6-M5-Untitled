@@ -46,10 +46,11 @@ struct VerifyingStop: View {
                         
                         if case let .bus(busnode) = journey.nodes[index + 1] {
                             ProgressLiveActivityManager.shared.updateStage(
-                                stage: RouteStage.waitingForBus.rawValue,
-                                destination: busnode.end.name,
-                                totalBusStops: busnode.stations.count,
-                                totalDistance: 0
+                                nextStage: RouteStage.waitingForBus.rawValue,
+                                nextDestination: busnode.end.name,
+                                totalDistance: 0,
+                                remainingBusStops: busnode.stations.count,
+                                busTravelTime: busnode.travelTime
                             )
                         }
                     } label: {

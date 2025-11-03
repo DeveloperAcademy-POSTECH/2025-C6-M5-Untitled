@@ -48,10 +48,11 @@ struct WalkingAlert: View {
                                 if case let .bus(busnode) = journey.nodes[index + 1] {
                                     print("다음 노드가 버스입니다:", busnode.busNo)
                                     ProgressLiveActivityManager.shared.updateStage(
-                                        stage: RouteStage.waitingForBus.rawValue,
-                                        destination: busnode.end.name,
-                                        totalBusStops: busnode.stations.count,
-                                        totalDistance: 0
+                                        nextStage: RouteStage.waitingForBus.rawValue,
+                                        nextDestination: busnode.start.name,
+                                        totalDistance: 0,
+                                        remainingBusStops: busnode.stations.count,
+                                        busTravelTime: busnode.travelTime
                                     )
                                 } else {
                                     print("다음 노드는 버스가 아님:", journey.nodes[index + 1])
