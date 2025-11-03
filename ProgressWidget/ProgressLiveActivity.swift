@@ -22,8 +22,7 @@ struct ProgressLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ProgressAttributes.self) { context in
             // 잠금화면 영역 (Lock Screen View)
-            VStack {
-                Spacer(minLength: 30)
+            VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 9){
                     Image(RouteStage(rawValue: context.state.stage)?.image ?? "QuestionMark")
                         .resizable()
@@ -55,8 +54,8 @@ struct ProgressLiveActivity: Widget {
                     imageName: RouteStage(rawValue: context.state.stage)?.image ?? "questionmark")
                 .padding(.horizontal, 30)
                 .padding(.top, 21)
-                Spacer(minLength: 30)
             }
+            .padding(.vertical, 30)
             .activitySystemActionForegroundColor(Color.black)
             .tint(Color.liveBackground)
         } dynamicIsland: { context in
