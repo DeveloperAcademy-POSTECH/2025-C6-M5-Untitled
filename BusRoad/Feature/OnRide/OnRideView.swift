@@ -26,7 +26,7 @@ struct OnRideView: View {
                 .frame(height: 144)
                 
                 LineDivider()
-                                
+                
                 // 하단 영역
                 ZStack {
                     Color(.background)
@@ -66,10 +66,10 @@ struct OnRideView: View {
                                 // "1정류장 남으면 버튼이 활성화돼요"
                             } label: {
                                 Text("내렸어요")
-                                    .foregroundColor(Color.subNeutral)
+                                    .foregroundColor(.subNeutral)
                                     .font(.premed32)
                                     .frame(width: 344.wScaled, height: 64)
-                                    .background(Color.subDisable)
+                                    .background(.subDisable)
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
