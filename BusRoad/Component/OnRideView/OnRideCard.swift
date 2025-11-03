@@ -11,19 +11,20 @@ struct OnRideCard: View {
     
     var body: some View {
         ZStack {
+            Rectangle()
+                .foregroundColor(canAlight ? Color.primaryStrong : Color.primarywhite)
+                .cornerRadius(20)
+                .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 0)
             
-            RoundedRectangle(cornerRadius: 20)
-                .foregroundStyle(canAlight ? .primaryStrong : .primaryLight)
-            
-            VStack(spacing: 5.wScaled) {
+            VStack(spacing: 36.wScaled) {
                 
                 VStack(spacing: 48.wScaled) {
                     HStack {
                         VStack(alignment: .leading, spacing: 8.wScaled) {
                             MarqueeText(
                                 text: busStopName,
-                                font: .presemi32Scaled,
-                                uiFont: .presemi32Scaled,
+                                font: .presemi36Scaled,
+                                uiFont: .presemi36Scaled,
                                 startDelay: 1.0,
                                 alignment: .leading
                             )
@@ -131,11 +132,59 @@ struct BusStopProgress: View {
     }
 }
 
-//#Preview {
-//    OnRideCard(
-//        busStopName: "Bus stop name",
-//        canAlight: false,
-//        progress: 0.9,
-//        remainingStations: 2
-//    )
-//}
+// MARK: - 프리뷰
+
+#Preview("하차 가능 - 3정류장 남음") {
+    OnRideCard(
+        busStopName: "강남역 9번 출구",
+        canAlight: true,
+        progress: 0.7,
+        remainingStations: 3,
+        hasArrived: false
+    )
+    .padding()
+}
+
+#Preview("하차 불가 - 5정류장 남음") {
+    OnRideCard(
+        busStopName: "서울역 12번 출구 앞",
+        canAlight: false,
+        progress: 0.4,
+        remainingStations: 5,
+        hasArrived: false
+    )
+    .padding()
+}
+
+#Preview("도착 완료") {
+    OnRideCard(
+        busStopName: "역삼역 2번 출구",
+        canAlight: true,
+        progress: 1.0,
+        remainingStations: 0,
+        hasArrived: true
+    )
+    .padding()
+}
+
+#Preview("시작 - 10정류장 남음") {
+    OnRideCard(
+        busStopName: "포항시청 앞 정류장",
+        canAlight: false,
+        progress: 0.1,
+        remainingStations: 10,
+        hasArrived: false
+    )
+    .padding()
+}
+
+#Preview("긴 이름 정류장") {
+    OnRideCard(
+        busStopName: "포항공과대학교 제2학생회관 앞 정류장",
+        canAlight: true,
+        progress: 0.85,
+        remainingStations: 1,
+        hasArrived: false
+    )
+    .padding()
+}

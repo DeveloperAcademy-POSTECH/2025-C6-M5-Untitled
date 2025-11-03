@@ -56,17 +56,15 @@ struct RouteSelectButton: View {
                     print("[DEBUG] routes가 존재하지 않습니다.")
                 }
             } label: {
-                
-                Text("이걸로 갈게요")
-                    .foregroundStyle(Color.subLight)
+                Text("시작하기")
+                    .foregroundColor(Color.subLight)
                     .font(.premed32)
-                    .frame(width: 240, height: 75)
-                    .background(Color.subStrong)
+                    .frame(width: 305.wScaled, height: 64)
+                    .background(Color.subPoint)
                     .cornerRadius(20)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 74)
-            
+            .frame(height: 64)
         } else if viewModel.errorMessage == "지원하지 않는 교통수단이 포함되어 있습니다." {
             Button {
                 retrySearch()
@@ -74,14 +72,13 @@ struct RouteSelectButton: View {
                 Text("다시 검색하기")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
-                    .frame(width: 240, height: 75)
-                    .background(Color.subStrong)
+                    .frame(width: 305.wScaled, height: 64)
+                    .background(Color.subPoint)
                     .cornerRadius(20)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 74)
-        }
-        else if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다."{
+            .frame(height: 65)
+        } else if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다." {
             Button {
                 viewModel.createWalkingJourneyIfNeeded()
                 onSelect()
@@ -103,29 +100,26 @@ struct RouteSelectButton: View {
                 Text("도보 이동하기")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
-                    .frame(width: 240, height: 75)
-                    .background(Color.subStrong)
+                    .frame(width: 305.wScaled, height: 64)
+                    .background(Color.subPoint)
                     .cornerRadius(20)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 74)
-        }
-        else if viewModel.errorMessage == "출발지와 도착지가 같습니다."{
+            .frame(height: 64)
+        } else if viewModel.errorMessage == "출발지와 도착지가 같습니다." {
             Button {
                 retrySearch()
             } label: {
                 Text("처음으로")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
-                    .frame(width: 240, height: 75)
-                    .background(Color.subStrong)
+                    .frame(width: 305.wScaled, height: 64)
+                    .background(Color.subPoint)
                     .cornerRadius(20)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 74)
-            
-        }
-        else {
+            .frame(height: 64)
+        } else {
             Button {
                 if let origin = viewModel.origin, let destination = viewModel.destination {
                     viewModel.validateAndFetchRoute(origin: origin, destination: destination)
@@ -136,12 +130,12 @@ struct RouteSelectButton: View {
                 Text("새로고침 하기")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
-                    .frame(width: 240, height: 75)
-                    .background(Color.subStrong)
+                    .frame(width: 305.wScaled, height: 64)
+                    .background(Color.subPoint)
                     .cornerRadius(20)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 74)
+            .frame(height: 64)
         }
     }
 }
