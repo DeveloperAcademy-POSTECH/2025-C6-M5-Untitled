@@ -12,41 +12,41 @@ struct BoardingLocation: View {
     var isActive: Bool = true
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 24.wScaled){
+        VStack(alignment: .leading, spacing: 15.wScaled){
             
-            VStack(alignment: .leading, spacing: 8.wScaled) {
-                Text("탑승 정류장")
+            VStack(alignment: .leading, spacing: 4.wScaled) {
+                Text("정류장")
                     .font(.prereg20Scaled)
-                    .foregroundColor(Color.subLight)
+                    .foregroundColor(Color.greyNormal)
                 
                 MarqueeText(
                     text: route.start.name,
-                    font: .presemi32Scaled,
-                    uiFont: .presemi32Scaled,
+                    font: .presemi24Scaled,
+                    uiFont: .presemi24Scaled,
                     startDelay: 1.0,
                     alignment: .leading,
                     shouldAnimate: isActive
                 )
-                .foregroundColor(Color.subLight)
+                .foregroundColor(Color.primaryHeavy)
             }
             
-            HStack(spacing: 8.wScaled) {
-                ForEach(route.busNo, id: \.self) { bus in
-                    Text(bus)
-                        .font(.presemi24)
-                        .foregroundColor(.primaryHeavy)
-                        .padding(.horizontal, 8.wScaled)
-                        .padding(.vertical, 8.wScaled)
-                        .background(
-                            Rectangle()
-                                .cornerRadius(15.wScaled)
-                                .foregroundColor(Color.subNormal)
-                        )
+            VStack(alignment: .leading, spacing: 4.wScaled) {
+                
+                Text("버스")
+                    .font(.prereg20Scaled)
+                    .foregroundColor(Color.greyNormal)
+                
+                HStack(spacing: 8.wScaled) {
+                    if !route.busNo.isEmpty {
+                            Text(route.busNo[0])
+                                .font(.presemi24)
+                                .foregroundColor(.primaryHeavy)
+                        }
+                    // TODO: 실시간 버스 도착 예정 시간으로 수정해야 함!! (실시간 API 활용 필요)
+                    Text("곧 도착")
+                        .font(.prereg16Scaled)
+                        .foregroundColor(Color.greyNormal)
                 }
-                // TODO: 실시간 버스 도착 예정 시간으로 수정해야 함!! (실시간 API 활용 필요)
-                Text(" ")
-                    .font(.prereg16Scaled)
-                    .foregroundColor(Color.subLight)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)

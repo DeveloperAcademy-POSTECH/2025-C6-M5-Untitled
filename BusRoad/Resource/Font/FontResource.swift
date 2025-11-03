@@ -238,6 +238,10 @@ extension UIFont {
         return UIFont(name: type.value, size: size) ?? .systemFont(ofSize: size)
     }
     
+    static var presemi24Scaled: UIFont {
+        pretendard(.semibold, size: 24.wScaled)
+    }
+    
     static var presemi32Scaled: UIFont {
         pretendard(.semibold, size: 32.wScaled)
     }

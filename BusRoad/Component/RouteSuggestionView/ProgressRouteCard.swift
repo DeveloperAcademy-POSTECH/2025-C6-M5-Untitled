@@ -10,12 +10,13 @@ struct ProgressRouteCard: View {
     var body: some View {
         ZStack {
             Rectangle()
-                .foregroundColor(Color.primaryNormal)
-            //                .frame(width: 305, height: 423)
+                .foregroundColor(Color.primarywhite)
                 .cornerRadius(20)
+                .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 0)
+            
             ProgressView()
                 .progressViewStyle(CircularProgressViewStyle(tint: .primaryLight))
-                .scaleEffect(1.5)
+                .scaleEffect(3)
         }
     }
 }
