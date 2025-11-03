@@ -60,7 +60,7 @@ struct WalkingAlert: View {
           
         .background(
             RoundedRectangle(cornerRadius: 35)
-            .fill(.regularMaterial) // 내부 색상
+                .fill(Color.alertbackground) // 내부 색상
             .overlay(
                 RoundedRectangle(cornerRadius: 35)
                     .stroke(Color.primarywhite, lineWidth: 0.5)
