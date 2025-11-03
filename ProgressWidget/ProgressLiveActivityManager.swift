@@ -15,7 +15,6 @@ final class ProgressLiveActivityManager {
     static var busTravelTime: Int = 0
     static var maxProgressValue: Double = 0.0
     static var currentProgressValue: Double = 0.0
-    static var isDarkMode: Bool = false
     
     private var currentActivity: Activity<ProgressAttributes>?
     private var maxProgress: Double = 0.0
@@ -98,7 +97,7 @@ final class ProgressLiveActivityManager {
         }
     }
     
-    func startActivity(totalDistance: Double, stage: String, destination: String, remainingBusStops: Int, busTravelTime: Int, isDarkMode: Bool) {
+    func startActivity(totalDistance: Double, stage: String, destination: String, remainingBusStops: Int, busTravelTime: Int) {
         Self.totalDistance = totalDistance
         Self.destination = destination
         Self.remainingBusStops = remainingBusStops
@@ -106,7 +105,6 @@ final class ProgressLiveActivityManager {
         Self.maxProgressValue = 0.0
         Self.currentProgressValue = 0.0
         self.maxProgress = 0.0
-        Self.isDarkMode = isDarkMode
         
         let attributes = ProgressAttributes()
         
@@ -120,8 +118,7 @@ final class ProgressLiveActivityManager {
             currentProgressValue: Self.currentProgressValue,
             busProgress: Self.busProgress,
             remainingBusStops: Self.remainingBusStops,
-            busTravelTime: Self.busTravelTime,
-            isDarkMode: Self.isDarkMode
+            busTravelTime: Self.busTravelTime
         )
         
         do {
@@ -154,8 +151,7 @@ final class ProgressLiveActivityManager {
             currentProgressValue: currentProgress,
             busProgress: 0,
             remainingBusStops: 0,
-            busTravelTime: Self.busTravelTime,
-            isDarkMode: Self.isDarkMode
+            busTravelTime: Self.busTravelTime
         )
         
         Task {

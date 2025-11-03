@@ -24,10 +24,4 @@ enum RouteStage: String, CaseIterable {
             return "BusIcon"
         }
     }
-    
-    // 🔹 다크모드 대응 이미지 반환
-    func image(forDarkMode darkMode: Bool) -> String {
-        let baseName = self.image
-        return darkMode ? "\(baseName)DarkMode" : baseName
-    }
 }

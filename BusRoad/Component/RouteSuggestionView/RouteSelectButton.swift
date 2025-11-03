@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct RouteSelectButton: View {
-    @Environment(\.colorScheme) var colorScheme
     @ObservedObject var viewModel = BusRouteViewModel()
     @Binding var currentIndex: Int
     @State private var currentStage: RouteStage?
@@ -17,12 +16,9 @@ struct RouteSelectButton: View {
     var retrySearch: () -> Void
     
     var body: some View {
-        let isDarkMode = colorScheme == .dark
-        
         if viewModel.errorMessage == nil {
             Button {
                 if let routes {
-                    print("\(isDarkMode)")
                     print("[DEBUG] 버튼 클릭! 현재 index: \(currentIndex)")
                     onSelect()
                     
@@ -35,8 +31,7 @@ struct RouteSelectButton: View {
                                     stage: RouteStage.walkingToBus.rawValue,
                                     destination: walkNode.end.name,
                                     remainingBusStops: 0,
-                                    busTravelTime: 0,
-                                    isDarkMode: isDarkMode
+                                    busTravelTime: 0
                                 )
                             case .bus(let busNode):
                                 let destinationName = selectedJourney.busSegments.first?.end.name ?? "목적지"
@@ -45,8 +40,7 @@ struct RouteSelectButton: View {
                                     stage: RouteStage.waitingForBus.rawValue,
                                     destination: destinationName,
                                     remainingBusStops: busNode.stations.count,
-                                    busTravelTime: busNode.travelTime,
-                                    isDarkMode: isDarkMode
+                                    busTravelTime: busNode.travelTime
                                 )
                             }
                         }
@@ -90,8 +84,7 @@ struct RouteSelectButton: View {
                             stage: RouteStage.walkingToDestination.rawValue,
                             destination: node.end.name,
                             remainingBusStops: 0,
-                            busTravelTime: 0,
-                            isDarkMode: isDarkMode
+                            busTravelTime: 0
                         )
                     }
                 }
