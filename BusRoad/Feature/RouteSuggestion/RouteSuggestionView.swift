@@ -83,7 +83,6 @@ struct RouteSuggestionView: View {
                             RouteCardSlide(
                                 currentIndex: $viewModel.currentIndex,
                                 routes: $viewModel.routes,
-                                viewModel: viewModel,
                                 errorMessage: viewModel.errorMessage
                             )
                             .padding(.horizontal, 44.wScaled)

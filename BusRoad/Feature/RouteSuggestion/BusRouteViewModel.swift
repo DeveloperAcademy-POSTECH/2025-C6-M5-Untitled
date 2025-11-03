@@ -28,11 +28,13 @@ class BusRouteViewModel: ObservableObject {
     
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
+    private let arrivalInfoManager: ArrivalInfoManager
     private var bag = Set<AnyCancellable>()
     
-    init(journeyManager: JourneyManager = .shared, searchManager: SearchManager = .shared) {
+    init(journeyManager: JourneyManager = .shared, searchManager: SearchManager = .shared, arrivalInfoManager: ArrivalInfoManager = .shared) {
         self.journeyManager = journeyManager
         self.searchManager = searchManager
+        self.arrivalInfoManager = arrivalInfoManager
         observeManager()
     }
     
@@ -308,5 +310,41 @@ extension BusRouteViewModel {
             ))
         }
         resetManager()
+    }
+    
+    func fetchNearestBusInfo(for route: BusRouteNode) async -> (busNo: String, arrivalText: String)? {
+        guard let item = await ArrivalInfoManager.shared.prepareRouteArrivalSummary(for: route) else {
+            print("[DEBUG] 도착 정보 없음")
+            return nil
+        }
+
+        let minutes = item.arrtime / 60
+        let arrivalText: String
+        if minutes < 1 {
+            arrivalText = "곧 도착"
+        } else {
+            arrivalText = "\(minutes)분 후 도착"
+        }
+        
+        let cleanedBusNo = cleanBusNumber(item.routeno)
+
+        return (busNo: cleanedBusNo, arrivalText: arrivalText)
+    }
+    
+    private func cleanBusNumber(_ busNo: String) -> String {
+        var result = busNo
+        let pattern = #"\([^()]*\)"#  // 한 단계 괄호 제거용 정규식
+        
+        // 안쪽 괄호부터 반복 제거
+        while let _ = result.range(of: pattern, options: .regularExpression) {
+            result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        }
+        
+        // 숫자로 끝날 경우 "번" 추가
+        if let lastChar = result.last, lastChar.isNumber {
+            result += "번"
+        }
+        
+        return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

@@ -127,7 +127,7 @@ struct BusArrivalItems: Codable {
 
 struct BusArrivalItem: Codable, Identifiable {
     var id = UUID()
-    let routeno: Int
+    let routeno: String
     let arrtime: Int
     let vehicletp: String?
     let arrprevstationcnt: Int
@@ -141,7 +141,7 @@ struct BusArrivalItem: Codable, Identifiable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        routeno = try container.decode(Int.self, forKey: .routeno)
+        routeno = try container.decode(String.self, forKey: .routeno)
         arrtime = try container.decode(Int.self, forKey: .arrtime)
         vehicletp = try? container.decode(String.self, forKey: .vehicletp)
         arrprevstationcnt = try container.decode(Int.self, forKey: .arrprevstationcnt)

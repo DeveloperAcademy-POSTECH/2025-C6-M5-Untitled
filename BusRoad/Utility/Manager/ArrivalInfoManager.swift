@@ -15,12 +15,8 @@ class ArrivalInfoManager {
         self.busArrivalService = busArrivalService ?? BusArrivalService()
     }
     
-    // (경로추천뷰 한번호출) 경로 journey -> 정류소ID, 버스리스트(No, Id), 그중 가장 도착시간 짧은 버스No와 남은시간(초)(BusArrivalItem)
-    func prepareRouteArrivalSummary(_ journey: Journey) async -> BusArrivalItem? {
-        guard let busRouteNode = journey.firstBusRoute else {
-            return nil
-        }
-        
+    // (경로추천뷰 한번호출) 버스루트노드 -> 정류소ID, 버스리스트(No, Id), 그중 가장 도착시간 짧은 버스No와 남은시간(초)(BusArrivalItem)
+    func prepareRouteArrivalSummary(for busRouteNode: BusRouteNode) async -> BusArrivalItem? {
         let busLocation = busRouteNode.start
         
         guard let cityCode = await CityCodeManager.shared.getCityCodeByLocationAsync(
@@ -33,7 +29,10 @@ class ArrivalInfoManager {
         
         print("[DEBUG] 도시코드: \(cityCode)")
         
-        let station = busRouteNode.stations[0]
+        guard let station = busRouteNode.stations.first else {
+            print("[ERROR] 정류소 정보가 없습니다.")
+            return nil
+        }
         
         do {
             let nodeId = try await busArrivalService.fetchNodeId(

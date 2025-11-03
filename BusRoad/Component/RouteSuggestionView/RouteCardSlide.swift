@@ -3,7 +3,7 @@ import SwiftUI
 struct RouteCardSlide: View {
     @Binding var currentIndex: Int
     @Binding var routes: [Journey]?
-    @ObservedObject var viewModel: BusRouteViewModel
+    @ObservedObject var viewModel = BusRouteViewModel()
     var errorMessage: String?
     
     var body: some View {
