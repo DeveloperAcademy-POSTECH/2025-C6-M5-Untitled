@@ -15,6 +15,7 @@ struct ProgressAttributes: ActivityAttributes {
         var busProgress: Double
         var remainingBusStops: Int
         var busTravelTime: Int
+        var isDarkMode: Bool
     }
 }
 
@@ -23,17 +24,18 @@ struct ProgressLiveActivity: Widget {
         ActivityConfiguration(for: ProgressAttributes.self) { context in
             // 잠금화면 영역 (Lock Screen View)
             VStack {
-                Spacer(minLength: 20)
+                Spacer(minLength: 30)
                 HStack{
-                    Image(RouteStage(rawValue: context.state.stage)?.image ?? "questionmark")
+                    Image(RouteStage(rawValue: context.state.stage)?.image(forDarkMode: context.state.isDarkMode) ?? "QuestionMark")
                         .resizable()
                         .frame(width: 42, height: 42)
                     VStack(alignment:.leading){
                         Text(ProgressLiveActivityManager.description(for: context.state.stage, destination: context.state.destination))
                             .font(.presemi18)
-                            .foregroundColor(.primaryblack)
+                            .foregroundColor(context.state.isDarkMode ? .primarywhite : .primaryblack)
                             .multilineTextAlignment(.leading)
                             .lineLimit(2)
+                            .fixedSize(horizontal: false, vertical: true)
                         Text(
                             ProgressLiveActivityManager.subDescription(
                                 for: context.state.stage,
@@ -43,39 +45,33 @@ struct ProgressLiveActivity: Widget {
                             )
                         )
                             .font(.premed12)
-                            .foregroundColor(.greyDisable)
+                            .foregroundColor(context.state.isDarkMode ? .greyDisable : .greyNormal)
                     }
+                    .frame(height: 60)
                 }
                 .padding(.horizontal, 30)
-                .padding(.top, 30)
-                .frame(maxWidth: .infinity, maxHeight: 57, alignment: .leading)
+                .frame(maxWidth: .infinity,  alignment: .leading)
                 ProgressBarWithTracker(
                     progressValue: context.state.maxProgressValue,
-                    imageName: RouteStage(rawValue: context.state.stage)?.image ?? "questionmark")
-                .padding(30)
-                Spacer(minLength: 20)
+                    imageName: RouteStage(rawValue: context.state.stage)?.image(forDarkMode: context.state.isDarkMode) ?? "questionmark",
+                    isDarkMode: context.state.isDarkMode)
+                .padding(.horizontal, 30)
+                .padding(.top, 14)
+                Spacer(minLength: 30)
             }
-            .frame(width: 360, height: 145)
             .activitySystemActionForegroundColor(Color.black)
-            
+            .background(context.state.isDarkMode ? Color.black : Color.white)
         } dynamicIsland: { context in
             // Dynamic Island View
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-//                    Text(ProgressLiveActivityManager.description(for: context.state.stage, destination: context.state.destination))
+
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-//                    let progress = ProgressLiveActivityManager.progress(
-//                        for: context.state.stage,
-//                        totalDistance: context.state.totalDistance,
-//                        leftDistance: context.state.leftDistance ?? context.state.totalDistance,
-//                        busProgess: context.state.busProgress,
-//                        remainingBusStops: context.state.remainingBusStops
-//                    )
-//                    Text("\(Int(progress * 100))%")
+
                 }
                 DynamicIslandExpandedRegion(.bottom) {
-//                    Text("경로를 따라 이동하세요.")
+
                 }
             } compactLeading: {
                 HStack{
@@ -95,6 +91,7 @@ struct ProgressLiveActivity: Widget {
 struct ProgressBarWithTracker: View {
     let progressValue: Double
     let imageName: String
+    let isDarkMode: Bool
     
     private let iconSize: CGFloat = 20
     private let barHeight: CGFloat = 10
@@ -113,7 +110,7 @@ struct ProgressBarWithTracker: View {
                 
                 // 2. 프로그레스 바 채우기
                 Capsule()
-                    .fill(Color.primaryNormal)
+                    .fill(isDarkMode ? Color.subPoint : Color.primaryNormal)
                     .frame(width: totalWidth * progressValue, height: barHeight)
                 
                 // 3. 진행률 추적 아이콘 (움직이는 부분)
@@ -147,11 +144,11 @@ extension ProgressAttributes {
 extension ProgressAttributes.ContentState {
     fileprivate static var walking: ProgressAttributes.ContentState {
         ProgressAttributes.ContentState(stage: RouteStage.walkingToBus.rawValue,
-                                        leftDistance: 35, totalDistance: 70, destination: "포스텍", subDescription: "약 3분 정도 걸려요", maxProgressValue: 0, currentProgressValue: 0, busProgress: 0, remainingBusStops: 10, busTravelTime: 0)
+                                        leftDistance: 35, totalDistance: 70, destination: "띄어쓰기가 어떻게 되는지 알아보기 위한 아무렇게나 넣는 목적지 입니다.", subDescription: "약 3분 정도 걸려요", maxProgressValue: 0, currentProgressValue: 0, busProgress: 0, remainingBusStops: 10, busTravelTime: 0, isDarkMode: true)
     }
     
     fileprivate static var onBus: ProgressAttributes.ContentState {
-        ProgressAttributes.ContentState(stage: RouteStage.onBus.rawValue, leftDistance: 30, totalDistance: 50, destination: "포항역", subDescription: "2정류장 남았어요", maxProgressValue: 30, currentProgressValue: 30, busProgress: 0.5, remainingBusStops: 2, busTravelTime: 27)
+        ProgressAttributes.ContentState(stage: RouteStage.onBus.rawValue, leftDistance: 30, totalDistance: 50, destination: "포항역", subDescription: "2정류장 남았어요", maxProgressValue: 0.5, currentProgressValue: 0.5, busProgress: 0.5, remainingBusStops: 2, busTravelTime: 27, isDarkMode: false)
     }
 }
 

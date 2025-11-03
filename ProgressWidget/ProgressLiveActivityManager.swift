@@ -15,6 +15,7 @@ final class ProgressLiveActivityManager {
     static var busTravelTime: Int = 0
     static var maxProgressValue: Double = 0.0
     static var currentProgressValue: Double = 0.0
+    static var isDarkMode: Bool = false
     
     private var currentActivity: Activity<ProgressAttributes>?
     private var maxProgress: Double = 0.0
@@ -38,20 +39,41 @@ final class ProgressLiveActivityManager {
             return 0.0
         }
     }
-    
+
+    private func splitTextToFit(text: String, maxCharactersPerLine: Int) -> String {
+        guard text.count > maxCharactersPerLine else {
+            return text // 1줄이면 그대로 반환
+        }
+        
+        // 최대 문자 수까지 문자열을 자릅니다.
+        let index = text.index(text.startIndex, offsetBy: maxCharactersPerLine)
+        let firstLine = String(text[..<index])
+        let remainingText = String(text[index...])
+        
+        // 두 번째 줄의 시작 공백 제거
+        let trimmedRemainingText = remainingText.drop { $0.isWhitespace }
+            return "\(firstLine)\n\(trimmedRemainingText)"
+    }
+
+
     static func description(for stage: String, destination: String) -> String {
+        
+        let baseText: String
         switch stage {
-        case "walkingToBus":
-            return "\(destination)까지 걷기"
+        case "walkingToBus", "walkingToDestination":
+            baseText = "\(destination)까지 걷기"
         case "waitingForBus":
-            return "\(destination)에서 승차"
-        case "walkingToDestination":
-            return "\(destination)까지 걷기"
+            baseText = "\(destination)에서 승차"
         case "onBus":
-            return "\(destination)에서 하차"
+            baseText = "\(destination)에서 하차"
         default:
             return ""
         }
+        
+        let manager = ProgressLiveActivityManager.shared
+        let adjustedText = manager.splitTextToFit(text: baseText, maxCharactersPerLine: 17)
+        
+        return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
     }
     
     static func subDescription(for stage: String, leftDistance: Double, remainingBusStops: Int, busTravelTime: Int) -> String {
@@ -76,7 +98,7 @@ final class ProgressLiveActivityManager {
         }
     }
     
-    func startActivity(totalDistance: Double, stage: String, destination: String, remainingBusStops: Int, busTravelTime: Int) {
+    func startActivity(totalDistance: Double, stage: String, destination: String, remainingBusStops: Int, busTravelTime: Int, isDarkMode: Bool) {
         Self.totalDistance = totalDistance
         Self.destination = destination
         Self.remainingBusStops = remainingBusStops
@@ -84,6 +106,7 @@ final class ProgressLiveActivityManager {
         Self.maxProgressValue = 0.0
         Self.currentProgressValue = 0.0
         self.maxProgress = 0.0
+        Self.isDarkMode = isDarkMode
         
         let attributes = ProgressAttributes()
         
@@ -97,7 +120,8 @@ final class ProgressLiveActivityManager {
             currentProgressValue: Self.currentProgressValue,
             busProgress: Self.busProgress,
             remainingBusStops: Self.remainingBusStops,
-            busTravelTime: Self.busTravelTime
+            busTravelTime: Self.busTravelTime,
+            isDarkMode: Self.isDarkMode
         )
         
         do {
@@ -130,7 +154,8 @@ final class ProgressLiveActivityManager {
             currentProgressValue: currentProgress,
             busProgress: 0,
             remainingBusStops: 0,
-            busTravelTime: Self.busTravelTime
+            busTravelTime: Self.busTravelTime,
+            isDarkMode: Self.isDarkMode
         )
         
         Task {

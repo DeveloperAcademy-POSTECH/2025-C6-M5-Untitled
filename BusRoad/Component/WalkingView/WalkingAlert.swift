@@ -45,17 +45,21 @@ struct WalkingAlert: View {
                         Button{
                             coordinator.advanceJourneyStage()
                             
-                                if case let .bus(busnode) = journey.nodes[index + 1] {
-                                    print("다음 노드가 버스입니다:", busnode.busNo)
-                                    ProgressLiveActivityManager.shared.updateStage(
-                                        nextStage: RouteStage.waitingForBus.rawValue,
-                                        nextDestination: busnode.start.name,
-                                        totalDistance: 0,
-                                        remainingBusStops: busnode.stations.count,
-                                        busTravelTime: busnode.travelTime
-                                    )
+                            if index + 1 < journey.nodes.count {
+                                    if case let .bus(busnode) = journey.nodes[index + 1] {
+                                        print("다음 노드가 버스입니다:", busnode.busNo)
+                                        ProgressLiveActivityManager.shared.updateStage(
+                                            nextStage: RouteStage.waitingForBus.rawValue,
+                                            nextDestination: busnode.start.name,
+                                            totalDistance: 0,
+                                            remainingBusStops: busnode.stations.count,
+                                            busTravelTime: busnode.travelTime
+                                        )
+                                    } else {
+                                        print("다음 노드는 버스가 아님:", journey.nodes[index + 1])
+                                    }
                                 } else {
-                                    print("다음 노드는 버스가 아님:", journey.nodes[index + 1])
+                                    print("마지막 노드이므로 updateStage 호출 안함")
                                 }
 
                             isPresented = false
