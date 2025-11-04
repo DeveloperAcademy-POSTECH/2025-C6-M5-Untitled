@@ -323,7 +323,7 @@ extension BusRouteViewModel {
         if minutes < 1 {
             arrivalText = "곧 도착"
         } else {
-            arrivalText = "\(minutes)분 후 도착"
+            arrivalText = "\(minutes)분 후"
         }
         
         let cleanedBusNo = cleanBusNumber(item.routeno)

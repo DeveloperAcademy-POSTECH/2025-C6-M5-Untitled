@@ -22,12 +22,19 @@ struct WalkingAlert: View {
                     .ignoresSafeArea()
                 
                 VStack(alignment:.center){
-                    Text("목적지에 도착하셨나요?")
-                        .font(.presemi24Scaled)
-                        .foregroundColor(.primaryblack)
-                        .padding(.top, 20.wScaled)
-                        .padding(.bottom, 36.wScaled)
-                    
+                    if index == journey.nodes.count - 1 {
+                        Text("이미 도착하셨나요?")
+                            .font(.presemi24Scaled)
+                            .foregroundColor(.primaryblack)
+                            .padding(.top, 20.wScaled)
+                            .padding(.bottom, 36.wScaled)
+                    } else {
+                        Text("이미 정류장이신가요?")
+                            .font(.presemi24Scaled)
+                            .foregroundColor(.primaryblack)
+                            .padding(.top, 20.wScaled)
+                            .padding(.bottom, 36.wScaled)
+                    }
                     HStack(spacing: 9.wScaled){
                         Button{
                             isPresented = false
@@ -37,7 +44,7 @@ struct WalkingAlert: View {
                                     .cornerRadius(100)
                                     .foregroundColor(Color.greybutton)
                                     .frame(width: 139.wScaled, height: 48.wScaled)
-                                Text("아니요")
+                                Text("닫기")
                                     .foregroundColor(Color.primaryblack)
                                     .font(.premed20Scaled)
                             }
@@ -69,7 +76,7 @@ struct WalkingAlert: View {
                                     .cornerRadius(100)
                                     .foregroundColor(Color.subPoint)
                                     .frame(width: 139.wScaled, height: 48.wScaled)
-                                Text("네")
+                                Text("완료하기")
                                     .foregroundColor(Color.primarywhite)
                                     .font(.premed20Scaled)
                             }

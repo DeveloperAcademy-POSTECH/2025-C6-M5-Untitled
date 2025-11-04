@@ -5,6 +5,7 @@ struct BoardingLocation: View {
     var isActive: Bool = true
     @ObservedObject var viewModel = BusRouteViewModel()
     @State private var nearestBusInfo: (busNo: String, arrivalText: String)?
+    @State private var didFetchOnce = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 15.wScaled) {
@@ -35,23 +36,36 @@ struct BoardingLocation: View {
                 HStack(spacing: 8.wScaled) {
                     if let info = nearestBusInfo {
                         Text(info.busNo)
-                            .font(.presemi24)
+                            .font(.presemi24Scaled)
                             .foregroundColor(.primaryHeavy)
                         Text(info.arrivalText)
                             .font(.prereg16Scaled)
                             .foregroundColor(Color.greyNormal)
                     } else {
-                        Text("도착 정보 불러오는 중...")
-                            .font(.prereg16Scaled)
-                            .foregroundColor(Color.greyNormal)
+                        if !didFetchOnce {
+                            Text("도착 정보 불러오는 중...")
+                                .font(.prereg16Scaled)
+                                .foregroundColor(Color.greyNormal)
+                        } else {
+                            Text(route.busNo[0])
+                                .font(.presemi24Scaled)
+                                .foregroundColor(.greyHeavy)
+                            Text("도착 예정 정보 없음")
+                                .font(.prereg16Scaled)
+                                .foregroundColor(Color.greyNormal)
+                        }
                     }
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .task {
-            // 뷰가 나타날 때 자동으로 API 호출
-            nearestBusInfo = await viewModel.fetchNearestBusInfo(for: route)
+        .onAppear {
+            if !didFetchOnce {
+                Task {
+                    nearestBusInfo = await viewModel.fetchNearestBusInfo(for: route)
+                }
+                didFetchOnce = true
+            }
         }
     }
 }
