@@ -8,6 +8,8 @@ final class JourneyManager: ObservableObject {
     @Published var journeyList: [Journey]?      // 스와이프할 journey list
     @Published var selectedJourney: Journey?    // 최종 선택된 journey
     @Published var journeyIndex: Int?
+    @Published var firstLoadedLocation: LocationInfo?   // 단 한 번만 사용
+    @Published var firstLoadedLocationUsed: Bool = false
     
     static let shared = JourneyManager()    // singleton manager
     
@@ -29,6 +31,33 @@ final class JourneyManager: ObservableObject {
     
     func setDestination(_ destination: LocationInfo) {
         self.destination = destination
+    }
+    
+    func warmUpLocation() { // 첫뷰에서 단 한 번만 호출
+        print("[DEBUG] warmUpLocation")
+        Task { @MainActor in
+            do {
+                let loc = try await locationService.requestOneShotLocation()
+                self.firstLoadedLocation =
+                LocationInfo(
+                    name: "현위치",
+                    latitude:  loc.coordinate.latitude,
+                    longitude: loc.coordinate.longitude
+                )
+            }
+        }
+    }
+    
+    func useFirstLoadedLocation() { // 한 번만 씀
+        if !firstLoadedLocationUsed {
+            if let firstLoadedLocation {
+                print("[DEBUG] firstLoadedLocation is used")
+                setOrigin(firstLoadedLocation)
+            } else {
+                requestOrigin()
+            }
+            self.firstLoadedLocationUsed = true  // 이제 쓸 일 없음
+        }
     }
     
     func requestOrigin() {

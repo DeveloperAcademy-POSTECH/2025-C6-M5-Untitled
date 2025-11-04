@@ -248,6 +248,10 @@ class BusRouteViewModel: ObservableObject {
             journeyManager.journeyIndex = 0
         }
     }
+    
+    func fetchFirstLoadedLocation() {
+        journeyManager.useFirstLoadedLocation()
+    }
 }
 
 extension BusRouteViewModel {

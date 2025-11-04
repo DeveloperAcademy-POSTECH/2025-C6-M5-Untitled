@@ -113,6 +113,7 @@ struct RouteSuggestionView: View {
                 .onAppear {
                     print("[DEBUG] onAppear")
                     if viewModel.isFirstLoad {
+                        viewModel.fetchFirstLoadedLocation()    // warm-up때 가져왔던 현위치 그대로 사용(단 한번만)
                         if !viewModel.userDidSelectOrigin {
                             viewModel.requestOrigin()
                         }
