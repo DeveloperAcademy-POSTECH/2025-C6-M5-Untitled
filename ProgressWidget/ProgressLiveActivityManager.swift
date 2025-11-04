@@ -20,6 +20,9 @@ final class ProgressLiveActivityManager {
     private var maxProgress: Double = 0.0
     private var isStageUpdating = false
     
+    private var lastWalkingUpdateTime: Date = .distantPast
+    private var pendingStageUpdate: (nextStage: String, nextDestination: String, totalDistance: Double, remainingBusStops: Int, busTravelTime: Int)?
+
     private init() {}
     
     static func progress(for stage: String, totalDistance: Double, leftDistance: Double, busProgess: Double, remainingBusStops: Int) -> Double {
@@ -134,16 +137,24 @@ final class ProgressLiveActivityManager {
     }
     
     func updateWalkingActivity(stage: String, newLeftDistance: Double) {
+        let timestamp = Date().timeIntervalSince1970
+        
+        
         guard let currentActivity = currentActivity else { return }
-        guard !isStageUpdating else { return } // 🚫 stage 업데이트 중이면 무시
+        
+        guard !isStageUpdating else { return }
+        
+        // 마지막 업데이트로부터 1초 이상 지났는지 확인
+        let now = Date()
+        guard now.timeIntervalSince(lastWalkingUpdateTime) >= 1.0 else {
+            return
+        }
+        lastWalkingUpdateTime = now
         
         let currentProgress = Self.progress(for: stage, totalDistance: Self.totalDistance, leftDistance: newLeftDistance, busProgess: 0, remainingBusStops: 0)
-        
         maxProgress = max(maxProgress, currentProgress)
-        
         let subDescription = Self.subDescription(for: stage, leftDistance: newLeftDistance, remainingBusStops: 0, busTravelTime: 0)
-        print("Updated subDescription: \(subDescription)")
-        
+                
         let updatedState = ProgressAttributes.ContentState(
             stage: stage,
             leftDistance: newLeftDistance,
@@ -159,15 +170,23 @@ final class ProgressLiveActivityManager {
         
         Task {
             await currentActivity.update(ActivityContent(state: updatedState, staleDate: nil))
+            print("[걷기 \(String(format: "%.3f", timestamp))] 업데이트 완료")
         }
     }
     
     func updateStage(nextStage: String, nextDestination: String, totalDistance: Double, remainingBusStops: Int, busTravelTime: Int) {
-        guard !isStageUpdating else {
-            print("[LiveActivity] Stage update skipped - already updating")
+        let timestamp = Date().timeIntervalSince1970
+        print("[단계변경 \(String(format: "%.3f", timestamp))] 호출됨 - nextStage: \(nextStage), destination: \(nextDestination)")
+        
+        // 업데이트 중이면 저장하고 대기
+        if isStageUpdating {
+            print("[단계변경 \(String(format: "%.3f", timestamp))] 대기 중 - pendingStageUpdate에 저장")
+            pendingStageUpdate = (nextStage, nextDestination, totalDistance, remainingBusStops, busTravelTime)
             return
         }
-        isStageUpdating = true  // 🚫 다른 업데이트 잠금
+        
+        isStageUpdating = true
+
         
         guard let activity = Activity<ProgressAttributes>.activities.first else {
             print("[LiveActivity] No active activity found")
@@ -187,7 +206,12 @@ final class ProgressLiveActivityManager {
             busTravelTime: busTravelTime
         )
         
+        print("[단계변경 \(String(format: "%.3f", timestamp))] 0.5초 대기 시작...")
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            let afterTimestamp = Date().timeIntervalSince1970
+            let delayActual = afterTimestamp - timestamp
+            
             var updatedState = activity.content.state
             updatedState.stage = nextStage
             updatedState.destination = nextDestination
@@ -201,12 +225,25 @@ final class ProgressLiveActivityManager {
             
             Task {
                 await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-                print("[LiveActivity] Successfully updated to stage: \(nextStage)")
-                self.isStageUpdating = false // ✅ 해제
+                print("[단계변경 \(String(format: "%.3f", timestamp))] 업데이트 성공 - 새 단계: \(nextStage)")
+                self.isStageUpdating = false
+                print("[단계변경 \(String(format: "%.3f", timestamp))] 잠금 해제 (성공)")
+                
+                // 대기 중인 업데이트 처리
+                if let pending = self.pendingStageUpdate {
+                    print("[대기된 업데이트] 처리 시작 - stage: \(pending.nextStage)")
+                    self.pendingStageUpdate = nil
+                    self.updateStage(
+                        nextStage: pending.nextStage,
+                        nextDestination: pending.nextDestination,
+                        totalDistance: pending.totalDistance,
+                        remainingBusStops: pending.remainingBusStops,
+                        busTravelTime: pending.busTravelTime
+                    )
+                }
             }
         }
     }
-    
     func updateRemainingBusStops(remaining: Int) {
         guard let activity = Activity<ProgressAttributes>.activities.first else {
             print("[LiveActivity] No active activity found for remaining bus stops update")

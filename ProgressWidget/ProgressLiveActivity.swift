@@ -56,8 +56,7 @@ struct ProgressLiveActivity: Widget {
                 .padding(.top, 21)
             }
             .padding(.vertical, 30)
-            .activitySystemActionForegroundColor(Color.black)
-            .tint(Color.liveBackground)
+            .activityBackgroundTint(Color.liveBackground)
         } dynamicIsland: { context in
             // Dynamic Island View
             DynamicIsland {

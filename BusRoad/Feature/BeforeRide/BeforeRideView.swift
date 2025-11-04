@@ -61,7 +61,7 @@ struct BeforeRideView: View {
                                     nextStage: RouteStage.onBus.rawValue,
                                     nextDestination: busnode.end.name,
                                     totalDistance: 10,
-                                    remainingBusStops: busnode.stations.count,
+                                    remainingBusStops: proximityManager.remainingStations,
                                     busTravelTime: busnode.travelTime
                                 )
                             }

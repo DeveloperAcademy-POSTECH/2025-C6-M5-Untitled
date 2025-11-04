@@ -25,7 +25,7 @@ final class AlightProximityManager: ObservableObject {
     // MARK: - 내부 상태
     private var cancellable: AnyCancellable?
     private var hasEnteredRadius: Bool = false // 정류장 안에 들어갔는지
-    private let detectionRadius: CLLocationDistance = 10  // 10m 반경
+    private let detectionRadius: CLLocationDistance = 15  // 15m 반경
     private var initialDistance: CLLocationDistance?        // 목적지까지 초기 거리
     private var recentDistances: [CLLocationDistance] = []  // GPS 튀는 것 방지
     private let smoothCount: Int = 5                        // 최근 N개 평균
@@ -143,13 +143,13 @@ final class AlightProximityManager: ObservableObject {
             latitude: destination.latitude,
             longitude: destination.longitude
         )
-                
+        
         // 진행률 계산
         updateProgress(
-                startLocation: startLocation,
-                destinationLocation: destinationLocation,
-                currentLocation: currentLocation
-            )
+            startLocation: startLocation,
+            destinationLocation: destinationLocation,
+            currentLocation: currentLocation
+        )
         
         // 모든 정류장 지났으면 종료
         guard nextStationIndex < stations.count else {
@@ -245,16 +245,21 @@ final class AlightProximityManager: ObservableObject {
         
         if remainingStations <= 2 {
             canAlight = true
-            print("[AlightProximityManager] 내릴 준비 - 버튼 활성화!")
+        }
+        
+        // 2개 남았을 때 음성 알림
+        if remainingStations == 2 {
+            print("[AlightProximityManager] 2정류장 전 알림!")
             
             if shouldAnnounce {
                 playHapticFeedback()
                 voiceManager.announceTwoStations()
             }
         }
-        else if remainingStations == 1 {
-            print("[AlightProximityManager] 다음 정류장 하차!")
-            
+        
+        // 1개 남았을 때 음성 알림
+        if remainingStations == 1 {
+            print("[AlightProximityManager] 다음 정류장 알림!")
             
             if shouldAnnounce {
                 playHapticFeedback()

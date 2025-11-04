@@ -15,7 +15,7 @@ struct ProgressRouteCard: View {
                 .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 0)
             
             ProgressView()
-                .progressViewStyle(CircularProgressViewStyle(tint: .primaryLight))
+                .tint(.greyDisable)
                 .scaleEffect(3)
         }
     }
