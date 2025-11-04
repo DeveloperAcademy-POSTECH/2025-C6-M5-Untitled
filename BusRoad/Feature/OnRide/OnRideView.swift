@@ -62,7 +62,7 @@ struct OnRideView: View {
                                             nextStage: RouteStage.waitingForBus.rawValue,
                                             nextDestination: busnode.end.name,
                                             totalDistance: 0,
-                                            remainingBusStops: busnode.stations.count,
+                                            remainingBusStops: proximityManager.remainingStations,
                                             busTravelTime: busnode.travelTime
                                         )
                                     } else if let index = viewModel.index, let journey = viewModel.journey,
