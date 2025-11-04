@@ -88,7 +88,7 @@ struct WalkingView: View {
                     } label: {
                         Image(systemName: "map.fill")
                             .font(.system(size: 20.wScaled, weight: .bold))
-                            .foregroundColor(.subStrong)
+                            .foregroundColor(.subLight)
                             .padding(.vertical, 12.wScaled)
                             .padding(.horizontal, 18.wScaled)
                             .background(
