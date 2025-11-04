@@ -16,12 +16,13 @@ struct DestinationTextField : View {
     var body: some View {
         
         HStack(spacing: 12) {
-            Text("도착지")
+            Text("도착")
                 .foregroundColor(Color.subPoint)
                 .font(.prereg20)
             
             Divider()
                 .background(Color.greyDisable)
+                .frame(width: 1)
                 .frame(height: 26)
             
             Button(action: {
@@ -49,9 +50,9 @@ struct DestinationTextField : View {
         .padding(.leading, 20)
         .padding(.trailing, 0)
         .padding(.vertical, 12)
-        .overlay {
-            RoundedRectangle(cornerRadius: 25)
-                .stroke(.subStrong, lineWidth: 1.5)
+        .background {
+            RoundedRectangle(cornerRadius: 5)
+                .foregroundStyle(Color.background)
         }
     }
 }

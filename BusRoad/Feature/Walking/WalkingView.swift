@@ -95,9 +95,11 @@ struct WalkingView: View {
                 }
                 Spacer()
             }
-            .overlay(
-                WalkingAlert(isPresented: $viewModel.showAlert)
-            )
+            .overlay {
+                if let journey = viewModel.journey, let index = viewModel.journeyIndex {
+                    WalkingAlert(isPresented: $viewModel.showAlert, journey: journey, index: index)
+                }
+            }
         }
         // 맵뷰 바텀 시트
         .sheet(isPresented: $viewModel.showDevSheet) {

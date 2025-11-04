@@ -19,12 +19,13 @@ struct OriginTextField : View {
     var body: some View {
         
         HStack(spacing: 12) {
-            Text("출발지")
+            Text("출발")
                 .foregroundColor(Color.subPoint)
                 .font(.prereg20Scaled)
             
             Divider()
                 .background(Color.greyDisable)
+                .frame(width: 1)
                 .frame(height: 26)
             
             Button(action: {
@@ -43,7 +44,7 @@ struct OriginTextField : View {
                 HStack{
                     Text(location?.name ?? "출발지를 입력하세요")
                         .font(.prereg20Scaled)
-                        .foregroundColor(userDidSelectOrigin ? .greyHeavy : .greyNormal)
+                        .foregroundColor(userDidSelectOrigin ? .greyHeavy : .greyDisable)
                     Spacer()
                 }
             }
@@ -55,17 +56,18 @@ struct OriginTextField : View {
             }, label: {
                 Image("update")
                     .resizable()
-                    .foregroundColor(Color.greyNormal)
-                    .frame(width: 18, height: 20)
                     .aspectRatio(contentMode: .fit)
+                    .foregroundColor(Color.greyNormal)
+                    .frame(width: 24, height: 24)
             })
         }
         .padding(.leading, 20)
-        .padding(.trailing, 25)
+        .padding(.trailing, 15)
         .padding(.vertical, 12)
-        .overlay {
-            RoundedRectangle(cornerRadius: 25)
-                .stroke(.subStrong, lineWidth: 1.5)
+        .background {
+            RoundedRectangle(cornerRadius: 5)
+                .foregroundStyle(Color.background)
+               
         }
     }
 }

@@ -136,7 +136,7 @@ extension Font {
  
     
 
-// MARK: - 반응형 폰트 (화면 크기에 맞게 자동 조정)
+// MARK: - 반응w형 폰트 (화면 크기에 맞게 자동 조정)
 extension Font {
     /// 화면 크기에 맞게 조정된 커스텀 폰트
     static func preScaled(type: Pre, size: CGFloat) -> Font {
@@ -236,6 +236,10 @@ extension UIFont {
     
     static func pretendard(_ type: Font.Pre, size: CGFloat) -> UIFont {
         return UIFont(name: type.value, size: size) ?? .systemFont(ofSize: size)
+    }
+    
+    static var presemi24Scaled: UIFont {
+        pretendard(.semibold, size: 24.wScaled)
     }
     
     static var presemi32Scaled: UIFont {

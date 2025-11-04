@@ -10,12 +10,11 @@ excluded:
   - "**/*.xcodeproj"
   - Build
   - "**/Build"
-
-# 기본 세트 끄고, 아래 것만 검사
+  
+#기본 세트 끄고, 아래 것만 검사
 only_rules:
   - force_unwrapping
-  - force_cast
-  - force_try
+  - force_castforce_try
   - implicitly_unwrapped_optional
   - duplicate_imports
   - unused_import

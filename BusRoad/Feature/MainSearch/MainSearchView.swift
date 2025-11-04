@@ -69,6 +69,7 @@ struct MainSearchView: View {
         .onAppear {   // GPS 하드웨어 웜업용
             print("[DEBUG] requestOrigin")
             viewModel.requestOrigin()
+            ProgressLiveActivityManager.shared.endActivity()
         }
         .onChange(of: isFocused) { _, new in
             if new && !viewModel.isSearchMode {

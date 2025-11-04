@@ -27,8 +27,6 @@ struct OnRideView: View {
                 
                 LineDivider()
                 
-                
-                
                 // 하단 영역
                 ZStack {
                     Color(.background)
@@ -44,41 +42,78 @@ struct OnRideView: View {
                         )
                         .padding(.horizontal, 24.wScaled)
                         .padding(.top, 28.wScaled)
-                        .padding(.bottom, 47.wScaled)
+                        .padding(.bottom, 30.wScaled)
                         
                         // 버튼 영역
                         if proximityManager.canAlight {
                             Button {
                                 proximityManager.stop()
                                 coordinator.advanceJourneyStage()
+                                
+                                let journey = JourneyManager.shared.selectedJourney
+                                
+                                if let journey = JourneyManager.shared.selectedJourney,
+                                   let currentIndex = JourneyManager.shared.journeyIndex,
+                                   currentIndex < journey.nodes.count - 1 {
+                                    
+                                    if let index = viewModel.index, let journey = viewModel.journey,
+                                       case let .bus(busnode) = journey.nodes[index + 1] {
+                                        ProgressLiveActivityManager.shared.updateStage(
+                                            nextStage: RouteStage.waitingForBus.rawValue,
+                                            nextDestination: busnode.end.name,
+                                            totalDistance: 0,
+                                            remainingBusStops: proximityManager.remainingStations,
+                                            busTravelTime: busnode.travelTime
+                                        )
+                                    } else if let index = viewModel.index, let journey = viewModel.journey,
+                                              case let .walk(node) = journey.nodes[index + 1] {
+                                        if journey.nodes.count - 1 == index + 1{
+                                            ProgressLiveActivityManager.shared.updateStage(
+                                                nextStage: RouteStage.walkingToDestination.rawValue,
+                                                nextDestination: node.end.name,
+                                                totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                                remainingBusStops: 0,
+                                                busTravelTime: 0
+                                            )
+                                        } else {
+                                            ProgressLiveActivityManager.shared.updateStage(
+                                                nextStage: RouteStage.walkingToBus.rawValue,
+                                                nextDestination: node.end.name,
+                                                totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                                remainingBusStops: 0,
+                                                busTravelTime: 0
+                                            )
+                                        }
+                                    }
+                                }
+                                
                             } label: {
                                 Text("내렸어요")
                                     .font(.premed32)
                                     .foregroundStyle(.subLight)
-                                    .frame(width: 239, height: 74)
+                                    .frame(width: 344.wScaled, height: 64)
                                     .background(.subStrong)
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 74)
+                            .frame(height: 64)
                         } else {
                             Button {
                                 // TODO: 비활성화 상태에서의 동작(토스트 등)
                                 // "1정류장 남으면 버튼이 활성화돼요"
                             } label: {
                                 Text("내렸어요")
+                                    .foregroundColor(.subNeutral)
                                     .font(.premed32)
-                                    .foregroundStyle(.subNeutral)
-                                    .frame(width: 239, height: 74)
+                                    .frame(width: 344.wScaled, height: 64)
                                     .background(.subDisable)
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 74)
+                            .frame(height: 64)
                         }
-                        
                     }
                 }
                 .onAppear {

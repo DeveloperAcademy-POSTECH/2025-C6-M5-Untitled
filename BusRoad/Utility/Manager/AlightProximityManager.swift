@@ -9,6 +9,7 @@ final class AlightProximityManager: ObservableObject {
     
     // MARK: - Published Properties
     @Published private(set) var currentStationIndex: Int = 0 // 현재까지 지나간 정류장
+    @Published var stations: [BusStation] = []  // 모든 정류장 리스트
     @Published private(set) var remainingStations: Int = 0 // 남은 정류장 개수
     @Published private(set) var lastDistance: CLLocationDistance? // 다음 정류장까지 거리
     @Published private(set) var canAlight: Bool = false // 내릴 수 있는지(2정류장 남았을때)
@@ -23,9 +24,8 @@ final class AlightProximityManager: ObservableObject {
     
     // MARK: - 내부 상태
     private var cancellable: AnyCancellable?
-    private var stations: [BusStation] = []  // 모든 정류장 리스트
     private var hasEnteredRadius: Bool = false // 정류장 안에 들어갔는지
-    private let detectionRadius: CLLocationDistance = 10  // 10m 반경
+    private let detectionRadius: CLLocationDistance = 15  // 15m 반경
     private var initialDistance: CLLocationDistance?        // 목적지까지 초기 거리
     private var recentDistances: [CLLocationDistance] = []  // GPS 튀는 것 방지
     private let smoothCount: Int = 5                        // 최근 N개 평균
@@ -66,6 +66,10 @@ final class AlightProximityManager: ObservableObject {
         initialDistance = nil
         recentDistances.removeAll()
         maxProgress = 0
+        
+        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
+        
+        //여기에 start 함수 추가
     }
     
     func start() {
@@ -139,13 +143,13 @@ final class AlightProximityManager: ObservableObject {
             latitude: destination.latitude,
             longitude: destination.longitude
         )
-                
+        
         // 진행률 계산
         updateProgress(
-                startLocation: startLocation,
-                destinationLocation: destinationLocation,
-                currentLocation: currentLocation
-            )
+            startLocation: startLocation,
+            destinationLocation: destinationLocation,
+            currentLocation: currentLocation
+        )
         
         // 모든 정류장 지났으면 종료
         guard nextStationIndex < stations.count else {
@@ -220,6 +224,9 @@ final class AlightProximityManager: ObservableObject {
             // 항상 최대값 유지
             maxProgress = max(maxProgress, clamped)
             progress = maxProgress
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: Double(self.progress))
+            }
         } else {
             progress = 0
         }
@@ -234,19 +241,25 @@ final class AlightProximityManager: ObservableObject {
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)개")
         
+        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
         
-        if remainingStations == 2 {
+        if remainingStations <= 2 {
             canAlight = true
-            print("[AlightProximityManager] 내릴 준비 - 버튼 활성화!")
+        }
+        
+        // 2개 남았을 때 음성 알림
+        if remainingStations == 2 {
+            print("[AlightProximityManager] 2정류장 전 알림!")
             
             if shouldAnnounce {
                 playHapticFeedback()
                 voiceManager.announceTwoStations()
             }
         }
-        else if remainingStations == 1 {
-            print("[AlightProximityManager] 다음 정류장 하차!")
-            
+        
+        // 1개 남았을 때 음성 알림
+        if remainingStations == 1 {
+            print("[AlightProximityManager] 다음 정류장 알림!")
             
             if shouldAnnounce {
                 playHapticFeedback()

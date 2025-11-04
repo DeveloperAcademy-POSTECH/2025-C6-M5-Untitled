@@ -139,6 +139,7 @@ struct ArrivalConfirmation: View {
                 Button {
                     coordinator.popToRoot()
                     showArrivalConfirmation = false
+                    ProgressLiveActivityManager.shared.endActivity()
                 } label: {
                     ZStack{
                         Rectangle()

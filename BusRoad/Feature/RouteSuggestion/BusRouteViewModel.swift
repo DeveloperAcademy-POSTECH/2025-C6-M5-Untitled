@@ -16,6 +16,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var userDidSelectOrigin: Bool = false
     @Published var isFirstLoad = true
     @Published var locationType: LocationType = .origin
+    @Published var totalDistance: Double = 0.0
 
     // 에러 케이스 분류용
     @Published var errorMessage: String?
@@ -160,7 +161,7 @@ class BusRouteViewModel: ObservableObject {
                                 if let origin = self.origin, let destination = self.destination {
                                     let distance = origin.asCLLocation.distance(from: destination.asCLLocation)
                                 }
-                                self.errorMessage = "검색 결과가 없습니다."
+                                self.errorMessage = "출발지와 목적지가 너무 가깝습니다."
                             case "500":
                                 self.errorMessage = "출발지 또는 목적지 주변에 정류장이 없습니다."
                             default:
@@ -250,6 +251,9 @@ class BusRouteViewModel: ObservableObject {
 extension BusRouteViewModel {
     func createWalkingJourneyIfNeeded() {
         guard let origin = origin, let destination = destination else { return }
+        
+        let distance = origin.asCLLocation.distance(from: destination.asCLLocation)
+                totalDistance = distance
         
         let walkingNode = WalkRouteNode(
             start: origin,

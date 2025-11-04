@@ -85,6 +85,15 @@ final class JourneyManager: ObservableObject {
                 }
                 
             case 3: // 도보
+                // 중간 도보이고, 양옆에 노드가 있으면 '완전 동일 정류장' 여부로 스킵
+                if i > 0, i < subPaths.count - 1 {
+                    let prev = subPaths[i - 1]
+                    let next = subPaths[i + 1]
+                    if isSameStopStrict(prev: prev, next: next) {
+                        // 같은 정류장에서 환승 → 도보 노드 생성하지 않음
+                        continue
+                    }
+                }
                 if let walk = parseWalkNode(at: i, in: subPaths) {
                     nodes.append(.walk(walk))
                 }
@@ -174,6 +183,22 @@ final class JourneyManager: ObservableObject {
         }
         
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    /// 이전 노드의 end와 다음 노드의 start가 이름/좌표 모두 '완전히 동일'한지 검사
+    private func isSameStopStrict(prev: [String: Any], next: [String: Any]) -> Bool {
+        guard
+            let prevEndName = prev["endName"] as? String,
+            let prevEndX = prev["endX"] as? Double,
+            let prevEndY = prev["endY"] as? Double,
+            let nextStartName = next["startName"] as? String,
+            let nextStartX = next["startX"] as? Double,
+            let nextStartY = next["startY"] as? Double
+        else { return false }
+
+        return prevEndName == nextStartName &&
+               prevEndX == nextStartX &&
+               prevEndY == nextStartY
     }
     
     private func parseWalkNode(at index: Int, in subPath: [[String: Any]]) -> WalkRouteNode? {

@@ -87,6 +87,7 @@ struct SearchModeSection: View {
                             .controlSize(.large)
                             .scaleEffect(1.5)
                             .padding(.top, -100)
+                            .tint(.greyDisable)
                         
                         Spacer(minLength: 0)
                         
