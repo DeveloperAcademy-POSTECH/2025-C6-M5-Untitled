@@ -153,6 +153,10 @@ extension Font {
         return .preScaled(type: .bold, size: 36)
     }
     
+    static var prebold30Scaled: Font {
+        return .preScaled(type: .bold, size: 30)
+    }
+    
     static var presemi36Scaled: Font {
         return .preScaled(type: .semibold, size: 36)
     }
