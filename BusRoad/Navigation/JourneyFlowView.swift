@@ -22,6 +22,7 @@ struct JourneyFlowView: View {
                 CongratsView()
             case .none:
                 ProgressView("경로 불러오는 중...")
+                    .tint(.greyDisable)
             }
         }
         .onAppear {
