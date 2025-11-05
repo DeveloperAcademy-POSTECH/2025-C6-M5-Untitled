@@ -241,7 +241,9 @@ final class AlightProximityManager: ObservableObject {
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)개")
         
-        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
+        Task {
+                await ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
+            }
         
         if remainingStations <= 2 {
             canAlight = true

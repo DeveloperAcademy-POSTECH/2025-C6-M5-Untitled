@@ -19,10 +19,13 @@ final class ProgressLiveActivityManager {
     private var currentActivity: Activity<ProgressAttributes>?
     private var maxProgress: Double = 0.0
     private var isStageUpdating = false
+    private var isBusUpdating = false
     
     private var lastWalkingUpdateTime: Date = .distantPast
+    private var lastBusProgressUpdateTime: Date = .distantPast
     private var pendingStageUpdate: (nextStage: String, nextDestination: String, totalDistance: Double, remainingBusStops: Int, busTravelTime: Int)?
-
+    private var pendingRemainingBusStops: Int?
+    
     private init() {}
     
     static func progress(for stage: String, totalDistance: Double, leftDistance: Double, busProgess: Double, remainingBusStops: Int) -> Double {
@@ -154,7 +157,7 @@ final class ProgressLiveActivityManager {
         let currentProgress = Self.progress(for: stage, totalDistance: Self.totalDistance, leftDistance: newLeftDistance, busProgess: 0, remainingBusStops: 0)
         maxProgress = max(maxProgress, currentProgress)
         let subDescription = Self.subDescription(for: stage, leftDistance: newLeftDistance, remainingBusStops: 0, busTravelTime: 0)
-                
+        
         let updatedState = ProgressAttributes.ContentState(
             stage: stage,
             leftDistance: newLeftDistance,
@@ -186,7 +189,7 @@ final class ProgressLiveActivityManager {
         }
         
         isStageUpdating = true
-
+        
         
         guard let activity = Activity<ProgressAttributes>.activities.first else {
             print("[LiveActivity] No active activity found")
@@ -245,6 +248,14 @@ final class ProgressLiveActivityManager {
         }
     }
     func updateRemainingBusStops(remaining: Int) {
+        let timestamp = Date().timeIntervalSince1970
+        
+        if isBusUpdating {
+            print("[남은 정류장 \(String(format: "%.3f", timestamp))] 대기 중 - pendingRemainingBusStops에 저장")
+            pendingRemainingBusStops = remaining
+            return
+        }
+        
         guard let activity = Activity<ProgressAttributes>.activities.first else {
             print("[LiveActivity] No active activity found for remaining bus stops update")
             return
@@ -263,15 +274,31 @@ final class ProgressLiveActivityManager {
         
         Task {
             await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-            print("[LiveActivity] Updated remaining bus stops: \(remaining)")
-        }
+            print("[남은 정류장 \(String(format: "%.3f", timestamp))] Updated remaining bus stops: \(remaining)")        }
     }
     
     func updateBusProgress(busProgress: Double) {
+        let timestamp = Date().timeIntervalSince1970
+        
+        if isBusUpdating {
+            print("[버스 진행률 \(String(format: "%.3f", timestamp))] 업데이트 중이므로 무시됩니다.")
+            // 진행률 업데이트는 빈번하므로 pending으로 저장하지 않고 최신값만 처리하도록 무시합니다.
+            // 대신, pendingRemainingBusStops에 값이 있다면 다음 업데이트에 처리될 것입니다.
+            return
+        }
+        
         guard let activity = Activity<ProgressAttributes>.activities.first else {
             print("[LiveActivity] No active activity found for bus progress update")
             return
         }
+        
+        let now = Date()
+        guard now.timeIntervalSince(lastBusProgressUpdateTime) >= 1.0 else {
+            return
+        }
+        lastBusProgressUpdateTime = now
+        
+        isBusUpdating = true
         
         Self.busProgress = busProgress
         
@@ -294,9 +321,25 @@ final class ProgressLiveActivityManager {
             updatedState.currentProgressValue = progressValue
             updatedState.maxProgressValue = max(updatedState.maxProgressValue, progressValue)
             
+            // 보류된 remainingBusStops가 있다면 반영
+            if let pendingRemaining = self.pendingRemainingBusStops {
+                updatedState.remainingBusStops = pendingRemaining
+                updatedState.subDescription = Self.subDescription(
+                    for: updatedState.stage,
+                    leftDistance: updatedState.leftDistance ?? 0,
+                    remainingBusStops: pendingRemaining,
+                    busTravelTime: updatedState.busTravelTime
+                )
+                print("[버스 진행률 \(String(format: "%.3f", timestamp))] 보류된 남은 정류장 \(pendingRemaining) 반영")
+            }
+            
             Task {
                 await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-                print("[LiveActivity] Updated bus progress: \(busProgress), progressValue: \(progressValue)")
+                print("[버스 진행률 \(String(format: "%.3f", timestamp))] 업데이트 완료. progressValue: \(progressValue)")
+                self.isBusUpdating = false // 업데이트 완료
+                
+                // 보류된 remainingBusStops가 반영되었으므로 초기화
+                self.pendingRemainingBusStops = nil
             }
         }
     }
