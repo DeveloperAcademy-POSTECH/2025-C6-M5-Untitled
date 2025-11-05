@@ -155,7 +155,7 @@ struct BeforeRideView: View {
             
         }
         .onDisappear {
-            viewModel.stopRefreshing()
+            viewModel.endManager()
         }
     }
 }

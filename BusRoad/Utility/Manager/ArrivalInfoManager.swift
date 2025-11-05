@@ -47,6 +47,14 @@ class ArrivalInfoManager: ObservableObject {
         print("[DEBUG] ArrivalInfoManager: Auto Refresh Stopped")
     }
     
+    func endManager() {
+        stopAutoRefresh()
+        nearestBusInfo = nil
+        isArrivingSoon = false
+        hasPassed = false
+        lastPassedBusNo = nil
+    }
+    
     // MARK: - 실제 갱신 로직
     func refresh(for busRouteNode: BusRouteNode) async {
         let result = await refreshNearestBusArrival(for: busRouteNode)
