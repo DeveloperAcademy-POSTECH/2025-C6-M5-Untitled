@@ -37,4 +37,8 @@ final class BeforeRideViewModel: ObservableObject {
     func stopRefreshing() {
         arrivalManager.stopAutoRefresh()
     }
+    
+    func endManager() {
+        arrivalManager.endManager()
+    }
 }
