@@ -87,8 +87,7 @@ class ArrivalInfoManager: ObservableObject {
         do {
             let nodeId = try await busArrivalService.fetchNodeId(
                 cityCode: cityCode,
-                stationName: firstStation.stationName,
-                arsId: firstStation.nodeId
+                stationName: firstStation.stationName
             )
             
             let arrivals = try await busArrivalService.fetchBusArrivalInfo(
@@ -171,8 +170,7 @@ class ArrivalInfoManager: ObservableObject {
             } else {
                 nodeId = try await busArrivalService.fetchNodeId(
                     cityCode: cityCode,
-                    stationName: station.stationName,
-                    arsId: station.nodeId
+                    stationName: station.stationName
                 )
             }
             print("[DEBUG] nodeId 조회 성공: \(nodeId)")

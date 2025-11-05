@@ -101,8 +101,8 @@ struct BusArrivalItems: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         // 빈 문자열인 경우 처리 (버스가 없는 경우)
-        if let _ = try? container.decode(String.self, forKey: .item) {
-            print("[BusArrivalItems] items가 빈 문자열입니다")
+        if let emptyString = try? container.decode(String.self, forKey: .item) {
+            print("[BusArrivalItems] items가 빈 문자열입니다: '\(emptyString)'")
             self.item = []
             return
         }
@@ -111,17 +111,19 @@ struct BusArrivalItems: Codable {
         if let itemsArray = try? container.decode([BusArrivalItem].self, forKey: .item) {
             print("[BusArrivalItems] 배열로 디코딩 성공: \(itemsArray.count)개")
             self.item = itemsArray
+            return
         }
+        
         // 단일 객체인 경우
-        else if let singleItem = try? container.decode(BusArrivalItem.self, forKey: .item) {
+        if let singleItem = try? container.decode(BusArrivalItem.self, forKey: .item) {
             print("[BusArrivalItems] 단일 객체로 디코딩 성공, 배열로 변환")
             self.item = [singleItem]
+            return
         }
+        
         // 그 외 오류
-        else {
-            print("[BusArrivalItems] 디코딩 실패, 빈 배열 반환")
-            self.item = []
-        }
+        print("[BusArrivalItems] 디코딩 실패, 빈 배열 반환")
+        self.item = []
     }
 }
 
@@ -143,7 +145,20 @@ struct BusArrivalItem: Codable, Identifiable {
     
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
-        routeno = try container.decode(String.self, forKey: .routeno)
+        
+        // routeno는 String 또는 Int로 올 수 있음
+        if let routenoString = try? container.decode(String.self, forKey: .routeno) {
+            routeno = routenoString
+        } else if let routenoInt = try? container.decode(Int.self, forKey: .routeno) {
+            routeno = String(routenoInt)
+        } else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .routeno,
+                in: container,
+                debugDescription: "routeno는 String 또는 Int여야 합니다"
+            )
+        }
+        
         routeid = try container.decode(String.self, forKey: .routeid)
         arrtime = try container.decode(Int.self, forKey: .arrtime)
         vehicletp = try? container.decode(String.self, forKey: .vehicletp)

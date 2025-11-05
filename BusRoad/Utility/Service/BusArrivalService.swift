@@ -9,20 +9,24 @@ class BusArrivalService {
     }
     
     // nodeId 조회하기
-    func fetchNodeId(cityCode: Int, stationName: String, arsId: String) async throws -> String {
+    func fetchNodeId(cityCode: Int, stationName: String, arsId: String? = nil) async throws -> String {
         let urlString = "\(baseURL)/BusSttnInfoInqireService/getSttnNoList"
         
-        let params: [String: String] = [
+        var params: [String: String] = [
             "serviceKey": apiKey,
             "cityCode": "\(cityCode)",
             "nodeNm": stationName,
-            "nodeNo": arsId,
             "_type": "json",
             "numOfRows": "10",
             "pageNo": "1"
         ]
         
-        print("[nodeId 조회] cityCode: \(cityCode), 정류소: \(stationName), arsId: \(arsId)")
+        // arsId가 있을 경우에만 nodeNo 파라미터 추가
+        if let arsId = arsId, !arsId.isEmpty {
+            params["nodeNo"] = arsId
+        }
+        
+        print("[nodeId 조회] cityCode: \(cityCode), 정류소: \(stationName), arsId: \(arsId ?? "없음")")
         
         let data = try await request(urlString: urlString, params: params)
         let response = try JSONDecoder().decode(NodeIdResponse.self, from: data)
