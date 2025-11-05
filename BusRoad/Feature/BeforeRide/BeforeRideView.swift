@@ -127,9 +127,9 @@ struct BeforeRideView: View {
                             } label: {
                                 Text("탔어요")
                                     .font(.premed32)
-                                    .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .subNeutral)
+                                    .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .subLight)  // 임시 활성화
                                     .frame(width: 344.wScaled, height: 64)
-                                    .background(viewModel.isArrivingSoon ? .subStrong : .subDisable)
+                                    .background(viewModel.isArrivingSoon ? .subStrong : .subStrong)     // 임시 활성화
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)

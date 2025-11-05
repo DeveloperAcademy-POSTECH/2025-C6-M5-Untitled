@@ -138,11 +138,16 @@ class ArrivalInfoManager {
         }
         
         do {
-            let nodeId = try await busArrivalService.fetchNodeId(
-                cityCode: cityCode,
-                stationName: station.stationName,
-                arsId: station.nodeId
-            )
+            var nodeId = ""
+            if let localStationId = station.localStationId {
+                nodeId = localStationId
+            } else {
+                nodeId = try await busArrivalService.fetchNodeId(
+                    cityCode: cityCode,
+                    stationName: station.stationName,
+                    arsId: station.nodeId
+                )
+            }
             print("[DEBUG] nodeId 조회 성공: \(nodeId)")
             
             let arrivals = try await busArrivalService.fetchBusArrivalInfo(
