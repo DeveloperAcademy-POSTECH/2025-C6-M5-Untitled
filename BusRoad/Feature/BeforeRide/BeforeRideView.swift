@@ -110,20 +110,22 @@ struct BeforeRideView: View {
                             }
                             Button {
                                 
-//                                if viewModel.isArrivingSoon {   // TODO: 활성화상태일때만 되도록 해야하는데 도착정보 없을 경우 예외처리 이슈 나중에 해결하기 전까지는 일단 비활성화 상태에서도 뷰전환되도록
-                                    coordinator.advanceJourneyStage()
-                                    
-                                    if let index = viewModel.index, let journey = viewModel.journey,
-                                       case let .bus(busnode) = journey.nodes[index] {
-                                        ProgressLiveActivityManager.shared.updateStage(
-                                            nextStage: RouteStage.onBus.rawValue,
-                                            nextDestination: busnode.end.name,
-                                            totalDistance: 10,
-                                            remainingBusStops: proximityManager.remainingStations,
-                                            busTravelTime: busnode.travelTime
-                                        )
-                                    }
-//                                }
+                                //                                if viewModel.isArrivingSoon {
+                                // TODO: 활성화상태일때만 되도록 해야하는데 도착정보 없을 경우 예외처리 이슈 나중에 해결하기 전까지는 일단 비활성화 상태에서도 뷰전환되도록
+                                coordinator.advanceJourneyStage()
+                                
+                                if let index = viewModel.index, let journey = viewModel.journey,
+                                   case let .bus(busnode) = journey.nodes[index] {
+                                    ProgressLiveActivityManager.shared.updateStage(
+                                        nextStage: RouteStage.onBus.rawValue,
+                                        nextDestination: busnode.end.name,
+                                        totalDistance: 10,
+                                        remainingBusStops: proximityManager.remainingStations,
+                                        busTravelTime: busnode.travelTime
+                                    )
+                                }
+                                viewModel.stopRefreshing()
+                                //                                }
                             } label: {
                                 Text("탔어요")
                                     .font(.premed32)
@@ -152,7 +154,7 @@ struct BeforeRideView: View {
             print("[BeforeRideView] 정류장 추적 시작")
             
         }
-        .onDisappear {  // 뷰전환 시 싱글톤매니저에서 실시간 업데이트 끄기
+        .onDisappear {
             viewModel.stopRefreshing()
         }
     }
