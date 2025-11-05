@@ -12,8 +12,6 @@ struct BeforeRideView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @EnvironmentObject var proximityManager: AlightProximityManager
     
-    // TODO: hasPassed가 true로 바뀔 경우 뷰 바뀌는 거 구현 필요
-    
     var body: some View {
         
         ZStack {
@@ -46,13 +44,13 @@ struct BeforeRideView: View {
                                 BusPassedCard(busNo: passedBus)
                                     .padding(.horizontal, 24.wScaled)
                                     .padding(.top, 28.wScaled)
-                                    .padding(.bottom, 47.wScaled)
+                                    .padding(.bottom, 30.wScaled)
                             } else {
                                 // 예외 처리 (버스 번호 없을 때)
                                 BusPassedCard(busNo: "이전")
                                     .padding(.horizontal, 24.wScaled)
                                     .padding(.top, 28.wScaled)
-                                    .padding(.bottom, 47.wScaled)
+                                    .padding(.bottom, 30.wScaled)
                             }
                             
                             HStack {
@@ -108,7 +106,7 @@ struct BeforeRideView: View {
                                 )
                                 .padding(.horizontal, 24.wScaled)
                                 .padding(.top, 28.wScaled)
-                                .padding(.bottom, 47.wScaled)
+                                .padding(.bottom, 30.wScaled)
                             }
                             Button {
                                 
