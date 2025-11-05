@@ -92,7 +92,7 @@ struct OnRideView: View {
                                     .font(.premed32)
                                     .foregroundStyle(.subLight)
                                     .frame(width: 344.wScaled, height: 64)
-                                    .background(.subStrong)
+                                    .background(.subPoint)
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
