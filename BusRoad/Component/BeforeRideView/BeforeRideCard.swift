@@ -65,7 +65,7 @@ struct BeforeRideCard: View {
                                 
                                 Text(info.arrivalText)
                                     .font(.premed20Scaled)
-                                    .foregroundStyle(.primaryHeavy)
+                                    .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .primaryHeavy)
                                 
                                 Spacer()
                             }
