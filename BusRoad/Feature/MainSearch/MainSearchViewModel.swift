@@ -50,10 +50,6 @@ final class MainSearchViewModel: ObservableObject {
         searchManager.reset()
     }
     
-    func requestOrigin() {
-        journeyManager.requestOrigin()
-    }
-    
     // MARK: - 액션 메서드들
     /// 검색 모드 종료
     func exitSearchMode() {
@@ -89,5 +85,9 @@ final class MainSearchViewModel: ObservableObject {
         ))
         resetManager()
         isSearchMode = false
+    }
+    
+    func warmUpLocation() {
+        journeyManager.warmUpLocation()
     }
 }

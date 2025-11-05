@@ -30,7 +30,10 @@ final class WalkingViewModel: NSObject, ObservableObject {
         self.journeyManager = journeyManager
         super.init()
         loc.delegate = self
-        loc.desiredAccuracy = kCLLocationAccuracyBest
+        loc.allowsBackgroundLocationUpdates = true
+        loc.pausesLocationUpdatesAutomatically = false
+        loc.showsBackgroundLocationIndicator = true // iOS 11+ (상태바에 파란바 표시)
+        loc.desiredAccuracy = kCLLocationAccuracyBestForNavigation
         loc.headingFilter = 1
         loc.headingOrientation = .portrait
         
@@ -43,7 +46,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
     
     // MARK: - Public
     func start() {
-        loc.requestWhenInUseAuthorization()
+        loc.requestAlwaysAuthorization()
         loc.startUpdatingLocation()
         loc.startUpdatingHeading()
     }

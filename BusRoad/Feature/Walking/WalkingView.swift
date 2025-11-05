@@ -57,10 +57,17 @@ struct WalkingView: View {
                                 Button {
                                     viewModel.showAlert = true
                                 } label: {
-                                    Text("이미 목적지에 도착하셨나요?")
-                                        .font(.premed12Scaled)
-                                        .foregroundColor(.primaryHeavy)
-                                        .underline()
+                                    if index == journey.nodes.count - 1 {
+                                        Text("이미 도착하셨나요?")
+                                            .font(.premed12Scaled)
+                                            .foregroundColor(.primaryHeavy)
+                                            .underline()
+                                    } else {
+                                        Text("이미 정류장이신가요?")
+                                            .font(.premed12Scaled)
+                                            .foregroundColor(.primaryHeavy)
+                                            .underline()
+                                    }
                                 }
                                 
                             }

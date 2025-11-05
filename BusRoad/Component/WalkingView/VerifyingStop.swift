@@ -57,7 +57,7 @@ struct VerifyingStop: View {
                         ZStack{
                             Rectangle()
                                 .cornerRadius(20)
-                                .foregroundColor(.subStrong)
+                                .foregroundColor(.subPoint)
                                 .frame(width: 240.wScaled, height: 75.wScaled)
                             Text("맞아요")
                                 .font(.premed32Scaled)

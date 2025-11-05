@@ -90,9 +90,13 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         // 권한 보장
         try await requestWhenInUseAuthorizationIfNeeded()
         
-        // 중복 요청 방지
-        guard locationContinuation == nil else {
-            throw LocationError.busy
+        // 기존 요청이 있다면 강제 종료(웜업 진행중일 가능성)
+        if let cont = locationContinuation {
+            cont.resume(throwing: LocationError.busy)
+            locationContinuation = nil
+            timeoutTask?.cancel()
+            timeoutTask = nil
+            print("[LocationService] 기존 위치 요청 중단됨 (새 요청으로 교체)")
         }
         
         return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<CLLocation, Error>) in
@@ -108,6 +112,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
                 if let cont = self.locationContinuation {
                     cont.resume(throwing: LocationError.timeout)
                     self.locationContinuation = nil
+                    print("[LocationService] 위치 요청 타임아웃")
                 }
             }
         }
