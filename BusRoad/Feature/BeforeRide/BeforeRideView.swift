@@ -154,5 +154,8 @@ struct BeforeRideView: View {
             print("[BeforeRideView] 정류장 추적 시작")
             
         }
+        .onDisappear {
+            viewModel.stopRefreshing()
+        }
     }
 }
