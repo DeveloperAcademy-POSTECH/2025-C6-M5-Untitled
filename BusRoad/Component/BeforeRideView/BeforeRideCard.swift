@@ -27,7 +27,7 @@ struct BeforeRideCard: View {
                         y: 0
                     )
                 
-                VStack(spacing: 20.wScaled) {
+                VStack(spacing: 30.wScaled) {
                     VStack(spacing: 28.wScaled) {
                         HStack {
                             VStack(alignment: .leading, spacing: 8.wScaled) {
@@ -51,16 +51,12 @@ struct BeforeRideCard: View {
                             HStack {
                                 Text(info.busNo)
                                     .font(.presemi32Scaled)
-                                    .foregroundStyle(
-                                        viewModel.isArrivingSoon ? .primaryNormal : .subLight
-                                    )
+                                    .foregroundStyle(viewModel.isArrivingSoon ? .primaryHeavy : .subLight)
                                     .padding(.horizontal, 8.wScaled)
                                     .padding(.vertical, 4.wScaled)
                                     .background(
                                         Rectangle()
-                                            .foregroundColor(
-                                                viewModel.isArrivingSoon ? .subNormal : .primaryHeavy
-                                            )
+                                            .foregroundStyle(viewModel.isArrivingSoon ? .subNormal : .primaryHeavy)
                                             .cornerRadius(15)
                                     )
                                 
@@ -91,10 +87,12 @@ struct BeforeRideCard: View {
                         }
                     }
                     
-                    LottieView(animation: .named("BeforeRiding"))
+                    LottieView(animation: .named(viewModel.isArrivingSoon ? "BeforeBoarding" : "BeforeRiding"))
                         .playing(loopMode: .loop)  // 반복 재생
                         .animationSpeed(1.0)  // 재생 속도
                         .frame(width: 200.wScaled, height: 200.wScaled)
+                        .padding(.leading, viewModel.isArrivingSoon ? 25.wScaled : 0)
+                        .padding(.top, viewModel.isArrivingSoon ? 20.wScaled : 0)
                     
                     
                 }
@@ -102,8 +100,4 @@ struct BeforeRideCard: View {
             }
         }
     }
-}
-
-#Preview {
-    BeforeRideCard(waitingStopName: "포스텍", waitingBusNo: ["123번", "234번"])
 }

@@ -131,7 +131,7 @@ struct BeforeRideView: View {
                                     .font(.premed32)
                                     .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .subLight)  // 임시 활성화
                                     .frame(width: 344.wScaled, height: 64)
-                                    .background(viewModel.isArrivingSoon ? .subStrong : .subStrong)     // 임시 활성화
+                                    .background(viewModel.isArrivingSoon ? .subPoint : .subDisable)     // 임시 활성화
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
@@ -159,3 +159,4 @@ struct BeforeRideView: View {
         }
     }
 }
+
