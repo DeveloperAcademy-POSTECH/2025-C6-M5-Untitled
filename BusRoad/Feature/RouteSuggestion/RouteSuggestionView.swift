@@ -80,15 +80,22 @@ struct RouteSuggestionView: View {
                         
                         // MARK: - 경로추천카드
                         VStack(spacing:0) {
-                            RouteCardSlide(
-                                currentIndex: $viewModel.currentIndex,
-                                routes: $viewModel.routes,
-                                errorMessage: viewModel.errorMessage
-                            )
-                            .padding(.horizontal, 44.wScaled)
-                            .padding(.top, 30.wScaled)
-                            .padding(.bottom, 17.wScaled)
                             
+                            if viewModel.errorMessage != nil {
+                                RouteErrorCard(viewModel: viewModel)
+                                    .padding(.horizontal, 44.wScaled)
+                                    .padding(.top, 30.wScaled)
+                                    .padding(.bottom, 17.wScaled)
+                            } else{
+                                RouteCardSlide(
+                                    currentIndex: $viewModel.currentIndex,
+                                    routes: $viewModel.routes,
+                                    errorMessage: viewModel.errorMessage
+                                )
+                                .padding(.horizontal, 44.wScaled)
+                                .padding(.top, 30.wScaled)
+                                .padding(.bottom, 17.wScaled)
+                            }
                             
                             // MARK: - 버튼
                             
