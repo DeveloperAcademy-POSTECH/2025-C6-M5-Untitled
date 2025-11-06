@@ -4,7 +4,7 @@ import SwiftUI
 struct RouteSuggestionView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
-    @FocusState var isFocused: Bool 
+    @FocusState var isFocused: Bool
     
     var body: some View {
         if viewModel.isSearchMode {
@@ -81,21 +81,14 @@ struct RouteSuggestionView: View {
                         // MARK: - 경로추천카드
                         VStack(spacing:0) {
                             
-                            if viewModel.errorMessage != nil {
-                                RouteErrorCard(viewModel: viewModel)
-                                    .padding(.horizontal, 44.wScaled)
-                                    .padding(.top, 30.wScaled)
-                                    .padding(.bottom, 17.wScaled)
-                            } else{
-                                RouteCardSlide(
-                                    currentIndex: $viewModel.currentIndex,
-                                    routes: $viewModel.routes,
-                                    errorMessage: viewModel.errorMessage
-                                )
-                                .padding(.horizontal, 44.wScaled)
-                                .padding(.top, 30.wScaled)
-                                .padding(.bottom, 17.wScaled)
-                            }
+                            RouteCardSlide(
+                                currentIndex: $viewModel.currentIndex,
+                                routes: $viewModel.routes,
+                                viewModel: viewModel
+                            )
+                            .padding(.horizontal, 44.wScaled)
+                            .padding(.top, 30.wScaled)
+                            .padding(.bottom, 17.wScaled)
                             
                             // MARK: - 버튼
                             
@@ -371,8 +364,7 @@ struct RouteSuggestionViewWithData: View {
                         RouteCardSlide(
                             currentIndex: $viewModel.currentIndex,
                             routes: $viewModel.routes,
-                            viewModel: viewModel,
-                            errorMessage: viewModel.errorMessage
+                            viewModel: viewModel
                         )
                         .padding(.horizontal, 44.wScaled)
                         .padding(.top, 25.wScaled)

@@ -3,13 +3,12 @@ import SwiftUI
 struct RouteCardSlide: View {
     @Binding var currentIndex: Int
     @Binding var routes: [Journey]?
-    @ObservedObject var viewModel = BusRouteViewModel()
-    var errorMessage: String?
+    @ObservedObject var viewModel: BusRouteViewModel
     
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
-                if errorMessage != nil {
+                if viewModel.errorMessage != nil {
                     RouteErrorCard(viewModel: viewModel)
                 } else if let routes {
                     ZStack {
