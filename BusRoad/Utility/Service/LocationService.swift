@@ -86,33 +86,49 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     
     
     // 1회성 현재 위치 가져오기 (권한 체크 포함). 기본 타임아웃 8초.
-    func requestOneShotLocation(timeout seconds: TimeInterval = 30) async throws -> CLLocation {
-        // 권한 보장
-        try await requestWhenInUseAuthorizationIfNeeded()
+    func requestOneShotLocation(timeout seconds: TimeInterval = 8) async throws -> CLLocation {
+        let maxRetries = 1
+        var attempt = 0
         
-        // 기존 요청이 있다면 강제 종료(웜업 진행중일 가능성)
-        if let cont = locationContinuation {
-            cont.resume(throwing: LocationError.busy)
-            locationContinuation = nil
-            timeoutTask?.cancel()
-            timeoutTask = nil
-            print("[LocationService] 기존 위치 요청 중단됨 (새 요청으로 교체)")
-        }
-        
-        return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<CLLocation, Error>) in
-            // 위치 요청 시작
-            self.locationContinuation = cont
-            self.manager.requestLocation()
-            
-            // 타임아웃 태스크 설정
-            self.timeoutTask?.cancel()
-            self.timeoutTask = Task { [weak self] in
-                guard let self else { return }
-                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
-                if let cont = self.locationContinuation {
-                    cont.resume(throwing: LocationError.timeout)
-                    self.locationContinuation = nil
-                    print("[LocationService] 위치 요청 타임아웃")
+        while true {
+            do {
+                // 권한 보장
+                try await requestWhenInUseAuthorizationIfNeeded()
+                
+                // 기존 요청이 있다면 강제 종료(웜업 진행중일 가능성)
+                if let cont = locationContinuation {
+                    cont.resume(throwing: LocationError.busy)
+                    locationContinuation = nil
+                    timeoutTask?.cancel()
+                    timeoutTask = nil
+                    print("[LocationService] 기존 위치 요청 중단됨 (새 요청으로 교체)")
+                }
+                
+                return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<CLLocation, Error>) in
+                    // 위치 요청 시작
+                    self.locationContinuation = cont
+                    self.manager.requestLocation()
+                    
+                    // 타임아웃 태스크 설정
+                    self.timeoutTask?.cancel()
+                    self.timeoutTask = Task { [weak self] in
+                        guard let self else { return }
+                        try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                        if let cont = self.locationContinuation {
+                            cont.resume(throwing: LocationError.timeout)
+                            self.locationContinuation = nil
+                            print("[LocationService] 위치 요청 타임아웃")
+                        }
+                    }
+                }
+            } catch {
+                if let locError = error as? LocationError, locError == .timeout, attempt < maxRetries {
+                    attempt += 1
+                    print("[LocationService] 위치 요청 타임아웃 발생, 재시도 \(attempt)/\(maxRetries)")
+                    try await Task.sleep(nanoseconds: 1_000_000_000) // 1초 대기 후 재시도
+                    continue
+                } else {
+                    throw error
                 }
             }
         }
