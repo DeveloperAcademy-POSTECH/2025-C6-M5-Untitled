@@ -128,6 +128,23 @@ final class AlightProximityManager: ObservableObject {
     // MARK: - 정류장 근접 확인
     private func checkStationProximity(currentLocation: CLLocation) {
         
+        // 첫 정류장은 건너뛰기
+        if currentStationIndex == 0 && stations.count > 1 {
+            print("[AlightProximityManager] 첫 정류장 자동 스킵")
+            currentStationIndex = 1
+            remainingStations = stations.count - 1
+            hasEnteredRadius = false
+            
+            if remainingStations <= 2 {
+                canAlight = true
+            }
+            
+            Task {
+                ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
+            }
+        }
+        
+        
         let nextStationIndex = currentStationIndex
         
         // 출발지(첫 번째 정류장) 위치
@@ -242,8 +259,8 @@ final class AlightProximityManager: ObservableObject {
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)개")
         
         Task {
-                await ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
-            }
+            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
+        }
         
         if remainingStations <= 2 {
             canAlight = true

@@ -33,6 +33,8 @@ class ArrivalInfoManager: ObservableObject {
         
         refreshTask = Task {
             print("[DEBUG] ArrivalInfoManager: Auto Refresh Started")
+            print("[DEBUG] 추적할 버스 번호들: \(busRouteNode.busNo)")  // 🔍 디버깅용 추가
+            
             while !Task.isCancelled {
                 await refresh(for: busRouteNode)
                 try? await Task.sleep(nanoseconds: 30 * 1_000_000_000)
@@ -93,28 +95,65 @@ class ArrivalInfoManager: ObservableObject {
         }
         
         do {
-            let nodeId = try await busArrivalService.fetchNodeId(
-                cityCode: cityCode,
-                stationName: firstStation.stationName
-            )
+            // localStationId를 우선적으로 사용
+            var nodeId = ""
+            if let localStationId = firstStation.localStationId {
+                nodeId = localStationId
+                print("[DEBUG] localStationId 사용: \(nodeId)")
+            } else {
+                nodeId = try await busArrivalService.fetchNodeId(
+                    cityCode: cityCode,
+                    stationName: firstStation.stationName
+                )
+                print("[DEBUG] stationName으로 nodeId 조회: \(nodeId)")
+            }
             
             let arrivals = try await busArrivalService.fetchBusArrivalInfo(
                 cityCode: cityCode,
                 nodeId: nodeId
             )
             
-            guard let nearest = arrivals.min(by: { $0.arrtime < $1.arrtime }) else {
-                print("[DEBUG] 도착 예정 버스 없음")
+            print("🚍 [BeforeRide] 추적할 버스 목록: \(busRouteNode.busNo)")
+            
+            // 선택한 경로의 버스만 필터링
+            let filteredArrivals = arrivals.filter { arrival in
+                let cleanedArrivalNo = cleanBusNumber(arrival.routeno)
+                let isMatchingBus = busRouteNode.busNo.contains(cleanedArrivalNo)
+                
+                // 디버깅용 로그
+                if !isMatchingBus {
+                    print("[DEBUG] 필터링됨: \(cleanedArrivalNo)는 선택한 경로가 아님")
+                }
+                
+                return isMatchingBus
+            }
+            
+            // 필터링된 버스가 없으면
+            guard let nearest = filteredArrivals.min(by: { $0.arrtime < $1.arrtime }) else {
+                print("[DEBUG] 선택한 경로(\(busRouteNode.busNo))의 버스가 도착 예정에 없음")
+                print("[DEBUG] 전체 도착 예정: \(arrivals.map { cleanBusNumber($0.routeno) })")
                 return (nil, false, nil)
             }
             
+            print("[DEBUG] 선택한 경로 중 가장 가까운 버스: \(cleanBusNumber(nearest.routeno)), \(nearest.arrtime)초 후")
+            
+            // 지나간 버스 판단도 선택한 경로인지 확인
             var didPass = false
             var passedBus: BusArrivalItem?
             
-            if let lastId = lastNearestRouteId, let lastTime = lastNearestArrTime {
-                if lastId != nearest.routeid || (lastTime < 30 && nearest.arrtime > 90) {
-                    didPass = true
-                    passedBus = lastNearestItem
+            if let lastId = lastNearestRouteId,
+               let lastTime = lastNearestArrTime,
+               let lastItem = lastNearestItem {
+                
+                // 마지막 추적한 버스도 선택한 경로의 버스인지 확인
+                let lastBusNo = cleanBusNumber(lastItem.routeno)
+                if busRouteNode.busNo.contains(lastBusNo) {
+                    // 버스 ID가 바뀌었거나, 시간 차이가 크면 지나간 것으로 판단
+                    if lastId != nearest.routeid || (lastTime < 60 && nearest.arrtime > 180) {
+                        didPass = true
+                        passedBus = lastItem
+                        print("[DEBUG] 버스 지나감 감지: \(lastBusNo)")
+                    }
                 }
             }
             
@@ -188,11 +227,17 @@ class ArrivalInfoManager: ObservableObject {
                 nodeId: nodeId
             )
             
-            if let nearest = arrivals.min(by: { $0.arrtime < $1.arrtime }) {
-                print("[DEBUG] 가장 빨리 오는 버스: \(nearest.routeno), \(nearest.arrtime)초 후 도착")
+            // 선택한 경로의 버스만 필터링
+            let filteredArrivals = arrivals.filter { arrival in
+                let cleanedArrivalNo = cleanBusNumber(arrival.routeno)
+                return busRouteNode.busNo.contains(cleanedArrivalNo)
+            }
+            
+            if let nearest = filteredArrivals.min(by: { $0.arrtime < $1.arrtime }) {
+                print("[DEBUG] 선택한 경로 중 가장 빨리 오는 버스: \(nearest.routeno), \(nearest.arrtime)초 후 도착")
                 return nearest
             } else {
-                print("[DEBUG] 도착 예정 버스 없음")
+                print("[DEBUG] 선택한 경로의 버스가 도착 예정에 없음")
                 return nil
             }
             
