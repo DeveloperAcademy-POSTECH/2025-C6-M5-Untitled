@@ -10,6 +10,7 @@ import SwiftUI
 struct WalkingAlert: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @Binding var isPresented: Bool
+    @ObservedObject var viewModel: WalkingViewModel
     
     let journey: Journey
     let index: Int
@@ -50,8 +51,8 @@ struct WalkingAlert: View {
                             }
                         }
                         Button{
-                            coordinator.advanceJourneyStage()
-                            
+                            viewModel.arrived = true
+                            viewModel.showVerifyingStop = true
                             if index + 1 < journey.nodes.count {
                                     if case let .bus(busnode) = journey.nodes[index + 1] {
                                         print("다음 노드가 버스입니다:", busnode.busNo)
@@ -76,7 +77,7 @@ struct WalkingAlert: View {
                                     .cornerRadius(100)
                                     .foregroundColor(Color.subPoint)
                                     .frame(width: 139.wScaled, height: 48.wScaled)
-                                Text("완료하기")
+                                Text("도착")
                                     .foregroundColor(Color.primarywhite)
                                     .font(.premed20Scaled)
                             }
