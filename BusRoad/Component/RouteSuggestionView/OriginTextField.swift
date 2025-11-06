@@ -42,7 +42,7 @@ struct OriginTextField : View {
                 //        }
             }) {
                 HStack{
-                    Text(location?.name ?? "현위치")
+                    Text(location?.name ?? "현위치") //플레이스홀더
                         .font(.prereg20Scaled)
                         .foregroundColor(userDidSelectOrigin ? .greyHeavy : .greyDisable)
                     Spacer()

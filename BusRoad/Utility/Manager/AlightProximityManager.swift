@@ -12,7 +12,7 @@ final class AlightProximityManager: ObservableObject {
     @Published var stations: [BusStation] = []  // 모든 정류장 리스트
     @Published private(set) var remainingStations: Int = 0 // 남은 정류장 개수
     @Published private(set) var lastDistance: CLLocationDistance? // 다음 정류장까지 거리
-    @Published private(set) var canAlight: Bool = false // 내릴 수 있는지(2정류장 남았을때)
+    @Published private(set) var canAlight: Bool = false // 내릴 수 있는지(1정류장 남았을때)
     @Published private(set) var progress: CGFloat = 0 // 진행률
     @Published private(set) var hasArrived: Bool = false // 목적지 도착여부
     
@@ -135,7 +135,7 @@ final class AlightProximityManager: ObservableObject {
             remainingStations = stations.count - 1
             hasEnteredRadius = false
             
-            if remainingStations <= 2 {
+            if remainingStations <= 1 {
                 canAlight = true
             }
             
@@ -262,7 +262,7 @@ final class AlightProximityManager: ObservableObject {
             ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
         }
         
-        if remainingStations <= 2 {
+        if remainingStations <= 1 {
             canAlight = true
         }
         
