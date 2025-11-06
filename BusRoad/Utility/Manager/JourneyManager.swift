@@ -205,12 +205,25 @@ final class JourneyManager: ObservableObject {
     
     private func cleanBusNumber(_ busNo: String) -> String {
         var result = busNo
-        let pattern = #"\([^()]*\)"#  // 한 단계 괄호 제거용 정규식
-        
-        // 안쪽 괄호부터 반복 제거
-        while let _ = result.range(of: pattern, options: .regularExpression) {
-            result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
-        }
+        let pattern = #"\((?!\d+\))[^)]*\)"#
+          result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+
+          // 공백 정리
+          result = result.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+                         .trimmingCharacters(in: .whitespacesAndNewlines)
+
+          // 짝 불일치 괄호 제거
+          let opens  = result.filter { $0 == "(" }.count
+          let closes = result.filter { $0 == ")" }.count
+          if opens != closes {
+              // 짝이 안 맞으면 괄호 전부 제거
+              result.removeAll { $0 == "(" || $0 == ")" }
+          } else {
+              // 짝은 맞지만, 예: "100)" 처럼 여는 괄호가 전혀 없는데 닫는 괄호로 끝나는 경우 방지
+              if result.hasSuffix(")") && !result.contains("(") {
+                  result.removeLast()
+              }
+          }
         
         // 숫자로 끝날 경우 "번" 추가
         if let lastChar = result.last, lastChar.isNumber {
