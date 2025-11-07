@@ -1,4 +1,5 @@
 import SwiftUI
+import Lottie
 
 struct AtArrival: View {
     var journey: Journey
@@ -31,21 +32,17 @@ struct AtArrival: View {
                     
                     HStack{
                         Spacer()
-                        Image(systemName: "checkmark.circle.fill")
-                            .font(.system(size: 148, weight: .bold))
-                            .foregroundColor(.subStrong)
-                            .rotation3DEffect(
-                                .degrees(isAnimating ? 360 : 0),
-                                axis: (x: 0, y: 1, z: 0)
-                            )
+                        
+                        LottieView(animation: .named("check"))
+                            .playing(loopMode: .playOnce)
+                            .animationSpeed(1.0)
+                            .frame(width: 180, height: 180)
                             .onAppear {
-                                withAnimation(.easeOut(duration: 2.0)) {
-                                    isAnimating = true
-                                }
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                                     showVerifyingStop = true
                                 }
                             }
+                        
                         Spacer()
                     }
                     Spacer()
@@ -66,4 +63,18 @@ struct AtArrival: View {
                 .foregroundColor(.red)
         }
     }
+}
+
+
+#Preview {
+    // Mock data: a journey with a single walk node ending at a named stop
+    let start = LocationInfo(name: "출발지", latitude: 37.0, longitude: 127.0)
+    let end = LocationInfo(name: "포스텍 정문", latitude: 36.0, longitude: 129.0)
+    let walk = WalkRouteNode(start: start, end: end, travelTime: 5)
+    let journey = Journey(totalTime: 5, nodes: [.walk(walk)])
+
+    let coordinator = NavigationCoordinator()
+    return AtArrival(journey: journey, index: 0)
+        .environmentObject(coordinator)
+        .padding()
 }
