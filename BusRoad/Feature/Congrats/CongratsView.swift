@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct CongratsView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
@@ -87,21 +88,17 @@ struct CongratsView: View {
                         } else {
                             HStack{
                                 Spacer()
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 148.wScaled, weight: .bold))
-                                    .foregroundColor(.subStrong)
-                                    .rotation3DEffect(
-                                        .degrees(isAnimating ? 360 : 0),
-                                        axis: (x: 0, y: 1, z: 0)
-                                    )
+                                
+                                LottieView(animation: .named("check"))
+                                    .playing(loopMode: .playOnce)
+                                    .animationSpeed(1.0)
+                                    .frame(width: 180.wScaled, height: 180.wScaled)
                                     .onAppear {
-                                        withAnimation(.easeOut(duration: 2.0)) {
-                                            isAnimating = true
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                                             showArrivalConfirmation = true
                                         }
                                     }
+                                
                                 Spacer()
                             }
                             Spacer()
