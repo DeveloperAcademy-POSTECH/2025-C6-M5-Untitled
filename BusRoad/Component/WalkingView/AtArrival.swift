@@ -64,17 +64,3 @@ struct AtArrival: View {
         }
     }
 }
-
-
-#Preview {
-    // Mock data: a journey with a single walk node ending at a named stop
-    let start = LocationInfo(name: "출발지", latitude: 37.0, longitude: 127.0)
-    let end = LocationInfo(name: "포스텍 정문", latitude: 36.0, longitude: 129.0)
-    let walk = WalkRouteNode(start: start, end: end, travelTime: 5)
-    let journey = Journey(totalTime: 5, nodes: [.walk(walk)])
-
-    let coordinator = NavigationCoordinator()
-    return AtArrival(journey: journey, index: 0)
-        .environmentObject(coordinator)
-        .padding()
-}
