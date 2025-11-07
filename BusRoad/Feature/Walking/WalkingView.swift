@@ -47,7 +47,7 @@ struct WalkingView: View {
                     VStack {
                         if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                             if viewModel.arrived {
-                                AtArrival(journey: journey, index: index)
+                                AtArrival(journey: journey, index: index, viewModel: viewModel)
                             } else {
                                 ToDestination(vm:viewModel, journey: journey, index: index)
                                 
@@ -104,7 +104,7 @@ struct WalkingView: View {
             }
             .overlay {
                 if let journey = viewModel.journey, let index = viewModel.journeyIndex {
-                    WalkingAlert(isPresented: $viewModel.showAlert, journey: journey, index: index)
+                    WalkingAlert(isPresented: $viewModel.showAlert, viewModel: viewModel, journey: journey, index: index)
                 }
             }
         }

@@ -4,6 +4,7 @@ struct AtArrival: View {
     var journey: Journey
     var index: Int
     @EnvironmentObject var coordinator: NavigationCoordinator
+    @ObservedObject var viewModel: WalkingViewModel
     
     @State private var scale: CGFloat = 0.0
     @State private var isAnimating = false
@@ -11,8 +12,8 @@ struct AtArrival: View {
     
     var body: some View {
         if case let .walk(node) = journey.nodes[index] {
-            if showVerifyingStop && journey.nodes.count > 1 {
-                VerifyingStop(showVerifyingStop: $showVerifyingStop, journey: journey, index: index)
+            if viewModel.showVerifyingStop && journey.nodes.count > 1 {
+                VerifyingStop(showVerifyingStop: $viewModel.showVerifyingStop, journey: journey, index: index)
             } else {
                 VStack(alignment: .leading) {
                     Spacer()

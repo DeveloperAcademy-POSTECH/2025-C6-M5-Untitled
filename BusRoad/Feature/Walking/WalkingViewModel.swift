@@ -15,6 +15,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var showAlert: Bool = false
     @Published var showDevSheet: Bool = false
     @Published var tmapTotalDistance: Int = 0
+    @Published var showVerifyingStop: Bool = false
     
     private var stepIndex: Int = 0
     private var hasCalculatedRoute = false
