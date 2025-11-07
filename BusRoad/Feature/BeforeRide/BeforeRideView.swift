@@ -59,11 +59,13 @@ struct BeforeRideView: View {
                                     viewModel.hasPassed = false
                                 } label: {
                                     Text("놓쳤어요")
-                                        .foregroundColor(.cancelbutton)
+                                        .foregroundColor(.subPoint)
                                         .font(.premed28Scaled)
                                         .frame(width: 162.wScaled, height: 64)
-                                        .background(.primaryLight)
-                                        .cornerRadius(20)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .stroke(Color.subPoint, lineWidth: 1)
+                                        )
                                 }
                                 .buttonStyle(.plain)
                                 

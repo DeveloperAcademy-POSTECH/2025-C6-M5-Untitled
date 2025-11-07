@@ -24,13 +24,13 @@ struct WalkingAlert: View {
                 
                 VStack(alignment:.center){
                     if index == journey.nodes.count - 1 {
-                        Text("이미 도착하셨나요?")
+                        Text("이미 목적지에 도착하셨나요?")
                             .font(.presemi24Scaled)
                             .foregroundColor(.primaryblack)
                             .padding(.top, 20.wScaled)
                             .padding(.bottom, 36.wScaled)
                     } else {
-                        Text("이미 정류장이신가요?")
+                        Text("이미 정류장에 도착하셨나요?")
                             .font(.presemi24Scaled)
                             .foregroundColor(.primaryblack)
                             .padding(.top, 20.wScaled)

@@ -145,9 +145,6 @@ final class JourneyManager: ObservableObject {
             let startName = sub["startName"] as? String,
             let endName = sub["endName"] as? String,
             let lanes = sub["lane"] as? [[String: Any]],
-            let lane = lanes.first,
-            let busNo = lane["busNo"] as? String,
-            let busId = lane["busID"] as? Int,
             let passStopList = sub["passStopList"] as? [String: Any],
             let stations = passStopList["stations"] as? [[String: Any]],
             let travelTime = sub["sectionTime"] as? Int
@@ -155,8 +152,17 @@ final class JourneyManager: ObservableObject {
             return nil
         }
         
-        // busNo에서 괄호()로 묶인 불필요한 정보 없애기
-        let cleanedBusNo = cleanBusNumber(busNo)
+        let busNumbers = lanes.compactMap { lane -> String? in
+            guard let busNo = lane["busNo"] as? String else { return nil }
+            return cleanBusNumber(busNo) // cleanBusNumber 적용
+        }
+        let busIds = lanes.compactMap { $0["busID"] as? Int }
+        
+        // 만약 유효한 버스 번호가 하나도 없으면 nil 반환
+        if busNumbers.isEmpty {
+            print("[DEBUG] parseBusNode: lanes에 유효한 busNo가 없습니다.")
+            return nil
+        }
         
         // stations 정보 중 필요한 정보만 뽑아내기
         let stationsInfo: [BusStation] = stations.compactMap { dict in
@@ -190,8 +196,8 @@ final class JourneyManager: ObservableObject {
         return BusRouteNode(
             start: LocationInfo(name: startName, latitude: startY, longitude: startX),
             end: LocationInfo(name: endName, latitude: endY, longitude: endX),
-            busNo: [cleanedBusNo],    // 버스 번호만 추출
-            busId: [busId],
+            busNo: busNumbers,    // 버스 번호만 추출
+            busId: busIds,
             stations: stationsInfo,
             travelTime: travelTime
         )
@@ -199,12 +205,25 @@ final class JourneyManager: ObservableObject {
     
     private func cleanBusNumber(_ busNo: String) -> String {
         var result = busNo
-        let pattern = #"\([^()]*\)"#  // 한 단계 괄호 제거용 정규식
-        
-        // 안쪽 괄호부터 반복 제거
-        while let _ = result.range(of: pattern, options: .regularExpression) {
-            result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
-        }
+        let pattern = #"\((?!\d+\))[^)]*\)"#
+          result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+
+          // 공백 정리
+          result = result.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+                         .trimmingCharacters(in: .whitespacesAndNewlines)
+
+          // 짝 불일치 괄호 제거
+          let opens  = result.filter { $0 == "(" }.count
+          let closes = result.filter { $0 == ")" }.count
+          if opens != closes {
+              // 짝이 안 맞으면 괄호 전부 제거
+              result.removeAll { $0 == "(" || $0 == ")" }
+          } else {
+              // 짝은 맞지만, 예: "100)" 처럼 여는 괄호가 전혀 없는데 닫는 괄호로 끝나는 경우 방지
+              if result.hasSuffix(")") && !result.contains("(") {
+                  result.removeLast()
+              }
+          }
         
         // 숫자로 끝날 경우 "번" 추가
         if let lastChar = result.last, lastChar.isNumber {
@@ -224,10 +243,10 @@ final class JourneyManager: ObservableObject {
             let nextStartX = next["startX"] as? Double,
             let nextStartY = next["startY"] as? Double
         else { return false }
-
+        
         return prevEndName == nextStartName &&
-               prevEndX == nextStartX &&
-               prevEndY == nextStartY
+        prevEndX == nextStartX &&
+        prevEndY == nextStartY
     }
     
     private func parseWalkNode(at index: Int, in subPath: [[String: Any]]) -> WalkRouteNode? {
@@ -316,7 +335,7 @@ final class JourneyManager: ObservableObject {
                     return nil
                 }
             }.joined(separator: "|") // 여러 버스 구간은 '|'로 구분
-
+            
             // 이미 같은 경로가 있는 경우 → 병합
             if var existing = clusters[signature] {
                 let mergedNodes = zip(existing.nodes, journey.nodes).map { (lhs, rhs) -> RouteNode in
@@ -354,10 +373,10 @@ final class JourneyManager: ObservableObject {
                 order.append(signature)
             }
         }
-
+        
         // 입력 순서 유지하여 반환
         return order.compactMap { clusters[$0] }
     }
-
-
+    
+    
 }

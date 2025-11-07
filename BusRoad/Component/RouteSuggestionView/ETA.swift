@@ -45,7 +45,7 @@ struct ETA: View {
         VStack(alignment: .leading, spacing: 4.wScaled) {
             HStack{
                 if index == 0  {
-                    Text("추천")
+                    Text("최적")
                         .foregroundColor(.subPoint)
                         .font(.presemi20Scaled)
                     

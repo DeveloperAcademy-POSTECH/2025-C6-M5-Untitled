@@ -45,7 +45,7 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     
     // 1정류장 남음
     func announceOneStation() {
-        announce("하차하기까지 한정류장 남았습니다.")
+        announce("이번 정류장에서 내려야해요.하차벨을 눌러주세요")
     }
 }
 

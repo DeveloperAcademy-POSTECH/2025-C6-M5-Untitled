@@ -45,7 +45,7 @@ struct OnRideView: View {
                         .padding(.bottom, 30.wScaled)
                         
                         // 버튼 영역
-                        if proximityManager.canAlight {
+//                        if proximityManager.canAlight {
                             Button {
                                 proximityManager.stop()
                                 coordinator.advanceJourneyStage()
@@ -98,22 +98,22 @@ struct OnRideView: View {
                             .buttonStyle(.plain)
                             .frame(maxWidth: .infinity)
                             .frame(height: 64)
-                        } else {
-                            Button {
-                                // TODO: 비활성화 상태에서의 동작(토스트 등)
-                                // "1정류장 남으면 버튼이 활성화돼요"
-                            } label: {
-                                Text("내렸어요")
-                                    .foregroundColor(.subNeutral)
-                                    .font(.premed32)
-                                    .frame(width: 344.wScaled, height: 64)
-                                    .background(.subDisable)
-                                    .cornerRadius(20)
-                            }
-                            .buttonStyle(.plain)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 64)
-                        }
+//                        } else {
+//                            Button {
+//                                // TODO: 비활성화 상태에서의 동작(토스트 등)
+//                                // "1정류장 남으면 버튼이 활성화돼요"
+//                            } label: {
+//                                Text("내렸어요")
+//                                    .foregroundColor(.subNeutral)
+//                                    .font(.premed32)
+//                                    .frame(width: 344.wScaled, height: 64)
+//                                    .background(.subDisable)
+//                                    .cornerRadius(20)
+//                            }
+//                            .buttonStyle(.plain)
+//                            .frame(maxWidth: .infinity)
+//                            .frame(height: 64)
+//                        }
                     }
                 }
                 .onAppear {
