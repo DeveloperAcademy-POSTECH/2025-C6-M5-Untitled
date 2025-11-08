@@ -13,7 +13,7 @@ struct BoardingLocation: View {
             // MARK: 정류장 정보
             VStack(alignment: .leading, spacing: 4.wScaled) {
                 Text("정류장")
-                    .font(.prereg20Scaled)
+                    .font(.premed16Scaled)
                     .foregroundColor(Color.greyNormal)
                 
                 MarqueeText(
@@ -30,7 +30,7 @@ struct BoardingLocation: View {
             // MARK: 버스 도착 정보
             VStack(alignment: .leading, spacing: 4.wScaled) {
                 Text("버스")
-                    .font(.prereg20Scaled)
+                    .font(.premed16Scaled)
                     .foregroundColor(Color.greyNormal)
                 
                 HStack(spacing: 8.wScaled) {
