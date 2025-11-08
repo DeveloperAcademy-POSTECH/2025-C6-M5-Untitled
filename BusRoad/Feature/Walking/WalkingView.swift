@@ -127,10 +127,15 @@ struct WalkingView: View {
             DevRouteMapView(
                 tmapCoordinates: viewModel.tmapCoordinates,
                 userLocation: viewModel.loc.location,
-                destination: viewModel.pendingDestination
+                destination: viewModel.pendingDestination,
+                deviceHeading: viewModel.loc.heading?.trueHeading,   // 선택
+                showRoutePoints: true,        // ✅ 점 표시 켜기
+                maxPointAnnotations: 400,     // 필요하면 조절
+                pointSize: 6
             )
             .presentationDetents([.fraction(0.4), .large])
             .presentationDragIndicator(.visible)
         }
+
     }
 }
