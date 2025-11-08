@@ -45,75 +45,85 @@ struct OnRideView: View {
                         .padding(.bottom, 30.wScaled)
                         
                         // 버튼 영역
-//                        if proximityManager.canAlight {
-                            Button {
-                                proximityManager.stop()
-                                coordinator.advanceJourneyStage()
+                        // if proximityManager.canAlight {
+                        Button {
+                            proximityManager.stop()
+                            coordinator.advanceJourneyStage()
+                            
+                            guard
+                                let journey = JourneyManager.shared.selectedJourney,
+                                let currentIndex = JourneyManager.shared.journeyIndex,
+                                currentIndex < journey.nodes.count
+                            else { return }
+                            
+                            // currentIndex는 "내린 뒤"의 현재 노드 인덱스라고 가정
+                            
+                            let nextIndex = currentIndex
+                            let nextNode = journey.nodes[nextIndex]
+                            
+                            switch nextNode {
+                            case .bus(let busNode):
+                                // 다음 버스 기다리는 상태
+                                let boardingStopName = busNode.start.name
+                                ProgressLiveActivityManager.shared.updateStage(
+                                    nextStage: RouteStage.waitingForBus.rawValue,
+                                    nextDestination: boardingStopName,  
+                                    totalDistance: 0,
+                                    remainingBusStops: busNode.stations.count,
+                                    busTravelTime: busNode.travelTime
+                                )
+                                print("[DEBUG] OnRideView - 환승 waitingForBus 업데이트, destination: \(boardingStopName)")
                                 
-                                let journey = JourneyManager.shared.selectedJourney
-                                
-                                if let journey = JourneyManager.shared.selectedJourney,
-                                   let currentIndex = JourneyManager.shared.journeyIndex,
-                                   currentIndex < journey.nodes.count - 1 {
-                                    
-                                    if let index = viewModel.index, let journey = viewModel.journey,
-                                       case let .bus(busnode) = journey.nodes[index + 1] {
-                                        ProgressLiveActivityManager.shared.updateStage(
-                                            nextStage: RouteStage.waitingForBus.rawValue,
-                                            nextDestination: busnode.end.name,
-                                            totalDistance: 0,
-                                            remainingBusStops: proximityManager.remainingStations,
-                                            busTravelTime: busnode.travelTime
-                                        )
-                                    } else if let index = viewModel.index, let journey = viewModel.journey,
-                                              case let .walk(node) = journey.nodes[index + 1] {
-                                        if journey.nodes.count - 1 == index + 1{
-                                            ProgressLiveActivityManager.shared.updateStage(
-                                                nextStage: RouteStage.walkingToDestination.rawValue,
-                                                nextDestination: node.end.name,
-                                                totalDistance: Double(WalkingViewModel().tmapTotalDistance),
-                                                remainingBusStops: 0,
-                                                busTravelTime: 0
-                                            )
-                                        } else {
-                                            ProgressLiveActivityManager.shared.updateStage(
-                                                nextStage: RouteStage.walkingToBus.rawValue,
-                                                nextDestination: node.end.name,
-                                                totalDistance: Double(WalkingViewModel().tmapTotalDistance),
-                                                remainingBusStops: 0,
-                                                busTravelTime: 0
-                                            )
-                                        }
-                                    }
+                            case .walk(let walkNode):
+                                if nextIndex == journey.nodes.count - 1 {
+                                    // 마지막 도보 → 목적지
+                                    ProgressLiveActivityManager.shared.updateStage(
+                                        nextStage: RouteStage.walkingToDestination.rawValue,
+                                        nextDestination: walkNode.end.name,
+                                        totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                        remainingBusStops: 0,
+                                        busTravelTime: 0
+                                    )
+                                    print("[DEBUG] OnRideView - walkingToDestination 업데이트, destination: \(walkNode.end.name)")
+                                } else {
+                                    // 환승을 위한 도보 → 다음 승차 정류장
+                                    ProgressLiveActivityManager.shared.updateStage(
+                                        nextStage: RouteStage.walkingToBus.rawValue,
+                                        nextDestination: walkNode.end.name,
+                                        totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                        remainingBusStops: 0,
+                                        busTravelTime: 0
+                                    )
+                                    print("[DEBUG] OnRideView - 환승 walkingToBus 업데이트, destination: \(walkNode.end.name)")
                                 }
-                                
-                            } label: {
-                                Text("내렸어요")
-                                    .font(.premed32)
-                                    .foregroundStyle(.subLight)
-                                    .frame(width: 344.wScaled, height: 64)
-                                    .background(.subPoint)
-                                    .cornerRadius(20)
                             }
-                            .buttonStyle(.plain)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 64)
-//                        } else {
-//                            Button {
-//                                // TODO: 비활성화 상태에서의 동작(토스트 등)
-//                                // "1정류장 남으면 버튼이 활성화돼요"
-//                            } label: {
-//                                Text("내렸어요")
-//                                    .foregroundColor(.subNeutral)
-//                                    .font(.premed32)
-//                                    .frame(width: 344.wScaled, height: 64)
-//                                    .background(.subDisable)
-//                                    .cornerRadius(20)
-//                            }
-//                            .buttonStyle(.plain)
-//                            .frame(maxWidth: .infinity)
-//                            .frame(height: 64)
-//                        }
+                        } label: {
+                            Text("내렸어요")
+                                .font(.premed32)
+                                .foregroundStyle(.subLight)
+                                .frame(width: 344.wScaled, height: 64)
+                                .background(.subPoint)
+                                .cornerRadius(20)
+                        }
+                        .buttonStyle(.plain)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 64)
+                        //                        } else {
+                        //                            Button {
+                        //                                // TODO: 비활성화 상태에서의 동작(토스트 등)
+                        //                                // "1정류장 남으면 버튼이 활성화돼요"
+                        //                            } label: {
+                        //                                Text("내렸어요")
+                        //                                    .foregroundColor(.subNeutral)
+                        //                                    .font(.premed32)
+                        //                                    .frame(width: 344.wScaled, height: 64)
+                        //                                    .background(.subDisable)
+                        //                                    .cornerRadius(20)
+                        //                            }
+                        //                            .buttonStyle(.plain)
+                        //                            .frame(maxWidth: .infinity)
+                        //                            .frame(height: 64)
+                        //                        }
                     }
                 }
                 .onAppear {

@@ -58,11 +58,12 @@ struct WalkingAlert: View {
                                         print("다음 노드가 버스입니다:", busnode.busNo)
                                         ProgressLiveActivityManager.shared.updateStage(
                                             nextStage: RouteStage.waitingForBus.rawValue,
-                                            nextDestination: busnode.start.name,
+                                            nextDestination: busnode.start.name,  // 승차 정류장
                                             totalDistance: 0,
                                             remainingBusStops: busnode.stations.count,
                                             busTravelTime: busnode.travelTime
                                         )
+                                        print("[DEBUG] WalkingAlert - waitingForBus 업데이트, destination: \(busnode.start.name)")
                                     } else {
                                         print("다음 노드는 버스가 아님:", journey.nodes[index + 1])
                                     }
