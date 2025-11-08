@@ -8,7 +8,7 @@ struct WalkingRerouteAlert: View {
     let journey: Journey
     let index: Int
 
-    private var selection: Int = 30 // 테스트용
+    var selection: Int = 50
 
     var body: some View {
         if isPresented {
