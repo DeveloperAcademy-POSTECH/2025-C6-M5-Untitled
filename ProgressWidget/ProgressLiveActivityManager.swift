@@ -141,36 +141,56 @@ final class ProgressLiveActivityManager {
     
     func updateWalkingActivity(stage: String, newLeftDistance: Double) {
         let timestamp = Date().timeIntervalSince1970
-        
-        
+
         guard let currentActivity = currentActivity else { return }
-        
         guard !isStageUpdating else { return }
-        
-        // 마지막 업데이트로부터 1초 이상 지났는지 확인
+
+        // 너무 자주 업데이트 방지
         let now = Date()
         guard now.timeIntervalSince(lastWalkingUpdateTime) >= 1.0 else {
             return
         }
         lastWalkingUpdateTime = now
         
-        let currentProgress = Self.progress(for: stage, totalDistance: Self.totalDistance, leftDistance: newLeftDistance, busProgess: 0, remainingBusStops: 0)
-        maxProgress = max(maxProgress, currentProgress)
-        let subDescription = Self.subDescription(for: stage, leftDistance: newLeftDistance, remainingBusStops: 0, busTravelTime: 0)
-        
-        let updatedState = ProgressAttributes.ContentState(
-            stage: stage,
-            leftDistance: newLeftDistance,
+        // 현재 Live Activity의 실제 stage 확인
+        let currentStage = currentActivity.content.state.stage
+
+        // 이미 waitingForBus / onBus / walkingToDestination 등으로 넘어갔으면 걷기 업데이트 무시
+        guard currentStage == RouteStage.walkingToBus.rawValue ||
+              currentStage == RouteStage.walkingToDestination.rawValue else {
+            print("[걷기 \(String(format: "%.3f", timestamp))] stage 불일치 (current=\(currentStage), param=\(stage)) → 업데이트 무시")
+            return
+        }
+
+        // canonical stage는 currentStage를 쓴다 (파라미터 stage로 덮어쓰지 않음)
+        let effectiveStage = currentStage
+
+        let currentProgress = Self.progress(
+            for: effectiveStage,
             totalDistance: Self.totalDistance,
-            destination: Self.destination,
-            subDescription: subDescription,
-            maxProgressValue: maxProgress,
-            currentProgressValue: currentProgress,
-            busProgress: 0,
-            remainingBusStops: 0,
-            busTravelTime: Self.busTravelTime
+            leftDistance: newLeftDistance,
+            busProgess: 0,
+            remainingBusStops: 0
         )
-        
+
+        maxProgress = max(maxProgress, currentProgress)
+        Self.leftDistance = newLeftDistance
+
+        let subDescription = Self.subDescription(
+            for: effectiveStage,
+            leftDistance: newLeftDistance,
+            remainingBusStops: 0,
+            busTravelTime: 0
+        )
+
+        // 기존 state 기반으로 필요한 값만 갱신
+        var updatedState = currentActivity.content.state
+        updatedState.leftDistance = newLeftDistance
+        updatedState.totalDistance = Self.totalDistance
+        updatedState.maxProgressValue = maxProgress
+        updatedState.currentProgressValue = currentProgress
+        updatedState.subDescription = subDescription
+
         Task {
             await currentActivity.update(ActivityContent(state: updatedState, staleDate: nil))
             print("[걷기 \(String(format: "%.3f", timestamp))] 업데이트 완료")
@@ -183,7 +203,7 @@ final class ProgressLiveActivityManager {
         totalDistance: Double,
         remainingBusStops: Int,
         busTravelTime: Int
-    ) {
+    ) async {
         let timestamp = Date().timeIntervalSince1970
         print("[단계변경 \(String(format: "%.3f", timestamp))] 호출됨 - nextStage: \(nextStage), destination: \(nextDestination)")
 
@@ -198,7 +218,7 @@ final class ProgressLiveActivityManager {
         Self.destination = nextDestination
         Self.totalDistance = totalDistance
         Self.busTravelTime = busTravelTime
-        Self.leftDistance = totalDistance  // leftDistance도 초기화
+        Self.leftDistance = totalDistance
 
         // 현재 단계에 맞는 설명 텍스트
         let subDescription = Self.subDescription(
@@ -217,7 +237,7 @@ final class ProgressLiveActivityManager {
         updatedState.destination = nextDestination
         updatedState.remainingBusStops = remainingBusStops
         updatedState.busProgress = 0
-        updatedState.leftDistance = totalDistance  // leftDistance 업데이트
+        updatedState.leftDistance = totalDistance
 
         updatedState.totalDistance = totalDistance
         updatedState.subDescription = subDescription
@@ -230,13 +250,10 @@ final class ProgressLiveActivityManager {
         print("[DEBUG updateStage] 새로운 state - stage: \(updatedState.stage), destination: \(updatedState.destination)")
         print("[DEBUG updateStage] description will be: \(Self.description(for: nextStage, destination: nextDestination))")
         
-        // maxProgress 리셋
         self.maxProgress = 0.0
 
-        Task {
-            await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-            print("[단계변경 \(String(format: "%.3f", timestamp))] 업데이트 성공 - 새 단계: \(nextStage), destination: \(nextDestination)")
-        }
+        await activity.update(ActivityContent(state: updatedState, staleDate: nil))
+        print("[단계변경 \(String(format: "%.3f", timestamp))] 업데이트 성공 - 새 단계: \(nextStage), destination: \(nextDestination)")
     }
     
     func updateRemainingBusStops(remaining: Int) {

@@ -52,7 +52,7 @@ struct AtArrival: View {
                 .padding(.horizontal, 30.wScaled)
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-                        viewModel.showVerifyingStop = true  
+                        viewModel.showVerifyingStop = true
                     }
                 }
             }

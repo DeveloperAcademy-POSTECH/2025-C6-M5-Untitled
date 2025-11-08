@@ -72,18 +72,20 @@ struct BeforeRideView: View {
                                 Spacer()
                                 
                                 Button {
-                                    coordinator.advanceJourneyStage()
-                                    
-                                    if let index = viewModel.index, let journey = viewModel.journey,
-                                       case let .bus(busnode) = journey.nodes[index] {
-                                        ProgressLiveActivityManager.shared.updateStage(
-                                            nextStage: RouteStage.onBus.rawValue,
-                                            nextDestination: busnode.end.name,
-                                            totalDistance: 10,
-                                            remainingBusStops: proximityManager.remainingStations,
-                                            busTravelTime: busnode.travelTime
-                                        )
-                                        print("[DEBUG] BeforeRideView - onBus 업데이트, destination: \(busnode.end.name)")
+                                    Task { @MainActor in
+                                        coordinator.advanceJourneyStage()
+                                        
+                                        if let index = viewModel.index, let journey = viewModel.journey,
+                                           case let .bus(busnode) = journey.nodes[index] {
+                                            await ProgressLiveActivityManager.shared.updateStage(
+                                                nextStage: RouteStage.onBus.rawValue,
+                                                nextDestination: busnode.end.name,
+                                                totalDistance: 10,
+                                                remainingBusStops: proximityManager.remainingStations,
+                                                busTravelTime: busnode.travelTime
+                                            )
+                                            print("[DEBUG] BeforeRideView - onBus 업데이트, destination: \(busnode.end.name)")
+                                        }
                                     }
                                 } label: {
                                     Text("탔어요")
@@ -112,24 +114,25 @@ struct BeforeRideView: View {
                                 .padding(.bottom, 30.wScaled)
                             }
                             Button {
-                                
-                                //                                if viewModel.isArrivingSoon {
-                                // TODO: 활성화상태일때만 되도록 해야하는데 도착정보 없을 경우 예외처리 이슈 나중에 해결하기 전까지는 일단 비활성화 상태에서도 뷰전환되도록
-                                coordinator.advanceJourneyStage()
-                                
-                                if let index = viewModel.index, let journey = viewModel.journey,
-                                   case let .bus(busnode) = journey.nodes[index] {
-                                    ProgressLiveActivityManager.shared.updateStage(
-                                        nextStage: RouteStage.onBus.rawValue,
-                                        nextDestination: busnode.end.name,
-                                        totalDistance: 10,
-                                        remainingBusStops: proximityManager.remainingStations,
-                                        busTravelTime: busnode.travelTime
-                                    )
-                                    print("[DEBUG] BeforeRideView (두번째) - onBus 업데이트, destination: \(busnode.end.name)")
+                                Task { @MainActor in
+                                    //                                if viewModel.isArrivingSoon {
+                                    // TODO: 활성화상태일때만 되도록 해야하는데 도착정보 없을 경우 예외처리 이슈 나중에 해결하기 전까지는 일단 비활성화 상태에서도 뷰전환되도록
+                                    coordinator.advanceJourneyStage()
+                                    
+                                    if let index = viewModel.index, let journey = viewModel.journey,
+                                       case let .bus(busnode) = journey.nodes[index] {
+                                        await ProgressLiveActivityManager.shared.updateStage(
+                                            nextStage: RouteStage.onBus.rawValue,
+                                            nextDestination: busnode.end.name,
+                                            totalDistance: 10,
+                                            remainingBusStops: proximityManager.remainingStations,
+                                            busTravelTime: busnode.travelTime
+                                        )
+                                        print("[DEBUG] BeforeRideView (두번째) - onBus 업데이트, destination: \(busnode.end.name)")
+                                    }
+                                    viewModel.stopRefreshing()
+                                    //                                }
                                 }
-                                viewModel.stopRefreshing()
-                                //                                }
                             } label: {
                                 Text("탔어요")
                                     .font(.premed32)
@@ -145,19 +148,30 @@ struct BeforeRideView: View {
             }
         }
         .onAppear {
-            proximityManager.configure(busLegIndex: 0)
-            proximityManager.disableVoiceAnnouncement()
-            proximityManager.start()
-            
-            if let journey = viewModel.journey,
-               let index = viewModel.index,
-               case .bus(let busNode) = journey.nodes[index] {
-                viewModel.startRefreshing(for: busNode)
-            }
-            
-            print("[BeforeRideView] 정류장 추적 시작")
-            
-        }
+                    proximityManager.configure(busLegIndex: 0)
+                    proximityManager.disableVoiceAnnouncement()
+                    proximityManager.start()
+                    
+                    if let journey = viewModel.journey,
+                       let index = viewModel.index,
+                       case let .bus(busNode) = journey.nodes[index] { // let .bus(busNode)로 바인딩
+                        viewModel.startRefreshing(for: busNode)
+                        
+                        // Live Activity를 waitingForBus 단계로 업데이트하는 로직 추가
+                        Task {
+                            await ProgressLiveActivityManager.shared.updateStage(
+                                nextStage: "waitingForBus", // RouteStage.waitingForBus.rawValue
+                                nextDestination: busNode.start.name,  // 승차 정류장 이름
+                                totalDistance: 0,
+                                remainingBusStops: busNode.stations.count,
+                                busTravelTime: busNode.travelTime
+                            )
+                            print("[DEBUG] BeforeRideView - Live Activity waitingForBus 업데이트 완료. Destination: \(busNode.start.name)")
+                        }
+                    }
+                    
+                    print("[BeforeRideView] 정류장 추적 시작")
+                }
         .onDisappear {
             viewModel.endManager()
         }

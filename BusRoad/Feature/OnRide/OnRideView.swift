@@ -65,35 +65,41 @@ struct OnRideView: View {
                             case .bus(let busNode):
                                 // 다음 버스 기다리는 상태
                                 let boardingStopName = busNode.start.name
-                                ProgressLiveActivityManager.shared.updateStage(
-                                    nextStage: RouteStage.waitingForBus.rawValue,
-                                    nextDestination: boardingStopName,  
-                                    totalDistance: 0,
-                                    remainingBusStops: busNode.stations.count,
-                                    busTravelTime: busNode.travelTime
-                                )
+                                Task {
+                                    await ProgressLiveActivityManager.shared.updateStage(
+                                        nextStage: RouteStage.waitingForBus.rawValue,
+                                        nextDestination: boardingStopName,
+                                        totalDistance: 0,
+                                        remainingBusStops: busNode.stations.count,
+                                        busTravelTime: busNode.travelTime
+                                    )
+                                }
                                 print("[DEBUG] OnRideView - 환승 waitingForBus 업데이트, destination: \(boardingStopName)")
                                 
                             case .walk(let walkNode):
                                 if nextIndex == journey.nodes.count - 1 {
                                     // 마지막 도보 → 목적지
-                                    ProgressLiveActivityManager.shared.updateStage(
-                                        nextStage: RouteStage.walkingToDestination.rawValue,
-                                        nextDestination: walkNode.end.name,
-                                        totalDistance: Double(WalkingViewModel().tmapTotalDistance),
-                                        remainingBusStops: 0,
-                                        busTravelTime: 0
-                                    )
+                                    Task {
+                                        await ProgressLiveActivityManager.shared.updateStage(
+                                            nextStage: RouteStage.walkingToDestination.rawValue,
+                                            nextDestination: walkNode.end.name,
+                                            totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                            remainingBusStops: 0,
+                                            busTravelTime: 0
+                                        )
+                                    }
                                     print("[DEBUG] OnRideView - walkingToDestination 업데이트, destination: \(walkNode.end.name)")
                                 } else {
                                     // 환승을 위한 도보 → 다음 승차 정류장
-                                    ProgressLiveActivityManager.shared.updateStage(
-                                        nextStage: RouteStage.walkingToBus.rawValue,
-                                        nextDestination: walkNode.end.name,
-                                        totalDistance: Double(WalkingViewModel().tmapTotalDistance),
-                                        remainingBusStops: 0,
-                                        busTravelTime: 0
-                                    )
+                                    Task {
+                                        await ProgressLiveActivityManager.shared.updateStage(
+                                            nextStage: RouteStage.walkingToBus.rawValue,
+                                            nextDestination: walkNode.end.name,
+                                            totalDistance: Double(WalkingViewModel().tmapTotalDistance),
+                                            remainingBusStops: 0,
+                                            busTravelTime: 0
+                                        )
+                                    }
                                     print("[DEBUG] OnRideView - 환승 walkingToBus 업데이트, destination: \(walkNode.end.name)")
                                 }
                             }
