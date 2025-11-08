@@ -19,6 +19,12 @@ struct DevRouteMapView: UIViewRepresentable {
         map.isPitchEnabled = true
         map.isZoomEnabled = true
         map.isScrollEnabled = true
+        
+        // 살짝 더 입체감 있는 타일
+        let cfg = MKStandardMapConfiguration(elevationStyle: .realistic, emphasisStyle: .muted)
+        map.preferredConfiguration = cfg
+        map.showsBuildings = true
+        
         return map
     }
     
@@ -28,23 +34,28 @@ struct DevRouteMapView: UIViewRepresentable {
         if !tmapCoordinates.isEmpty {
             let poly = MKPolyline(coordinates: tmapCoordinates, count: tmapCoordinates.count)
             mapView.addOverlay(poly)
+            
             if context.coordinator.hasSetInitialRegion == false {
                 mapView.setVisibleMapRect(
                     poly.boundingMapRect,
                     edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50),
-                    animated: true
+                    animated: false
                 )
                 context.coordinator.hasSetInitialRegion = true
+                // 프레이밍이 끝난 "다음 프레임"에 피치만 주입 (거리/중심은 그대로)
+                context.coordinator.applyInitialPitchLater(on: mapView)
             }
         } else if let dest = destination, context.coordinator.hasSetInitialRegion == false {
-            // 경로가 없을 때만 목적지 핀을 간단히 표시
-            let region = MKCoordinateRegion(center: dest, latitudinalMeters: 900, longitudinalMeters: 900)
-            mapView.setRegion(region, animated: true)
+            mapView.setRegion(
+                MKCoordinateRegion(center: dest, latitudinalMeters: 900, longitudinalMeters: 900),
+                animated: false
+            )
             let ann = MKPointAnnotation()
             ann.coordinate = dest
             ann.title = "목적지"
             mapView.addAnnotation(ann)
             context.coordinator.hasSetInitialRegion = true
+            context.coordinator.applyInitialPitchLater(on: mapView)
         }
         
         // 사용자 puck 회전 갱신 (지도 카메라 회전 보정)
@@ -57,8 +68,10 @@ struct DevRouteMapView: UIViewRepresentable {
     final class Coordinator: NSObject, MKMapViewDelegate {
         var hasSetInitialRegion = false
         private weak var puckView: UserPuckView?
+        private let defaultPitch: CGFloat = 55
+        private var didInjectInitialPitch = false  // 초기 1회만 피치 주입
         
-        // 경로 렌더러
+        // 경로 렌더러 (경로 = 파랑)
         func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
             guard let poly = overlay as? MKPolyline else { return MKOverlayRenderer(overlay: overlay) }
             let r = MKPolylineRenderer(polyline: poly)
@@ -69,7 +82,7 @@ struct DevRouteMapView: UIViewRepresentable {
             return r
         }
         
-        // 사용자 위치만 커스텀. 그 외(목적지)는 기본 마커.
+        // 사용자 위치만 커스텀 puck 사용
         func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
             if annotation is MKUserLocation {
                 let id = "UserPuck"
@@ -85,42 +98,60 @@ struct DevRouteMapView: UIViewRepresentable {
             return nil
         }
         
-        // 지도가 회전하면 보정 필요
+        // 사용자가 손댄 후에도 “피치만” 살짝 유지하고, 축소 제한은 두지 않음
         func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+            if didInjectInitialPitch, mapView.camera.pitch < defaultPitch - 1 {
+                var cam = mapView.camera
+                cam.pitch = defaultPitch     // 거리/중심은 그대로 유지
+                mapView.setCamera(cam, animated: false)
+            }
             applyHeading(nil, on: mapView)
         }
         
-        // 기기 헤딩(옵션) + 지도 회전 보정 적용
+        /// 프레이밍이 완료된 다음 프레임에 피치만 주입 (거리/중심 유지)
+        func applyInitialPitchLater(on mapView: MKMapView) {
+            guard didInjectInitialPitch == false else { return }
+            didInjectInitialPitch = true
+            DispatchQueue.main.async {
+                var cam = mapView.camera
+                cam.pitch = self.defaultPitch
+                mapView.setCamera(cam, animated: false)
+                
+                // 줌 제한 제거
+                mapView.setCameraZoomRange(nil, animated: false)
+            }
+        }
+        
+        /// 기기 헤딩(옵션) + 지도 카메라 회전 보정 적용
         func applyHeading(_ deviceHeading: CLLocationDirection?, on mapView: MKMapView) {
             let mapHeading = mapView.camera.heading
             let dev = deviceHeading ?? 0
-            let visual = CGFloat((dev - mapHeading).truncatingRemainder(dividingBy: 360))
-            puckView?.setHeading(visualDegrees: visual)
+            var vis = (dev - mapHeading).truncatingRemainder(dividingBy: 360)
+            if vis < 0 { vis += 360 }
+            puckView?.setHeading(visualDegrees: CGFloat(vis))
         }
     }
 }
 
-// MARK: - SwiftUI로 그린 puck (원 + 위쪽 삼각형)
+// MARK: - SwiftUI로 그린 puck (원 + 위쪽 삼각형) — 경로색(파랑)과 통일
 private struct PuckGlyph: View {
     let diameter: CGFloat
     let arrowWidth: CGFloat
     let arrowHeight: CGFloat
     let gap: CGFloat
-
+    
     var body: some View {
         let totalH = diameter + gap + arrowHeight
         let totalW = max(diameter, arrowWidth)
-
+        
         ZStack {
-            // 원: 파랑 채움 + 흰색 테두리 (가독성)
+            // 원: 경로색(파랑) + 흰색 테두리
             Circle()
                 .fill(Color.blue)
                 .frame(width: diameter, height: diameter)
-                .overlay(
-                    Circle().stroke(Color.primarywhite, lineWidth: 2)
-                )
-
-            // 삼각형: 파랑
+                .overlay(Circle().stroke(Color.primarywhite, lineWidth: 2))
+            
+            // 삼각형: 경로색(파랑)
             ArrowUp()
                 .fill(Color.blue)
                 .overlay(ArrowUp().stroke(Color.primarywhite, lineWidth: 1))
@@ -148,11 +179,11 @@ private struct ArrowUp: Shape {
 private final class UserPuckView: MKAnnotationView {
     private var hosting: UIHostingController<PuckGlyph>?
     
-    // 디자인 파라미터 (필요시 숫자만 조절)
+    // 디자인 파라미터
     private let diameter: CGFloat = 22
     private let arrowWidth: CGFloat = 10
     private let arrowHeight: CGFloat = 8
-    private let gap: CGFloat = 12   // 원 밖으로 살짝 띄우는 간격
+    private let gap: CGFloat = 12
     
     override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
         super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
@@ -181,19 +212,15 @@ private final class UserPuckView: MKAnnotationView {
         host.view.frame = bounds
         addSubview(host.view)
         hosting = host
-        
-        // 부드러운 그림자
-        layer.shadowColor = UIColor.black.cgColor
-        layer.shadowOpacity = 0.25
-        layer.shadowRadius = 2
-        layer.shadowOffset = CGSize(width: 0, height: 1)
     }
     
     /// 북(0°) 기준 시계방향. 지도 카메라 보정 포함 각도.
     func setHeading(visualDegrees: CGFloat) {
         let rad = visualDegrees * .pi / 180
-        hosting?.view.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-        hosting?.view.layer.position = CGPoint(x: bounds.midX, y: bounds.midY)
-        hosting?.view.transform = CGAffineTransform(rotationAngle: rad)
+        if let hostingView = hosting?.view {
+            hostingView.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
+            hostingView.layer.position = CGPoint(x: bounds.midX, y: bounds.midY)
+            hostingView.transform = CGAffineTransform(rotationAngle: rad)
+        }
     }
 }
