@@ -54,15 +54,13 @@ struct VerifyingStop: View {
                             )
                         }
                     } label: {
-                        ZStack{
-                            Rectangle()
-                                .cornerRadius(20)
-                                .foregroundColor(.subPoint)
-                                .frame(width: 240.wScaled, height: 75.wScaled)
-                            Text("맞아요")
-                                .font(.premed32Scaled)
-                                .foregroundColor(.subLight)
-                        }
+                        
+                        Text("맞아요")
+                            .foregroundColor(Color.subLight)
+                            .font(.premed32)
+                            .frame(width: 305.wScaled, height: 64)
+                            .background(Color.subPoint)
+                            .cornerRadius(20)
                     }
                     Spacer()
                 }
