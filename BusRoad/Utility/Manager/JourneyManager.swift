@@ -13,7 +13,7 @@ final class JourneyManager: ObservableObject {
     
     static let shared = JourneyManager()    // singleton manager
     
-    let locationService = LocationService()
+    private let locationService = LocationService.shared
     
     private init() { }  // 무한 호출 방지
     
@@ -34,16 +34,19 @@ final class JourneyManager: ObservableObject {
     }
     
     func warmUpLocation() { // 첫뷰에서 단 한 번만 호출
-        print("[DEBUG] warmUpLocation")
+        print("[DEBUG] warmUpLocation started")
         Task { @MainActor in
             do {
-                let loc = try await locationService.requestOneShotLocation()
-                self.firstLoadedLocation =
-                LocationInfo(
+                // ✅ 타임아웃 늘림
+                let loc = try await locationService.requestOneShotLocation(timeout: 10)
+                self.firstLoadedLocation = LocationInfo(
                     name: "현위치",
-                    latitude:  loc.coordinate.latitude,
+                    latitude: loc.coordinate.latitude,
                     longitude: loc.coordinate.longitude
                 )
+                print("[DEBUG] warmUpLocation 성공")
+            } catch {
+                print("[DEBUG] warmUpLocation 실패: \(error.localizedDescription)")
             }
         }
     }
@@ -54,6 +57,7 @@ final class JourneyManager: ObservableObject {
                 print("[DEBUG] firstLoadedLocation is used")
                 setOrigin(firstLoadedLocation)
             } else {
+                print("[DEBUG] firstLoadedLocation 없음 - requestOrigin 호출")
                 requestOrigin()
             }
             self.firstLoadedLocationUsed = true  // 이제 쓸 일 없음
@@ -63,12 +67,13 @@ final class JourneyManager: ObservableObject {
     func requestOrigin() {
         Task { @MainActor in
             do {
-                let loc = try await locationService.requestOneShotLocation()
-                print("[DEBUG] 현재 위치 저장")
+                // 캐시 우선 사용 (10분까지 허용)
+                let loc = try await locationService.getQuickLocation(maxAge: 600)
+                print("[DEBUG] 현재 위치 저장 (캐시 사용 가능)")
                 self.setOrigin(
                     LocationInfo(
                         name: "현위치",
-                        latitude:  loc.coordinate.latitude,
+                        latitude: loc.coordinate.latitude,
                         longitude: loc.coordinate.longitude
                     )
                 )

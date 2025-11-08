@@ -66,7 +66,12 @@ struct MainSearchView: View {
         .animation(nil, value: viewModel.query)
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
-        .onAppear {   // GPS 하드웨어 웜업용
+        .onAppear {
+            Task {
+                try? await LocationService.shared.startBackgroundTracking()
+            }
+            
+            // GPS 하드웨어 웜업용
             viewModel.warmUpLocation()
             ProgressLiveActivityManager.shared.endActivity()
         }
