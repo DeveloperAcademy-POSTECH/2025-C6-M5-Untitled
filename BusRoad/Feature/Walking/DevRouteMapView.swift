@@ -1,226 +1,193 @@
-import MapKit
 import SwiftUI
+import MapKit
+import Combine
 
-struct DevRouteMapView: UIViewRepresentable {
+@available(iOS 17.0, *)
+struct DevRouteMapView: View {
+    // Inputs
     let tmapCoordinates: [CLLocationCoordinate2D]
     let userLocation: CLLocation?
     let destination: CLLocationCoordinate2D?
-    let deviceHeading: CLLocationDirection?
-    
-    func makeUIView(context: Context) -> MKMapView {
-        let map = MKMapView()
-        map.delegate = context.coordinator
-        map.showsUserLocation = true
-        map.userTrackingMode = .none
-        
-        map.mapType = .standard
-        map.showsCompass = true
-        map.isRotateEnabled = true
-        map.isPitchEnabled = true
-        map.isZoomEnabled = true
-        map.isScrollEnabled = true
-        
-        // 살짝 더 입체감 있는 타일
-        let cfg = MKStandardMapConfiguration(elevationStyle: .realistic, emphasisStyle: .muted)
-        map.preferredConfiguration = cfg
-        map.showsBuildings = true
-        
-        return map
+    let deviceHeading: CLLocationDirection?   // 0...360 (북=0°, 시계방향)
+
+    // Camera state
+    @State private var camera: MapCameraPosition = .automatic
+    @State private var didSetInitialCamera = false
+
+    // Puck (ground-attached) geometry in meters
+    private let circleRadius: CLLocationDistance = 6
+    private let arrowGap: CLLocationDistance    = 2
+    private let arrowLength: CLLocationDistance = 6   // smaller triangle
+    private let arrowWidth: CLLocationDistance  = 6
+
+    // Colors (replace with your palette if you want)
+    private let routeColor: Color  = .blue
+    private let strokeColor: Color = .primarywhite
+
+    // Smooth heading (adaptive)
+    @State private var smoothHeading: Double = 0      // drawn angle
+    @State private var targetHeading: Double = 0      // incoming device angle (normalized)
+
+    private let fps: Double     = 60
+    private let baseAlpha: Double = 0.32   // minimum follow speed
+    private let maxAlpha:  Double = 0.85   // speed for large turns
+
+    var body: some View {
+        Map(position: $camera) {
+            // 1) Route polyline
+            if !tmapCoordinates.isEmpty {
+                MapPolyline(coordinates: tmapCoordinates)
+                    .stroke(routeColor, lineWidth: 5)
+            }
+
+            // 2) Destination marker (simple) when no route
+            if let dest = destination, tmapCoordinates.isEmpty {
+                Marker("목적지", coordinate: dest)
+            }
+
+            // 3) Ground-attached current location puck (circle + triangle)
+            if let loc = userLocation {
+                let puck = puckGeometry(center: loc.coordinate,
+                                        heading: smoothHeading, // smoothed
+                                        r: circleRadius,
+                                        gap: arrowGap,
+                                        len: arrowLength,
+                                        w: arrowWidth)
+
+                MapCircle(center: puck.center, radius: circleRadius)
+                    .foregroundStyle(routeColor)
+                    .stroke(strokeColor, lineWidth: 2)
+
+                MapPolygon(coordinates: puck.triangle)
+                    .foregroundStyle(routeColor)
+                    .stroke(strokeColor, lineWidth: 1)
+            }
+        }
+        .mapControls {
+            MapCompass()
+            MapPitchToggle()
+            MapScaleView()
+        }
+        .task {
+            // Initial camera
+            if didSetInitialCamera == false {
+                setInitialCamera()
+                didSetInitialCamera = true
+            }
+            // Initialize heading
+            let initHead = normalizeDeg(deviceHeading ?? 0)
+            targetHeading = initHead
+            smoothHeading = initHead
+        }
+        // Reframe on route change (CLLocationCoordinate2D != Equatable → watch count)
+        .onChange(of: tmapCoordinates.count) { _, _ in
+            setInitialCamera()
+        }
+        // Update target heading when deviceHeading changes
+        .onChange(of: deviceHeading) { _, newValue in
+            let new = normalizeDeg(newValue ?? targetHeading)
+            targetHeading = new
+        }
+        // 60fps adaptive smoothing (no heavy work each tick)
+        .onReceive(Timer.publish(every: 1.0 / fps, on: .main, in: .common).autoconnect()) { _ in
+            let delta = shortestDelta(from: smoothHeading, to: targetHeading)
+            if abs(delta) < 0.05 {
+                smoothHeading = targetHeading
+                return
+            }
+            let alpha = adaptiveAlpha(for: delta)
+            smoothHeading = normalizeDeg(smoothHeading + delta * alpha)
+        }
     }
-    
-    func updateUIView(_ mapView: MKMapView, context: Context) {
-        // 경로 갱신
-        mapView.removeOverlays(mapView.overlays)
+
+    // MARK: - Camera
+
+    private func setInitialCamera() {
         if !tmapCoordinates.isEmpty {
             let poly = MKPolyline(coordinates: tmapCoordinates, count: tmapCoordinates.count)
-            mapView.addOverlay(poly)
-            
-            if context.coordinator.hasSetInitialRegion == false {
-                mapView.setVisibleMapRect(
-                    poly.boundingMapRect,
-                    edgePadding: UIEdgeInsets(top: 50, left: 50, bottom: 50, right: 50),
-                    animated: false
-                )
-                context.coordinator.hasSetInitialRegion = true
-                // 프레이밍이 끝난 "다음 프레임"에 피치만 주입 (거리/중심은 그대로)
-                context.coordinator.applyInitialPitchLater(on: mapView)
-            }
-        } else if let dest = destination, context.coordinator.hasSetInitialRegion == false {
-            mapView.setRegion(
-                MKCoordinateRegion(center: dest, latitudinalMeters: 900, longitudinalMeters: 900),
-                animated: false
-            )
-            let ann = MKPointAnnotation()
-            ann.coordinate = dest
-            ann.title = "목적지"
-            mapView.addAnnotation(ann)
-            context.coordinator.hasSetInitialRegion = true
-            context.coordinator.applyInitialPitchLater(on: mapView)
-        }
-        
-        // 사용자 puck 회전 갱신 (지도 카메라 회전 보정)
-        context.coordinator.applyHeading(deviceHeading, on: mapView)
-    }
-    
-    func makeCoordinator() -> Coordinator { Coordinator() }
-    
-    // MARK: - Coordinator
-    final class Coordinator: NSObject, MKMapViewDelegate {
-        var hasSetInitialRegion = false
-        private weak var puckView: UserPuckView?
-        private let defaultPitch: CGFloat = 55
-        private var didInjectInitialPitch = false  // 초기 1회만 피치 주입
-        
-        // 경로 렌더러 (경로 = 파랑)
-        func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-            guard let poly = overlay as? MKPolyline else { return MKOverlayRenderer(overlay: overlay) }
-            let r = MKPolylineRenderer(polyline: poly)
-            r.strokeColor = .systemBlue
-            r.lineWidth = 5
-            r.lineCap = .round
-            r.lineJoin = .round
-            return r
-        }
-        
-        // 사용자 위치만 커스텀 puck 사용
-        func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-            if annotation is MKUserLocation {
-                let id = "UserPuck"
-                var view = mapView.dequeueReusableAnnotationView(withIdentifier: id) as? UserPuckView
-                if view == nil {
-                    view = UserPuckView(annotation: annotation, reuseIdentifier: id)
-                } else {
-                    view?.annotation = annotation
-                }
-                puckView = view
-                return view
-            }
-            return nil
-        }
-        
-        // 사용자가 손댄 후에도 “피치만” 살짝 유지하고, 축소 제한은 두지 않음
-        func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-            if didInjectInitialPitch, mapView.camera.pitch < defaultPitch - 1 {
-                var cam = mapView.camera
-                cam.pitch = defaultPitch     // 거리/중심은 그대로 유지
-                mapView.setCamera(cam, animated: false)
-            }
-            applyHeading(nil, on: mapView)
-        }
-        
-        /// 프레이밍이 완료된 다음 프레임에 피치만 주입 (거리/중심 유지)
-        func applyInitialPitchLater(on mapView: MKMapView) {
-            guard didInjectInitialPitch == false else { return }
-            didInjectInitialPitch = true
-            DispatchQueue.main.async {
-                var cam = mapView.camera
-                cam.pitch = self.defaultPitch
-                mapView.setCamera(cam, animated: false)
-                
-                // 줌 제한 제거
-                mapView.setCameraZoomRange(nil, animated: false)
-            }
-        }
-        
-        /// 기기 헤딩(옵션) + 지도 카메라 회전 보정 적용
-        func applyHeading(_ deviceHeading: CLLocationDirection?, on mapView: MKMapView) {
-            let mapHeading = mapView.camera.heading
-            let dev = deviceHeading ?? 0
-            var vis = (dev - mapHeading).truncatingRemainder(dividingBy: 360)
-            if vis < 0 { vis += 360 }
-            puckView?.setHeading(visualDegrees: CGFloat(vis))
-        }
-    }
-}
+            let rect = poly.boundingMapRect
+            let region = MKCoordinateRegion(rect)
+            let center = region.center
+            let distance = estimatedDistance(for: rect)
 
-// MARK: - SwiftUI로 그린 puck (원 + 위쪽 삼각형) — 경로색(파랑)과 통일
-private struct PuckGlyph: View {
-    let diameter: CGFloat
-    let arrowWidth: CGFloat
-    let arrowHeight: CGFloat
-    let gap: CGFloat
-    
-    var body: some View {
-        let totalH = diameter + gap + arrowHeight
-        let totalW = max(diameter, arrowWidth)
-        
-        ZStack {
-            // 원: 경로색(파랑) + 흰색 테두리
-            Circle()
-                .fill(Color.blue)
-                .frame(width: diameter, height: diameter)
-                .overlay(Circle().stroke(Color.primarywhite, lineWidth: 2))
-            
-            // 삼각형: 경로색(파랑)
-            ArrowUp()
-                .fill(Color.blue)
-                .overlay(ArrowUp().stroke(Color.primarywhite, lineWidth: 1))
-                .frame(width: arrowWidth, height: arrowHeight)
-                .offset(y: -(diameter/2 + gap) + arrowHeight/2)
+            camera = .camera(MapCamera(centerCoordinate: center,
+                                       distance: distance,
+                                       heading: 0,
+                                       pitch: 55))
+        } else if let dest = destination {
+            camera = .camera(MapCamera(centerCoordinate: dest,
+                                       distance: 900,
+                                       heading: 0,
+                                       pitch: 55))
         }
-        .frame(width: totalW, height: totalH)
-        .shadow(color: Color.black.opacity(0.25), radius: 2, x: 0, y: 1)
     }
-}
 
-private struct ArrowUp: Shape {
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let midX = rect.midX
-        p.move(to: CGPoint(x: midX, y: rect.minY))
-        p.addLine(to: CGPoint(x: midX - rect.width/2, y: rect.maxY))
-        p.addLine(to: CGPoint(x: midX + rect.width/2, y: rect.maxY))
-        p.closeSubpath()
-        return p
+    private func estimatedDistance(for rect: MKMapRect) -> CLLocationDistance {
+        let midPoint = MKMapPoint(x: rect.midX, y: rect.midY)
+        let midCoord = midPoint.coordinate
+        let ppm = MKMapPointsPerMeterAtLatitude(midCoord.latitude)
+        let widthMeters  = rect.size.width  / ppm
+        let heightMeters = rect.size.height / ppm
+        let maxSide = max(widthMeters, heightMeters)
+        // padding & clamp
+        return max(600, min(maxSide * 1.4, 8000))
     }
-}
 
-// MARK: - MKAnnotationView hosting SwiftUI puck
-private final class UserPuckView: MKAnnotationView {
-    private var hosting: UIHostingController<PuckGlyph>?
-    
-    // 디자인 파라미터
-    private let diameter: CGFloat = 22
-    private let arrowWidth: CGFloat = 10
-    private let arrowHeight: CGFloat = 8
-    private let gap: CGFloat = 12
-    
-    override init(annotation: MKAnnotation?, reuseIdentifier: String?) {
-        super.init(annotation: annotation, reuseIdentifier: reuseIdentifier)
-        setup()
+    // MARK: - Heading smoothing
+
+    private func normalizeDeg(_ x: Double) -> Double {
+        var v = x.truncatingRemainder(dividingBy: 360)
+        if v < 0 { v += 360 }
+        return v
     }
-    required init?(coder: NSCoder) { super.init(coder: coder); setup() }
-    
-    private func setup() {
-        let totalH = diameter + gap + arrowHeight
-        let totalW = max(diameter, arrowWidth)
-        
-        bounds = CGRect(x: 0, y: 0, width: totalW, height: totalH)
-        centerOffset = .zero
-        displayPriority = .required
-        collisionMode = .circle
-        clipsToBounds = false
-        
-        let glyph = PuckGlyph(
-            diameter: diameter,
-            arrowWidth: arrowWidth,
-            arrowHeight: arrowHeight,
-            gap: gap
-        )
-        let host = UIHostingController(rootView: glyph)
-        host.view.backgroundColor = .clear
-        host.view.frame = bounds
-        addSubview(host.view)
-        hosting = host
+
+    /// a→b shortest turn in [-180, 180]
+    private func shortestDelta(from a: Double, to b: Double) -> Double {
+        let d = (b - a).truncatingRemainder(dividingBy: 360)
+        if d > 180 { return d - 360 }
+        if d < -180 { return d + 360 }
+        return d
     }
-    
-    /// 북(0°) 기준 시계방향. 지도 카메라 보정 포함 각도.
-    func setHeading(visualDegrees: CGFloat) {
-        let rad = visualDegrees * .pi / 180
-        if let hostingView = hosting?.view {
-            hostingView.layer.anchorPoint = CGPoint(x: 0.5, y: 0.5)
-            hostingView.layer.position = CGPoint(x: bounds.midX, y: bounds.midY)
-            hostingView.transform = CGAffineTransform(rotationAngle: rad)
+
+    /// Larger delta → faster follow, small jitter → softer
+    private func adaptiveAlpha(for delta: Double) -> Double {
+        let norm = min(abs(delta) / 90.0, 1.0)     // normalize to [0,1] with ±90° ref
+        return baseAlpha + (maxAlpha - baseAlpha) * norm
+    }
+
+    // MARK: - Ground puck geometry (in map coordinates)
+
+    private func puckGeometry(center: CLLocationCoordinate2D,
+                              heading: CLLocationDirection,
+                              r: CLLocationDistance,
+                              gap: CLLocationDistance,
+                              len: CLLocationDistance,
+                              w: CLLocationDistance) -> (center: CLLocationCoordinate2D,
+                                                         triangle: [CLLocationCoordinate2D]) {
+        // heading: north=0°, clockwise(+)
+        let rad = heading * .pi / 180
+
+        // forward (east/north)
+        let fx = sin(rad)
+        let fy = cos(rad)
+        // left perpendicular
+        let lx = -fy
+        let ly =  fx
+
+        // Offset helper in meters (east, north)
+        func offset(from origin: CLLocationCoordinate2D, east: Double, north: Double) -> CLLocationCoordinate2D {
+            let R = 6_378_137.0
+            let dLat = north / R * 180.0 / .pi
+            let dLon = east  / (R * cos(origin.latitude * .pi / 180.0)) * 180.0 / .pi
+            return .init(latitude: origin.latitude + dLat, longitude: origin.longitude + dLon)
         }
+
+        // Triangle points
+        let baseCenter = offset(from: center, east: (r + gap) * fx, north: (r + gap) * fy)
+        let tip        = offset(from: center, east: (r + gap + len) * fx, north: (r + gap + len) * fy)
+        let leftBase   = offset(from: baseCenter, east: (w / 2) * lx, north: (w / 2) * ly)
+        let rightBase  = offset(from: baseCenter, east: -(w / 2) * lx, north: -(w / 2) * ly)
+
+        return (center, [tip, leftBase, rightBase])
     }
 }
