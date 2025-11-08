@@ -1,12 +1,5 @@
-//
-//  Untitled.swift
-//  BusRoad
-//
-//  Created by 박난 on 9/23/25.
-//
-
-import MapKit
 import SwiftUI
+import MapKit
 
 struct WalkingView: View {
     @ObservedObject var viewModel = WalkingViewModel()
@@ -14,11 +7,9 @@ struct WalkingView: View {
     
     var body: some View {
         ZStack {
-            Color(.primarywhite)
-                .ignoresSafeArea()
+            Color(.primarywhite).ignoresSafeArea()
             
             VStack(spacing: 0){
-                
                 VStack(spacing: 0) {
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
@@ -41,19 +32,14 @@ struct WalkingView: View {
                 LineDivider()
                 
                 ZStack {
-                    Color(.background)
-                        .ignoresSafeArea()
-                    
+                    Color(.background).ignoresSafeArea()
                     VStack {
                         if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                             if viewModel.arrived {
                                 AtArrival(journey: journey, index: index, viewModel: viewModel)
                             } else {
                                 ToDestination(vm:viewModel, journey: journey, index: index)
-                                
                                 Spacer()
-                                
-                                
                                 Button {
                                     viewModel.showAlert = true
                                 } label: {
@@ -69,7 +55,6 @@ struct WalkingView: View {
                                             .underline()
                                     }
                                 }
-                                
                             }
                         }
                     }
@@ -78,9 +63,7 @@ struct WalkingView: View {
             
             // 맵뷰 버튼
             VStack {
-                Spacer()    // 높이 144(고정) + 120.wScaled(변동)
-                    .frame(height: 144 + 120.wScaled)
-                    
+                Spacer().frame(height: 144 + 120.wScaled) // 높이 144(고정) + 120.wScaled(변동)
                 HStack {
                     Spacer()
                     Button {
@@ -95,8 +78,7 @@ struct WalkingView: View {
                                 UnevenRoundedRectangle(
                                     topLeadingRadius: 10,
                                     bottomLeadingRadius: 10
-                                )
-                                .fill(Color.subStrong)
+                                ).fill(Color.subStrong)
                             )
                     }
                 }
@@ -104,7 +86,39 @@ struct WalkingView: View {
             }
             .overlay {
                 if let journey = viewModel.journey, let index = viewModel.journeyIndex {
-                    WalkingAlert(isPresented: $viewModel.showAlert, viewModel: viewModel, journey: journey, index: index)
+                    WalkingAlert(isPresented: $viewModel.showAlert,
+                                 viewModel: viewModel,
+                                 journey: journey,
+                                 index: index)
+                }
+            }
+            
+            if viewModel.isRerouting {
+                Color.black.opacity(0.25).ignoresSafeArea()
+                VStack(spacing: 12) {
+                    ProgressView()
+                    Text("경로 재탐색 중…")
+                        .font(.callout)
+                        .foregroundColor(.white)
+                }
+                .padding(16)
+                .background(Color.black.opacity(0.6))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+        }
+        .overlay(alignment: .center) {
+            Group {
+                if let journey = viewModel.journey,
+                   let index = viewModel.journeyIndex,
+                   viewModel.showRerouteAlert {
+                    WalkingRerouteAlert(
+                        isPresented: $viewModel.showRerouteAlert,
+                        viewModel: viewModel,
+                        journey: journey,
+                        index: index
+                    )
+                } else {
+                    EmptyView()
                 }
             }
         }
