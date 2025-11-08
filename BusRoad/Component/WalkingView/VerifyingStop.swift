@@ -45,24 +45,25 @@ struct VerifyingStop: View {
                         showVerifyingStop = false
                         
                         if case let .bus(busnode) = journey.nodes[index + 1] {
+                            let boardingStopName = busnode.start.name  // 승차 정류장
+
                             ProgressLiveActivityManager.shared.updateStage(
                                 nextStage: RouteStage.waitingForBus.rawValue,
-                                nextDestination: busnode.end.name,
+                                nextDestination: boardingStopName,   
                                 totalDistance: 0,
                                 remainingBusStops: busnode.stations.count,
                                 busTravelTime: busnode.travelTime
                             )
+                            print("[DEBUG] VerifyingStop - waitingForBus 업데이트, destination: \(boardingStopName)")
                         }
                     } label: {
-                        ZStack{
-                            Rectangle()
-                                .cornerRadius(20)
-                                .foregroundColor(.subPoint)
-                                .frame(width: 240.wScaled, height: 75.wScaled)
-                            Text("맞아요")
-                                .font(.premed32Scaled)
-                                .foregroundColor(.subLight)
-                        }
+                        
+                        Text("맞아요")
+                            .foregroundColor(Color.subLight)
+                            .font(.premed32)
+                            .frame(width: 305.wScaled, height: 64)
+                            .background(Color.subPoint)
+                            .cornerRadius(20)
                     }
                     Spacer()
                 }

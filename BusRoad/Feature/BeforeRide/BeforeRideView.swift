@@ -83,6 +83,7 @@ struct BeforeRideView: View {
                                             remainingBusStops: proximityManager.remainingStations,
                                             busTravelTime: busnode.travelTime
                                         )
+                                        print("[DEBUG] BeforeRideView - onBus 업데이트, destination: \(busnode.end.name)")
                                     }
                                 } label: {
                                     Text("탔어요")
@@ -125,6 +126,7 @@ struct BeforeRideView: View {
                                         remainingBusStops: proximityManager.remainingStations,
                                         busTravelTime: busnode.travelTime
                                     )
+                                    print("[DEBUG] BeforeRideView (두번째) - onBus 업데이트, destination: \(busnode.end.name)")
                                 }
                                 viewModel.stopRefreshing()
                                 //                                }
@@ -161,4 +163,3 @@ struct BeforeRideView: View {
         }
     }
 }
-

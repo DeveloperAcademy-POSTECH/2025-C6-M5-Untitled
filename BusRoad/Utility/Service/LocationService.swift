@@ -12,6 +12,8 @@ import Foundation
 @MainActor
 final class LocationService: NSObject, ObservableObject, CLLocationManagerDelegate {
     
+    static let shared = LocationService()
+
     // Errors
     enum LocationError: LocalizedError {
         case servicesDisabled
@@ -46,7 +48,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         self.authorizationStatus = manager.authorizationStatus
         super.init()
         manager.delegate = self
-        manager.desiredAccuracy = kCLLocationAccuracyNearestTenMeters
+        manager.desiredAccuracy = kCLLocationAccuracyBest
         
         // 백그라운드 업데이트 허용
         manager.allowsBackgroundLocationUpdates = true
@@ -122,6 +124,40 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     func requestOneShotCoordinate(timeout seconds: TimeInterval = 5) async throws -> CLLocationCoordinate2D {
         let loc = try await requestOneShotLocation(timeout: seconds)
         return loc.coordinate
+    }
+    
+    // 캐시 우선 빠른 위치 가져오기
+    func getQuickLocation(maxAge: TimeInterval = 300) async throws -> CLLocation {
+        // 최근 위치가 있으면 즉시 반환
+        if let cached = location,
+           Date().timeIntervalSince(cached.timestamp) < maxAge {
+            print("[LocationService] 캐시된 위치 사용 (나이: \(Int(Date().timeIntervalSince(cached.timestamp)))초)")
+            return cached
+        }
+        
+        // 캐시 없으면 새로 요청 (타임아웃 늘림)
+        print("[LocationService] 새 위치 요청")
+        return try await requestOneShotLocation(timeout: 10)
+    }
+    
+    // 좌표만 필요한 경우
+    func getQuickCoordinate(maxAge: TimeInterval = 300) async throws -> CLLocationCoordinate2D {
+        let loc = try await getQuickLocation(maxAge: maxAge)
+        return loc.coordinate
+    }
+    
+    // 앱 시작 시 백그라운드 트래킹 시작
+    func startLightTracking() async throws {
+        try await requestWhenInUseAuthorizationIfNeeded()
+        
+        manager.distanceFilter = 100  // 100m마다 업데이트
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        manager.allowsBackgroundLocationUpdates = false  // 백그라운드 끄기
+        manager.pausesLocationUpdatesAutomatically = true  // 자동 일시정지
+        manager.activityType = .otherNavigation  // 네비게이션 최적화
+        
+        manager.startUpdatingLocation()
+        print("[LocationService] 백그라운드 트래킹 시작 (포그라운드 전용)")
     }
     
     // MARK: - CLLocationManagerDelegate

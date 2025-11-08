@@ -26,13 +26,15 @@ struct RouteSelectButton: View {
                         if let firstNode = selectedJourney.nodes.first {
                             switch firstNode {
                             case .walk(let walkNode):
+                                // 수정: walkNode.end.name은 승차 정류장 이름
                                 ProgressLiveActivityManager.shared.startActivity(
                                     totalDistance: Double(WalkingViewModel().tmapTotalDistance),
                                     stage: RouteStage.walkingToBus.rawValue,
-                                    destination: walkNode.end.name,
+                                    destination: walkNode.end.name,  // 승차 정류장 이름
                                     remainingBusStops: 0,
                                     busTravelTime: 0
                                 )
+                                print("[DEBUG] Live Activity 시작 - walkingToBus, destination: \(walkNode.end.name)")
                             case .bus(let busNode):
                                 let destinationName = selectedJourney.busSegments.first?.end.name ?? "목적지"
                                 ProgressLiveActivityManager.shared.startActivity(
@@ -42,6 +44,7 @@ struct RouteSelectButton: View {
                                     remainingBusStops: busNode.stations.count,
                                     busTravelTime: busNode.travelTime
                                 )
+                                print("[DEBUG] Live Activity 시작 - waitingForBus, destination: \(destinationName)")
                             }
                         }
                     }

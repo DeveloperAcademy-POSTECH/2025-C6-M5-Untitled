@@ -11,7 +11,7 @@ import SwiftUI
 struct BusRoadApp: App {
     @StateObject var coordinator = NavigationCoordinator()
     @StateObject private var proximityManager = AlightProximityManager(
-            locationService: LocationService(),
+        locationService: LocationService.shared,
             journeyManager: JourneyManager.shared,
             voiceManager: VoiceAnnouncementManager()
         )

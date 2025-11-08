@@ -45,22 +45,6 @@ final class ProgressLiveActivityManager {
         }
     }
     
-    private func splitTextToFit(text: String, maxCharactersPerLine: Int) -> String {
-        guard text.count > maxCharactersPerLine else {
-            return text // 1줄이면 그대로 반환
-        }
-        
-        // 최대 문자 수까지 문자열을 자릅니다.
-        let index = text.index(text.startIndex, offsetBy: maxCharactersPerLine)
-        let firstLine = String(text[..<index])
-        let remainingText = String(text[index...])
-        
-        // 두 번째 줄의 시작 공백 제거
-        let trimmedRemainingText = remainingText.drop { $0.isWhitespace }
-        return "\(firstLine)\n\(trimmedRemainingText)"
-    }
-    
-    
     static func description(for stage: String, destination: String) -> String {
         
         let baseText: String
@@ -75,10 +59,26 @@ final class ProgressLiveActivityManager {
             return ""
         }
         
-        let manager = ProgressLiveActivityManager.shared
-        let adjustedText = manager.splitTextToFit(text: baseText, maxCharactersPerLine: 17)
+        // splitTextToFit을 static 함수로 변경하여 호출
+        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: 17)
         
         return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
+    }
+    
+    // static 함수로 변경
+    private static func splitTextToFit(text: String, maxCharactersPerLine: Int) -> String {
+        guard text.count > maxCharactersPerLine else {
+            return text // 1줄이면 그대로 반환
+        }
+        
+        // 최대 문자 수까지 문자열을 자릅니다.
+        let index = text.index(text.startIndex, offsetBy: maxCharactersPerLine)
+        let firstLine = String(text[..<index])
+        let remainingText = String(text[index...])
+        
+        // 두 번째 줄의 시작 공백 제거
+        let trimmedRemainingText = remainingText.drop { $0.isWhitespace }
+        return "\(firstLine)\n\(trimmedRemainingText)"
     }
     
     static func subDescription(for stage: String, leftDistance: Double, remainingBusStops: Int, busTravelTime: Int) -> String {
@@ -177,76 +177,68 @@ final class ProgressLiveActivityManager {
         }
     }
     
-    func updateStage(nextStage: String, nextDestination: String, totalDistance: Double, remainingBusStops: Int, busTravelTime: Int) {
+    func updateStage(
+        nextStage: String,
+        nextDestination: String,
+        totalDistance: Double,
+        remainingBusStops: Int,
+        busTravelTime: Int
+    ) {
         let timestamp = Date().timeIntervalSince1970
         print("[단계변경 \(String(format: "%.3f", timestamp))] 호출됨 - nextStage: \(nextStage), destination: \(nextDestination)")
-        
-        // 업데이트 중이면 저장하고 대기
-        if isStageUpdating {
-            print("[단계변경 \(String(format: "%.3f", timestamp))] 대기 중 - pendingStageUpdate에 저장")
-            pendingStageUpdate = (nextStage, nextDestination, totalDistance, remainingBusStops, busTravelTime)
-            return
-        }
-        
-        isStageUpdating = true
-        
-        
+
+        // 활성화된 Live Activity 확인
         guard let activity = Activity<ProgressAttributes>.activities.first else {
             print("[LiveActivity] No active activity found")
-            isStageUpdating = false
             return
         }
-        
+
+        // 내부 static 상태 업데이트
         Self.remainingBusStops = remainingBusStops
         Self.destination = nextDestination
         Self.totalDistance = totalDistance
         Self.busTravelTime = busTravelTime
-        
+        Self.leftDistance = totalDistance  // leftDistance도 초기화
+
+        // 현재 단계에 맞는 설명 텍스트
         let subDescription = Self.subDescription(
             for: nextStage,
             leftDistance: totalDistance,
             remainingBusStops: remainingBusStops,
             busTravelTime: busTravelTime
         )
+
+        // 기존 state 기반으로 필요한 값만 교체
+        var updatedState = activity.content.state
         
-        print("[단계변경 \(String(format: "%.3f", timestamp))] 0.5초 대기 시작...")
+        print("[DEBUG updateStage] 이전 state - stage: \(updatedState.stage), destination: \(updatedState.destination)")
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            let afterTimestamp = Date().timeIntervalSince1970
-            let delayActual = afterTimestamp - timestamp
-            
-            var updatedState = activity.content.state
-            updatedState.stage = nextStage
-            updatedState.destination = nextDestination
-            updatedState.remainingBusStops = remainingBusStops
-            updatedState.busProgress = 0
-            updatedState.totalDistance = totalDistance
-            updatedState.subDescription = subDescription
-            updatedState.busTravelTime = busTravelTime
-            updatedState.maxProgressValue = 0
-            updatedState.currentProgressValue = 0
-            
-            Task {
-                await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-                print("[단계변경 \(String(format: "%.3f", timestamp))] 업데이트 성공 - 새 단계: \(nextStage)")
-                self.isStageUpdating = false
-                print("[단계변경 \(String(format: "%.3f", timestamp))] 잠금 해제 (성공)")
-                
-                // 대기 중인 업데이트 처리
-                if let pending = self.pendingStageUpdate {
-                    print("[대기된 업데이트] 처리 시작 - stage: \(pending.nextStage)")
-                    self.pendingStageUpdate = nil
-                    self.updateStage(
-                        nextStage: pending.nextStage,
-                        nextDestination: pending.nextDestination,
-                        totalDistance: pending.totalDistance,
-                        remainingBusStops: pending.remainingBusStops,
-                        busTravelTime: pending.busTravelTime
-                    )
-                }
-            }
+        updatedState.stage = nextStage
+        updatedState.destination = nextDestination
+        updatedState.remainingBusStops = remainingBusStops
+        updatedState.busProgress = 0
+        updatedState.leftDistance = totalDistance  // leftDistance 업데이트
+
+        updatedState.totalDistance = totalDistance
+        updatedState.subDescription = subDescription
+        updatedState.busTravelTime = busTravelTime
+
+        // 단계 전환 시에는 진행도 리셋
+        updatedState.maxProgressValue = 0
+        updatedState.currentProgressValue = 0
+        
+        print("[DEBUG updateStage] 새로운 state - stage: \(updatedState.stage), destination: \(updatedState.destination)")
+        print("[DEBUG updateStage] description will be: \(Self.description(for: nextStage, destination: nextDestination))")
+        
+        // maxProgress 리셋
+        self.maxProgress = 0.0
+
+        Task {
+            await activity.update(ActivityContent(state: updatedState, staleDate: nil))
+            print("[단계변경 \(String(format: "%.3f", timestamp))] 업데이트 성공 - 새 단계: \(nextStage), destination: \(nextDestination)")
         }
     }
+    
     func updateRemainingBusStops(remaining: Int) {
         let timestamp = Date().timeIntervalSince1970
         
@@ -267,7 +259,7 @@ final class ProgressLiveActivityManager {
         updatedState.remainingBusStops = remaining
         updatedState.subDescription = Self.subDescription(
             for: updatedState.stage,
-            leftDistance: updatedState.leftDistance ?? 0,
+            leftDistance: updatedState.leftDistance,
             remainingBusStops: remaining,
             busTravelTime: updatedState.busTravelTime
         )
@@ -303,7 +295,7 @@ final class ProgressLiveActivityManager {
         Self.busProgress = busProgress
         
         let currentStage = activity.content.state.stage
-        let currentLeftDistance = activity.content.state.leftDistance ?? activity.content.state.totalDistance
+        let currentLeftDistance = activity.content.state.leftDistance
         let currentRemainingBusStops = activity.content.state.remainingBusStops
         
         // 현재 progress 계산
@@ -326,7 +318,7 @@ final class ProgressLiveActivityManager {
                 updatedState.remainingBusStops = pendingRemaining
                 updatedState.subDescription = Self.subDescription(
                     for: updatedState.stage,
-                    leftDistance: updatedState.leftDistance ?? 0,
+                    leftDistance: updatedState.leftDistance,
                     remainingBusStops: pendingRemaining,
                     busTravelTime: updatedState.busTravelTime
                 )
