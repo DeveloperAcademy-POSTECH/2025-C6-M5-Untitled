@@ -68,7 +68,7 @@ struct MainSearchView: View {
         .background(Color(.systemBackground).ignoresSafeArea())
         .onAppear {
             Task {
-                try? await LocationService.shared.startBackgroundTracking()
+                try? await LocationService.shared.startLightTracking()
             }
             
             // GPS 하드웨어 웜업용

@@ -147,14 +147,17 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     }
     
     // 앱 시작 시 백그라운드 트래킹 시작
-    func startBackgroundTracking() async throws {
+    func startLightTracking() async throws {
         try await requestWhenInUseAuthorizationIfNeeded()
         
         manager.distanceFilter = 100  // 100m마다 업데이트
-        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters  // 배터리 절약
+        manager.desiredAccuracy = kCLLocationAccuracyHundredMeters
+        manager.allowsBackgroundLocationUpdates = false  // 백그라운드 끄기
+        manager.pausesLocationUpdatesAutomatically = true  // 자동 일시정지
+        manager.activityType = .otherNavigation  // 네비게이션 최적화
         
         manager.startUpdatingLocation()
-        print("[LocationService] 백그라운드 트래킹 시작")
+        print("[LocationService] 백그라운드 트래킹 시작 (포그라운드 전용)")
     }
     
     // MARK: - CLLocationManagerDelegate
