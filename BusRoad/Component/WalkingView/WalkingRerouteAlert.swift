@@ -3,11 +3,7 @@ import SwiftUI
 struct WalkingRerouteAlert: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @Binding var isPresented: Bool
-    @ObservedObject var viewModel: WalkingViewModel
-
-    let journey: Journey
-    let index: Int
-
+    @ObservedObject var viewModel = WalkingViewModel()
     var selection: Int = 50
 
     var body: some View {
@@ -25,6 +21,7 @@ struct WalkingRerouteAlert: View {
                         .padding(.top, 20.wScaled)
                         .padding(.bottom, 10.wScaled)
                     
+                    // 상세 설명
                     Text("현재 위치에서 다시\n경로를 검색할까요?")
                       .font(.prereg20Scaled)
                       .foregroundColor(.primaryblack)
@@ -33,7 +30,7 @@ struct WalkingRerouteAlert: View {
 
                     // 버튼 영역
                     HStack(spacing: 9.wScaled) {
-                        // 닫기(= 나중에)
+                        // 닫기
                         Button {
                             viewModel.deferRealert(seconds: 45) // 재등장 쿨다운
                             isPresented = false
