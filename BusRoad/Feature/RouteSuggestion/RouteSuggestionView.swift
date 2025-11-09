@@ -108,7 +108,7 @@ struct RouteSuggestionView: View {
                                         coordinator.push(.journeyFlow)
                                     },
                                     retrySearch: {
-                                        print(viewModel.errorMessage)
+                                        print(viewModel.errorMessage ?? "Unknown error")
                                         coordinator.popToRoot() // MainSearch로 초기화
                                     }
                                 )
@@ -388,7 +388,7 @@ struct RouteSuggestionViewWithData: View {
                                 coordinator.push(.journeyFlow)
                             },
                             retrySearch: {
-                                print(viewModel.errorMessage)
+                                print(viewModel.errorMessage ?? "Unknown error")
                                 coordinator.popToRoot()
                             }
                         )
