@@ -80,6 +80,10 @@ final class ArrivalInfoManager: ObservableObject {
         hasPassed = false
         lastPassedBusNo = nil
         
+        nearestBusInfo = nil
+        isArrivingSoon = false
+        
+        
         suppressPassUntil = Date().addingTimeInterval(12)
         armedForPass = false
         
@@ -126,10 +130,16 @@ final class ArrivalInfoManager: ObservableObject {
     }
     
     
+    func forceRefresh(for busRouteNode: BusRouteNode) async {
+        print("[DEBUG] 강제 refresh 실행")
+        await refresh(for: busRouteNode)
+    }
+    
+    
     // 버스 도착 정보 조회 + 지나감 판단
     func refreshNearestBusArrival(for busRouteNode: BusRouteNode)
     async -> (item: BusArrivalItem?, didPass: Bool, passedBus: BusArrivalItem?) {
-
+        
         let busLocation = busRouteNode.start
         
         guard let cityCode = await CityCodeManager.shared.getCityCodeByLocationAsync(
@@ -167,6 +177,8 @@ final class ArrivalInfoManager: ObservableObject {
                 busRouteNode.busNo.contains(cleanBusNumber(arrival.routeno))
             }
             
+            print("[DEBUG] 추적 중인 버스(\(busRouteNode.busNo)): \(filtered.map { "\(cleanBusNumber($0.routeno)) - \($0.arrtime)초" })")
+            
             if filtered.isEmpty {
                 if let lastItem = lastNearestItem {
                     let lastNo = cleanBusNumber(lastItem.routeno)
@@ -190,16 +202,18 @@ final class ArrivalInfoManager: ObservableObject {
             
             var didPass = false
             var passedBus: BusArrivalItem?
-            
-            if let lastTime = lastNearestArrTime,
+
+            if let lastId = lastNearestRouteId,
+               let lastTime = lastNearestArrTime,
                let lastItem = lastNearestItem {
                 
-                let jump = (lastTime <= 90 && nearest.arrtime >= 180)
-                
-                if jump {
+                // 버스 ID가 바뀌었거나, 180초 이상이면 지나감
+                if lastId != nearest.routeid || (lastTime < nearest.arrtime && nearest.arrtime > 180) {
                     didPass = true
                     passedBus = lastItem
-                    print("[DEBUG] 도착 시간 점프로 지나감 감지")
+                    
+                    let reason = lastId != nearest.routeid ? "버스 교체" : "시간 역행"
+                    print("[DEBUG] \(reason)로 지나감 감지: \(cleanBusNumber(lastItem.routeno)) (\(lastTime)초 → \(nearest.arrtime)초)")
                 }
             }
             

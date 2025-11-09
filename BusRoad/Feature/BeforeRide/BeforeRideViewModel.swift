@@ -41,7 +41,16 @@ final class BeforeRideViewModel: ObservableObject {
     func endManager() {
         arrivalManager.endManager()
     }
+    
     func acknowledgeMiss() {
         arrivalManager.acknowledgePassed()
+        
+        if let journey = journey,
+           let index = index,
+           case let .bus(busNode) = journey.nodes[index] {
+            Task {
+                await arrivalManager.forceRefresh(for: busNode)
+            }
+        }
     }
 }
