@@ -117,7 +117,7 @@ struct WalkingView: View {
                    let index = viewModel.journeyIndex,
                    viewModel.showRerouteAlert {
                     WalkingRerouteAlert(
-//                        isPresented: $viewModel.showRerouteAlert
+                        isPresented: $viewModel.showRerouteAlert
                     )
                 } else {
                     EmptyView()
