@@ -12,22 +12,22 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var arrived: Bool = false
     @Published var journey: Journey?
     @Published var journeyIndex: Int?
-    
+
     @Published var showAlert: Bool = false
     @Published var showRerouteAlert: Bool = false
-    
+
     @Published var showDevSheet: Bool = false
     @Published var tmapTotalDistance: Int = 0
     @Published var showVerifyingStop: Bool = false
     @Published var isRerouting: Bool = false
-    @Published var offRouteThreshold: CLLocationDistance = 50 // 30/50/100 UI에서 변경
+    @Published var offRouteThreshold: CLLocationDistance = 50 // 기본 50m
 
     // MARK: - Internal State
     private var hasCalculatedRoute = false
     private var stepSwitchDistance: CLLocationDistance = 6
     private var journeyManager: JourneyManager
 
-    // 진행/거리
+    // 경로 진행/거리
     private var currentSegmentIndex: Int = 0
     private var cumulativeMeters: [Double] = [] // coords[i]까지 누적 길이
     private var totalMeters: Double { cumulativeMeters.last ?? 0 }
@@ -42,6 +42,21 @@ final class WalkingViewModel: NSObject, ObservableObject {
     let loc = CLLocationManager()
     var pendingDestination: CLLocationCoordinate2D?
     var tmapCoordinates: [CLLocationCoordinate2D] = []
+
+    // MARK: - Anti False-OffRoute (새 로직 관련 상태)
+    private let nearDestBufferRadius: CLLocationDistance = 25       // 목적지 근방에서는 오프루트 비활성화
+    private let arrivalRadius: CLLocationDistance = 18               // 도착 판정 반경
+    private let shortSegMeters: CLLocationDistance = 12              // "짧은 세그먼트" 기준
+    private let emaAlpha: Double = 0.4                               // projection distance EMA
+    private var emaProjectionDistance: Double? = nil
+
+    // 추세 판단용 버퍼 (최근 n회)
+    private var recentDestDistances: [Double] = []
+    private var recentProjDistances: [Double] = []
+    private let trendWindow: Int = 4
+
+    // 최근 heading 기록
+    private var lastHeadingTrue: CLLocationDirection?
 
     // MARK: - Init
     init(journeyManager: JourneyManager = .shared) {
@@ -105,7 +120,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         calculateRoute(origin: origin, dest: dest)
     }
 
-    // MARK: - Private
+    // MARK: - Private: Route lifecycle
     private func resetRouteState() {
         tmapCoordinates = []
         tmapTotalDistance = 0
@@ -119,6 +134,11 @@ final class WalkingViewModel: NSObject, ObservableObject {
         offRouteViolations = 0
         isRerouting = false
         showRerouteAlert = false
+
+        // Anti False-OffRoute 상태 초기화
+        emaProjectionDistance = nil
+        recentDestDistances.removeAll()
+        recentProjDistances.removeAll()
     }
 
     private func tryCalculateIfReady() {
@@ -236,6 +256,9 @@ final class WalkingViewModel: NSObject, ObservableObject {
     private func finishReroute() {
         isRerouting = false
         offRouteViolations = 0
+        emaProjectionDistance = nil
+        recentDestDistances.removeAll()
+        recentProjDistances.removeAll()
     }
 
     // MARK: - 누적거리
@@ -261,29 +284,31 @@ final class WalkingViewModel: NSObject, ObservableObject {
 
     // MARK: - 투영/스냅
     private struct Projection {
-        let segmentIndex: Int  // [i, i+1]
-        let t: Double          // 0...1
+        let segmentIndex: Int      // [i, i+1]
+        let t: Double              // 0...1
         let projected: CLLocationCoordinate2D
         let distance: CLLocationDistance
+        let segmentLength: CLLocationDistance
+    }
+
+    private func metersXY(_ origin: CLLocationCoordinate2D, relativeTo p: CLLocationCoordinate2D) -> (x: Double, y: Double) {
+        let R = 6378137.0
+        let x = (origin.longitude - p.longitude) * .pi/180 * R * cos(p.latitude * .pi/180)
+        let y = (origin.latitude  - p.latitude)  * .pi/180 * R
+        return (x, y)
     }
 
     private func project(_ p: CLLocationCoordinate2D,
                          onto a: CLLocationCoordinate2D,
                          _ b: CLLocationCoordinate2D) -> (t: Double, proj: CLLocationCoordinate2D) {
-        func metersXY(_ c: CLLocationCoordinate2D) -> (x: Double, y: Double) {
-            let R = 6378137.0
-            let x = (c.longitude - p.longitude) * .pi/180 * R * cos(p.latitude * .pi/180)
-            let y = (c.latitude  - p.latitude)  * .pi/180 * R
-            return (x, y)
-        }
-        let pa = metersXY(a), pb = metersXY(b)
+        let pa = metersXY(a, relativeTo: p), pb = metersXY(b, relativeTo: p)
         let vx = pb.x - pa.x, vy = pb.y - pa.y
         let wx = -pa.x,      wy = -pa.y
         let denom = vx*vx + vy*vy
         let tVal = denom > 0 ? max(0, min(1, (wx*vx + wy*vy)/denom)) : 0
         let px = pa.x + tVal*vx, py = pa.y + tVal*vy
 
-        let R = 6378137.0
+        let R = 6378137.0   // 지구 반지름
         let dLon = px / (R * cos(p.latitude * .pi/180))
         let dLat = py / R
         let proj = CLLocationCoordinate2D(
@@ -291,6 +316,13 @@ final class WalkingViewModel: NSObject, ObservableObject {
             longitude: p.longitude + dLon * 180 / .pi
         )
         return (tVal, proj)
+    }
+
+    private func segmentLength(at i: Int) -> CLLocationDistance {
+        guard i >= 0, i+1 < tmapCoordinates.count else { return 0 }
+        let a = CLLocation(latitude: tmapCoordinates[i].latitude, longitude: tmapCoordinates[i].longitude)
+        let b = CLLocation(latitude: tmapCoordinates[i+1].latitude, longitude: tmapCoordinates[i+1].longitude)
+        return a.distance(from: b)
     }
 
     private func nearestProjection(to user: CLLocationCoordinate2D,
@@ -302,12 +334,14 @@ final class WalkingViewModel: NSObject, ObservableObject {
             let (tVal, proj) = project(user, onto: a, b)
             let d = CLLocation(latitude: user.latitude, longitude: user.longitude)
                 .distance(from: CLLocation(latitude: proj.latitude, longitude: proj.longitude))
+            let segLen = segmentLength(at: i)
+            let candidate = Projection(segmentIndex: i, t: tVal, projected: proj, distance: d, segmentLength: segLen)
             if let currentBest = best {
                 if d < currentBest.distance {
-                    best = Projection(segmentIndex: i, t: tVal, projected: proj, distance: d)
+                    best = candidate
                 }
             } else {
-                best = Projection(segmentIndex: i, t: tVal, projected: proj, distance: d)
+                best = candidate
             }
         }
         return best
@@ -322,7 +356,23 @@ final class WalkingViewModel: NSObject, ObservableObject {
         return fmod(θ + 360, 360)
     }
 
-    // 핵심 업데이트 (스냅/잔여/오프루트)
+    private func angleDiff(_ a: CLLocationDirection, _ b: CLLocationDirection) -> CLLocationDirection {
+        let diff = abs(a - b).truncatingRemainder(dividingBy: 360)
+        return diff > 180 ? 360 - diff : diff
+    }
+
+    // MARK: - Trend helpers
+    private func push(_ value: Double, into array: inout [Double], window: Int) {
+        array.append(value)
+        if array.count > window { array.removeFirst(array.count - window) }
+    }
+
+    private func netIncrease(_ array: [Double]) -> Double {
+        guard let first = array.first, let last = array.last else { return 0 }
+        return last - first
+    }
+
+    // MARK: - 핵심 업데이트 (스냅/잔여/오프루트)
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
         guard !tmapCoordinates.isEmpty else {
             bigDistanceText = "-- m"
@@ -333,18 +383,13 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 1) 투영
         guard let p = nearestProjection(to: location.coordinate, on: tmapCoordinates) else { return }
 
-        // 2) 세그먼트 점프
+        // 2) 세그먼트 점프 (진행)
         currentSegmentIndex = max(currentSegmentIndex, p.segmentIndex + (p.t >= 0.999 ? 1 : 0))
 
-        // 3) 잔여거리
+        // 3) 잔여거리 계산
         let base = cumulativeMeters.indices.contains(p.segmentIndex) ? cumulativeMeters[p.segmentIndex] : 0
         let nextIndex = p.segmentIndex + 1
-        let segLen: Double
-        if cumulativeMeters.indices.contains(nextIndex) {
-            segLen = cumulativeMeters[nextIndex] - base
-        } else {
-            segLen = 0
-        }
+        let segLen: Double = (cumulativeMeters.indices.contains(nextIndex) ? cumulativeMeters[nextIndex] - base : 0)
         let progressed = base + segLen * p.t
         let remain = max(0, totalMeters - progressed)
         bigDistanceText = "\(Int(remain)) m"
@@ -352,14 +397,14 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 4) 도착 판정
         if let last = tmapCoordinates.last {
             let destD = location.distance(from: CLLocation(latitude: last.latitude, longitude: last.longitude))
-            let arriveRadius: CLLocationDistance = 18
-            if remain < max(stepSwitchDistance, 8), destD < arriveRadius {
+            if remain < max(stepSwitchDistance, 8), destD < arrivalRadius {
                 arrived = true
             }
         }
 
-        // 5) 화살표
+        // 5) 화살표 베어링 (디바이스 기준 상대각)
         if let hdg = heading?.trueHeading, hdg >= 0 {
+            lastHeadingTrue = hdg
             let nextIdx = min(tmapCoordinates.count - 1, p.segmentIndex + 1)
             let target = tmapCoordinates.indices.contains(nextIdx) ? tmapCoordinates[nextIdx] : lastOrSelfCoordinate(default: location.coordinate)
             let bearingAbs = bearing(from: p.projected, to: target)
@@ -373,12 +418,73 @@ final class WalkingViewModel: NSObject, ObservableObject {
             ProgressLiveActivityManager.shared.updateWalkingActivity(stage: stage, newLeftDistance: remain)
         }
 
-        // 7) 오프루트 감지 (연속 위반 + 쿨다운)
-        if p.distance > offRouteThreshold {
-            offRouteViolations += 1
+        // 7) Anti False-OffRoute + 실제 OffRoute 탐지
+        guard let dest = tmapCoordinates.last else { return }
+        let destDistance = location.distance(from: CLLocation(latitude: dest.latitude, longitude: dest.longitude))
+
+        // 목적지 근방에서는 OffRoute 감지 비활성화
+        if destDistance <= nearDestBufferRadius {
+            offRouteViolations = 0
+            emaProjectionDistance = nil
+            recentDestDistances.removeAll()
+            recentProjDistances.removeAll()
+            return
+        }
+
+        // EMA로 projection distance 안정화
+        let projD = p.distance
+        if let ema = emaProjectionDistance {
+            emaProjectionDistance = ema * (1 - emaAlpha) + projD * emaAlpha
         } else {
+            emaProjectionDistance = projD
+        }
+        let emaProj = emaProjectionDistance ?? projD
+
+        // 추세 버퍼 갱신
+        push(destDistance, into: &recentDestDistances, window: trendWindow)
+        push(emaProj, into: &recentProjDistances, window: trendWindow)
+
+        // "짧은 세그먼트"이면 projection 단독 판단 금지, 다중 조건으로만 판단
+        let isShortSeg = p.segmentLength <= shortSegMeters
+
+        // Heading 차이 (목적지 방향 대비)
+        var headingOK = true
+        if let hdg = lastHeadingTrue {
+            let toDest = bearing(from: location.coordinate, to: dest)
+            let diff = angleDiff(hdg, toDest)
+            // 목적지 반대 방향으로 걷는 듯할 때만 강한 근거로 사용
+            headingOK = diff > 75
+        }
+
+        // 추세: 최근 창에서 목적지와 projection이 모두 "멀어지는" 경향인가?
+        let destNetInc = netIncrease(recentDestDistances) // +면 멀어지는 중
+        let projNetInc = netIncrease(recentProjDistances)
+
+        // 정확도에 따른 동적 임계치 보정 (정확도 나쁠수록 threshold 상향)
+        let accuracyBoost = max(0, min(30, location.horizontalAccuracy - 10)) // 10m 초과분만 반영, 최대 +30
+        let dynamicThreshold = offRouteThreshold + accuracyBoost
+
+        // 최종 OffRoute 조건
+        let baseCondition = emaProj > dynamicThreshold
+        let trendCondition = (destNetInc > 2) && (projNetInc > 2)   // 최근 창에서 각각 최소 2m 이상 증가
+        let multiSignalCondition: Bool
+
+        if isShortSeg {
+            // 짧은 세그먼트에서는 다중 신호 모두 필요
+            multiSignalCondition = baseCondition && trendCondition && headingOK
+        } else {
+            // 일반 세그먼트: projection + (추세 OR heading 반전)
+            multiSignalCondition = baseCondition && (trendCondition || headingOK)
+        }
+
+        if multiSignalCondition {
+            offRouteViolations += 1
+        } else if emaProj <= dynamicThreshold * 0.7 {
+            // 충분히 복귀했다고 판단되면 카운터 리셋
             offRouteViolations = 0
         }
+
+        // 연속 위반 + 쿨다운 체크
         if offRouteViolations >= 3, Date().timeIntervalSince(lastRecalcAt) > recalcCooldown {
             showRerouteAlert = true
             lastRecalcAt = Date()
@@ -386,9 +492,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
     }
 
     private func lastOrSelfCoordinate(default coord: CLLocationCoordinate2D) -> CLLocationCoordinate2D {
-        if let last = tmapCoordinates.last {
-            return last
-        }
+        if let last = tmapCoordinates.last { return last }
         return coord
     }
 }
