@@ -55,9 +55,6 @@ final class WalkingViewModel: NSObject, ObservableObject {
     private var recentProjDistances: [Double] = []
     private let trendWindow: Int = 4
 
-    // 최근 heading 기록
-    private var lastHeadingTrue: CLLocationDirection?
-
     // MARK: - Init
     init(journeyManager: JourneyManager = .shared) {
         self.journeyManager = journeyManager
@@ -356,11 +353,6 @@ final class WalkingViewModel: NSObject, ObservableObject {
         return fmod(θ + 360, 360)
     }
 
-    private func angleDiff(_ a: CLLocationDirection, _ b: CLLocationDirection) -> CLLocationDirection {
-        let diff = abs(a - b).truncatingRemainder(dividingBy: 360)
-        return diff > 180 ? 360 - diff : diff
-    }
-
     // MARK: - Trend helpers
     private func push(_ value: Double, into array: inout [Double], window: Int) {
         array.append(value)
@@ -372,7 +364,6 @@ final class WalkingViewModel: NSObject, ObservableObject {
         return last - first
     }
 
-    // MARK: - 핵심 업데이트 (스냅/잔여/오프루트)
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
         guard !tmapCoordinates.isEmpty else {
             bigDistanceText = "-- m"
@@ -402,9 +393,8 @@ final class WalkingViewModel: NSObject, ObservableObject {
             }
         }
 
-        // 5) 화살표 베어링 (디바이스 기준 상대각)
+        // 5) 화살표 베어링 (UI용)
         if let hdg = heading?.trueHeading, hdg >= 0 {
-            lastHeadingTrue = hdg
             let nextIdx = min(tmapCoordinates.count - 1, p.segmentIndex + 1)
             let target = tmapCoordinates.indices.contains(nextIdx) ? tmapCoordinates[nextIdx] : lastOrSelfCoordinate(default: location.coordinate)
             let bearingAbs = bearing(from: p.projected, to: target)
@@ -444,17 +434,8 @@ final class WalkingViewModel: NSObject, ObservableObject {
         push(destDistance, into: &recentDestDistances, window: trendWindow)
         push(emaProj, into: &recentProjDistances, window: trendWindow)
 
-        // "짧은 세그먼트"이면 projection 단독 판단 금지, 다중 조건으로만 판단
+        // 짧은 세그먼트 여부
         let isShortSeg = p.segmentLength <= shortSegMeters
-
-        // Heading 차이 (목적지 방향 대비)
-        var headingOK = true
-        if let hdg = lastHeadingTrue {
-            let toDest = bearing(from: location.coordinate, to: dest)
-            let diff = angleDiff(hdg, toDest)
-            // 목적지 반대 방향으로 걷는 듯할 때만 강한 근거로 사용
-            headingOK = diff > 75
-        }
 
         // 추세: 최근 창에서 목적지와 projection이 모두 "멀어지는" 경향인가?
         let destNetInc = netIncrease(recentDestDistances) // +면 멀어지는 중
@@ -467,15 +448,15 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 최종 OffRoute 조건
         let baseCondition = emaProj > dynamicThreshold
         let trendCondition = (destNetInc > 2) && (projNetInc > 2)   // 최근 창에서 각각 최소 2m 이상 증가
-        let multiSignalCondition: Bool
 
-        if isShortSeg {
-            // 짧은 세그먼트에서는 다중 신호 모두 필요
-            multiSignalCondition = baseCondition && trendCondition && headingOK
-        } else {
-            // 일반 세그먼트: projection + (추세 OR heading 반전)
-            multiSignalCondition = baseCondition && (trendCondition || headingOK)
-        }
+        // 짧은 세그먼트에서는 projection 단독 판단 금지 → 동일하게 추세 필요
+        let multiSignalCondition: Bool = {
+            if isShortSeg {
+                return baseCondition && trendCondition
+            } else {
+                return baseCondition && trendCondition
+            }
+        }()
 
         if multiSignalCondition {
             offRouteViolations += 1
