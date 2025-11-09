@@ -1,39 +1,37 @@
 import SwiftUI
 
 struct WalkingRerouteAlert: View {
-    @EnvironmentObject var coordinator: NavigationCoordinator
     @Binding var isPresented: Bool
     @ObservedObject var viewModel = WalkingViewModel()
     var selection: Int = 50
-
+    
     var body: some View {
         if isPresented {
             ZStack {
                 Color.primaryblack
                     .opacity(0.5)
                     .ignoresSafeArea()
-
-                VStack(alignment: .center) {
+                
+                VStack(alignment: .center, spacing: 0) {
                     // 타이틀
                     Text("경로에서 벗어났어요")
                         .font(.presemi24Scaled)
                         .foregroundColor(.primaryblack)
-                        .padding(.top, 20.wScaled)
+                        .padding(.top, 40.wScaled)
                         .padding(.bottom, 10.wScaled)
                     
                     // 상세 설명
                     Text("현재 위치에서 다시\n경로를 검색할까요?")
-                      .font(.prereg20Scaled)
-                      .foregroundColor(.primaryblack)
-                     .multilineTextAlignment(.center)
-                     .padding(.bottom, 36.wScaled)
-
+                        .font(.prereg20Scaled)
+                        .foregroundColor(.primaryblack)
+                        .multilineTextAlignment(.center)
+                        .padding(.bottom, 36.wScaled)
+                    
                     // 버튼 영역
                     HStack(spacing: 9.wScaled) {
-                        // 닫기
                         Button {
-                            viewModel.deferRealert(seconds: 45) // 재등장 쿨다운
-                            isPresented = false
+                            //                            viewModel.deferRealert(seconds: 45) // 재등장 쿨다운
+                            //                            isPresented = false
                         } label: {
                             ZStack {
                                 Rectangle()
@@ -45,13 +43,11 @@ struct WalkingRerouteAlert: View {
                                     .font(.premed20Scaled)
                             }
                         }
-
-                        // 재탐색
                         Button {
-                            viewModel.setOffRouteThreshold(selection)
-                            viewModel.offRouteViolations = 0
-                            viewModel.rerouteIfNeeded()
-                            isPresented = false
+                            //                            viewModel.setOffRouteThreshold(selection)
+                            //                            viewModel.offRouteViolations = 0
+                            //                            viewModel.rerouteIfNeeded()
+                            //                            isPresented = false
                         } label: {
                             ZStack {
                                 Rectangle()
@@ -64,7 +60,6 @@ struct WalkingRerouteAlert: View {
                             }
                         }
                     }
-                    .padding(.top, 24.wScaled)
                     .padding(.bottom, 20.wScaled)
                 }
                 .frame(width: 320.wScaled)
