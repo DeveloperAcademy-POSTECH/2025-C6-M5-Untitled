@@ -30,8 +30,8 @@ struct WalkingRerouteAlert: View {
                     // 버튼 영역
                     HStack(spacing: 9.wScaled) {
                         Button {
-                            //                            viewModel.deferRealert(seconds: 45) // 재등장 쿨다운
-                            //                            isPresented = false
+                            viewModel.deferRealert(seconds: 45) // 재등장 쿨다운
+                            isPresented = false
                         } label: {
                             ZStack {
                                 Rectangle()
@@ -44,10 +44,10 @@ struct WalkingRerouteAlert: View {
                             }
                         }
                         Button {
-                            //                            viewModel.setOffRouteThreshold(selection)
-                            //                            viewModel.offRouteViolations = 0
-                            //                            viewModel.rerouteIfNeeded()
-                            //                            isPresented = false
+                            viewModel.setOffRouteThreshold(selection)
+                            viewModel.offRouteViolations = 0
+                            viewModel.rerouteIfNeeded()
+                            isPresented = false
                         } label: {
                             ZStack {
                                 Rectangle()
