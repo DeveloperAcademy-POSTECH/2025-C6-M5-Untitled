@@ -17,12 +17,19 @@ struct WalkingRerouteAlert: View {
                     .opacity(0.5)
                     .ignoresSafeArea()
 
-                VStack(alignment: .center, spacing: 0) {
+                VStack(alignment: .center) {
                     // 타이틀
-                    Text("경로에서 벗어난 것 같아요")
+                    Text("경로에서 벗어났어요")
                         .font(.presemi24Scaled)
                         .foregroundColor(.primaryblack)
                         .padding(.top, 20.wScaled)
+                        .padding(.bottom, 10.wScaled)
+                    
+                    Text("현재 위치에서 다시\n경로를 검색할까요?")
+                      .font(.prereg20Scaled)
+                      .foregroundColor(.primaryblack)
+                     .multilineTextAlignment(.center)
+                     .padding(.bottom, 36.wScaled)
 
                     // 버튼 영역
                     HStack(spacing: 9.wScaled) {
@@ -36,7 +43,7 @@ struct WalkingRerouteAlert: View {
                                     .cornerRadius(100)
                                     .foregroundColor(Color.greybutton)
                                     .frame(width: 139.wScaled, height: 48.wScaled)
-                                Text("나중에")
+                                Text("취소")
                                     .foregroundColor(Color.primaryblack)
                                     .font(.premed20Scaled)
                             }
@@ -54,7 +61,7 @@ struct WalkingRerouteAlert: View {
                                     .cornerRadius(100)
                                     .foregroundColor(Color.subPoint)
                                     .frame(width: 139.wScaled, height: 48.wScaled)
-                                Text("재탐색")
+                                Text("다시 검색")
                                     .foregroundColor(Color.primarywhite)
                                     .font(.premed20Scaled)
                             }
