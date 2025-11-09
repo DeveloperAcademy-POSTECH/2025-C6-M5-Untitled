@@ -56,8 +56,6 @@ struct OnRideView: View {
                                 currentIndex < journey.nodes.count
                             else { return }
                             
-                            // currentIndex는 "내린 뒤"의 현재 노드 인덱스라고 가정
-                            
                             let nextIndex = currentIndex
                             let nextNode = journey.nodes[nextIndex]
                             
@@ -142,6 +140,8 @@ struct OnRideView: View {
                     else { return }
                     
                     viewModel.busLegIndex = leg
+                    
+                    print("[OnRideView] 탑승 화면 진입 - 기존 추적 계속 진행 (progress: \(proximityManager.progress), remaining: \(proximityManager.remainingStations))")
                 }
                 .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
                     guard
@@ -152,13 +152,13 @@ struct OnRideView: View {
                     
                     if viewModel.busLegIndex != leg {
                         viewModel.busLegIndex = leg
-                        
-                        proximityManager.configure(busLegIndex: leg)
+                        print("[OnRideView] journeyIndex 변경 감지 - busLegIndex: \(leg)")
                     }
                 }
                 .onDisappear {
                     proximityManager.disableVoiceAnnouncement()
                     proximityManager.stop()
+                    print("[OnRideView] 화면 종료 - 추적 중단")
                 }
             }
         }
