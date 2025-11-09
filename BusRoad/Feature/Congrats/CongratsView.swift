@@ -12,8 +12,6 @@ struct CongratsView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @State private var showArrivalConfirmation = false
     @State private var isAnimating = false
-    @State private var showMarquee = false
-    
     @State private var journey: Journey? = JourneyManager.shared.selectedJourney
     
     var body: some View {
@@ -39,6 +37,7 @@ struct CongratsView: View {
                     LineDivider()
                 }
                 .frame(height: 144)
+                
                 ZStack {
                     Color(.background)
                         .ignoresSafeArea()
@@ -47,44 +46,40 @@ struct CongratsView: View {
                         Spacer()
                         
                         if let destination = JourneyManager.shared.destination {
-                            Group {
-                                if showMarquee {    // 1.5초 후
-                                    MarqueeText(
-                                        text: destination.name,
-                                        font: .presemi36Scaled,
-                                        uiFont: .presemi36Scaled,
-                                        startDelay: 1.0,
-                                        alignment: .leading
-                                    )
-                                    .offset(y: showArrivalConfirmation ? 150.wScaled : 0)
-                                    .foregroundColor(Color.primaryHeavy)
-                                } else {    // 처음
-                                    Group {
-                                        MarqueeText(
-                                            text: destination.name,
-                                            font: .presemi36Scaled,
-                                            uiFont: .presemi36Scaled,
-                                            startDelay: 1.0,
-                                            alignment: .leading
-                                        )
-                                        .foregroundColor(Color.primaryHeavy)
-                                    }
-                                    .offset(y: showArrivalConfirmation ? 150.wScaled : 0)
-                                    .animation(.easeOut(duration: 1.0), value: showArrivalConfirmation)
-                                }
-                            }
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 6.0 + 1.5) {
-                                    showMarquee = true
-                                    print("[DEBUG] showMarquee")
-                                }
-                            }
+                            
+                            // 2. if/else 분기를 제거하고 MarqueeText 하나만 남겼습니다.
+                            MarqueeText(
+                                text: destination.name,
+                                font: .presemi36Scaled,
+                                uiFont: .presemi36Scaled,
+                                startDelay: 3.0,
+                                alignment: .leading
+                            )
+                            .foregroundColor(Color.primaryHeavy)
+                            .offset(y: showArrivalConfirmation ? 200.wScaled : 0)
+                            .animation(.easeOut(duration: 1.0), value: showArrivalConfirmation)
                         }
                         
                         Spacer()
                         
                         if showArrivalConfirmation {
                             ArrivalConfirmation(showArrivalConfirmation: $showArrivalConfirmation)
+                            
+                            
+                            Button {
+                                coordinator.popToRoot()
+                                showArrivalConfirmation = false
+                                ProgressLiveActivityManager.shared.endActivity()
+                            } label: {
+                                Text("확인")
+                                    .foregroundColor(Color.subLight)
+                                    .font(.premed32)
+                                    .frame(width: 344.wScaled, height: 64)
+                                    .background(Color.subPoint)
+                                    .cornerRadius(20)
+                                
+                            }
+                            
                         } else {
                             HStack{
                                 Spacer()
@@ -117,7 +112,6 @@ struct CongratsView: View {
             }
         }
     }
-    
 }
 
 struct ArrivalConfirmation: View {
@@ -131,24 +125,7 @@ struct ArrivalConfirmation: View {
                 .font(.prereg32Scaled)
                 .foregroundColor(.primaryHeavy)
             Spacer()
-            HStack{
-                Spacer()
-                Button {
-                    coordinator.popToRoot()
-                    showArrivalConfirmation = false
-                    ProgressLiveActivityManager.shared.endActivity()
-                } label: {
-                    Text("확인")
-                        .foregroundColor(Color.subLight)
-                        .font(.premed32)
-                        .frame(width: 305.wScaled, height: 64)
-                        .background(Color.subPoint)
-                        .cornerRadius(20)
-                    
-                }
-                Spacer()
-            }
-            .padding(.bottom, 20)
+            
         }
         
     }
