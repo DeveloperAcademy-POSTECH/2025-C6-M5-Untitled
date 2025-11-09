@@ -78,7 +78,7 @@ struct WalkingView: View {
                                 UnevenRoundedRectangle(
                                     topLeadingRadius: 10,
                                     bottomLeadingRadius: 10
-                                ).fill(Color.subStrong)
+                                ).fill(Color.subPoint)
                             )
                     }
                 }
