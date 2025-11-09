@@ -21,6 +21,7 @@ final class ArrivalInfoManager: ObservableObject {
     
     private var suppressPassUntil: Date? = nil
     private var armedForPass: Bool = false
+    private var trackedBusRouteId: String? = nil
 
     // Published
     @Published var nearestBusInfo: (busNo: String, arrivalText: String)?
@@ -70,6 +71,7 @@ final class ArrivalInfoManager: ObservableObject {
         
         suppressPassUntil = nil
         armedForPass = false
+        trackedBusRouteId = nil
     }
     
     
@@ -90,6 +92,7 @@ final class ArrivalInfoManager: ObservableObject {
         lastNearestRouteId = nil
         lastNearestArrTime = nil
         lastNearestItem = nil
+        trackedBusRouteId = nil
     }
     
     private func isInSuppressionWindow() -> Bool {
@@ -189,6 +192,7 @@ final class ArrivalInfoManager: ObservableObject {
                         lastNearestRouteId = nil
                         lastNearestArrTime = nil
                         lastNearestItem = nil
+                        trackedBusRouteId = nil  
                         
                         return (nil, true, passed)
                     }
@@ -196,32 +200,57 @@ final class ArrivalInfoManager: ObservableObject {
                 return (nil, false, nil)
             }
             
-            guard let nearest = filtered.min(by: { $0.arrtime < $1.arrtime }) else {
+            // 처음이면 가장 가까운 버스를 추적 대상으로 설정
+            if trackedBusRouteId == nil {
+                guard let nearest = filtered.min(by: { $0.arrtime < $1.arrtime }) else {
+                    return (nil, false, nil)
+                }
+                trackedBusRouteId = nearest.routeid
+                print("[DEBUG] 🎯 추적 버스 선정: \(cleanBusNumber(nearest.routeno)) (ID: \(nearest.routeid))")
+            }
+            
+            // 추적 중인 버스만 찾기
+            guard let trackedBus = filtered.first(where: { $0.routeid == trackedBusRouteId }) else {
+                // 추적 중이던 버스가 사라짐 → 지나감
+                if let lastItem = lastNearestItem {
+                    print("[DEBUG] 추적 중이던 버스 사라짐 → 지나감")
+                    
+                    let passed = lastItem
+                    lastNearestRouteId = nil
+                    lastNearestArrTime = nil
+                    lastNearestItem = nil
+                    trackedBusRouteId = nil
+                    
+                    return (nil, true, passed)
+                }
                 return (nil, false, nil)
             }
             
+            print("[DEBUG] 추적 중: \(cleanBusNumber(trackedBus.routeno)) - \(trackedBus.arrtime)초")
+            
             var didPass = false
             var passedBus: BusArrivalItem?
-
+            
+            // 지나감 판단
             if let lastId = lastNearestRouteId,
                let lastTime = lastNearestArrTime,
                let lastItem = lastNearestItem {
                 
-                // 버스 ID가 바뀌었거나, 180초 이상이면 지나감
-                if lastId != nearest.routeid || (lastTime < nearest.arrtime && nearest.arrtime > 180) {
+                // 버스 ID가 바뀌었거나, 시간이 역행하면서 180초 이상이면 지나감
+                if lastId != trackedBus.routeid || (lastTime < trackedBus.arrtime && trackedBus.arrtime > 180) {
                     didPass = true
                     passedBus = lastItem
                     
-                    let reason = lastId != nearest.routeid ? "버스 교체" : "시간 역행"
-                    print("[DEBUG] \(reason)로 지나감 감지: \(cleanBusNumber(lastItem.routeno)) (\(lastTime)초 → \(nearest.arrtime)초)")
+                    let reason = lastId != trackedBus.routeid ? "버스 교체" : "시간 역행"
+                    print("[DEBUG] \(reason)로 지나감 감지: \(cleanBusNumber(lastItem.routeno)) (\(lastTime)초 → \(trackedBus.arrtime)초)")
                 }
             }
             
-            lastNearestRouteId = nearest.routeid
-            lastNearestArrTime = nearest.arrtime
-            lastNearestItem = nearest
+            lastNearestRouteId = trackedBus.routeid
+            lastNearestArrTime = trackedBus.arrtime
+            lastNearestItem = trackedBus
             
-            return (nearest, didPass, passedBus)
+            return (trackedBus, didPass, passedBus)
             
         } catch {
             print("[ERROR] \(error.localizedDescription)")
