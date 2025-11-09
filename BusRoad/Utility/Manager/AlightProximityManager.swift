@@ -26,10 +26,10 @@ final class AlightProximityManager: ObservableObject {
     private var cancellable: AnyCancellable?
     private var hasEnteredRadius: Bool = false // 정류장 안에 들어갔는지
     private let detectionRadius: CLLocationDistance = 15  // 15m 반경
-    private var initialDistance: CLLocationDistance?        // 목적지까지 초기 거리
+    private var initialDistance: CLLocationDistance?      // 목적지까지 초기 거리
     private var recentDistances: [CLLocationDistance] = []  // GPS 튀는 것 방지
-    private let smoothCount: Int = 5                        // 최근 N개 평균
-    private var maxProgress: CGFloat = 0                    // 뒤로가기 금지
+    private let smoothCount: Int = 5                      // 최근 N개 평균
+    private var maxProgress: CGFloat = 0                  // 뒤로가기 금지
     private var shouldAnnounce: Bool = false
     
     // MARK: - 콜백
@@ -55,21 +55,50 @@ final class AlightProximityManager: ObservableObject {
         
         // 모든 정류장 저장
         self.stations = busNode.stations
-        self.currentStationIndex = 0
-        self.remainingStations = stations.count
         self.canAlight = false
         self.hasEnteredRadius = false
         self.progress = 0
         self.hasArrived = false
         
+        // 첫 정류장(인덱스 0)은 스킵하고 인덱스 1부터 시작
+        if stations.count > 1 {
+            self.currentStationIndex = 1
+            self.remainingStations = stations.count - 1
+            self.canAlight = (remainingStations <= 1)
+            print("[AlightProximityManager] 초기화 및 첫 정류장 스킵: 인덱스 1부터 시작, 남은 정류장 \(self.remainingStations)개")
+        } else {
+            self.currentStationIndex = 0
+            self.remainingStations = stations.count
+            self.canAlight = (stations.count == 1)
+            print("[AlightProximityManager] 초기화: 정류장 \(self.remainingStations)개")
+        }
+
         // 진행률 계산 초기화
         initialDistance = nil
         recentDistances.removeAll()
         maxProgress = 0
         
         ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
+    }
+    
+    /// '탔어요' 버튼이 눌렸을 때, 탑승한 정류장(index 1)까지 통과한 것으로 처리합니다.
+    func markBoardingStationPassed() {
+        // configure()에서 currentStationIndex는 1로 초기화되어 있어야 함.
+        guard stations.count >= 1, currentStationIndex == 0 else {
+            print("[AlightProximityManager] markBoardingStationPassed: 정류장 수가 부족하거나 이미 통과 처리됨.")
+            return
+        }
+
+        currentStationIndex = 1
+        remainingStations = stations.count - currentStationIndex
+        canAlight = (remainingStations <= 1)
         
-        //여기에 start 함수 추가
+        print("[AlightProximityManager] 탑승 정류장 통과 처리 완료: 남은 정류장 \(remainingStations)개")
+        
+        // Live Activity 즉시 업데이트
+        Task {
+            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
+        }
     }
     
     func start() {
@@ -127,22 +156,6 @@ final class AlightProximityManager: ObservableObject {
     
     // MARK: - 정류장 근접 확인
     private func checkStationProximity(currentLocation: CLLocation) {
-        
-        // 첫 정류장은 건너뛰기
-        if currentStationIndex == 0 && stations.count > 1 {
-            print("[AlightProximityManager] 첫 정류장 자동 스킵")
-            currentStationIndex = 1
-            remainingStations = stations.count - 1
-            hasEnteredRadius = false
-            
-            if remainingStations <= 1 {
-                canAlight = true
-            }
-            
-            Task {
-                ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
-            }
-        }
         
         
         let nextStationIndex = currentStationIndex
