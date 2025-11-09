@@ -54,7 +54,7 @@ struct BeforeRideView: View {
                             HStack {
                                 
                                 Button {
-                                    viewModel.hasPassed = false
+                                    viewModel.acknowledgeMiss()
                                 } label: {
                                     Text("놓쳤어요")
                                         .foregroundColor(.subPoint)
