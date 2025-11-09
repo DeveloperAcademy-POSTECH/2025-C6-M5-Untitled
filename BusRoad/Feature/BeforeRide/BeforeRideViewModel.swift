@@ -41,4 +41,7 @@ final class BeforeRideViewModel: ObservableObject {
     func endManager() {
         arrivalManager.endManager()
     }
+    func acknowledgeMiss() {
+        arrivalManager.acknowledgePassed()
+    }
 }

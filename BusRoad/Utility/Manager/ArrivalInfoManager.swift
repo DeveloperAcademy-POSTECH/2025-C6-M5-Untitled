@@ -149,7 +149,7 @@ class ArrivalInfoManager: ObservableObject {
                 print("[DEBUG] 선택한 경로(\(busRouteNode.busNo))의 버스가 현재 없음")
                 return (nil, false, nil)
             }
-
+            
             // 여기서부터는 기존처럼 nearest 찾기
             guard let nearest = filteredArrivals.min(by: { $0.arrtime < $1.arrtime }) else {
                 return (nil, false, nil) // 도달할 일 거의 없음
@@ -169,7 +169,7 @@ class ArrivalInfoManager: ObservableObject {
                 let lastBusNo = cleanBusNumber(lastItem.routeno)
                 if busRouteNode.busNo.contains(lastBusNo) {
                     // 버스 ID가 바뀌었거나, 시간 차이가 크면 지나간 것으로 판단
-                    if lastId != nearest.routeid || (lastTime < 60 && nearest.arrtime > 180) {
+                    if lastId != nearest.routeid || (lastTime < nearest.arrtime && nearest.arrtime > 180) {
                         didPass = true
                         passedBus = lastItem
                         print("[DEBUG] 버스 지나감 감지: \(lastBusNo)")
@@ -265,5 +265,17 @@ class ArrivalInfoManager: ObservableObject {
             print("[ERROR] \(error.localizedDescription)")
             return nil
         }
+    }
+    
+    /// 사용자가 '놓쳤어요'를 눌러 지남 이벤트를 소비/초기화
+    func acknowledgePassed() {
+        // 뷰가 같은 카드로 되돌아오지 않도록 모든 관련 상태 초기화
+        hasPassed = false
+        lastPassedBusNo = nil
+        
+        // 직전 "가장 가까운 버스" 스냅샷을 비워 재감지 루프 방지
+        lastNearestRouteId = nil
+        lastNearestArrTime = nil
+        lastNearestItem = nil
     }
 }
