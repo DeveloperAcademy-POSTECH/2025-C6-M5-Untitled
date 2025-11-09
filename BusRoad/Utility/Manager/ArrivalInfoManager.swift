@@ -128,11 +128,31 @@ class ArrivalInfoManager: ObservableObject {
                 return isMatchingBus
             }
             
-            // 필터링된 버스가 없으면
-            guard let nearest = filteredArrivals.min(by: { $0.arrtime < $1.arrtime }) else {
-                print("[DEBUG] 선택한 경로(\(busRouteNode.busNo))의 버스가 도착 예정에 없음")
-                print("[DEBUG] 전체 도착 예정: \(arrivals.map { cleanBusNumber($0.routeno) })")
+            // 필터링된 버스가 없으면 → 지나감 여부 먼저 체크
+            if filteredArrivals.isEmpty {
+                if let lastItem = lastNearestItem {
+                    let lastBusNo = cleanBusNumber(lastItem.routeno)
+                    if busRouteNode.busNo.contains(lastBusNo) {
+                        print("[DEBUG] 이전 버스 지나감 감지(다음 버스 없음): \(lastBusNo)")
+                        let passed = lastItem
+                        
+                        // RESET
+                        lastNearestRouteId = nil
+                        lastNearestArrTime = nil
+                        lastNearestItem = nil
+                        
+                        return (nil, true, passed)
+                    }
+                }
+                
+                // 지나간 버스가 없으면 정상 종료
+                print("[DEBUG] 선택한 경로(\(busRouteNode.busNo))의 버스가 현재 없음")
                 return (nil, false, nil)
+            }
+
+            // 여기서부터는 기존처럼 nearest 찾기
+            guard let nearest = filteredArrivals.min(by: { $0.arrtime < $1.arrtime }) else {
+                return (nil, false, nil) // 도달할 일 거의 없음
             }
             
             print("[DEBUG] 선택한 경로 중 가장 가까운 버스: \(cleanBusNumber(nearest.routeno)), \(nearest.arrtime)초 후")

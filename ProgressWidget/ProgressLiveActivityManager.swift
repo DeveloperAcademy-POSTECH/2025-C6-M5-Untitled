@@ -85,7 +85,15 @@ final class ProgressLiveActivityManager {
         switch stage {
         case "walkingToBus", "walkingToDestination":
             let minutesLeft = Int(leftDistance / 70) + 1
-            return "\(minutesLeft)분 남았어요"
+            let walkingHours = minutesLeft / 60
+            let walkingMinutes = minutesLeft % 60
+            if walkingHours > 0 && walkingMinutes == 0 {
+                return "\(walkingHours)시간 남았어요"
+            } else if walkingHours > 0 {
+                return "\(walkingHours)시간 \(walkingMinutes)분 남았어요"
+            } else {
+                return "\(walkingMinutes)분 남았어요"
+            }
         case "onBus":
             return "\(remainingBusStops)정류장 남았어요"
         case "waitingForBus":
