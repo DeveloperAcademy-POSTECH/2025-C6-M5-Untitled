@@ -356,6 +356,11 @@ final class WalkingViewModel: NSObject, ObservableObject {
         if array.count > window { array.removeFirst(array.count - window) }
     }
     
+    private func netIncrease(_ array: [Double]) -> Double {
+        guard let first = array.first, let last = array.last else { return 0 }
+        return last - first
+    }
+    
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
         guard !tmapCoordinates.isEmpty else {
             bigDistanceText = "-- m"
