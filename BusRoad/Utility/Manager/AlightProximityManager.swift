@@ -62,7 +62,7 @@ final class AlightProximityManager: ObservableObject {
         self.hasEnteredRadius = false
         self.progress = 0
         self.hasArrived = false
-        self.currentStationIndex = 0
+        self.currentStationIndex = 1
         self.remainingStations = max(0, stations.count - 1)  // 탑승지 제외한 남은 정류장
         self.canAlight = (remainingStations <= 1)
 
@@ -77,25 +77,6 @@ final class AlightProximityManager: ObservableObject {
         print("[AlightProximityManager] 초기화: 전체 \(stations.count)개, 남은 정류장 \(remainingStations)개")
         
         ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
-    }
-    
-    /// '탔어요' 버튼을 눌렸을 때, 탑승 정류장을 통과 처리하고 다음 정류장 감지를 시작합니다.
-    func markBoardingStationPassed() {
-        guard stations.count >= 1, currentStationIndex == 0 else {
-            print("[AlightProximityManager] markBoardingStationPassed: 정류장 수가 부족하거나 이미 통과 처리됨.")
-            return
-        }
-
-        currentStationIndex = 1
-        remainingStations = stations.count - currentStationIndex
-        canAlight = (remainingStations <= 1)
-        
-        print("[AlightProximityManager] 탑승 정류장 통과 처리 완료: 남은 정류장 \(remainingStations)개")
-        
-        // Live Activity 즉시 업데이트
-        Task {
-            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
-        }
     }
     
     func start() {
