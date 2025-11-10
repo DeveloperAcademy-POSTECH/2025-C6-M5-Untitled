@@ -62,8 +62,6 @@ struct ToDestination: View {
                 Text("남았어요.")
                     .font(.prereg32Scaled)
                     .foregroundColor(.primaryHeavy)
-                    .padding(.bottom, 36.wScaled)
-//                Spacer()
             }
             .padding(.horizontal, 32.wScaled)
             .onAppear {
