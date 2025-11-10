@@ -10,7 +10,7 @@ import Lottie
 
 
 struct BeforeRideCard: View {
-    @ObservedObject var viewModel = BeforeRideViewModel()
+    @ObservedObject var viewModel: BeforeRideViewModel
     var waitingStopName: String
     var waitingBusNo: [String]
     

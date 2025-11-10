@@ -108,6 +108,7 @@ struct BeforeRideView: View {
                                 let index = viewModel.index,
                                 case let .bus(busNode) = journey.nodes[index] {
                                 BeforeRideCard(
+                                    viewModel: viewModel,
                                     waitingStopName: busNode.stations[0].stationName,
                                     waitingBusNo: busNode.busNo
                                 )
