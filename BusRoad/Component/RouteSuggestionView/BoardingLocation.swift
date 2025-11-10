@@ -63,8 +63,8 @@ struct BoardingLocation: View {
             if !didFetchOnce {
                 Task {
                     nearestBusInfo = await viewModel.fetchNearestBusInfo(for: route)
+                    didFetchOnce = true
                 }
-                didFetchOnce = true
             }
         }
     }

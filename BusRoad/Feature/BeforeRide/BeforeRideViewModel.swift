@@ -11,6 +11,7 @@ final class BeforeRideViewModel: ObservableObject {
     @Published var isArrivingSoon: Bool = false
     @Published var hasPassed: Bool = false
     @Published var lastPassedBusNo: String? = nil
+    @Published var didFetchOnce: Bool = false
 
     private var manager: JourneyManager
     private var cancellables = Set<AnyCancellable>()
@@ -32,6 +33,7 @@ final class BeforeRideViewModel: ObservableObject {
     // MARK: - 실시간 루프 시작 / 중단
     func startRefreshing(for route: BusRouteNode) {
         arrivalManager.startAutoRefresh(for: route)
+        didFetchOnce = true
     }
 
     func stopRefreshing() {
@@ -50,6 +52,7 @@ final class BeforeRideViewModel: ObservableObject {
            case let .bus(busNode) = journey.nodes[index] {
             Task {
                 await arrivalManager.forceRefresh(for: busNode)
+                didFetchOnce = false
             }
         }
     }
