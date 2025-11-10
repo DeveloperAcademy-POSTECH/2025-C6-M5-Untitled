@@ -147,7 +147,7 @@ final class ProgressLiveActivityManager {
         }
     }
     
-    func updateWalkingActivity(stage: String, newLeftDistance: Double) {
+    func updateWalkingActivity(newLeftDistance: Double) {
         let timestamp = Date().timeIntervalSince1970
 
         guard let currentActivity = currentActivity else { return }
@@ -166,7 +166,7 @@ final class ProgressLiveActivityManager {
         // 이미 waitingForBus / onBus / walkingToDestination 등으로 넘어갔으면 걷기 업데이트 무시
         guard currentStage == RouteStage.walkingToBus.rawValue ||
               currentStage == RouteStage.walkingToDestination.rawValue else {
-            print("[걷기 \(String(format: "%.3f", timestamp))] stage 불일치 (current=\(currentStage), param=\(stage)) → 업데이트 무시")
+            print("[걷기 \(String(format: "%.3f", timestamp))] stage 불일치 (current=\(currentStage)) → 업데이트 무시")
             return
         }
 

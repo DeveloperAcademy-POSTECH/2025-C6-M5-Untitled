@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		608B23A62EBD892D0005FCB5 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
-		608B23A72EBD892D0005FCB5 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
 		931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 931B33E82EA5DB5D00ED7944 /* Lottie */; };
 		FEFDE9E22EB23C5200733205 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEFDE9E12EB23C5200733205 /* WidgetKit.framework */; };
@@ -53,7 +51,6 @@
 		246B44332E823A2000E28F87 /* Exceptions for "BusRoad" folder in "BusRoad" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Application/Secrets.plist,
 				Info.plist,
 			);
 			target = 60A8CDA02E7CDFE500530B92 /* BusRoad */;
@@ -77,6 +74,7 @@
 		FEFDED1F2EB305EB00733205 /* Exceptions for "BusRoad" folder in "ProgressWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Application/Secrets.plist,
 				Resource/Color.xcassets,
 				"Resource/Font/Paperlogy-5Medium.ttf",
 				"Resource/Font/Paperlogy-6SemiBold.ttf",
@@ -260,7 +258,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
-				608B23A62EBD892D0005FCB5 /* Secrets.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,7 +265,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				608B23A72EBD892D0005FCB5 /* Secrets.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
