@@ -4,6 +4,8 @@ import Combine
 
 final class VoiceAnnouncementManager: NSObject, ObservableObject {
     
+    static let shared = VoiceAnnouncementManager()
+    
     private let synthesizer = AVSpeechSynthesizer()
     
     override init() {
@@ -46,6 +48,11 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     // 1정류장 남음
     func announceOneStation() {
         announce("이번 정류장에서 내려야해요.하차벨을 눌러주세요")
+    }
+    
+    // 승차 전, 곧 버스 도착 알림
+    func announceBusArrival() {
+        announce("곧 버스가 도착합니다.")
     }
 }
 
