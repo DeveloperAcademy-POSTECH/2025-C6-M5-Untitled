@@ -91,11 +91,17 @@ final class ProgressLiveActivityManager {
                 return "\(walkingHours)시간 남았어요"
             } else if walkingHours > 0 {
                 return "\(walkingHours)시간 \(walkingMinutes)분 남았어요"
+            } else if walkingHours == 0 && walkingMinutes < 2 {
+                return "곧 도착해요"
             } else {
                 return "\(walkingMinutes)분 남았어요"
             }
         case "onBus":
-            return "\(remainingBusStops)정류장 남았어요"
+            if remainingBusStops < 2 {
+                return "곧 도착해요"
+            } else {
+                return "\(remainingBusStops)정류장 남았어요"
+            }
         case "waitingForBus":
             let hours = busTravelTime / 60
             let minutes = busTravelTime % 60
