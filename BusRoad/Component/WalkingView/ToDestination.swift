@@ -42,7 +42,7 @@ struct ToDestination: View {
                     ZStack{
                         Circle()
                             .frame(width: 18, height: 18)
-                            .foregroundColor(.subStrong.opacity(0.5))
+                            .foregroundColor(.subPoint.opacity(0.5))
                             .offset(y: -100)
                         
                         ArrowView(bearing: vm.arrowBearing, threshold: threshold)
@@ -110,7 +110,7 @@ struct ArrowView: View {
         ZStack {
             if startAngle != endAngle {
                 ArcPath(startAngle: startAngle, endAngle: endAngle)
-                    .stroke(Color.subStrong.opacity(0.2),
+                    .stroke(Color.subPoint.opacity(0.2),
                             style: StrokeStyle(lineWidth: 13, lineCap: .round))
                     .frame(width: 2 * radius, height: 2 * radius)
             }
@@ -123,7 +123,7 @@ struct ArrowView: View {
                 
                 Circle()
                     .frame(width: dotSize, height: dotSize)
-                    .foregroundColor(.subStrong)
+                    .foregroundColor(.subPoint)
                     .offset(y: -radius)
             }
             .rotationEffect(.degrees(smoothAngle))

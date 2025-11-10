@@ -62,34 +62,39 @@ struct WalkingView: View {
             }
             
             // 맵뷰 버튼
-            VStack {
-                Spacer().frame(height: 144 + 120.wScaled) // 높이 144(고정) + 120.wScaled(변동)
-                HStack {
-                    Spacer()
-                    Button {
-                        viewModel.showDevSheet = true
-                    } label: {
-                        Image(systemName: "map.fill")
-                            .font(.system(size: 20.wScaled, weight: .bold))
-                            .foregroundColor(.subLight)
-                            .padding(.vertical, 12.wScaled)
-                            .padding(.horizontal, 18.wScaled)
-                            .background(
-                                UnevenRoundedRectangle(
-                                    topLeadingRadius: 10,
-                                    bottomLeadingRadius: 10
-                                ).fill(Color.subStrong)
-                            )
+            if let journey = viewModel.journey,
+               let index = viewModel.journeyIndex,
+               !viewModel.arrived {            
+                VStack {
+                    Spacer().frame(height: 144 + 120.wScaled) // 높이 144(고정) + 120.wScaled(변동)
+                    HStack {
+                        Spacer()
+                        Button {
+                            viewModel.showDevSheet = true
+                        } label: {
+                            Image(systemName: "map.fill")
+                                .font(.system(size: 20.wScaled, weight: .bold))
+                                .foregroundColor(.subLight)
+                                .padding(.vertical, 12.wScaled)
+                                .padding(.horizontal, 18.wScaled)
+                                .background(
+                                    UnevenRoundedRectangle(
+                                        topLeadingRadius: 10,
+                                        bottomLeadingRadius: 10
+                                    )
+                                    .fill(Color.subPoint)
+                                )
+                        }
                     }
+                    Spacer()
                 }
-                Spacer()
-            }
-            .overlay {
-                if let journey = viewModel.journey, let index = viewModel.journeyIndex {
-                    WalkingAlert(isPresented: $viewModel.showAlert,
-                                 viewModel: viewModel,
-                                 journey: journey,
-                                 index: index)
+                .overlay {
+                    WalkingAlert(
+                        isPresented: $viewModel.showAlert,
+                        viewModel: viewModel,
+                        journey: journey,
+                        index: index
+                    )
                 }
             }
             
@@ -112,10 +117,7 @@ struct WalkingView: View {
                    let index = viewModel.journeyIndex,
                    viewModel.showRerouteAlert {
                     WalkingRerouteAlert(
-                        isPresented: $viewModel.showRerouteAlert,
-                        viewModel: viewModel,
-                        journey: journey,
-                        index: index
+                        isPresented: $viewModel.showRerouteAlert
                     )
                 } else {
                     EmptyView()

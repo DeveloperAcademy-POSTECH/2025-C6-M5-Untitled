@@ -11,10 +11,39 @@ struct AtArrival: View {
         if case let .walk(node) = journey.nodes[index] {
             if viewModel.showVerifyingStop && journey.nodes.count > 1 {
                 VerifyingStop(
-                    showVerifyingStop: $viewModel.showVerifyingStop,
                     journey: journey,
                     index: index
                 )
+                .padding(.horizontal, 32.wScaled)
+                VStack(spacing: 0){
+                    Button {
+                        coordinator.advanceJourneyStage()
+                        viewModel.showVerifyingStop = false
+                        
+                        if journey.nodes.indices.contains(index + 1),
+                           case let .bus(busnode) = journey.nodes[index + 1] {
+                            let boardingStopName = busnode.start.name  // 승차 정류장
+                            
+                            Task {
+                                await ProgressLiveActivityManager.shared.updateStage(
+                                    nextStage: RouteStage.waitingForBus.rawValue,
+                                    nextDestination: boardingStopName,
+                                    totalDistance: 0,
+                                    remainingBusStops: busnode.stations.count,
+                                    busTravelTime: busnode.travelTime
+                                )
+                                print("[DEBUG] VerifyingStop - waitingForBus 업데이트, destination: \(boardingStopName)")
+                            }
+                        }
+                    } label: {
+                        Text("맞아요")
+                            .foregroundColor(Color.subLight)
+                            .font(.premed32)
+                            .frame(width: 344.wScaled, height: 64)
+                            .background(Color.subPoint)
+                            .cornerRadius(20)
+                    }
+                }
             } else {
                 VStack(alignment: .leading) {
                     Spacer()
@@ -49,7 +78,7 @@ struct AtArrival: View {
                         .foregroundColor(.primaryHeavy)
                         .padding(.bottom, 80.wScaled)
                 }
-                .padding(.horizontal, 30.wScaled)
+                .padding(.horizontal, 32.wScaled)
                 .onAppear {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                         viewModel.showVerifyingStop = true

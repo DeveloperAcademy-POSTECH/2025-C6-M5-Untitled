@@ -92,21 +92,29 @@ struct RouteSuggestionView: View {
                             
                             // MARK: - 버튼
                             
-                            RouteSelectButton(
-                                viewModel: viewModel,
-                                currentIndex: $viewModel.currentIndex,
-                                routes: viewModel.routes,
-                                onSelect: {
-                                    viewModel.selectJourney(at: viewModel.currentIndex)
-                                    coordinator.push(.journeyFlow)
-                                },
-                                retrySearch: {
-                                    print(viewModel.errorMessage)
-                                    coordinator.popToRoot() // MainSearch로 초기화
-                                }
-                            )
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 74)
+                            if viewModel.isLoading {
+                                Rectangle()
+                                    .fill(.subDisable)
+                                    .frame(width: 305.wScaled, height: 64)
+                                    .cornerRadius(20)
+                                
+                            } else {
+                                RouteSelectButton(
+                                    viewModel: viewModel,
+                                    currentIndex: $viewModel.currentIndex,
+                                    routes: viewModel.routes,
+                                    onSelect: {
+                                        viewModel.selectJourney(at: viewModel.currentIndex)
+                                        coordinator.push(.journeyFlow)
+                                    },
+                                    retrySearch: {
+                                        print(viewModel.errorMessage ?? "Unknown error")
+                                        coordinator.popToRoot() // MainSearch로 초기화
+                                    }
+                                )
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 64)
+                            }
                         }
                     }
                 }
@@ -380,7 +388,7 @@ struct RouteSuggestionViewWithData: View {
                                 coordinator.push(.journeyFlow)
                             },
                             retrySearch: {
-                                print(viewModel.errorMessage)
+                                print(viewModel.errorMessage ?? "Unknown error")
                                 coordinator.popToRoot()
                             }
                         )

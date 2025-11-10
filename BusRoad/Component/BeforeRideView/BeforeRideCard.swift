@@ -83,6 +83,13 @@ struct BeforeRideCard: View {
                                     )
                                 
                                 Spacer()
+                                    .frame(width: 8.wScaled)
+                                
+                                Text("도착 예정 정보 없음")
+                                    .font(.premed20Scaled)
+                                    .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .primaryHeavy)
+                                
+                                Spacer()
                             }
                         }
                     }
