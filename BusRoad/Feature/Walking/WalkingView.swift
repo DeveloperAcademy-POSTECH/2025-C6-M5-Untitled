@@ -33,7 +33,7 @@ struct WalkingView: View {
                 
                 ZStack {
                     Color(.background).ignoresSafeArea()
-                    VStack {
+                    VStack(spacing: 0) {
                         if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                             if viewModel.arrived {
                                 AtArrival(journey: journey, index: index, viewModel: viewModel)

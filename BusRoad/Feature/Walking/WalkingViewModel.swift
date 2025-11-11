@@ -176,7 +176,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
             let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
             ProgressLiveActivityManager.totalDistance = totalMeters
             ProgressLiveActivityManager.maxProgressValue = 0
-            ProgressLiveActivityManager.shared.updateWalkingActivity(stage: stage, newLeftDistance: totalMeters)
+            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: totalMeters)
         }
     }
 
@@ -220,7 +220,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
             if let journey = self.journey, let journeyIndex = self.journeyIndex {
                 let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
                 let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-                ProgressLiveActivityManager.shared.updateWalkingActivity(stage: stage, newLeftDistance: self.totalMeters)
+                ProgressLiveActivityManager.shared.updateWalkingActivity( newLeftDistance: self.totalMeters)
             }
             self.finishReroute()
         }
@@ -365,7 +365,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         if let journey = journey, let journeyIndex = journeyIndex {
             let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
             let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-            ProgressLiveActivityManager.shared.updateWalkingActivity(stage: stage, newLeftDistance: remain)
+            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
         }
 
         // 7) 오프루트 감지 (워밍업 + 디바운스 + 쿨다운)

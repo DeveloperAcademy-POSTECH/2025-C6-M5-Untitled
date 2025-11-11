@@ -4,6 +4,8 @@ import Combine
 
 final class VoiceAnnouncementManager: NSObject, ObservableObject {
     
+    static let shared = VoiceAnnouncementManager()
+    
     private let synthesizer = AVSpeechSynthesizer()
     
     override init() {
@@ -19,7 +21,7 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
             try audioSession.setCategory(
                 .playback,  // 재생 모드
                 mode: .spokenAudio,  // 음성 전용
-                options: [.duckOthers]  // 다른 소리 줄이기
+                options: [.duckOthers, .mixWithOthers]  // 다른 소리 줄이기
             )
             try audioSession.setActive(true)
             print("[음성안내] 오디오 설정 완료!")
@@ -46,6 +48,11 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     // 1정류장 남음
     func announceOneStation() {
         announce("이번 정류장에서 내려야해요.하차벨을 눌러주세요")
+    }
+    
+    // 승차 전, 곧 버스 도착 알림
+    func announceBusArrival() {
+        announce("곧 버스가 도착합니다.")
     }
 }
 

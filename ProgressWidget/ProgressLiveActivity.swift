@@ -53,7 +53,7 @@ struct ProgressLiveActivity: Widget {
                     progressValue: context.state.maxProgressValue,
                     imageName: RouteStage(rawValue: context.state.stage)?.image ?? "questionmark")
                 .padding(.horizontal, 30)
-                .padding(.top, 21)
+                .padding(.top, 27)
             }
             .padding(.vertical, 30)
             .activityBackgroundTint(Color.liveBackground)
