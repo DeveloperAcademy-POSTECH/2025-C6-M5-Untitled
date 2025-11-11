@@ -25,7 +25,7 @@ final class AlightProximityManager: ObservableObject {
     // MARK: - 내부 상태
     private var cancellable: AnyCancellable?
     private var hasEnteredRadius: Bool = false // 정류장 안에 들어갔는지
-    private let detectionRadius: CLLocationDistance = 15  // 15m 반경
+    private let detectionRadius: CLLocationDistance = 35  // 35m 반경
     private var maxProgress: CGFloat = 0                  // 뒤로가기 금지
     private var shouldAnnounce: Bool = false
     
@@ -210,35 +210,40 @@ final class AlightProximityManager: ObservableObject {
                 
             } else {
                 // 3단계: 놓친 정류장 감지
+
+                // 거리 변화 추적 (초기화 조건 완화)
+                if let prevDist = previousDistance {
+                    if distance > prevDist {
+                        increasingDistanceCount += 1
+                    }
+                    // else 제거 - 한번 가까워져도 카운트 유지
+                }
+
+                // 스킵 조건 
                 var shouldSkip = false
                 var skipReason = ""
-                
-                // 조건 1: 거리가 계속 멀어지고 있는지
-                if let prevDist = previousDistance, distance > prevDist {
-                    increasingDistanceCount += 1
-                } else {
-                    increasingDistanceCount = 0
-                }
-                
-                // 조건 2: 가까이 갔었는데 지금은 충분히 멀어졌는지
-                let wasClose = closestDistance < skipThreshold
-                let nowFarEnough = distance > skipThreshold
-                
-                // 조건 3: 연속으로 멀어지고 있는지
-                let consistentlyMovingAway = increasingDistanceCount >= 3
-                
-                // 모든 조건을 만족하면 스킵
-                if wasClose && nowFarEnough && consistentlyMovingAway {
+
+                // 조건 1: 가까이 갔다가 충분히 멀어짐 (가장 중요)
+                let wasClose = closestDistance < detectionRadius * 1.5  // 52.5m
+                let nowFar = distance > detectionRadius * 2  // 70m
+
+                if wasClose && nowFar {
                     shouldSkip = true
-                    skipReason = "가까이 갔었으나(\(Int(closestDistance))m) 지금은 멀어짐(\(Int(distance))m), 3번 연속 멀어짐"
+                    skipReason = "접근 후 멀어짐 (최소:\(Int(closestDistance))m → 현재:\(Int(distance))m)"
                 }
-                
-                // 추가 안전장치: 너무 멀어지면 무조건 스킵 (100m 이상)
-                if distance > 100 && closestDistance < 100 {
+
+                // 조건 2: 연속으로 멀어지고 있음 (보조)
+                if increasingDistanceCount >= 2 && distance > skipThreshold {
                     shouldSkip = true
-                    skipReason = "100m 이상 멀어짐 (최소거리: \(Int(closestDistance))m)"
+                    skipReason = "2회 연속 멀어짐, 현재 \(Int(distance))m"
                 }
-                
+
+                // 조건 3: 절대 거리 기준 (안전장치)
+                if closestDistance < 80 && distance > 100 {
+                    shouldSkip = true
+                    skipReason = "80m 이내 접근 후 100m 이상 멀어짐"
+                }
+
                 if shouldSkip {
                     print("[AlightProximityManager] 정류장 [\(nextStationIndex)] 스킵: \(nextStation.stationName)")
                     print("[AlightProximityManager] 이유: \(skipReason)")
