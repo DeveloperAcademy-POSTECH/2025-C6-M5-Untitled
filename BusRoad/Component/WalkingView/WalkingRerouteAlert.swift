@@ -2,8 +2,7 @@ import SwiftUI
 
 struct WalkingRerouteAlert: View {
     @Binding var isPresented: Bool
-    @ObservedObject var viewModel = WalkingViewModel()
-    var selection: Int = 50
+    @ObservedObject var viewModel: WalkingViewModel
     
     var body: some View {
         if isPresented {
@@ -44,8 +43,6 @@ struct WalkingRerouteAlert: View {
                             }
                         }
                         Button {
-                            viewModel.setOffRouteThreshold(selection)
-                            viewModel.offRouteViolations = 0
                             viewModel.rerouteIfNeeded()
                             isPresented = false
                         } label: {
