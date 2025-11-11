@@ -21,7 +21,7 @@ struct ProgressAttributes: ActivityAttributes {
 struct ProgressLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: ProgressAttributes.self) { context in
-            // 잠금화면 영역 (Lock Screen View)
+            // MARK: - lock screen
             VStack(spacing: 0) {
                 HStack(alignment: .top, spacing: 9){
                     Image(RouteStage(rawValue: context.state.stage)?.image ?? "QuestionMark")
@@ -58,24 +58,52 @@ struct ProgressLiveActivity: Widget {
             .padding(.vertical, 30)
             .activityBackgroundTint(Color.liveBackground)
         } dynamicIsland: { context in
-            // Dynamic Island View
             DynamicIsland {
-                DynamicIslandExpandedRegion(.leading) {
-
+                // MARK: - Expanded dynamic
+                DynamicIslandExpandedRegion(.leading){
+                    Image(RouteStage(rawValue: context.state.stage)?.expandImage ?? "BusIcon")
+                        .resizable()
+                        .frame(width: 48, height: 48)
+                        .padding(.top, 15)
                 }
-                DynamicIslandExpandedRegion(.trailing) {
-
+                
+                DynamicIslandExpandedRegion(.center) {
+                    HStack(alignment: .top, spacing: 0) {
+                        VStack(alignment:.leading, spacing: 3){
+                            Text(ProgressLiveActivityManager.description(for: context.state.stage, destination: context.state.destination))
+                                .font(.presemi18)
+                                .foregroundColor(.liveTitle)
+                                .multilineTextAlignment(.leading)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            
+                            Text(
+                                ProgressLiveActivityManager.subDescription(
+                                    for: context.state.stage,
+                                    leftDistance: context.state.leftDistance ?? context.state.totalDistance,
+                                    remainingBusStops: context.state.remainingBusStops,
+                                    busTravelTime: context.state.busTravelTime
+                                )
+                            )
+                            .font(.premed12)
+                            .foregroundColor(.liveSubtitle)
+                        }
+                        .padding(.leading, 9)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                DynamicIslandExpandedRegion(.bottom) {
-
-                }
-            } compactLeading: {
+            }
+            // MARK: - compact dynamic
+            compactLeading: {
                 HStack{
                     Image(RouteStage(rawValue: context.state.stage)?.minimalImage ?? "BusIcon")
                         .padding(.trailing, 5)
                 }
-            } compactTrailing: {
-            } minimal: {
+            }
+            compactTrailing: { }
+            // MARK: - compact minimal
+            minimal: {
                 Image(RouteStage(rawValue: context.state.stage)?.minimalImage ?? "BusIcon")
             }
             .widgetURL(URL(string: "http://www.apple.com"))
@@ -147,8 +175,21 @@ extension ProgressAttributes.ContentState {
     }
 }
 
-// ⭐️ 파일 스코프 (전역)에서 선언
-#Preview("Notification", as: .content, using: ProgressAttributes.preview) {
+
+#Preview("lockscreen", as: .content, using: ProgressAttributes.preview) {
+    ProgressLiveActivity()
+} contentStates: {
+    ProgressAttributes.ContentState.walking
+    ProgressAttributes.ContentState.onBus
+}
+
+#Preview("dynamic", as: .dynamicIsland(.expanded), using: ProgressAttributes.preview) {
+    ProgressLiveActivity()
+} contentStates: {
+    ProgressAttributes.ContentState.walking
+    ProgressAttributes.ContentState.onBus
+}
+#Preview("compact", as: .dynamicIsland(.compact), using: ProgressAttributes.preview) {
     ProgressLiveActivity()
 } contentStates: {
     ProgressAttributes.ContentState.walking

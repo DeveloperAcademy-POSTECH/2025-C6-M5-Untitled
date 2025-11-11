@@ -24,4 +24,12 @@ enum RouteStage: String, CaseIterable {
             return "BusIcon"
         }
     }
+    var expandImage: String {
+        switch self {
+        case  .walkingToDestination, .walkingToBus:
+            return "expandwalk"
+        case .waitingForBus, .onBus:
+            return "expandbus"
+        }
+    }
 }
