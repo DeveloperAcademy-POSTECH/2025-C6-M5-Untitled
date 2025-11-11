@@ -392,22 +392,13 @@ final class WalkingViewModel: NSObject, ObservableObject {
                 ? tmapCoordinates[nextIdx]
                 : lastOrSelfCoordinate(default: location.coordinate)
 
-            let bearingAbs = bearing(from: p.projected, to: target)
+            let bearingAbs = bearing(from: location.coordinate, to: target)
             arrowBearing = fmod((bearingAbs - hdg + 360), 360)
         }
 
         // 6) 라이브 액티비티
-        if let journey = journey, let journeyIndex = journeyIndex {
-            let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
-            let _ = isLastNode
-                ? RouteStage.walkingToDestination.rawValue
-                : RouteStage.walkingToBus.rawValue
-
-            ProgressLiveActivityManager.shared.updateWalkingActivity(
-                newLeftDistance: remain
-            )
-        }
-
+        ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
+        
         // 7) 오프루트 감지 (워밍업 + 디바운스 + 쿨다운)
         let now = Date()
 
