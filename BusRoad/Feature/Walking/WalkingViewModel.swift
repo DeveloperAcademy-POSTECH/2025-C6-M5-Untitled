@@ -23,13 +23,13 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var reachedFinalDestination: Bool = false        // 목적지 직선거리 < 6m
 
     private let segmentArrivalDistance: CLLocationDistance = 6            // 경로 단계 도착
-    private let finalArrivalStraightDistance: CLLocationDistance = 6      // 최종 도착(직선거리)
     private let journeyManager: JourneyManager
     private let recalcCooldown: TimeInterval = 45
     private let accuracyGate: CLLocationAccuracy = 30
     private let warmupSeconds: TimeInterval = 5
     private let offRouteDebounce: TimeInterval = 2  // 경로 2회 이상 이탈 시만 알럿
     
+    private var finalArrivalStraightDistance: CLLocationDistance = 6      // 최종 도착(직선거리)
     private var hasCalculatedRoute = false
     private var currentSegmentIndex: Int = 0
     private var cumulativeMeters: [Double] = [] // coords[i]까지 누적 길이
@@ -58,6 +58,9 @@ final class WalkingViewModel: NSObject, ObservableObject {
            let index = journeyManager.journeyIndex {
             self.journey = journey
             self.journeyIndex = index
+            if index == journey.nodes.count - 1 {   // 최종도착 도보일 경우에만 12m 반경
+                finalArrivalStraightDistance = 12
+            }
         }
     }
 
