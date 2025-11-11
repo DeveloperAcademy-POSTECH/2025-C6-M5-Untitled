@@ -17,19 +17,29 @@ struct BusPassedCard: View {
                     .foregroundColor(.primaryStrong)
                     .cornerRadius(20)
                 
-                VStack(spacing: 0) {
-                    Text("버스에 탑승하셨나요?")
-                        .font(.prebold30Scaled)
-                        .foregroundStyle(.subLight)
+                VStack(alignment: .center, spacing: 12.wScaled, content: {
+                    
+                    Image("passedBusCharacter")
+                        .resizable()
+                        .frame(width: 120, height: 97)
+                    
                     
                     Spacer()
                         .frame(height: 12.wScaled)
                     
+                    Text("버스에 탑승하셨나요?")
+                        .font(.prebold30Scaled)
+                        .foregroundStyle(.subLight)
+                    
                     Text("\(busNo) 버스가 지나갔어요")
                         .font(.premed24Scaled)
                         .foregroundStyle(.subLight)
-                }
+                })
             }
         
     }
+}
+
+#Preview {
+    BusPassedCard(busNo: "206")
 }
