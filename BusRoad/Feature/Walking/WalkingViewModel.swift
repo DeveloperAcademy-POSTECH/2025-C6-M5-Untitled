@@ -377,7 +377,12 @@ final class WalkingViewModel: NSObject, ObservableObject {
 
         // 4-3) arrived (기존 인터페이스 유지)
         if !manuallyArrived {
-            arrived = isFinalNode ? reachedFinalDestination : reachedSegmentEnd
+            arrived = isFinalNode ? reachedFinalDestination || (remain < segmentArrivalDistance) : reachedSegmentEnd
+        }
+        
+        // 4-4) arrived 확정 시 manual lock
+        if arrived && !manuallyArrived {
+            manuallyArrived = true
         }
 
         // 5) 화살표
