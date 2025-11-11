@@ -60,23 +60,20 @@ struct ProgressLiveActivity: Widget {
         } dynamicIsland: { context in
             DynamicIsland {
                 // MARK: - Expanded dynamic
-                DynamicIslandExpandedRegion(.leading){
-                    Image(RouteStage(rawValue: context.state.stage)?.expandImage ?? "BusIcon")
-                        .resizable()
-                        .frame(width: 48, height: 48)
-                        .padding(.top, 15)
-                }
-                
                 DynamicIslandExpandedRegion(.center) {
                     HStack(alignment: .top, spacing: 0) {
+                        Image(RouteStage(rawValue: context.state.stage)?.expandImage ?? "BusIcon")
+                            .resizable()
+                            .frame(width: 48, height: 48)
+                            .padding(.top, 15)
                         VStack(alignment:.leading, spacing: 3){
-                            Text(ProgressLiveActivityManager.description(for: context.state.stage, destination: context.state.destination))
+                            Text(ProgressLiveActivityManager.expandedDescription(for: context.state.stage, destination: context.state.destination))
                                 .font(.presemi18)
                                 .foregroundColor(.liveTitle)
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(2)
                                 .fixedSize(horizontal: false, vertical: true)
-                            
+                                .padding(.top, 15)
                             Text(
                                 ProgressLiveActivityManager.subDescription(
                                     for: context.state.stage,
@@ -88,7 +85,7 @@ struct ProgressLiveActivity: Widget {
                             .font(.premed12)
                             .foregroundColor(.liveSubtitle)
                         }
-                        .padding(.leading, 9)
+                        .padding(.leading, 15)
                         Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)

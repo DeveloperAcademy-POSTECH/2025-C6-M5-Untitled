@@ -65,6 +65,26 @@ final class ProgressLiveActivityManager {
         return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
     }
     
+    static func expandedDescription(for stage: String, destination: String) -> String {
+        
+        let baseText: String
+        switch stage {
+        case "walkingToBus", "walkingToDestination":
+            baseText = "\(destination)까지 걷기"
+        case "waitingForBus":
+            baseText = "\(destination)에서 승차"
+        case "onBus":
+            baseText = "\(destination)에서 하차"
+        default:
+            return ""
+        }
+        
+        // splitTextToFit을 static 함수로 변경하여 호출
+        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: 18)
+        
+        return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
+    }
+    
     // static 함수로 변경
     private static func splitTextToFit(text: String, maxCharactersPerLine: Int) -> String {
         guard text.count > maxCharactersPerLine else {
