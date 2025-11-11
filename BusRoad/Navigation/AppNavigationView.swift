@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AppNavigationView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
+    @StateObject private var voiceSearchManager = VoiceSearchManager.shared
     
     var body: some View {
         NavigationStack(path: $coordinator.path) {
@@ -22,14 +23,22 @@ struct AppNavigationView: View {
                     case .mainSearch:
                         MainSearchView()
                             .toolbar(.hidden, for: .navigationBar)
-                    case .voiceSearch:
-                        VoiceSearchView()
-                            .toolbar(.hidden, for: .navigationBar)
                     case .journeyFlow:
                         JourneyFlowView()
                             .toolbar(.hidden, for: .navigationBar)
                     }
                 }
+        }
+        .fullScreenCover(isPresented: $voiceSearchManager.isPresented) {
+            VoiceSearchView(
+                onCompleted: { text in
+                    voiceSearchManager.onCompleted?(text)
+                    voiceSearchManager.dismiss()
+                },
+                onDismiss: {
+                    voiceSearchManager.dismiss()
+                }
+            )
         }
     }
 }

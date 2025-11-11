@@ -32,7 +32,6 @@ struct MainSearchView: View {
                     onMicTap: {
                         viewModel.handleMicTap()
                         isFocused = false
-                        coordinator.push(.voiceSearch)
                     },
                     onSelect: { item in
                         viewModel.selectPlace(item: item)
@@ -53,7 +52,6 @@ struct MainSearchView: View {
                     onMicTap: {
                         viewModel.handleMicTap()
                         isFocused = false
-                        coordinator.push(.voiceSearch)
                     },
                     onClear: {
                         viewModel.clearQuery()

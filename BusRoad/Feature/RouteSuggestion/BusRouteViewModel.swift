@@ -365,3 +365,27 @@ extension BusRouteViewModel {
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }
+
+// MARK: - 음성 검색 관련 메서드들
+extension BusRouteViewModel {
+    /// 마이크 버튼 탭 → 풀스크린 뷰 열기
+    func handleMicTap() {
+        VoiceSearchManager.shared.present { [weak self] text in
+            self?.handleVoiceSearchCompleted(text)
+        }
+    }
+    
+    /// 음성 검색 완료 → 쿼리 반영 + 검색 실행
+    func handleVoiceSearchCompleted(_ text: String) {
+        query = text
+        isSearchMode = true
+        Task {
+            await search()
+        }
+    }
+    
+    /// 음성 검색 뷰에서 닫기
+    func dismissVoiceSearch() {
+        VoiceSearchManager.shared.dismiss()
+    }
+}

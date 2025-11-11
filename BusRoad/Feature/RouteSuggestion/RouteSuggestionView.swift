@@ -28,7 +28,7 @@ struct RouteSuggestionView: View {
                 },
                 onMicTap: {
                     isFocused = false
-                    coordinator.push(.voiceSearch)
+                    viewModel.handleMicTap()
                 },
                 onSelect: { item in
                     viewModel.selectPlace(item: item, locationType: viewModel.locationType)
