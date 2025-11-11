@@ -41,12 +41,6 @@ struct DevRouteMapView: View {
                 MapPolyline(coordinates: tmapCoordinates)
                     .stroke(routeColor, lineWidth: 5)
             }
-            
-            // 1-1) 경로의 모든 좌표에 작은 점 표시 (디버깅용!!)
-            ForEach(Array(tmapCoordinates.enumerated()), id: \.offset) { idx, coord in
-                MapCircle(center: coord, radius: 1.5)   // 반지름 1.5m 정도의 작은 점
-                    .foregroundStyle(.red.opacity(0.8))
-            }
 
             // 2) 목적지 (경로 없을 때)
             if let dest = destination, tmapCoordinates.isEmpty {
