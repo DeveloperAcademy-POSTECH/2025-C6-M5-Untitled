@@ -71,10 +71,7 @@ struct BeforeRideView: View {
                                 
                                 Button {
                                     Task { @MainActor in
-                                        
-                                        //  탑승 정류장 통과 처리
-                                        proximityManager.markBoardingStationPassed()
-                                        
+                                                                                
                                         coordinator.advanceJourneyStage()
                                             
                                         if let index = viewModel.index, let journey = viewModel.journey,
@@ -118,8 +115,6 @@ struct BeforeRideView: View {
                             }
                             Button {
                                 Task { @MainActor in
-                                    // 추가된 로직: 탑승 정류장 통과 처리
-                                    proximityManager.markBoardingStationPassed()
                                     
                                     coordinator.advanceJourneyStage()
                                     

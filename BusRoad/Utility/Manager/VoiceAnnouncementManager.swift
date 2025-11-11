@@ -21,7 +21,7 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
             try audioSession.setCategory(
                 .playback,  // 재생 모드
                 mode: .spokenAudio,  // 음성 전용
-                options: [.duckOthers]  // 다른 소리 줄이기
+                options: [.duckOthers, .mixWithOthers]  // 다른 소리 줄이기
             )
             try audioSession.setActive(true)
             print("[음성안내] 오디오 설정 완료!")
