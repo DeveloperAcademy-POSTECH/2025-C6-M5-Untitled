@@ -352,6 +352,12 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 4-1) 경로(세그먼트) 단위의 도착
         let segmentRemain = segLen * (1 - p.t)
         reachedSegmentEnd = (segmentRemain < segmentArrivalDistance)
+        if reachedSegmentEnd {
+            // 세그먼트는 0...(count-2)까지만 유효
+            let cap = max(0, tmapCoordinates.count - 2)
+            // 뒤로 가지 않도록 하면서, 이번 프레임의 투영 세그먼트+1까지는 최소 전진
+            currentSegmentIndex = min(max(currentSegmentIndex, p.segmentIndex + 1), cap)
+        }
 
         // 4-2) 마지막 세그먼트 여부
         let isLastRouteSegment = (p.segmentIndex == tmapCoordinates.count - 2)
