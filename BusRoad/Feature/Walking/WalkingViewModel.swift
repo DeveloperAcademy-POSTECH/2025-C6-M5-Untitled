@@ -176,13 +176,9 @@ final class WalkingViewModel: NSObject, ObservableObject {
         print("안내 카드: \(nextCards)")
 
         // 5) 라이브액티비티
-        if let journey = journey, let journeyIndex = journeyIndex {
-            let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
-            let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-            ProgressLiveActivityManager.totalDistance = totalMeters
-            ProgressLiveActivityManager.maxProgressValue = 0
-            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: totalMeters)
-        }
+        ProgressLiveActivityManager.totalDistance = totalMeters
+        ProgressLiveActivityManager.maxProgressValue = 0
+        ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: totalMeters)
     }
 
     // MARK: - Apple Maps Fallback
@@ -222,11 +218,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
             ProgressLiveActivityManager.totalDistance = self.totalMeters
             self.bigDistanceText = "\(Int(self.totalMeters)) m"
 
-            if let journey = self.journey, let journeyIndex = self.journeyIndex {
-                let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
-                let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-                ProgressLiveActivityManager.shared.updateWalkingActivity( newLeftDistance: self.totalMeters)
-            }
+            ProgressLiveActivityManager.shared.updateWalkingActivity( newLeftDistance: self.totalMeters)
             self.finishReroute()
         }
     }
@@ -358,26 +350,22 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 4) 도착 판정 ------------------------------
 
         // 4-1) 경로(세그먼트) 단위의 도착
-        reachedSegmentEnd = (remain < segmentArrivalDistance)
+        let segmentRemain = segLen * (1 - p.t)
+        reachedSegmentEnd = (segmentRemain < segmentArrivalDistance)
 
-        // 4-2) 실제 목적지 도착 여부
-        var isFinalNode = false
-        if let journey = journey, let idx = journeyIndex {
-            isFinalNode = (idx == journey.nodes.count - 1)
-        }
+        // 4-2) 마지막 세그먼트 여부
+        let isLastRouteSegment = (p.segmentIndex == tmapCoordinates.count - 2)
 
-        if isFinalNode, let dest = pendingDestination {
+        if let dest = pendingDestination {
             let straight = location.distance(
                 from: CLLocation(latitude: dest.latitude, longitude: dest.longitude)
             )
-            reachedFinalDestination = (straight < finalArrivalStraightDistance)
-        } else {
-            reachedFinalDestination = false
+            reachedFinalDestination = isLastRouteSegment && (straight < finalArrivalStraightDistance)
         }
 
-        // 4-3) arrived (기존 인터페이스 유지)
+        // 4-3) arrived
         if !manuallyArrived {
-            arrived = isFinalNode ? reachedFinalDestination || (remain < segmentArrivalDistance) : reachedSegmentEnd
+            arrived = reachedFinalDestination || (remain < finalArrivalStraightDistance)
         }
         
         // 4-4) arrived 확정 시 manual lock
@@ -424,7 +412,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         var pointEff = offRouteThreshold + 15 + min(40.0, acc * 0.3)
 
         // (d) 목적지 근방일 경우 threshold 완화 ----------------
-        if isFinalNode {
+        if isLastRouteSegment {
             projEff += 20
             pointEff += 20
         }
