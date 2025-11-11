@@ -91,11 +91,17 @@ final class ProgressLiveActivityManager {
                 return "\(walkingHours)시간 남았어요"
             } else if walkingHours > 0 {
                 return "\(walkingHours)시간 \(walkingMinutes)분 남았어요"
+            } else if walkingHours == 0 && walkingMinutes < 2 {
+                return "목적지 근처에요"
             } else {
                 return "\(walkingMinutes)분 남았어요"
             }
         case "onBus":
-            return "\(remainingBusStops)정류장 남았어요"
+            if remainingBusStops == 1 {
+                return "이번 정류장에서 내리세요"
+            } else{
+                return "\(remainingBusStops)정류장 남았어요"
+            }
         case "waitingForBus":
             let hours = busTravelTime / 60
             let minutes = busTravelTime % 60
@@ -147,7 +153,7 @@ final class ProgressLiveActivityManager {
         }
     }
     
-    func updateWalkingActivity(stage: String, newLeftDistance: Double) {
+    func updateWalkingActivity(newLeftDistance: Double) {
         let timestamp = Date().timeIntervalSince1970
 
         guard let currentActivity = currentActivity else { return }
@@ -166,7 +172,7 @@ final class ProgressLiveActivityManager {
         // 이미 waitingForBus / onBus / walkingToDestination 등으로 넘어갔으면 걷기 업데이트 무시
         guard currentStage == RouteStage.walkingToBus.rawValue ||
               currentStage == RouteStage.walkingToDestination.rawValue else {
-            print("[걷기 \(String(format: "%.3f", timestamp))] stage 불일치 (current=\(currentStage), param=\(stage)) → 업데이트 무시")
+            print("[걷기 \(String(format: "%.3f", timestamp))] stage 불일치 (current=\(currentStage)) → 업데이트 무시")
             return
         }
 

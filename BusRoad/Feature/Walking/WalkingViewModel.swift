@@ -195,7 +195,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
             let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
             ProgressLiveActivityManager.totalDistance = totalMeters
             ProgressLiveActivityManager.maxProgressValue = 0
-            ProgressLiveActivityManager.shared.updateWalkingActivity(stage: stage, newLeftDistance: totalMeters)
+            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: totalMeters)
         }
         
         // 재탐색 종료
@@ -242,7 +242,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
             if let journey = self.journey, let journeyIndex = self.journeyIndex {
                 let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
                 let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-                ProgressLiveActivityManager.shared.updateWalkingActivity(stage: stage, newLeftDistance: self.totalMeters)
+                ProgressLiveActivityManager.shared.updateWalkingActivity( newLeftDistance: self.totalMeters)
             }
             self.finishReroute()
         }
@@ -385,8 +385,18 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 4) 도착 판정
         if let last = tmapCoordinates.last {
             let destD = location.distance(from: CLLocation(latitude: last.latitude, longitude: last.longitude))
-            if remain < max(stepSwitchDistance, 8), destD < arrivalRadius {
-                arrived = true
+            if let journey = journey,
+                let index = journeyIndex,
+                index == journey.nodes.count - 1 {
+                if remain < max(stepSwitchDistance, 6), destD < arrivalRadius {
+                    arrived = true
+                }
+            } else if let journey = journey,
+                      let index = journeyIndex,
+                      index != journey.nodes.count - 1 {
+                if remain < max(stepSwitchDistance, 12), destD < arrivalRadius {
+                    arrived = true
+                }
             }
         }
         
@@ -402,7 +412,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         if let journey = journey, let journeyIndex = journeyIndex {
             let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
             let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-            ProgressLiveActivityManager.shared.updateWalkingActivity(stage: stage, newLeftDistance: remain)
+            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
         }
         
         // 7) Anti False-OffRoute + 실제 OffRoute 탐지
