@@ -24,10 +24,11 @@ struct BeforeRideView: View {
                     
                     if let journey = viewModel.journey, let index = viewModel.index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
-                            .padding(32)
+                            .padding(.horizontal,32)
+                            .padding(.vertical, 24)
                     }
                 }
-                .frame(height: 144)
+                .frame(height: 128)
                 
                 LineDivider()
                 

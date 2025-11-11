@@ -18,7 +18,7 @@ struct DestinationTextField : View {
         HStack(spacing: 12) {
             Text("도착")
                 .foregroundColor(Color.subPoint)
-                .font(.prereg20)
+                .font(.prereg20Scaled)
             
             Divider()
                 .background(Color.greyDisable)
@@ -40,7 +40,7 @@ struct DestinationTextField : View {
                 HStack{
                     Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
                         .foregroundColor(Color.greyHeavy)
-                        .font(.prereg20)
+                        .font(.prereg20Scaled)
                         .lineLimit(1)
                     Spacer()
                 }
@@ -49,7 +49,7 @@ struct DestinationTextField : View {
         }
         .padding(.leading, 20)
         .padding(.trailing, 0)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .background {
             RoundedRectangle(cornerRadius: 5)
                 .foregroundStyle(Color.background)
