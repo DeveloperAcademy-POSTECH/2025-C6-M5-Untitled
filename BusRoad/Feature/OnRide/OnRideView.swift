@@ -133,6 +133,12 @@ struct OnRideView: View {
                 .onAppear {
                     proximityManager.enableVoiceAnnouncement()
                     
+                    let arrival = ArrivalInfoManager.shared
+                        proximityManager.applyTagoContext(
+                            cityCode: arrival.lastCityCode,
+                            routeId: arrival.trackedBusRouteIdPublic
+                        )
+                    
                     guard
                         let journey = coordinator.journeyManager.selectedJourney,
                         let nodeIndex = coordinator.journeyManager.journeyIndex,
