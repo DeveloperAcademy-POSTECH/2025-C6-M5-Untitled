@@ -21,6 +21,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var offRouteThreshold: CLLocationDistance = 25
     @Published var reachedSegmentEnd: Bool = false              // 경로 잔여거리 < 6m
     @Published var reachedFinalDestination: Bool = false        // 목적지 직선거리 < 6m
+    @Published var manuallyArrived: Bool = false
 
     private let segmentArrivalDistance: CLLocationDistance = 6            // 경로 단계 도착
     private let journeyManager: JourneyManager
@@ -118,6 +119,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         showRerouteAlert = false
         reachedSegmentEnd = false
         reachedFinalDestination = false
+        manuallyArrived = false
     }
 
     private func tryCalculateIfReady() {
@@ -315,6 +317,9 @@ final class WalkingViewModel: NSObject, ObservableObject {
 
     // 핵심 업데이트 (스냅/잔여/도착/오프루트)
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
+        
+        guard !manuallyArrived else { return }
+        
         guard !tmapCoordinates.isEmpty else {
             bigDistanceText = "-- m"
             return
@@ -354,7 +359,9 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 4-3) 기존 arrived는 호환용으로 유지:
         //      - 마지막 노드면 실제 도착(reachedFinalDestination)
         //      - 그 외에는 경로 단계 도착(reachedSegmentEnd)
-        arrived = isFinalNode ? reachedFinalDestination : reachedSegmentEnd
+        if !manuallyArrived {
+               arrived = isFinalNode ? reachedFinalDestination : reachedSegmentEnd
+           }
 
         // 5) 화살표 (현재 heading 기준 상대 방위)
         if let hdg = heading?.trueHeading, hdg >= 0 {
