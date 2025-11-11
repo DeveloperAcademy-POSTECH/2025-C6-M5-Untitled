@@ -113,11 +113,10 @@ struct WalkingView: View {
         }
         .overlay(alignment: .center) {
             Group {
-                if let journey = viewModel.journey,
-                   let index = viewModel.journeyIndex,
-                   viewModel.showRerouteAlert {
+                if viewModel.showRerouteAlert {
                     WalkingRerouteAlert(
-                        isPresented: $viewModel.showRerouteAlert
+                        isPresented: $viewModel.showRerouteAlert,
+                        viewModel: viewModel
                     )
                 } else {
                     EmptyView()
