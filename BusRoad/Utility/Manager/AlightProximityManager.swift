@@ -26,11 +26,14 @@ final class AlightProximityManager: ObservableObject {
     private var cancellable: AnyCancellable?
     private var hasEnteredRadius: Bool = false // 정류장 안에 들어갔는지
     private let detectionRadius: CLLocationDistance = 15  // 15m 반경
-    private var initialDistance: CLLocationDistance?      // 목적지까지 초기 거리
-    private var recentDistances: [CLLocationDistance] = []  // GPS 튀는 것 방지
-    private let smoothCount: Int = 5                      // 최근 N개 평균
     private var maxProgress: CGFloat = 0                  // 뒤로가기 금지
     private var shouldAnnounce: Bool = false
+    
+    // 정류장 스킵 감지용
+    private var previousDistance: CLLocationDistance? = nil
+    private var closestDistance: CLLocationDistance = .infinity
+    private var increasingDistanceCount: Int = 0
+    private let skipThreshold: CLLocationDistance = 50  // 50m
     
     // MARK: - 콜백
     var onStationPassed: ((Int, String) -> Void)?
@@ -59,46 +62,21 @@ final class AlightProximityManager: ObservableObject {
         self.hasEnteredRadius = false
         self.progress = 0
         self.hasArrived = false
-        
-        // 첫 정류장(인덱스 0)은 스킵하고 인덱스 1부터 시작
-        if stations.count > 1 {
-            self.currentStationIndex = 1
-            self.remainingStations = stations.count - 1
-            self.canAlight = (remainingStations <= 1)
-            print("[AlightProximityManager] 초기화 및 첫 정류장 스킵: 인덱스 1부터 시작, 남은 정류장 \(self.remainingStations)개")
-        } else {
-            self.currentStationIndex = 0
-            self.remainingStations = stations.count
-            self.canAlight = (stations.count == 1)
-            print("[AlightProximityManager] 초기화: 정류장 \(self.remainingStations)개")
-        }
+        self.currentStationIndex = 1
+        self.remainingStations = max(0, stations.count - 1)  // 탑승지 제외한 남은 정류장
+        self.canAlight = (remainingStations <= 1)
 
         // 진행률 계산 초기화
-        initialDistance = nil
-        recentDistances.removeAll()
         maxProgress = 0
         
+        // 정류장 추적 초기화
+        closestDistance = .infinity
+        previousDistance = nil
+        increasingDistanceCount = 0
+        
+        print("[AlightProximityManager] 초기화: 전체 \(stations.count)개, 남은 정류장 \(remainingStations)개")
+        
         ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
-    }
-    
-    /// '탔어요' 버튼이 눌렸을 때, 탑승한 정류장(index 1)까지 통과한 것으로 처리합니다.
-    func markBoardingStationPassed() {
-        // configure()에서 currentStationIndex는 1로 초기화되어 있어야 함.
-        guard stations.count >= 1, currentStationIndex == 0 else {
-            print("[AlightProximityManager] markBoardingStationPassed: 정류장 수가 부족하거나 이미 통과 처리됨.")
-            return
-        }
-
-        currentStationIndex = 1
-        remainingStations = stations.count - currentStationIndex
-        canAlight = (remainingStations <= 1)
-        
-        print("[AlightProximityManager] 탑승 정류장 통과 처리 완료: 남은 정류장 \(remainingStations)개")
-        
-        // Live Activity 즉시 업데이트
-        Task {
-            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
-        }
     }
     
     func start() {
@@ -137,11 +115,12 @@ final class AlightProximityManager: ObservableObject {
         canAlight = false
         progress = 0
         hasArrived = false
-        
-        // 진행률 계산 초기화
-        initialDistance = nil
-        recentDistances.removeAll()
         maxProgress = 0
+        
+        // 정류장 추적 초기화
+        closestDistance = .infinity
+        previousDistance = nil
+        increasingDistanceCount = 0
     }
     
     func enableVoiceAnnouncement() {
@@ -156,8 +135,6 @@ final class AlightProximityManager: ObservableObject {
     
     // MARK: - 정류장 근접 확인
     private func checkStationProximity(currentLocation: CLLocation) {
-        
-        
         let nextStationIndex = currentStationIndex
         
         // 출발지(첫 번째 정류장) 위치
@@ -200,15 +177,21 @@ final class AlightProximityManager: ObservableObject {
         let distance = currentLocation.distance(from: stationLocation)
         self.lastDistance = distance
         
+        // 가장 가까웠던 거리 업데이트
+        if distance < closestDistance {
+            closestDistance = distance
+        }
+        
         let isLastStation = (nextStationIndex == stations.count - 1)
         
-        // 정류장 통과 감지
+        //정류장 통과 감지 (3단계 체크)
+        // 1단계: 반경 안에 들어왔는지
         if distance <= detectionRadius {
             if !hasEnteredRadius {
                 hasEnteredRadius = true
+                increasingDistanceCount = 0
                 print("[AlightProximityManager] 정류장 [\(nextStationIndex)] 반경 진입: \(nextStation.stationName)")
                 
-                // 마지막 정류장이면 진입만 해도 도착으로 바뀜
                 if isLastStation {
                     hasArrived = true
                     progress = 1.0
@@ -216,49 +199,125 @@ final class AlightProximityManager: ObservableObject {
                     print("[AlightProximityManager] 목적지 도착!")
                 }
             }
+            previousDistance = distance
+            
         } else {
+            // 2단계: 정상적으로 들어갔다 나왔는지
             if hasEnteredRadius {
+                print("[AlightProximityManager] 정상 통과")
                 stationPassed(index: nextStationIndex, name: nextStation.stationName)
+                resetStationTracking()
+                
+            } else {
+                // 3단계: 놓친 정류장 감지
+                var shouldSkip = false
+                var skipReason = ""
+                
+                // 조건 1: 거리가 계속 멀어지고 있는지
+                if let prevDist = previousDistance, distance > prevDist {
+                    increasingDistanceCount += 1
+                } else {
+                    increasingDistanceCount = 0
+                }
+                
+                // 조건 2: 가까이 갔었는데 지금은 충분히 멀어졌는지
+                let wasClose = closestDistance < skipThreshold
+                let nowFarEnough = distance > skipThreshold
+                
+                // 조건 3: 연속으로 멀어지고 있는지
+                let consistentlyMovingAway = increasingDistanceCount >= 3
+                
+                // 모든 조건을 만족하면 스킵
+                if wasClose && nowFarEnough && consistentlyMovingAway {
+                    shouldSkip = true
+                    skipReason = "가까이 갔었으나(\(Int(closestDistance))m) 지금은 멀어짐(\(Int(distance))m), 3번 연속 멀어짐"
+                }
+                
+                // 추가 안전장치: 너무 멀어지면 무조건 스킵 (100m 이상)
+                if distance > 100 && closestDistance < 100 {
+                    shouldSkip = true
+                    skipReason = "100m 이상 멀어짐 (최소거리: \(Int(closestDistance))m)"
+                }
+                
+                if shouldSkip {
+                    print("[AlightProximityManager] 정류장 [\(nextStationIndex)] 스킵: \(nextStation.stationName)")
+                    print("[AlightProximityManager] 이유: \(skipReason)")
+                    stationPassed(index: nextStationIndex, name: nextStation.stationName)
+                    resetStationTracking()
+                }
+                
+                previousDistance = distance
             }
         }
     }
     
-    // 진행률 계산
+    // 정류장 추적 상태 초기화
+    private func resetStationTracking() {
+        hasEnteredRadius = false
+        closestDistance = .infinity
+        previousDistance = nil
+        increasingDistanceCount = 0
+    }
+    
+    // 진행률 계산 (구간별 방식)
     private func updateProgress(
         startLocation: CLLocation,
         destinationLocation: CLLocation,
         currentLocation: CLLocation
     ) {
-        // 최초 업데이트에서 총 거리 저장 (첫 정류장 → 마지막 정류장)
-        if initialDistance == nil {
-            let totalDistance = startLocation.distance(from: destinationLocation)
-            initialDistance = totalDistance
-            print("[AlightProximityManager] 총 이동 거리: \(Int(totalDistance))m")
-        }
+        // 전체 구간 수 (정류장 수 - 1)
+        let totalSegments = max(stations.count - 1, 1)
         
-        // 현재 위치에서 목적지까지 남은 거리
-        let remainingDistance = currentLocation.distance(from: destinationLocation)
+        // 이미 통과한 정류장 수 (currentStationIndex는 다음 감지할 정류장이므로 -1)
+        let passedStations = max(currentStationIndex - 1, 0)
         
-        // 최근 N개 이동 평균 (GPS 튀는 것 방지)
-        recentDistances.append(remainingDistance)
-        if recentDistances.count > smoothCount {
-            recentDistances.removeFirst()
-        }
-        let smoothed = recentDistances.reduce(0, +) / Double(recentDistances.count)
+        // 기본 진행률 (통과한 구간들)
+        let baseProgress = CGFloat(passedStations) / CGFloat(totalSegments)
         
-        // 진행률: 1 - (남은거리/총거리)
-        if let total = initialDistance, total > 0 {
-            let ratio = 1.0 - (smoothed / total)
-            let clamped = CGFloat(min(max(ratio, 0), 1))
+        // 현재 구간의 진행률 계산
+        var currentSegmentProgress: CGFloat = 0
+        
+        if currentStationIndex > 0 && currentStationIndex < stations.count {
+            // 이전 정류장 (방금 통과한 정류장)
+            let prevStation = stations[currentStationIndex - 1]
+            let prevLocation = CLLocation(
+                latitude: prevStation.latitude,
+                longitude: prevStation.longitude
+            )
             
-            // 항상 최대값 유지
-            maxProgress = max(maxProgress, clamped)
-            progress = maxProgress
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: Double(self.progress))
+            // 다음 정류장 (지금 가고 있는 정류장)
+            let nextStation = stations[currentStationIndex]
+            let nextLocation = CLLocation(
+                latitude: nextStation.latitude,
+                longitude: nextStation.longitude
+            )
+            
+            // 이 구간의 총 거리
+            let segmentDistance = prevLocation.distance(from: nextLocation)
+            
+            // 이전 정류장에서 현재 위치까지의 거리
+            let distanceFromPrev = currentLocation.distance(from: prevLocation)
+            
+            // 현재 구간에서의 진행률 (0.0 ~ 1.0)
+            if segmentDistance > 0 {
+                let segmentRatio = min(distanceFromPrev / segmentDistance, 1.0)
+                // 전체 진행률에서 현재 구간이 차지하는 비율
+                currentSegmentProgress = CGFloat(segmentRatio) / CGFloat(totalSegments)
             }
-        } else {
-            progress = 0
+        }
+        
+        // 최종 진행률 = 통과한 구간 + 현재 구간 진행도
+        let totalProgress = baseProgress + currentSegmentProgress
+        let clamped = min(max(totalProgress, 0), 1)
+        
+        // 항상 최대값 유지 (뒤로 가지 않게)
+        maxProgress = max(maxProgress, clamped)
+        progress = maxProgress
+        
+        print("[AlightProximityManager] 진행률: \(Int(progress * 100))% (통과: \(passedStations)/\(totalSegments), 현재구간: \(Int(currentSegmentProgress * CGFloat(totalSegments) * 100))%)")
+        
+        Task {
+            ProgressLiveActivityManager.shared.updateBusProgress(busProgress: Double(self.progress))
         }
     }
     
@@ -267,7 +326,6 @@ final class AlightProximityManager: ObservableObject {
         
         currentStationIndex = index + 1
         remainingStations = stations.count - currentStationIndex
-        hasEnteredRadius = false
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)개")
         
@@ -299,7 +357,6 @@ final class AlightProximityManager: ObservableObject {
             }
         }
         onStationPassed?(index, name)
-        
     }
     
     private func playHapticFeedback() {
@@ -311,10 +368,6 @@ final class AlightProximityManager: ObservableObject {
                 generator.notificationOccurred(.success)
             }
         }
-    }
-    
-    func testVoiceAnnouncement() {
-        voiceManager.announceTwoStations()
     }
 }
 

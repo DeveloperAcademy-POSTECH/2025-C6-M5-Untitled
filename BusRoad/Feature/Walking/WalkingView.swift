@@ -33,7 +33,7 @@ struct WalkingView: View {
                 
                 ZStack {
                     Color(.background).ignoresSafeArea()
-                    VStack {
+                    VStack(spacing: 0) {
                         if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                             if viewModel.arrived {
                                 AtArrival(journey: journey, index: index, viewModel: viewModel)
@@ -113,11 +113,10 @@ struct WalkingView: View {
         }
         .overlay(alignment: .center) {
             Group {
-                if let journey = viewModel.journey,
-                   let index = viewModel.journeyIndex,
-                   viewModel.showRerouteAlert {
+                if viewModel.showRerouteAlert {
                     WalkingRerouteAlert(
-                        isPresented: $viewModel.showRerouteAlert
+                        isPresented: $viewModel.showRerouteAlert,
+                        viewModel: viewModel
                     )
                 } else {
                     EmptyView()

@@ -51,6 +51,7 @@ struct WalkingAlert: View {
                             }
                         }
                         Button{
+                            viewModel.manuallyArrived = true
                             viewModel.arrived = true
                             viewModel.showVerifyingStop = true
                             if index + 1 < journey.nodes.count {

@@ -303,13 +303,6 @@ final class ProgressLiveActivityManager {
     func updateBusProgress(busProgress: Double) {
         let timestamp = Date().timeIntervalSince1970
         
-        if isBusUpdating {
-            print("[버스 진행률 \(String(format: "%.3f", timestamp))] 업데이트 중이므로 무시됩니다.")
-            // 진행률 업데이트는 빈번하므로 pending으로 저장하지 않고 최신값만 처리하도록 무시합니다.
-            // 대신, pendingRemainingBusStops에 값이 있다면 다음 업데이트에 처리될 것입니다.
-            return
-        }
-        
         guard let activity = Activity<ProgressAttributes>.activities.first else {
             print("[LiveActivity] No active activity found for bus progress update")
             return
@@ -321,15 +314,14 @@ final class ProgressLiveActivityManager {
         }
         lastBusProgressUpdateTime = now
         
-        isBusUpdating = true
-        
         Self.busProgress = busProgress
         
         let currentStage = activity.content.state.stage
         let currentLeftDistance = activity.content.state.leftDistance
-        let currentRemainingBusStops = activity.content.state.remainingBusStops
         
-        // 현재 progress 계산
+        // pending이 있으면 그 값 사용
+        let currentRemainingBusStops = pendingRemainingBusStops ?? activity.content.state.remainingBusStops
+        
         let progressValue = ProgressLiveActivityManager.progress(
             for: currentStage,
             totalDistance: activity.content.state.totalDistance,
@@ -338,32 +330,28 @@ final class ProgressLiveActivityManager {
             remainingBusStops: currentRemainingBusStops
         )
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            var updatedState = activity.content.state
-            updatedState.busProgress = busProgress
-            updatedState.currentProgressValue = progressValue
-            updatedState.maxProgressValue = max(updatedState.maxProgressValue, progressValue)
-            
-            // 보류된 remainingBusStops가 있다면 반영
-            if let pendingRemaining = self.pendingRemainingBusStops {
-                updatedState.remainingBusStops = pendingRemaining
-                updatedState.subDescription = Self.subDescription(
-                    for: updatedState.stage,
-                    leftDistance: updatedState.leftDistance,
-                    remainingBusStops: pendingRemaining,
-                    busTravelTime: updatedState.busTravelTime
-                )
-                print("[버스 진행률 \(String(format: "%.3f", timestamp))] 보류된 남은 정류장 \(pendingRemaining) 반영")
-            }
-            
-            Task {
-                await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-                print("[버스 진행률 \(String(format: "%.3f", timestamp))] 업데이트 완료. progressValue: \(progressValue)")
-                self.isBusUpdating = false // 업데이트 완료
-                
-                // 보류된 remainingBusStops가 반영되었으므로 초기화
-                self.pendingRemainingBusStops = nil
-            }
+        var updatedState = activity.content.state
+        updatedState.busProgress = busProgress
+        updatedState.currentProgressValue = progressValue
+        updatedState.maxProgressValue = max(updatedState.maxProgressValue, progressValue)
+        
+        // pending 값 반영
+        if let pendingRemaining = pendingRemainingBusStops {
+            updatedState.remainingBusStops = pendingRemaining
+            updatedState.subDescription = Self.subDescription(
+                for: updatedState.stage,
+                leftDistance: updatedState.leftDistance,
+                remainingBusStops: pendingRemaining,
+                busTravelTime: updatedState.busTravelTime
+            )
+            Self.remainingBusStops = pendingRemaining
+            print("[버스 진행률 \(String(format: "%.3f", timestamp))] 보류된 남은 정류장 \(pendingRemaining) 반영")
+            pendingRemainingBusStops = nil
+        }
+        
+        Task {
+            await activity.update(ActivityContent(state: updatedState, staleDate: nil))
+            print("[버스 진행률 \(String(format: "%.3f", timestamp))] 업데이트 완료. progressValue: \(progressValue)")
         }
     }
     

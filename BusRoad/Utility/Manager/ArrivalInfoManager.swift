@@ -13,6 +13,7 @@ final class ArrivalInfoManager: ObservableObject {
     static let shared = ArrivalInfoManager()
     
     private let busArrivalService: BusArrivalService
+    private let voiceManager: VoiceAnnouncementManager
     
     private var refreshTask: Task<Void, Never>? = nil
     private var lastNearestRouteId: String? = nil
@@ -31,8 +32,11 @@ final class ArrivalInfoManager: ObservableObject {
     
     
     // Init
-    private init(busArrivalService: BusArrivalService? = nil) {
+    private init(busArrivalService: BusArrivalService? = nil,
+                 voiceManager: VoiceAnnouncementManager = VoiceAnnouncementManager.shared
+    ) {
         self.busArrivalService = busArrivalService ?? BusArrivalService()
+        self.voiceManager = voiceManager
     }
     
     
@@ -263,9 +267,14 @@ final class ArrivalInfoManager: ObservableObject {
     private func updateUI(with item: BusArrivalItem) {
         let minutes = item.arrtime / 60
         let text = minutes < 1 ? "곧 도착" : "\(minutes)분 후"
+        let wasArrivingSoon = isArrivingSoon
         
         isArrivingSoon = minutes < 2
         nearestBusInfo = (busNo: cleanBusNumber(item.routeno), arrivalText: text)
+        
+        if !wasArrivingSoon && isArrivingSoon {
+                voiceManager.announceBusArrival()
+        }
     }
     
     
