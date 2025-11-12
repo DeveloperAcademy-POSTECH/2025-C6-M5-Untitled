@@ -29,10 +29,11 @@ struct CongratsView: View {
                             journeyIndex: journey.nodes.count - 1,
                             isBeforeRide: false
                         )
-                        .padding(32)
+                        .padding(.horizontal, 32)
+                        .padding(.vertical, 24)
                     }
                 }
-                .frame(height: 144)
+                .frame(height: 128)
                 
                 LineDivider()
                 

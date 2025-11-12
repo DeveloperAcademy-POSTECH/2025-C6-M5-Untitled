@@ -26,22 +26,24 @@ struct BeforeRideCard: View {
                     y: 0
                 )
             
-            VStack(spacing: 30.wScaled) {
+            VStack(spacing: 32.wScaled) {
                 VStack(spacing: 28.wScaled) {
                     HStack {
                         VStack(alignment: .leading, spacing: 8.wScaled) {
+                            
+                            Text("승차정류장")
+                                .font(.prereg24Scaled)
+                                .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .primaryHeavy)
+                            
                             MarqueeText(
                                 text: waitingStopName,
-                                font: .presemi32Scaled,
-                                uiFont: .presemi32Scaled,
+                                font: .presemi36Scaled,
+                                uiFont: .presemi36Scaled,
                                 startDelay: 1.0,
                                 alignment: .leading
                             )
                             .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .primaryHeavy)
                             
-                            Text("정류장에서 타야 해요.")
-                                .font(.prereg24Scaled)
-                                .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .primaryHeavy)
                         }
                         Spacer()
                     }

@@ -16,11 +16,15 @@ struct OnRideCard: View {
                 .cornerRadius(20)
                 .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 0)
             
-            VStack(spacing: 36.wScaled) {
+            VStack(spacing: 40.wScaled) {
                 
-                VStack(spacing: 48.wScaled) {
+                VStack(spacing: 40.wScaled) {
                     HStack {
                         VStack(alignment: .leading, spacing: 8.wScaled) {
+                            Text("하차 정류장")
+                                .font(.prereg24Scaled)
+                                .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                            
                             MarqueeText(
                                 text: busStopName,
                                 font: .presemi36Scaled,
@@ -30,9 +34,7 @@ struct OnRideCard: View {
                             )
                             .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                             
-                            Text("정류장에서 내려야 해요.")
-                                .font(.prereg24Scaled)
-                                .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
+                            
                         }
                         
                         Spacer()
@@ -45,7 +47,6 @@ struct OnRideCard: View {
                 
                 VStack(spacing: 11 .wScaled) {
                     HStack {
-                        Spacer()
                         if canAlight {
                             Text("이번 정류장에서 내리세요.")
                                 .font(.presemi20Scaled)
@@ -58,6 +59,8 @@ struct OnRideCard: View {
                                 .font(.prereg20Scaled)
                                 .foregroundStyle(canAlight ? .subNormal : .primaryStrong)
                         }
+                        
+                        Spacer()
                     }
                     
                     BusStopProgress(
@@ -88,7 +91,9 @@ struct OnRideCard: View {
                 .animationSpeed(1.0)
                 .frame(height: canAlight ? 222.wScaled : 200.wScaled)
                 .padding(.leading, canAlight ? 30.wScaled : -20.wScaled)
-        })
+        }
+        )
+      
     }
     
 }
