@@ -168,18 +168,6 @@ struct BeforeRideView: View {
                 let index = viewModel.index,
                 case let .bus(busNode) = journey.nodes[index] { 
                 viewModel.startRefreshing(for: busNode)
-                
-                // Live Activity를 waitingForBus 단계로 업데이트하는 로직 추가
-                Task {
-                    await ProgressLiveActivityManager.shared.updateStage(
-                        nextStage: RouteStage.waitingForBus.rawValue,
-                        nextDestination: busNode.start.name,  // 승차 정류장 이름
-                        totalDistance: 0,
-                        remainingBusStops: proximityManager.remainingStations, 
-                        busTravelTime: busNode.travelTime
-                    )
-                    print("[DEBUG] BeforeRideView - Live Activity waitingForBus 업데이트 완료. Destination: \(busNode.start.name)")
-                }
             }
             
             print("[BeforeRideView] 정류장 추적 시작")

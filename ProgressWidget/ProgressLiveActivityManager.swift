@@ -242,8 +242,8 @@ final class ProgressLiveActivityManager {
         print("[단계변경 \(String(format: "%.3f", timestamp))] 호출됨 - nextStage: \(nextStage), destination: \(nextDestination)")
         
         // 활성화된 Live Activity 확인
-        guard let activity = Activity<ProgressAttributes>.activities.first else {
-            print("[LiveActivity] No active activity found")
+        guard let activity = self.currentActivity else {
+            print("[LiveActivity] currentActivity nil")
             return
         }
         
