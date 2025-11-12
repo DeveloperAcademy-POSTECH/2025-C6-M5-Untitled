@@ -23,7 +23,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var reachedFinalDestination: Bool = false        // 목적지 직선거리 < 6m or 12m
     @Published var manuallyArrived: Bool = false
 
-    private let segmentArrivalDistance: CLLocationDistance = 8            // 경로 단계 도착
+    private let segmentArrivalDistance: CLLocationDistance = 15            // 경로 단계 도착
     private let journeyManager: JourneyManager
     private let recalcCooldown: TimeInterval = 45
     private let accuracyGate: CLLocationAccuracy = 50
