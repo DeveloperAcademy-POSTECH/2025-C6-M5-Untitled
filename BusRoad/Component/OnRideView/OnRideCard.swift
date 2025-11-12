@@ -83,7 +83,7 @@ struct OnRideCard: View {
                 .padding(.top, canAlight ? 12.wScaled : 0)
             
             // 메인 애니메이션 (조건에 따라 변경)
-            LottieView(animation: .named(canAlight ? "Yellow" : "OnRiding"))
+            LottieView(animation: .named(canAlight ? "YellowButtonPush" : "OnRiding"))
                 .playing(loopMode: .loop)
                 .animationSpeed(1.0)
                 .frame(height: canAlight ? 222.wScaled : 200.wScaled)
