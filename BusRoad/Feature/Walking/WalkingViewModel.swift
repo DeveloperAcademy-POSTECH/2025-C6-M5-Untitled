@@ -27,18 +27,22 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // TMAP 경로 데이터
     var tmapCoordinates: [CLLocationCoordinate2D] = []
-    var tmapTotalDistance: Int = 0  // public으로 변경
+    var tmapTotalDistance: Int = 0
     
     // 거리 임계값
     private let stepSwitchDistance: CLLocationDistance = 15
     private let arrivalDistance: CLLocationDistance = 6
-    private let offRouteThreshold: CLLocationDistance = 25
+    private let offRouteThreshold: CLLocationDistance = 50  // 경로이탈 25에서 50으로 증가
     
     // 오프루트 감지
     private var offRouteSince: Date? = nil
-    private let offRouteDebounce: TimeInterval = 3
+    private let offRouteDebounce: TimeInterval = 5  // 3에서 5초로 증가
     private var lastRecalcAt: Date = .distantPast
-    private let recalcCooldown: TimeInterval = 30
+    private let recalcCooldown: TimeInterval = 60  // 30에서 60초로 증가
+    
+    // GPS 워밍업
+    private var firstLocationTime: Date? = nil
+    private let gpsWarmupTime: TimeInterval = 5
     
     // 정확도 게이트
     private let accuracyGate: CLLocationAccuracy = 50
@@ -59,7 +63,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         loc.headingFilter = 1
         loc.headingOrientation = .portrait
         
-        // Journey 정보 설정
         if let journey = journeyManager.selectedJourney,
            let index = journeyManager.journeyIndex {
             self.journey = journey
@@ -94,6 +97,11 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         
         isRerouting = true
         showRerouteAlert = false
+        offRouteSince = nil
+        lastRecalcAt = Date()
+        
+        // 도착 상태는 리셋하지 않음
+        
         calculateRoute(origin: origin, dest: dest)
     }
     
@@ -103,7 +111,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         offRouteSince = nil
     }
     
-    func deferRealert(seconds: TimeInterval = 45) {
+    func deferRealert(seconds: TimeInterval = 90) {
         lastRecalcAt = Date()
         offRouteSince = nil
     }
@@ -114,15 +122,19 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         tmapTotalDistance = 0
         currentSegmentIndex = 0
         hasCalculatedRoute = false
-        arrived = false
-        manuallyArrived = false
+        
+        if !isRerouting {
+            arrived = false
+            manuallyArrived = false
+            showVerifyingStop = false
+        }
+        
         bigDistanceText = "-- m"
         arrowBearing = 0
         nextCards = []
         showRerouteAlert = false
-        isRerouting = false
         offRouteSince = nil
-        showVerifyingStop = false
+        firstLocationTime = nil
     }
     
     private func tryCalculateIfReady() {
@@ -143,7 +155,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
                 
                 await MainActor.run {
                     self.applyTmapRoute(tmapResponse)
-                    self.isRerouting = false
                 }
                 
             } catch {
@@ -158,16 +169,13 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - TMAP 경로 적용
     private func applyTmapRoute(_ tmapResponse: TmapPedestrianResponse) {
-        // 1. 총 거리 저장
         if let totalDistance = tmapResponse.features.first?.properties.totalDistance {
             self.tmapTotalDistance = totalDistance
             self.bigDistanceText = "\(totalDistance) m"
             print("📏 TMAP 총 거리: \(totalDistance)m")
         }
         
-        // 2. 좌표 수집
         var allCoordinates: [CLLocationCoordinate2D] = []
-        
         for feature in tmapResponse.features {
             for coord in feature.geometry.coordinates where coord.count >= 2 {
                 let coordinate = CLLocationCoordinate2D(
@@ -181,7 +189,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         self.tmapCoordinates = allCoordinates
         print("📍 좌표 \(allCoordinates.count)개 수집 완료")
         
-        // 3. 안내 카드
         var cards: [String] = []
         for feature in tmapResponse.features {
             if let description = feature.properties.description,
@@ -191,7 +198,15 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         }
         self.nextCards = Array(cards.prefix(3))
         
-        // 4. 라이브 액티비티
+        // 재탐색 완료 처리
+        if isRerouting {
+            isRerouting = false
+            if tmapTotalDistance < 10 {
+                arrived = true
+                manuallyArrived = true
+            }
+        }
+        
         ProgressLiveActivityManager.totalDistance = Double(tmapTotalDistance)
         ProgressLiveActivityManager.shared.updateWalkingActivity(
             newLeftDistance: Double(tmapTotalDistance)
@@ -210,11 +225,10 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         MKDirections(request: req).calculate { [weak self] resp, err in
             guard let self else { return }
             
-            defer { self.isRerouting = false }
-            
             if let err = err {
                 self.bigDistanceText = "경로 계산 실패"
                 print("❌ Apple Maps 에러: \(err.localizedDescription)")
+                self.isRerouting = false
                 return
             }
             
@@ -222,10 +236,10 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
                   !routes.isEmpty,
                   let shortest = routes.min(by: { $0.distance < $1.distance }) else {
                 self.bigDistanceText = "경로 없음"
+                self.isRerouting = false
                 return
             }
             
-            // 좌표 변환
             let polyline = shortest.polyline
             let points = polyline.points()
             var coords: [CLLocationCoordinate2D] = []
@@ -238,7 +252,14 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             self.tmapTotalDistance = Int(shortest.distance)
             self.bigDistanceText = "\(Int(shortest.distance)) m"
             
-            // 라이브 액티비티
+            if self.isRerouting {
+                self.isRerouting = false
+                if self.tmapTotalDistance < 10 {
+                    self.arrived = true
+                    self.manuallyArrived = true
+                }
+            }
+            
             ProgressLiveActivityManager.totalDistance = shortest.distance
             ProgressLiveActivityManager.shared.updateWalkingActivity(
                 newLeftDistance: shortest.distance
@@ -268,19 +289,20 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         updateWithTmapRoute(location: last, heading: manager.heading)
     }
     
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location error: \(error.localizedDescription)")
+    }
+    
     // MARK: - 핵심 업데이트 로직
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
-        // 수동 도착이면 업데이트 중지
         guard !manuallyArrived else { return }
-        
         guard !tmapCoordinates.isEmpty else {
             bigDistanceText = "-- m"
             return
         }
-        
-        // GPS 정확도 체크
         guard location.horizontalAccuracy > 0,
               location.horizontalAccuracy < accuracyGate else { return }
+        guard !isRerouting else { return }
         
         // 1. 구간 진행
         if currentSegmentIndex < tmapCoordinates.count - 1 {
@@ -301,8 +323,8 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         let remainDistance = calculateRemainDistance(from: location)
         bigDistanceText = "\(Int(remainDistance)) m"
         
-        // 3. 도착 체크 (수동 도착이 아닐 때만)
-        if remainDistance < arrivalDistance && !arrived && !manuallyArrived {
+        // 3. 도착 체크
+        if remainDistance < arrivalDistance && !arrived && !manuallyArrived && !isRerouting {
             arrived = true
             print("🎯 목적지 도착!")
             ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: 0)
@@ -317,7 +339,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             arrowBearing = relative
         }
         
-        // 5. 오프루트 감지 (도착하지 않았을 때만)
+        // 5. 오프루트 감지
         if !arrived {
             checkOffRoute(location: location)
         }
@@ -332,12 +354,32 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - 오프루트 감지
     private func checkOffRoute(location: CLLocation) {
+        // GPS 워밍업 체크
+        if firstLocationTime == nil {
+            firstLocationTime = Date()
+        }
+        guard let firstTime = firstLocationTime,
+              Date().timeIntervalSince(firstTime) > gpsWarmupTime else {
+            return
+        }
+        
+        // GPS 정확도가 너무 낮으면 체크 안함
+        guard location.horizontalAccuracy < 20 else { return }
         guard !tmapCoordinates.isEmpty else { return }
+        
+        // 목적지 근처에서는 체크 안함
+        if let dest = pendingDestination {
+            let destLocation = CLLocation(latitude: dest.latitude, longitude: dest.longitude)
+            let distToDest = location.distance(from: destLocation)
+            if distToDest < 100 {
+                return
+            }
+        }
         
         var minDistance = Double.greatestFiniteMagnitude
         
-        let checkStart = max(0, currentSegmentIndex - 2)
-        let checkEnd = min(tmapCoordinates.count - 1, currentSegmentIndex + 5)
+        let checkStart = max(0, currentSegmentIndex - 5)
+        let checkEnd = min(tmapCoordinates.count - 1, currentSegmentIndex + 10)
         
         for i in checkStart...checkEnd {
             let point = CLLocation(
@@ -348,26 +390,25 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             minDistance = min(minDistance, distance)
         }
         
-        let effectiveThreshold = offRouteThreshold + min(30, location.horizontalAccuracy * 0.5)
-        let isLastSegment = currentSegmentIndex >= tmapCoordinates.count - 3
-        let threshold = isLastSegment ? effectiveThreshold + 20 : effectiveThreshold
+        let effectiveThreshold = offRouteThreshold + location.horizontalAccuracy
         
-        if minDistance > threshold {
+        if minDistance > effectiveThreshold {
             if offRouteSince == nil {
                 offRouteSince = Date()
-                print("⚠️ 경로 이탈 감지 시작")
+                print("⚠️ 경로 이탈 감지 시작: \(Int(minDistance))m")
             } else if let since = offRouteSince {
                 let elapsed = Date().timeIntervalSince(since)
                 let canShowAlert = Date().timeIntervalSince(lastRecalcAt) > recalcCooldown
                 
-                if elapsed > offRouteDebounce && canShowAlert && !showRerouteAlert {
+                if elapsed > offRouteDebounce && canShowAlert && !showRerouteAlert && !isRerouting {
                     print("🔄 재탐색 알림 표시")
                     showRerouteAlert = true
+                    lastRecalcAt = Date()
                 }
             }
         } else {
             if offRouteSince != nil {
-                print("✅ 경로로 복귀")
+                print("✅ 경로로 복귀: \(Int(minDistance))m")
                 offRouteSince = nil
             }
         }
