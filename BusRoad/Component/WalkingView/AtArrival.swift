@@ -80,6 +80,8 @@ struct AtArrival: View {
                 }
                 .padding(.horizontal, 32.wScaled)
                 .onAppear {
+                    viewModel.manuallyArrived = true
+                    
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                         viewModel.showVerifyingStop = true
                     }
