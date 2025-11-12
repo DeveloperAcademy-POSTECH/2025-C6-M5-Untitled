@@ -391,7 +391,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         }
 
         // 6) 라이브 액티비티
-        if !arrived {
+        if !arrived && !manuallyArrived {
             ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
         }
         
