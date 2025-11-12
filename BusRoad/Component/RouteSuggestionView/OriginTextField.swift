@@ -63,7 +63,7 @@ struct OriginTextField : View {
         }
         .padding(.leading, 20)
         .padding(.trailing, 15)
-        .padding(.vertical, 12)
+        .padding(.vertical, 10)
         .background {
             RoundedRectangle(cornerRadius: 5)
                 .foregroundStyle(Color.background)

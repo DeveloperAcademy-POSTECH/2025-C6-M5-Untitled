@@ -67,10 +67,10 @@ struct RouteSuggestionView: View {
                             )
                         }
                         .padding(.horizontal, 22)
-                        .padding(.top, 20)
-                        .padding(.bottom, 22)
+                        .padding(.top, 8)
+                        .padding(.bottom, 16)
                     }
-                    .frame(height: 194)
+                    .frame(height: 166)
                     
                     LineDivider()
                     
@@ -356,10 +356,10 @@ struct RouteSuggestionViewWithData: View {
                         )
                     }
                     .padding(.horizontal, 22)
-                    .padding(.top, 20)
-                    .padding(.bottom, 22)
+                    .padding(.top, 8)
+                    .padding(.bottom, 16)
                 }
-                .frame(height: 194)
+                .frame(height: 166)
                 
                 LineDivider()
                 

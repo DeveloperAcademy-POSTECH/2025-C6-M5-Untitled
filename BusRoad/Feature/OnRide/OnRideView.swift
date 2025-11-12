@@ -19,11 +19,12 @@ struct OnRideView: View {
                     
                     if let journey = viewModel.journey, let index = viewModel.index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-                            .padding(32)
+                            .padding(.horizontal,32)
+                            .padding(.vertical, 24)
                     }
                     
                 }
-                .frame(height: 144)
+                .frame(height: 128)
                 
                 LineDivider()
                 
@@ -132,6 +133,12 @@ struct OnRideView: View {
                 }
                 .onAppear {
                     proximityManager.enableVoiceAnnouncement()
+                    
+                    let arrival = ArrivalInfoManager.shared
+                        proximityManager.applyTagoContext(
+                            cityCode: arrival.lastCityCode,
+                            routeId: arrival.trackedBusRouteIdPublic
+                        )
                     
                     guard
                         let journey = coordinator.journeyManager.selectedJourney,

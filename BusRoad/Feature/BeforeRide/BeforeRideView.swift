@@ -24,10 +24,11 @@ struct BeforeRideView: View {
                     
                     if let journey = viewModel.journey, let index = viewModel.index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
-                            .padding(32)
+                            .padding(.horizontal,32)
+                            .padding(.vertical, 24)
                     }
                 }
-                .frame(height: 144)
+                .frame(height: 128)
                 
                 LineDivider()
                 
@@ -71,7 +72,14 @@ struct BeforeRideView: View {
                                 
                                 Button {
                                     Task { @MainActor in
-                                                                                
+                                        
+                                        let arrival = ArrivalInfoManager.shared
+                                        proximityManager.applyTagoContext(
+                                            cityCode: arrival.lastCityCode,
+                                            routeId: arrival.trackedBusRouteIdPublic,
+                                            targetVehicleNo: arrival.trackedVehicleNoPublic
+                                        )
+                                        viewModel.stopRefreshing()
                                         coordinator.advanceJourneyStage()
                                             
                                         if let index = viewModel.index, let journey = viewModel.journey,
@@ -116,6 +124,13 @@ struct BeforeRideView: View {
                             Button {
                                 Task { @MainActor in
                                     
+                                    let arrival = ArrivalInfoManager.shared
+                                    proximityManager.applyTagoContext(
+                                        cityCode: arrival.lastCityCode,
+                                        routeId: arrival.trackedBusRouteIdPublic,
+                                        targetVehicleNo: arrival.trackedVehicleNoPublic
+                                    )
+                                    viewModel.stopRefreshing()
                                     coordinator.advanceJourneyStage()
                                     
                                     if let index = viewModel.index, let journey = viewModel.journey,
@@ -129,7 +144,6 @@ struct BeforeRideView: View {
                                         )
                                         print("[DEBUG] BeforeRideView (두번째) - onBus 업데이트, destination: \(busnode.end.name), remaining: \(proximityManager.remainingStations)")
                                     }
-                                    viewModel.stopRefreshing()
                                 }
                             } label: {
                                 Text("탔어요")

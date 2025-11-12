@@ -16,10 +16,11 @@ struct WalkingView: View {
                     
                     if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: false)
-                            .padding(32)
+                            .padding(.horizontal, 32)
+                            .padding(.vertical,24)
                     }
                 }
-                .frame(height: 144)
+                .frame(height: 128)
                 .onChange(of: viewModel.arrived) { _, newValue in
                     if newValue,
                        let journey = viewModel.journey,
