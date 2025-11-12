@@ -28,6 +28,10 @@ final class ArrivalInfoManager: ObservableObject {
     private var trackedBusRouteId: String?
     private var trackedVehicleNo: String?
     
+    // 목표 정류장 정보 저장
+    private var targetStationNodeId: String?
+    private var targetStationOrder: Int?
+    
     @Published var nearestBusInfo: (busNo: String, arrivalText: String)?
     @Published var isArrivingSoon: Bool = false
     @Published var hasPassed: Bool = false
@@ -90,6 +94,9 @@ final class ArrivalInfoManager: ObservableObject {
         trackedBusRouteIdPublic = nil
         trackedVehicleNoPublic = nil
         lastCityCode = nil
+        
+        targetStationNodeId = nil
+        targetStationOrder = nil
     }
     
     func acknowledgePassed() {
@@ -269,6 +276,8 @@ final class ArrivalInfoManager: ObservableObject {
         trackedBusRouteIdPublic = nil
         trackedVehicleNo = nil
         trackedVehicleNoPublic = nil
+        targetStationNodeId = nil
+        targetStationOrder = nil
     }
     
     // MARK: - 차량 번호 잠금
@@ -281,87 +290,110 @@ final class ArrivalInfoManager: ObservableObject {
         guard trackedVehicleNo == nil,
               let cityCode = lastCityCode,
               let routeId = trackedBusRouteId,
-              currentItem.routeid == routeId
+              currentItem.routeid == routeId,
+              let targetStation = busRouteNode.stations.first
         else { return }
         
+        print("[ArrivalInfoManager] 🎯 탑승 정류장: \(targetStation.stationName)")
+        
         do {
-            // 1. 해당 노선의 모든 버스 위치 가져오기 (이미 routeId로 필터링됨)
+            // 1. 노선의 전체 정류장 순서 가져오기
+            let allStations = try await busLocationService.fetchRouteStations(
+                cityCode: cityCode,
+                routeId: routeId
+            )
+            
+            print("[ArrivalInfoManager] 📋 노선 전체 정류장: \(allStations.count)개")
+            
+            // 2. 탑승 정류장의 정확한 순번 찾기
+            func normalize(_ name: String) -> String {
+                return name
+                    .replacingOccurrences(of: " ", with: "")
+                    .replacingOccurrences(of: "(", with: "")
+                    .replacingOccurrences(of: ")", with: "")
+                    .replacingOccurrences(of: "/", with: "")
+                    .lowercased()
+            }
+            
+            var targetOrder: Int?
+            
+            // 2-1. nodeid로 매칭
+            if let targetNodeId = targetStation.localStationId,
+               let match = allStations.first(where: { $0.nodeid == targetNodeId }) {
+                targetOrder = match.nodeord
+                print("[ArrivalInfoManager] ✅ 탑승 정류장 순번: \(match.nodeord) (nodeid 매칭)")
+            }
+            // 2-2. 정류장명으로 매칭
+            else {
+                let targetNormalized = normalize(targetStation.stationName)
+                
+                if let match = allStations.first(where: {
+                    normalize($0.nodenm) == targetNormalized
+                }) {
+                    targetOrder = match.nodeord
+                    print("[ArrivalInfoManager] ✅ 탑승 정류장 순번: \(match.nodeord) (이름 매칭)")
+                } else if let match = allStations.first(where: {
+                    let stationNormalized = normalize($0.nodenm)
+                    return stationNormalized.contains(targetNormalized) || targetNormalized.contains(stationNormalized)
+                }) {
+                    targetOrder = match.nodeord
+                    print("[ArrivalInfoManager] ⚠️ 탑승 정류장 순번: \(match.nodeord) (부분 매칭: '\(match.nodenm)')")
+                }
+            }
+            
+            guard let targetOrder else {
+                print("[ArrivalInfoManager] ❌ 전체 노선에서 탑승 정류장을 찾을 수 없음")
+                return
+            }
+            
+            // 3. 해당 노선의 모든 버스 위치 가져오기
             let allBuses = try await busLocationService.fetchRouteBusLocations(
                 cityCode: cityCode,
                 routeId: routeId
             )
             
             guard !allBuses.isEmpty else {
-                print("[ArrivalInfoManager] lockVehicle: 버스 위치 없음")
+                print("[ArrivalInfoManager] 버스 위치 없음")
                 return
             }
             
-            print("[ArrivalInfoManager] 노선 \(routeId)의 버스 \(allBuses.count)대 조회")
+            print("[ArrivalInfoManager] 🚌 노선 \(routeId)의 버스 \(allBuses.count)대 조회")
             
-            // 2. 사용자 GPS 위치 가져오기
-            let myLocation: CLLocation?
-            if let cached = locationService.location,
-               Date().timeIntervalSince(cached.timestamp) < 300 {
-                myLocation = cached
-                let age = Int(Date().timeIntervalSince(cached.timestamp))
-                print("[ArrivalInfoManager] 📍 캐시된 GPS 사용 (나이: \(age)초)")
-            } else {
-                print("[ArrivalInfoManager] 📍 새 GPS 요청 중...")
-                myLocation = try? await locationService.requestOneShotLocation(timeout: 3)
-                if myLocation != nil {
-                    print("[ArrivalInfoManager] ✅새 GPS 획득 성공")
+            // 4. 탑승 정류장 이전에 있는 버스만 필터링
+            let validBuses = allBuses.compactMap { bus -> (bus: BusLocationItem, order: Int)? in
+                if bus.nodeord < targetOrder {
+                    print("[ArrivalInfoManager] \(bus.vehicleno): \(bus.nodenm) (순번 \(bus.nodeord)/\(targetOrder)) ✅")
+                    return (bus, bus.nodeord)
                 } else {
-                    print("[ArrivalInfoManager] ⚠️ GPS 획득 실패 (타임아웃)")
+                    print("[ArrivalInfoManager] \(bus.vehicleno): \(bus.nodenm) (순번 \(bus.nodeord)/\(targetOrder)) ❌ 이미 지나침")
+                    return nil
                 }
             }
             
-            // 3. 사용자 위치 기반 선택
-            if let location = myLocation {
-                selectBusByUserLocation(buses: allBuses, myLocation: location)
-            } else {
-                print("[ArrivalInfoManager] GPS 없음 - 선택 불가")
+            if validBuses.isEmpty {
+                print("[ArrivalInfoManager] ⚠️ 모든 버스가 이미 탑승 정류장을 지나침")
+                return
             }
             
+            // 5. 탑승 정류장에 가장 가까운 버스 선택 (순번이 가장 큰)
+            guard let closest = validBuses.max(by: { $0.order < $1.order }) else {
+                return
+            }
+            
+            trackedVehicleNo = closest.bus.vehicleno
+            trackedVehicleNoPublic = closest.bus.vehicleno
+            
+            print("[ArrivalInfoManager] ✅ 선택: \(closest.bus.vehicleno) (순번 \(closest.order)/\(targetOrder), \(targetOrder - closest.order)정류장 남음)")
+            
+        } catch let error as NSError {
+            if error.code == 403 {
+                print("[ArrivalInfoManager] ⚠️ 버스 위치/노선 API 권한 없음")
+            } else {
+                print("[ArrivalInfoManager] lockVehicle 실패: \(error.localizedDescription)")
+            }
         } catch {
             print("[ArrivalInfoManager] lockVehicle 실패: \(error)")
         }
-    }
-    
-    // 사용자 현재 위치에서 가장 가까운 버스 선택
-    private func selectBusByUserLocation(buses: [BusLocationItem], myLocation: CLLocation) {
-        print("[ArrivalInfoManager] 🎯 사용자 위치 기반 버스 선택")
-        print("[ArrivalInfoManager] 사용자 위치: (\(myLocation.coordinate.latitude), \(myLocation.coordinate.longitude))")
-        
-        struct BusCandidate {
-            let bus: BusLocationItem
-            let distance: CLLocationDistance
-        }
-        
-        let candidates = buses.map { bus -> BusCandidate in
-            let busLoc = CLLocation(latitude: bus.gpslong, longitude: bus.gpslati)
-            let distance = myLocation.distance(from: busLoc)
-            
-            print("[ArrivalInfoManager]   \(bus.vehicleno): \(bus.nodenm), 거리 \(Int(distance))m")
-            
-            return BusCandidate(bus: bus, distance: distance)
-        }
-        
-        // 5km 이내에 있는 버스 중 가장 가까운 것
-        let valid = candidates.filter { $0.distance < 5000 }
-        
-        if valid.isEmpty {
-            print("[ArrivalInfoManager] 5km 이내 버스 없음")
-            return
-        }
-        
-        guard let closest = valid.min(by: { $0.distance < $1.distance }) else {
-            return
-        }
-        
-        trackedVehicleNo = closest.bus.vehicleno
-        trackedVehicleNoPublic = closest.bus.vehicleno
-        
-        print("[ArrivalInfoManager] ✅ 선택: \(closest.bus.vehicleno) (거리: \(Int(closest.distance))m)")
     }
     
     // MARK: - UI 업데이트

@@ -26,8 +26,7 @@ final class AlightProximityManager: ObservableObject {
     private var shouldAnnounce: Bool = false
     
     // GPS 판정 파라미터
-    private let primaryRadius: CLLocationDistance = 50    // 1차 감지 반경
-    private let confirmRadius: CLLocationDistance = 30     // 확정 반경
+    private let confirmRadius: CLLocationDistance = 30     // 반경
     
     // 진입/이탈 상태 추적
     private var stationProximityState: [Int: Bool] = [:]  // [정류장idx: 30m안에 있는지]
@@ -126,7 +125,6 @@ final class AlightProximityManager: ObservableObject {
         print("[AlightProximityManager] TAGO 컨텍스트 설정: city=\(cityCode), route=\(routeId), vehicle=\(vehicleNo ?? "미지정")")
     }
     
-    // 별칭 (BeforeRideView 호환용)
     func applyTagoContext(cityCode: Int?, routeId: String?, targetVehicleNo: String?) {
         guard let city = cityCode, let route = routeId else {
             print("[AlightProximityManager] TAGO 컨텍스트 설정 실패: 필수 값 없음")
@@ -230,15 +228,25 @@ final class AlightProximityManager: ObservableObject {
             let stationLoc = CLLocation(latitude: station.latitude, longitude: station.longitude)
             let distance = currentLocation.distance(from: stationLoc)
             
-            let wasInside = stationProximityState[idx] ?? false  // 이전에 안에 있었나?
-            let isInside = distance <= confirmRadius  // 지금 안에 있나? (30m)
+            let wasInside = stationProximityState[idx] ?? false
+            let isInside = distance <= confirmRadius
+            
+            if idx == stations.count - 1 && isInside && !wasInside {
+                       // 마지막 정류장에 처음 진입!
+                       print("[AlightProximityManager] 🎉 마지막 정류장 진입 - Progress 100%")
+                       progress = 1.0
+                       hasArrived = true
+                       Task {
+                           ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0)
+                       }
+                   }
             
             if isInside && !wasInside {
-                // 🔔 진입!
+                // 진입
                 print("[AlightProximityManager] 🔔 정류장[\(idx)] 진입: \(station.stationName) (\(Int(distance))m)")
                 stationProximityState[idx] = true
             } else if !isInside && wasInside {
-                // 이탈! = 통과 완료!
+                // 이탈 = 통과 완료!
                 print("[AlightProximityManager] ✅ 정류장[\(idx)] 이탈 → 통과 확정: \(station.stationName)")
                 
                 // 건너뛴 정류장이 있으면 일괄 처리
@@ -275,14 +283,13 @@ final class AlightProximityManager: ObservableObject {
         
         print("[AlightProximityManager] ✅ 통과: [\(index)] \(station.stationName) (\(reason))")
         
-        // 인덱스 업데이트
         currentStationIndex = index + 1
         remainingStations = max(0, stations.count - currentStationIndex)
         lastStationPassedTime = Date()
         missedStationsCheck.remove(index)
         
-        // progress 업데이트 (정류장 기준)
-        if totalDistance > 0, segmentDistances.count >= stations.count - 1 {
+        // progress 업데이트 (마지막 정류장이 아닐 때만)
+        if !isLast && totalDistance > 0, segmentDistances.count >= stations.count - 1 {
             var passedDistance: CLLocationDistance = 0
            
             for i in 0..<currentStationIndex {
@@ -300,25 +307,16 @@ final class AlightProximityManager: ObservableObject {
             print("[AlightProximityManager] Progress 업데이트: \(String(format: "%.1f%%", newProgress * 100))")
         }
         
-        // 라이브 액티비티 업데이트
         Task {
             ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
         }
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)")
         
-        // 도착 처리
         if isLast {
-            hasArrived = true
-            canAlight = true
-            progress = 1.0
-            Task {
-                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0)
-            }
-            print("[AlightProximityManager] 🎉 목적지 도착!")
+            print("[AlightProximityManager] 🎉 목적지 통과 완료!")
         }
         
-        // 하차 안내
         if remainingStations <= 1 {
             canAlight = true
         }
