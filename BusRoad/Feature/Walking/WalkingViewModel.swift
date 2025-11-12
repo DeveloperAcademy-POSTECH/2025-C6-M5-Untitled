@@ -20,17 +20,17 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var isRerouting: Bool = false
     @Published var offRouteThreshold: CLLocationDistance = 25
     @Published var reachedSegmentEnd: Bool = false              // 경로 잔여거리 < 6m
-    @Published var reachedFinalDestination: Bool = false        // 목적지 직선거리 < 6m
+    @Published var reachedFinalDestination: Bool = false        // 목적지 직선거리 < 6m or 12m
     @Published var manuallyArrived: Bool = false
 
     private let segmentArrivalDistance: CLLocationDistance = 6            // 경로 단계 도착
     private let journeyManager: JourneyManager
     private let recalcCooldown: TimeInterval = 45
-    private let accuracyGate: CLLocationAccuracy = 30
+    private let accuracyGate: CLLocationAccuracy = 50
     private let warmupSeconds: TimeInterval = 5
     private let offRouteDebounce: TimeInterval = 2  // 경로 2회 이상 이탈 시만 알럿
     
-    private var finalArrivalStraightDistance: CLLocationDistance = 6      // 최종 도착(직선거리)
+    private var finalArrivalStraightDistance: CLLocationDistance = 12      // 최종 도착(직선거리)
     private var hasCalculatedRoute = false
     private var currentSegmentIndex: Int = 0
     private var cumulativeMeters: [Double] = [] // coords[i]까지 누적 길이
@@ -59,8 +59,8 @@ final class WalkingViewModel: NSObject, ObservableObject {
            let index = journeyManager.journeyIndex {
             self.journey = journey
             self.journeyIndex = index
-            if index == journey.nodes.count - 1 {   // 최종도착 도보일 경우에만 12m 반경
-                finalArrivalStraightDistance = 12
+            if index == journey.nodes.count - 1 {   // 최종도착 도보일 경우에만 6m 반경
+                finalArrivalStraightDistance = 6
             }
         }
     }
@@ -176,13 +176,9 @@ final class WalkingViewModel: NSObject, ObservableObject {
         print("안내 카드: \(nextCards)")
 
         // 5) 라이브액티비티
-        if let journey = journey, let journeyIndex = journeyIndex {
-            let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
-            let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-            ProgressLiveActivityManager.totalDistance = totalMeters
-            ProgressLiveActivityManager.maxProgressValue = 0
-            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: totalMeters)
-        }
+        ProgressLiveActivityManager.totalDistance = totalMeters
+        ProgressLiveActivityManager.maxProgressValue = 0
+        ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: totalMeters)
     }
 
     // MARK: - Apple Maps Fallback
@@ -222,11 +218,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
             ProgressLiveActivityManager.totalDistance = self.totalMeters
             self.bigDistanceText = "\(Int(self.totalMeters)) m"
 
-            if let journey = self.journey, let journeyIndex = self.journeyIndex {
-                let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
-                let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-                ProgressLiveActivityManager.shared.updateWalkingActivity( newLeftDistance: self.totalMeters)
-            }
+            ProgressLiveActivityManager.shared.updateWalkingActivity( newLeftDistance: self.totalMeters)
             self.finishReroute()
         }
     }
@@ -317,101 +309,142 @@ final class WalkingViewModel: NSObject, ObservableObject {
 
     // 핵심 업데이트 (스냅/잔여/도착/오프루트)
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
-        
+
         guard !manuallyArrived else { return }
-        
+
         guard !tmapCoordinates.isEmpty else {
             bigDistanceText = "-- m"
             return
         }
-        guard location.horizontalAccuracy > 0, location.horizontalAccuracy < accuracyGate else { return }
+
+        // GPS 정확도 체크
+        guard location.horizontalAccuracy > 0,
+              location.horizontalAccuracy < accuracyGate else { return }
 
         // 1) 투영
-        guard let p = nearestProjection(to: location.coordinate, on: tmapCoordinates) else { return }
+        guard let p = nearestProjection(
+            to: location.coordinate,
+            on: tmapCoordinates
+        ) else { return }
 
-        // 2) 세그먼트 점프 (진행)
-        currentSegmentIndex = max(currentSegmentIndex, p.segmentIndex + (p.t >= 0.999 ? 1 : 0))
+        // 2) 세그먼트 점프(진행)
+        currentSegmentIndex = max(
+            currentSegmentIndex,
+            p.segmentIndex + (p.t >= 0.999 ? 1 : 0)
+        )
 
         // 3) 잔여거리 계산
-        let base = cumulativeMeters.indices.contains(p.segmentIndex) ? cumulativeMeters[p.segmentIndex] : 0
+        let base = cumulativeMeters.indices.contains(p.segmentIndex)
+            ? cumulativeMeters[p.segmentIndex]
+            : 0
+
         let nextIndex = p.segmentIndex + 1
-        let segLen: Double = (cumulativeMeters.indices.contains(nextIndex) ? cumulativeMeters[nextIndex] - base : 0)
+        let segLen = (cumulativeMeters.indices.contains(nextIndex)
+                      ? cumulativeMeters[nextIndex] - base
+                      : 0)
+
         let progressed = base + segLen * p.t
         let remain = max(0, totalMeters - progressed)
         bigDistanceText = "\(Int(remain)) m"
 
-        // 4) 도착 판정 단순화
-        // 4-1) 경로 단계 도착: 남은 "경로거리"가 6m 미만
-        reachedSegmentEnd = (remain < segmentArrivalDistance)
+        // 4) 도착 판정 ------------------------------
 
-        // 4-2) 마지막 단계의 실제 도착: 목적지와의 "직선거리"가 6m 미만
-        var isFinalNode = false
-        if let journey = journey, let idx = journeyIndex {
-            isFinalNode = (idx == journey.nodes.count - 1)
-        }
-        if isFinalNode, let dest = pendingDestination {
-            let straight = location.distance(from: CLLocation(latitude: dest.latitude, longitude: dest.longitude))
-            reachedFinalDestination = (straight < finalArrivalStraightDistance)
-        } else {
-            reachedFinalDestination = false
+        // 4-1) 경로(세그먼트) 단위의 도착
+        let segmentRemain = segLen * (1 - p.t)
+        reachedSegmentEnd = (segmentRemain < segmentArrivalDistance)
+        if reachedSegmentEnd {
+            // 세그먼트는 0...(count-2)까지만 유효
+            let cap = max(0, tmapCoordinates.count - 2)
+            // 뒤로 가지 않도록 하면서, 이번 프레임의 투영 세그먼트+1까지는 최소 전진
+            currentSegmentIndex = min(max(currentSegmentIndex, p.segmentIndex + 1), cap)
         }
 
-        // 4-3) 기존 arrived는 호환용으로 유지:
-        //      - 마지막 노드면 실제 도착(reachedFinalDestination)
-        //      - 그 외에는 경로 단계 도착(reachedSegmentEnd)
+        // 4-2) 마지막 세그먼트 여부
+        let isLastRouteSegment = (p.segmentIndex == tmapCoordinates.count - 2)
+
+        if let dest = pendingDestination {
+            let straight = location.distance(
+                from: CLLocation(latitude: dest.latitude, longitude: dest.longitude)
+            )
+            reachedFinalDestination = isLastRouteSegment && (straight < finalArrivalStraightDistance)
+        }
+
+        // 4-3) arrived
         if !manuallyArrived {
-               arrived = isFinalNode ? reachedFinalDestination : reachedSegmentEnd
-           }
+            arrived = reachedFinalDestination || (remain < finalArrivalStraightDistance)
+        }
+        
+        // 4-4) arrived 확정 시 manual lock
+        if arrived && !manuallyArrived {
+            manuallyArrived = true
+        }
 
-        // 5) 화살표 (현재 heading 기준 상대 방위)
+        // 5) 화살표
         if let hdg = heading?.trueHeading, hdg >= 0 {
             let nextIdx = min(tmapCoordinates.count - 1, p.segmentIndex + 1)
-            let target = tmapCoordinates.indices.contains(nextIdx) ? tmapCoordinates[nextIdx] : lastOrSelfCoordinate(default: location.coordinate)
-            let bearingAbs = bearing(from: p.projected, to: target)
+            let target = tmapCoordinates.indices.contains(nextIdx)
+                ? tmapCoordinates[nextIdx]
+                : lastOrSelfCoordinate(default: location.coordinate)
+
+            let bearingAbs = bearing(from: location.coordinate, to: target)
             arrowBearing = fmod((bearingAbs - hdg + 360), 360)
         }
 
-        // 6) 라이브액티비티
-        if let journey = journey, let journeyIndex = journeyIndex {
-            let isLastNode = (journey.nodes.count - 1 == journeyIndex + 1)
-            let stage = isLastNode ? RouteStage.walkingToDestination.rawValue : RouteStage.walkingToBus.rawValue
-            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
-        }
-
+        // 6) 라이브 액티비티
+        ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
+        
         // 7) 오프루트 감지 (워밍업 + 디바운스 + 쿨다운)
         let now = Date()
 
-        // (a) 워밍업: 시작 5초 동안은 오프루트 판정 안 함
+        // (a) 워밍업: 앱 시작 후 5초는 감지하지 않음
         guard now.timeIntervalSince(appStartedAt) > warmupSeconds else {
             offRouteSince = nil
             return
         }
 
-        // (b) 이탈 여부(투영점 기준)
-        let isOffRoute = (p.distance > offRouteThreshold)
+        // (b) 엔드포인트 거리 계산 추가 --------------------
+        let pointDistance = minEndpointDistance(
+            around: p.segmentIndex,
+            location: location
+        )
 
+        // (c) 정확도 기반 동적 threshold 계산 ----------------
+        let acc = max(0, location.horizontalAccuracy)
+
+        // 투영 threshold
+        var projEff = offRouteThreshold + min(40.0, acc * 0.5)
+
+        // 엔드포인트 threshold
+        var pointEff = offRouteThreshold + 15 + min(40.0, acc * 0.3)
+
+        // (d) 목적지 근방일 경우 threshold 완화 ----------------
+        if isLastRouteSegment {
+            projEff += 20
+            pointEff += 20
+        }
+
+        // 오프루트 판정 (최종 적용)
+        let isOffRoute = (p.distance > projEff) && (pointDistance > pointEff)
+
+        // MARK: 오프루트 디바운스 처리
         if isOffRoute {
-            // 디바운스 시작 시점 기록 (없으면 now로 설정)
             if offRouteSince == nil {
-                offRouteSince = now
+                offRouteSince = now       // 최초 이탈 시각 기록
             }
 
-            // 디바운스가 존재하는 경우에만 처리
-            if let offRouteStart = offRouteSince {
-                let offRouteDuration = now.timeIntervalSince(offRouteStart)
-
-                // 디바운스 + 쿨다운 둘 다 통과해야 알럿
-                let passedDebounce = offRouteDuration > offRouteDebounce
+            if let start = offRouteSince {
+                let elapsed = now.timeIntervalSince(start)
+                let passedDebounce = elapsed > offRouteDebounce
                 let passedCooldown = now.timeIntervalSince(lastRecalcAt) > recalcCooldown
 
                 if passedDebounce && passedCooldown {
                     showRerouteAlert = true
                     lastRecalcAt = now
-                    offRouteSince = nil    // 다음 알럿을 위해 초기화
+                    offRouteSince = nil    // 재호출 방지
                 }
             }
         } else {
-            // 정상 경로 복귀 → 디바운스 초기화
+            // 정상 복귀 → 이탈 상태 초기화
             offRouteSince = nil
         }
     }
@@ -419,6 +452,26 @@ final class WalkingViewModel: NSObject, ObservableObject {
     private func lastOrSelfCoordinate(default coord: CLLocationCoordinate2D) -> CLLocationCoordinate2D {
         if let last = tmapCoordinates.last { return last }
         return coord
+    }
+    
+    // 현재 세그먼트(i, i+1)의 엔드포인트들 기준 최소 직선거리 계산
+    private func minEndpointDistance(around segmentIndex: Int,
+                                     location: CLLocation) -> CLLocationDistance {
+        var best = CLLocationDistance.greatestFiniteMagnitude
+        // i
+        if tmapCoordinates.indices.contains(segmentIndex) {
+            let a = tmapCoordinates[segmentIndex]
+            let dA = location.distance(from: CLLocation(latitude: a.latitude, longitude: a.longitude))
+            best = min(best, dA)
+        }
+        // i+1
+        let next = segmentIndex + 1
+        if tmapCoordinates.indices.contains(next) {
+            let b = tmapCoordinates[next]
+            let dB = location.distance(from: CLLocation(latitude: b.latitude, longitude: b.longitude))
+            best = min(best, dB)
+        }
+        return best
     }
 }
 
