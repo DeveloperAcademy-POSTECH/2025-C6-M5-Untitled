@@ -296,12 +296,14 @@ final class ProgressLiveActivityManager {
 
             let timestamp = Date().timeIntervalSince1970
 
-            // 다른 업데이트 중이라면 pending으로 저장하고 return
+            // 이미 다른 업데이트 중이라면 pending으로 저장하고 return
             if self.isBusUpdating {
                 print("[남은 정류장 \(String(format: "%.3f", timestamp))] 대기 중 - pendingRemainingBusStops에 저장")
                 self.pendingRemainingBusStops = remaining
                 return
             }
+            
+            self.isBusUpdating = true
 
             guard let activity = Activity<ProgressAttributes>.activities.first else {
                 print("[LiveActivity] No active activity found for remaining bus stops update")
@@ -323,6 +325,8 @@ final class ProgressLiveActivityManager {
             Task {
                 await activity.update(ActivityContent(state: updatedState, staleDate: nil))
                 print("[남은 정류장 \(String(format: "%.3f", timestamp))] Updated remaining bus stops: \(remaining)")
+                
+                self.isBusUpdating = false
                 
                 // 대기 중이던 값 있으면 바로 재실행
                 if let pending = self.pendingRemainingBusStops {
@@ -378,6 +382,11 @@ final class ProgressLiveActivityManager {
                 print("[버스 진행률 \(String(format: "%.3f", timestamp))] 업데이트 완료. progressValue: \(progressValue)")
                 
                 self.isBusUpdating = false
+                
+                if let pending = self.pendingRemainingBusStops {
+                    self.pendingRemainingBusStops = nil
+                    self.updateRemainingBusStops(remaining: pending)
+                }
             }
         }
     }

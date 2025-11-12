@@ -172,7 +172,7 @@ struct BeforeRideView: View {
                 // Live Activity를 waitingForBus 단계로 업데이트하는 로직 추가
                 Task {
                     await ProgressLiveActivityManager.shared.updateStage(
-                        nextStage: "waitingForBus", // RouteStage.waitingForBus.rawValue
+                        nextStage: RouteStage.waitingForBus.rawValue,
                         nextDestination: busNode.start.name,  // 승차 정류장 이름
                         totalDistance: 0,
                         remainingBusStops: proximityManager.remainingStations, 
