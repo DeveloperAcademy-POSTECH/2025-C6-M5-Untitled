@@ -18,7 +18,6 @@ final class ProgressLiveActivityManager {
     
     private var currentActivity: Activity<ProgressAttributes>?
     private var maxProgress: Double = 0.0
-    private var isStageUpdating = false
     private var isBusUpdating = false
     
     private var lastWalkingUpdateTime: Date = .distantPast
@@ -46,6 +45,26 @@ final class ProgressLiveActivityManager {
     }
     
     static func description(for stage: String, destination: String) -> String {
+        
+        let baseText: String
+        switch stage {
+        case "walkingToBus", "walkingToDestination":
+            baseText = "\(destination)까지 걷기"
+        case "waitingForBus":
+            baseText = "\(destination)에서 승차"
+        case "onBus":
+            baseText = "\(destination)에서 하차"
+        default:
+            return ""
+        }
+        
+        // splitTextToFit을 static 함수로 변경하여 호출
+        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: 16)
+        
+        return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
+    }
+    
+    static func expandedDescription(for stage: String, destination: String) -> String {
         
         let baseText: String
         switch stage {
@@ -157,7 +176,6 @@ final class ProgressLiveActivityManager {
         let timestamp = Date().timeIntervalSince1970
 
         guard let currentActivity = currentActivity else { return }
-        guard !isStageUpdating else { return }
 
         // 너무 자주 업데이트 방지
         let now = Date()
@@ -297,7 +315,14 @@ final class ProgressLiveActivityManager {
         
         Task {
             await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-            print("[남은 정류장 \(String(format: "%.3f", timestamp))] Updated remaining bus stops: \(remaining)")        }
+            isBusUpdating = false
+            if let pending = pendingRemainingBusStops {
+                        print("[남은 정류장 \(String(format: "%.3f", timestamp))] 보류된 \(pending) 정류장 값 반영 중")
+                        pendingRemainingBusStops = nil
+                        updateRemainingBusStops(remaining: pending)
+            }
+            print("[남은 정류장 \(String(format: "%.3f", timestamp))] Updated remaining bus stops: \(remaining)")
+        }
     }
     
     func updateBusProgress(busProgress: Double) {
