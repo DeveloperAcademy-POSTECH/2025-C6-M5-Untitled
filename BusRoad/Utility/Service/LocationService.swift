@@ -218,6 +218,7 @@ extension LocationService {
         
         manager.distanceFilter = distanceFilter
         manager.desiredAccuracy = accuracy
+        manager.pausesLocationUpdatesAutomatically = false
         
         manager.startUpdatingLocation()
     }
