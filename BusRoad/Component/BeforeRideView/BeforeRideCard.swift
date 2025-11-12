@@ -1,10 +1,3 @@
-//
-//  Card.swift
-//  C6test
-//
-//  Created by 강진 on 10/1/25.
-//
-
 import SwiftUI
 import Lottie
 

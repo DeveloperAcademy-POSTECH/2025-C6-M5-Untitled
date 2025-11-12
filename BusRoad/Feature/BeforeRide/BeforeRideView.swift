@@ -162,7 +162,14 @@ struct BeforeRideView: View {
         .onAppear {
             proximityManager.configure(busLegIndex: 0)
             proximityManager.disableVoiceAnnouncement()
-            proximityManager.start()
+            Task {
+                   do {
+                       try await proximityManager.start()  
+                       print("[BeforeRideView] GPS 추적 시작 성공")
+                   } catch {
+                       print("[BeforeRideView] GPS 추적 시작 실패: \(error)")
+                   }
+               }
             
             if let journey = viewModel.journey,
                 let index = viewModel.index,
