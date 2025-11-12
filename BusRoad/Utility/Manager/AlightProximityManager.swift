@@ -284,11 +284,13 @@ final class AlightProximityManager: ObservableObject {
         // progress 업데이트 (정류장 기준)
         if totalDistance > 0, segmentDistances.count >= stations.count - 1 {
             var passedDistance: CLLocationDistance = 0
-            for i in 0..<(currentStationIndex - 1) {
+           
+            for i in 0..<currentStationIndex {
                 if i < segmentDistances.count {
                     passedDistance += segmentDistances[i]
                 }
             }
+            
             let newProgress = min(1.0, max(0, passedDistance / totalDistance))
             progress = CGFloat(newProgress)
             
