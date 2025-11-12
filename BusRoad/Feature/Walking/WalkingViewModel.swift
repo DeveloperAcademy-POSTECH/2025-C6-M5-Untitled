@@ -391,7 +391,9 @@ final class WalkingViewModel: NSObject, ObservableObject {
         }
 
         // 6) 라이브 액티비티
-        ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
+        if !arrived {
+            ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: remain)
+        }
         
         // 7) 오프루트 감지 (워밍업 + 디바운스 + 쿨다운)
         let now = Date()
