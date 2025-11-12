@@ -65,7 +65,7 @@ struct ProgressLiveActivity: Widget {
                         Image(RouteStage(rawValue: context.state.stage)?.expandImage ?? "BusIcon")
                             .resizable()
                             .frame(width: 48, height: 48)
-                            .padding(.top, 15)
+                            .padding(.leading, 5)
                         VStack(alignment:.leading, spacing: 3){
                             Text(ProgressLiveActivityManager.expandedDescription(for: context.state.stage, destination: context.state.destination))
                                 .font(.presemi18)
@@ -73,7 +73,7 @@ struct ProgressLiveActivity: Widget {
                                 .multilineTextAlignment(.leading)
                                 .lineLimit(2)
                                 .fixedSize(horizontal: false, vertical: true)
-                                .padding(.top, 15)
+//                                .padding(.top, 15)
                             Text(
                                 ProgressLiveActivityManager.subDescription(
                                     for: context.state.stage,
@@ -85,10 +85,11 @@ struct ProgressLiveActivity: Widget {
                             .font(.premed12)
                             .foregroundColor(.liveSubtitle)
                         }
-                        .padding(.leading, 15)
+                        .padding(.leading, 9)
                         Spacer(minLength: 0)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.bottom, 10)
                 }
             }
             // MARK: - compact dynamic

@@ -79,7 +79,7 @@ final class ProgressLiveActivityManager {
         }
         
         // splitTextToFit을 static 함수로 변경하여 호출
-        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: 18)
+        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: 17)
         
         return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
     }
