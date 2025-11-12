@@ -143,7 +143,7 @@ final class ArrivalInfoManager: ObservableObject {
                 armedForPass = true
             }
             
-            if item.arrtime <= 300 { // 5분
+            if item.arrtime <= 180 { // 3분
                 await lockVehicleIfNeeded(for: busRouteNode, currentItem: item)
             }
         }
@@ -309,7 +309,7 @@ final class ArrivalInfoManager: ObservableObject {
                 print("[ArrivalInfoManager] 📍 새 GPS 요청 중...")
                 myLocation = try? await locationService.requestOneShotLocation(timeout: 3)
                 if myLocation != nil {
-                    print("[ArrivalInfoManager] ✅ 새 GPS 획득 성공")
+                    print("[ArrivalInfoManager] ✅새 GPS 획득 성공")
                 } else {
                     print("[ArrivalInfoManager] ⚠️ GPS 획득 실패 (타임아웃)")
                 }
