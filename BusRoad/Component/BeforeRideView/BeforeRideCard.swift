@@ -24,7 +24,9 @@ struct BeforeRideCard: View {
                 cardContent
             } else {
                 // 로딩 중 - 빈 카드
-                EmptyView()
+                ProgressView()
+                    .tint(.greyDisable)
+                    .scaleEffect(3)
             }
         }
     }
