@@ -405,7 +405,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
                 : lastOrSelfCoordinate(default: location.coordinate)
             
             var bearingAbs = bearing(from: location.coordinate, to: target)
-            if (p.t > 0.1 && p.t < 0.9 && p.distance < 7) || segLen < 12 {
+            if p.t > 0.1 && p.t < 0.9 && p.distance < 7 {
                 bearingAbs = bearing(from: p.projected, to: target)
             }
             arrowBearing = fmod((bearingAbs - hdg + 360), 360)
