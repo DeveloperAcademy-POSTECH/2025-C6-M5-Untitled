@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import CoreLocation
 
 //MARK: - 화면전달용 DTO
 struct PlaceSummary: Hashable, Identifiable, Codable {
@@ -14,4 +15,8 @@ struct PlaceSummary: Hashable, Identifiable, Codable {
     let address: String
     let latitude: Double
     let longitude: Double
+    
+    var coordinate: CLLocationCoordinate2D {
+        CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+    }
 }

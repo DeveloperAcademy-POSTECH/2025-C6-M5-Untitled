@@ -35,6 +35,7 @@ struct RouteSuggestionView: View {
                     viewModel.isSearchMode = false
                 },
                 hasSubmitted: $viewModel.hasSubmitted,
+                isPresented: $viewModel.showDestinationMap,
                 isLoading: viewModel.isSearchLoading
             )
         } else {

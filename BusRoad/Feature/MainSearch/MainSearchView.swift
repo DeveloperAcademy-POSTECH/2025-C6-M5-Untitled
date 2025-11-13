@@ -39,6 +39,7 @@ struct MainSearchView: View {
                         coordinator.push(.routeSuggestion)
                     },
                     hasSubmitted: $viewModel.hasSubmitted,
+                    isPresented: $viewModel.showDestinationMap,
                     isLoading: viewModel.isLoading
                 )
             } else {

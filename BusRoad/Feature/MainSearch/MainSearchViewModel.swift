@@ -7,6 +7,7 @@ final class MainSearchViewModel: ObservableObject {
     @Published var hasSubmitted: Bool = false
     @Published var isSearchMode: Bool = false
     @Published var showHint: Bool = false
+    @Published var showDestinationMap: Bool = false
     @Published var hasShownVoiceHint: Bool {
         didSet {
             UserDefaults.standard.set(hasShownVoiceHint, forKey: kHasShownVoiceHint)
