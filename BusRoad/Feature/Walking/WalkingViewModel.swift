@@ -18,12 +18,12 @@ final class WalkingViewModel: NSObject, ObservableObject {
     @Published var tmapTotalDistance: Int = 0
     @Published var showVerifyingStop: Bool = false
     @Published var isRerouting: Bool = false
-    @Published var offRouteThreshold: CLLocationDistance = 25
+    @Published var offRouteThreshold: CLLocationDistance = 20
     @Published var reachedSegmentEnd: Bool = false              // 경로 잔여거리 < 6m
     @Published var reachedFinalDestination: Bool = false        // 목적지 직선거리 < 6m or 12m
     @Published var manuallyArrived: Bool = false
 
-    private let segmentArrivalDistance: CLLocationDistance = 15            // 경로 단계 도착
+    private let segmentArrivalDistance: CLLocationDistance = 12            // 경로 단계 도착
     private let journeyManager: JourneyManager
     private let recalcCooldown: TimeInterval = 45
     private let accuracyGate: CLLocationAccuracy = 50
@@ -83,7 +83,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         setDestination(c)
     }
 
-    /// 알림 닫은 직후 곧바로 다시 뜨지 않도록, 다음 재알림 허용 시점을 `seconds` 뒤로 미룸
+    /// 알림 닫은 직후 곧바로 다시 뜨지 않도록, 다음 재알림 허용 시점을 seconds 뒤로 미룸
     func deferRealert(seconds: TimeInterval = 45) {
         lastRecalcAt = Date().addingTimeInterval(seconds - recalcCooldown)
     }
@@ -330,7 +330,7 @@ final class WalkingViewModel: NSObject, ObservableObject {
         // 2) 세그먼트 점프(진행)
         currentSegmentIndex = max(
             currentSegmentIndex,
-            p.segmentIndex + (p.t >= 0.999 ? 1 : 0)
+            p.segmentIndex + (p.t >= 0.9 ? 1 : 0)
         )
 
         // 3) 잔여거리 계산
@@ -349,14 +349,32 @@ final class WalkingViewModel: NSObject, ObservableObject {
 
         // 4) 도착 판정 ------------------------------
 
-        // 4-1) 경로(세그먼트) 단위의 도착
-        let segmentRemain = segLen * (1 - p.t)
-        reachedSegmentEnd = (segmentRemain < segmentArrivalDistance)
-        if reachedSegmentEnd {
-            // 세그먼트는 0...(count-2)까지만 유효
-            let cap = max(0, tmapCoordinates.count - 2)
-            // 뒤로 가지 않도록 하면서, 이번 프레임의 투영 세그먼트+1까지는 최소 전진
-            currentSegmentIndex = min(max(currentSegmentIndex, p.segmentIndex + 1), cap)
+//        // 4-1) 경로(세그먼트) 단위의 도착
+//        let segmentRemain = segLen * (1 - p.t)
+//        reachedSegmentEnd = (segmentRemain < segmentArrivalDistance)
+//        if reachedSegmentEnd {
+//            // 세그먼트는 0...(count-2)까지만 유효
+//            let cap = max(0, tmapCoordinates.count - 2)
+//            // 뒤로 가지 않도록 하면서, 이번 프레임의 투영 세그먼트+1까지는 최소 전진
+//            currentSegmentIndex = min(max(currentSegmentIndex, p.segmentIndex + 1), cap)
+//        }
+        // 세그먼트 끝 점 좌표
+        if tmapCoordinates.indices.contains(p.segmentIndex + 1) {
+            let segmentEnd = tmapCoordinates[p.segmentIndex + 1]
+            let distanceToSegmentEnd = location.distance(
+                from: CLLocation(latitude: segmentEnd.latitude, longitude: segmentEnd.longitude)
+            )
+            
+            reachedSegmentEnd = (distanceToSegmentEnd < segmentArrivalDistance)
+            
+            if reachedSegmentEnd {
+                // 세그먼트는 0...(count-2)까지만 유효
+                let cap = max(0, tmapCoordinates.count - 2)
+                // 뒤로 가지 않도록 하면서 최소 전진
+                currentSegmentIndex = min(max(currentSegmentIndex, p.segmentIndex + 1), cap)
+            }
+        } else {
+            reachedSegmentEnd = false
         }
 
         // 4-2) 마지막 세그먼트 여부
@@ -385,8 +403,11 @@ final class WalkingViewModel: NSObject, ObservableObject {
             let target = tmapCoordinates.indices.contains(nextIdx)
                 ? tmapCoordinates[nextIdx]
                 : lastOrSelfCoordinate(default: location.coordinate)
-
-            let bearingAbs = bearing(from: location.coordinate, to: target)
+            
+            var bearingAbs = bearing(from: location.coordinate, to: target)
+            if p.t > 0.1 && p.t < 0.9 {
+                bearingAbs = bearing(from: p.projected, to: target)
+            }
             arrowBearing = fmod((bearingAbs - hdg + 360), 360)
         }
 
