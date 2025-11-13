@@ -45,7 +45,6 @@ struct BeforeRideView: View {
                                     .padding(.top, 28.wScaled)
                                     .padding(.bottom, 30.wScaled)
                             } else {
-                                // 예외 처리 (버스 번호 없을 때)
                                 BusPassedCard(busNo: "이전")
                                     .padding(.horizontal, 24.wScaled)
                                     .padding(.top, 28.wScaled)
@@ -91,7 +90,6 @@ struct BeforeRideView: View {
                                                 remainingBusStops: proximityManager.remainingStations,
                                                 busTravelTime: busnode.travelTime
                                             )
-                                            print("[DEBUG] BeforeRideView - onBus 업데이트, destination: \(busnode.end.name), remaining: \(proximityManager.remainingStations)")
                                         }
                                     }
                                 } label: {
@@ -142,15 +140,14 @@ struct BeforeRideView: View {
                                             remainingBusStops: proximityManager.remainingStations,
                                             busTravelTime: busnode.travelTime
                                         )
-                                        print("[DEBUG] BeforeRideView (두번째) - onBus 업데이트, destination: \(busnode.end.name), remaining: \(proximityManager.remainingStations)")
                                     }
                                 }
                             } label: {
                                 Text("탔어요")
                                     .font(.premed32)
-                                    .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .subLight)  // 임시 활성화
+                                    .foregroundStyle(.subLight)
                                     .frame(width: 344.wScaled, height: 64)
-                                    .background(viewModel.isArrivingSoon ? .subPoint : .subPoint)     // 임시 활성화
+                                    .background(.subPoint)
                                     .cornerRadius(20)
                             }
                             .buttonStyle(.plain)
@@ -160,14 +157,24 @@ struct BeforeRideView: View {
             }
         }
         .onAppear {
+            Task {
+                await viewModel.prepareData()
+            }
+            
             proximityManager.configure(busLegIndex: 0)
             proximityManager.disableVoiceAnnouncement()
-            proximityManager.start()
+            Task {
+                   do {
+                       try await proximityManager.start()  
+                       print("[BeforeRideView] GPS 추적 시작 성공")
+                   } catch {
+                       print("[BeforeRideView] GPS 추적 시작 실패: \(error)")
+                   }
+               }
             
             if let journey = viewModel.journey,
                 let index = viewModel.index,
-                case let .bus(busNode) = journey.nodes[index] { 
-                viewModel.startRefreshing(for: busNode)
+                case let .bus(busNode) = journey.nodes[index] {
                 
                 // Live Activity를 waitingForBus 단계로 업데이트하는 로직 추가
                 Task {
@@ -181,7 +188,6 @@ struct BeforeRideView: View {
                     print("[DEBUG] BeforeRideView - Live Activity waitingForBus 업데이트 완료. Destination: \(busNode.start.name)")
                 }
             }
-            
             print("[BeforeRideView] 정류장 추적 시작")
         }
         .onDisappear {

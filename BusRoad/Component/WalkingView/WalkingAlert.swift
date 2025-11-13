@@ -54,26 +54,6 @@ struct WalkingAlert: View {
                             viewModel.manuallyArrived = true
                             viewModel.arrived = true
                             viewModel.showVerifyingStop = true
-                            if index + 1 < journey.nodes.count {
-                                if case let .bus(busnode) = journey.nodes[index + 1] {
-                                    print("다음 노드가 버스입니다:", busnode.busNo)
-                                    Task {
-                                        await ProgressLiveActivityManager.shared.updateStage(
-                                            nextStage: RouteStage.waitingForBus.rawValue,
-                                            nextDestination: busnode.start.name,  // 승차 정류장
-                                            totalDistance: 0,
-                                            remainingBusStops: busnode.stations.count,
-                                            busTravelTime: busnode.travelTime
-                                        )
-                                        print("[DEBUG] WalkingAlert - waitingForBus 업데이트, destination: \(busnode.start.name)")
-                                    }
-                                } else {
-                                    print("다음 노드는 버스가 아님:", journey.nodes[index + 1])
-                                }
-                            } else {
-                                print("마지막 노드이므로 updateStage 호출 안함")
-                            }
-
                             isPresented = false
                         } label:{
                             ZStack{

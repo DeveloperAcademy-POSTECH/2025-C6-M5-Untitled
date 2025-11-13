@@ -212,15 +212,19 @@ extension LocationService {
     func startContinuousUpdates(
         // 10m 이동마다 업데이트되도록
         distanceFilter: CLLocationDistance = 10,
-        accuracy: CLLocationAccuracy = kCLLocationAccuracyBest
+        accuracy: CLLocationAccuracy = kCLLocationAccuracyBest,
+        allowsBackgroundUpdates: Bool = true  // 백그라운드 옵션
     ) async throws {
         try await requestWhenInUseAuthorizationIfNeeded()
         
         manager.distanceFilter = distanceFilter
         manager.desiredAccuracy = accuracy
-        manager.pausesLocationUpdatesAutomatically = false
+        manager.pausesLocationUpdatesAutomatically = false  // 계속 추적
+        manager.allowsBackgroundLocationUpdates = allowsBackgroundUpdates  // 백그라운드 설정
+        manager.activityType = .otherNavigation
         
         manager.startUpdatingLocation()
+        print("[LocationService] 연속 위치 업데이트 시작 (백그라운드: \(allowsBackgroundUpdates))")
     }
     
     func stopContinuousUpdates() {
