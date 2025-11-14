@@ -10,7 +10,7 @@ struct RouteCardSlide: View {
             ZStack {
                 if viewModel.errorMessage != nil {
                     RouteErrorCard(viewModel: viewModel)
-                } else if let routes {
+                } else if let routes, viewModel.arrivalText != nil {
                     ZStack {
                         ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
                             let relativeIndex: CGFloat = CGFloat(index - currentIndex)

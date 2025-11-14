@@ -18,6 +18,8 @@ class BusRouteViewModel: ObservableObject {
     @Published var locationType: LocationType = .origin
     @Published var totalDistance: Double = 0.0
     
+    @Published var arrivalText: String? = nil
+    
     // 에러 케이스 분류용
     @Published var errorMessage: String?
     
@@ -381,6 +383,10 @@ extension BusRouteViewModel {
             arrivalText = "곧 도착"
         } else {
             arrivalText = "\(minutes)분 후"
+        }
+        
+        if let info = await fetchNearestBusInfo(for: route) {
+            self.arrivalText = info.arrivalText
         }
         
         let cleanedBusNo = cleanBusNumber(item.routeno)
