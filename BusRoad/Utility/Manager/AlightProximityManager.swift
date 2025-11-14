@@ -26,18 +26,13 @@ final class AlightProximityManager: ObservableObject {
     private var shouldAnnounce: Bool = false
     
     // GPS 판정 파라미터
-    private let primaryRadius: CLLocationDistance = 50    // 1차 감지 반경
-    private let confirmRadius: CLLocationDistance = 30     // 확정 반경
+    private let confirmRadius: CLLocationDistance = 30     // 반경
     
     // 진입/이탈 상태 추적
     private var stationProximityState: [Int: Bool] = [:]  // [정류장idx: 30m안에 있는지]
     
     // 건너뛰기 감지
     private var missedStationsCheck: Set<Int> = []
-    
-    // 정류장 간 거리 및 진행률
-    private var segmentDistances: [CLLocationDistance] = []
-    private var totalDistance: CLLocationDistance = 0
     
     // TAGO 연동
     private var cityCode: Int?
@@ -81,9 +76,6 @@ final class AlightProximityManager: ObservableObject {
             return
         }
         
-        // 정류장 간 거리 사전 계산
-        calculateSegmentDistances()
-        
         currentStationIndex = 1  // 첫 정류장(탑승)은 이미 지남
         remainingStations = max(0, stations.count - currentStationIndex)
         hasArrived = false
@@ -103,22 +95,6 @@ final class AlightProximityManager: ObservableObject {
         ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
     }
     
-    // 정류장 간 거리 계산
-    private func calculateSegmentDistances() {
-        segmentDistances.removeAll()
-        totalDistance = 0
-        
-        for i in 0..<(stations.count - 1) {
-            let from = CLLocation(latitude: stations[i].latitude, longitude: stations[i].longitude)
-            let to = CLLocation(latitude: stations[i+1].latitude, longitude: stations[i+1].longitude)
-            let dist = from.distance(from: to)
-            segmentDistances.append(dist)
-            totalDistance += dist
-        }
-        
-        print("[AlightProximityManager] 총 거리: \(Int(totalDistance))m, 구간: \(segmentDistances.count)개")
-    }
-    
     func setTagoContext(cityCode: Int, routeId: String, vehicleNo: String?) {
         self.cityCode = cityCode
         self.routeId = routeId
@@ -126,7 +102,6 @@ final class AlightProximityManager: ObservableObject {
         print("[AlightProximityManager] TAGO 컨텍스트 설정: city=\(cityCode), route=\(routeId), vehicle=\(vehicleNo ?? "미지정")")
     }
     
-    // 별칭 (BeforeRideView 호환용)
     func applyTagoContext(cityCode: Int?, routeId: String?, targetVehicleNo: String?) {
         guard let city = cityCode, let route = routeId else {
             print("[AlightProximityManager] TAGO 컨텍스트 설정 실패: 필수 값 없음")
@@ -230,15 +205,25 @@ final class AlightProximityManager: ObservableObject {
             let stationLoc = CLLocation(latitude: station.latitude, longitude: station.longitude)
             let distance = currentLocation.distance(from: stationLoc)
             
-            let wasInside = stationProximityState[idx] ?? false  // 이전에 안에 있었나?
-            let isInside = distance <= confirmRadius  // 지금 안에 있나? (30m)
+            let wasInside = stationProximityState[idx] ?? false
+            let isInside = distance <= confirmRadius
+            
+            // 마지막 정류장 진입 시 100%
+            if idx == stations.count - 1 && isInside && !wasInside {
+                print("[AlightProximityManager] 🎉 마지막 정류장 진입 - Progress 100%")
+                progress = 1.0
+                hasArrived = true
+                Task {
+                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0)
+                }
+            }
             
             if isInside && !wasInside {
-                // 🔔 진입!
+                // 진입
                 print("[AlightProximityManager] 🔔 정류장[\(idx)] 진입: \(station.stationName) (\(Int(distance))m)")
                 stationProximityState[idx] = true
             } else if !isInside && wasInside {
-                // 이탈! = 통과 완료!
+                // 이탈 = 통과 완료!
                 print("[AlightProximityManager] ✅ 정류장[\(idx)] 이탈 → 통과 확정: \(station.stationName)")
                 
                 // 건너뛴 정류장이 있으면 일괄 처리
@@ -271,54 +256,19 @@ final class AlightProximityManager: ObservableObject {
     private func handleStationPassed(index: Int, station: BusStation, reason: String) {
         guard index == currentStationIndex else { return }
         
-        let isLast = (index == stations.count - 1)
-        
         print("[AlightProximityManager] ✅ 통과: [\(index)] \(station.stationName) (\(reason))")
         
-        // 인덱스 업데이트
         currentStationIndex = index + 1
         remainingStations = max(0, stations.count - currentStationIndex)
         lastStationPassedTime = Date()
         missedStationsCheck.remove(index)
         
-        // progress 업데이트 (정류장 기준)
-        if totalDistance > 0, segmentDistances.count >= stations.count - 1 {
-            var passedDistance: CLLocationDistance = 0
-           
-            for i in 0..<currentStationIndex {
-                if i < segmentDistances.count {
-                    passedDistance += segmentDistances[i]
-                }
-            }
-            
-            let newProgress = min(1.0, max(0, passedDistance / totalDistance))
-            progress = CGFloat(newProgress)
-            
-            Task {
-                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress)
-            }
-            print("[AlightProximityManager] Progress 업데이트: \(String(format: "%.1f%%", newProgress * 100))")
-        }
-        
-        // 라이브 액티비티 업데이트
         Task {
             ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
         }
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)")
         
-        // 도착 처리
-        if isLast {
-            hasArrived = true
-            canAlight = true
-            progress = 1.0
-            Task {
-                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0)
-            }
-            print("[AlightProximityManager] 🎉 목적지 도착!")
-        }
-        
-        // 하차 안내
         if remainingStations <= 1 {
             canAlight = true
         }
@@ -336,23 +286,22 @@ final class AlightProximityManager: ObservableObject {
         onStationPassed?(index, station.stationName)
     }
     
-    // MARK: - 진행률 계산 (정류장 간 거리 기반)
+    // MARK: - 진행률 계산 (정류장 간격 균등 분할)
     
     private func updateDetailedProgress(currentLocation: CLLocation) {
-        guard stations.count >= 2, currentStationIndex > 0 else {
+        guard stations.count >= 2, currentStationIndex > 0, currentStationIndex <= stations.count else {
             progress = 0
             return
         }
         
-        // 이미 통과한 구간 거리 합
-        var passedDistance: CLLocationDistance = 0
-        for i in 0..<(currentStationIndex - 1) {
-            if i < segmentDistances.count {
-                passedDistance += segmentDistances[i]
-            }
-        }
+        let totalStops = stations.count - 1  // 전체 구간 수
         
-        // 현재 구간 진행률
+        // 이미 통과한 정류장 수
+        let completedStops = currentStationIndex - 1
+        
+        // 현재 구간 진행률 계산 (0.0 ~ 1.0)
+        var currentSegmentProgress: Double = 0.0
+        
         if currentStationIndex < stations.count {
             let prevStation = stations[currentStationIndex - 1]
             let nextStation = stations[currentStationIndex]
@@ -362,15 +311,16 @@ final class AlightProximityManager: ObservableObject {
             
             let segmentLength = prevLoc.distance(from: nextLoc)
             let distanceToNext = currentLocation.distance(from: nextLoc)
-            let currentSegmentProgress = max(0, segmentLength - distanceToNext)
+            let progressInSegment = max(0, min(1.0, (segmentLength - distanceToNext) / segmentLength))
             
-            passedDistance += currentSegmentProgress
+            currentSegmentProgress = progressInSegment
         }
         
-        // 전체 진행률
-        let newProgress = min(1.0, max(0, passedDistance / totalDistance))
+        // 전체 진행률 = (통과한 구간 + 현재 구간 진행률) / 전체 구간
+        let totalProgress = (Double(completedStops) + currentSegmentProgress) / Double(totalStops)
+        let newProgress = min(1.0, max(0, totalProgress))
         
-        if newProgress > progress {
+        if newProgress > Double(progress) {
             progress = CGFloat(newProgress)
             Task {
                 ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress)
@@ -500,8 +450,6 @@ final class AlightProximityManager: ObservableObject {
         lastStationPassedTime = nil
         
         missedStationsCheck.removeAll()
-        segmentDistances.removeAll()
-        totalDistance = 0
         stationProximityState.removeAll()
     }
     
