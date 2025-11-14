@@ -24,17 +24,20 @@ struct AtArrival: View {
                            case let .bus(busnode) = journey.nodes[index + 1] {
                             let boardingStopName = busnode.start.name  // 승차 정류장
                             
-                            Task {
-                                await ProgressLiveActivityManager.shared.updateStage(
-                                    nextStage: RouteStage.waitingForBus.rawValue,
-                                    nextDestination: boardingStopName,
-                                    totalDistance: 0,
-                                    remainingBusStops: busnode.stations.count,
-                                    busTravelTime: busnode.travelTime
-                                )
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                Task {
+                                    await ProgressLiveActivityManager.shared.updateStage(
+                                        nextStage: RouteStage.waitingForBus.rawValue,
+                                        nextDestination: boardingStopName,
+                                        totalDistance: 0,
+                                        remainingBusStops: busnode.stations.count,
+                                        busTravelTime: busnode.travelTime
+                                    )
+                                }
                                 print("[DEBUG] VerifyingStop - waitingForBus 업데이트, destination: \(boardingStopName)")
                             }
                         }
+
                     } label: {
                         Text("맞아요")
                             .foregroundColor(Color.subLight)

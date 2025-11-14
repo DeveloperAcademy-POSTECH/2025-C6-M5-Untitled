@@ -93,7 +93,7 @@ struct OnRideCard: View {
                 .padding(.leading, canAlight ? 30.wScaled : -20.wScaled)
         }
         )
-      
+        
     }
     
 }
@@ -105,12 +105,13 @@ struct BusStopProgress: View {
     let progress: CGFloat
     var trackColor: Color = .subNormal
     var fillColor: Color = .subHeavy
+    @State private var animatedProgress: CGFloat = 0
     
     var body: some View {
         
         GeometryReader { geometry in
             let width = geometry.size.width
-            let progress = min(max(progress, 0), 1)
+            let clampedProgress = min(max(animatedProgress, 0), 1)
             
             ZStack(alignment: .leading) {
                 Rectangle()
@@ -119,21 +120,29 @@ struct BusStopProgress: View {
                     .foregroundStyle(trackColor)
                 
                 Rectangle()
-                    .frame(width: progress*width, height: 8)
+                    .frame(width: clampedProgress * width, height: 8) 
                     .foregroundStyle(fillColor)
                     .clipShape(
                         UnevenRoundedRectangle(
                             cornerRadii: .init(
                                 topLeading: 10,
                                 bottomLeading: 10,
-                                bottomTrailing: progress >= 1 ? 10 : 0,
-                                topTrailing: progress >= 1 ? 10 : 0
+                                bottomTrailing: clampedProgress >= 1 ? 10 : 0,  // 👈 여기도
+                                topTrailing: clampedProgress >= 1 ? 10 : 0  // 👈 여기도
                             )
                         )
                     )
             }
         }
         .frame(height: 8)
+        .onChange(of: progress) { oldValue, newValue in
+            withAnimation(.easeInOut(duration: 0.5)) {
+                animatedProgress = newValue
+            }
+        }
+        .onAppear {
+            animatedProgress = progress
+        }
     }
 }
 

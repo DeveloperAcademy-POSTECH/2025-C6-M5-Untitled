@@ -17,7 +17,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var isFirstLoad = true
     @Published var locationType: LocationType = .origin
     @Published var totalDistance: Double = 0.0
-
+    
     // 에러 케이스 분류용
     @Published var errorMessage: String?
     
@@ -26,7 +26,8 @@ class BusRouteViewModel: ObservableObject {
     @Published var isSearchMode = false
     @Published var isLoading: Bool = false
     @Published var showDestinationMap: Bool = false
-
+    @Published var isRefreshingLocation: Bool = false
+    
     
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
@@ -240,6 +241,56 @@ class BusRouteViewModel: ObservableObject {
         print("[DEBUG] requestOrigin finished")
     }
     
+    // 강제 새로고침 (캐시 무시)
+    func forceRefreshOrigin() async {
+        guard !isRefreshingLocation else {
+            print("[DEBUG] 이미 새로고침 중입니다")
+            return
+        }
+        
+        isRefreshingLocation = true
+        print("[DEBUG] 현위치 강제 새로고침 시작")
+        
+        let minimumDurationTask = Task {
+            try? await Task.sleep(nanoseconds: 500_000_000) 
+        }
+        
+        do {
+            let newLocation = try await LocationService.shared.forceRefreshLocation(timeout: 15)
+            
+            let locationInfo = LocationInfo(
+                name: "현위치",
+                latitude: newLocation.coordinate.latitude,
+                longitude: newLocation.coordinate.longitude
+            )
+            
+            setOrigin(origin: locationInfo)
+            userDidSelectOrigin = false
+            print("[DEBUG] 현위치 새로고침 완료")
+            
+        } catch LocationService.LocationError.timeout {
+            print("현위치 새로고침 실패: 타임아웃")
+            errorMessage = "위치 정보를 가져오는데 시간이 초과되었습니다."
+            
+        } catch LocationService.LocationError.authorizationDenied {
+            print("현위치 새로고침 실패: 권한 거부")
+            errorMessage = "위치 권한이 필요합니다."
+            
+        } catch LocationService.LocationError.busy {
+            print("현위치 새로고침 실패: 이미 진행 중")
+            errorMessage = "위치 정보를 가져오는 중입니다."
+            
+        } catch {
+            print("현위치 새로고침 실패: \(error.localizedDescription)")
+            errorMessage = "현위치를 가져올 수 없습니다."
+        }
+        
+        // 최소 시간이 지날 때까지 대기
+        await minimumDurationTask.value
+        
+        isRefreshingLocation = false
+    }
+    
     func selectJourney(at index: Int) {
         if let routes = journeyManager.journeyList {
             guard index >= 0 && index < routes.count else {
@@ -261,7 +312,7 @@ extension BusRouteViewModel {
         guard let origin = origin, let destination = destination else { return }
         
         let distance = origin.asCLLocation.distance(from: destination.asCLLocation)
-                totalDistance = distance
+        totalDistance = distance
         
         let walkingNode = WalkRouteNode(
             start: origin,
@@ -323,7 +374,7 @@ extension BusRouteViewModel {
             print("[DEBUG] 도착 정보 없음")
             return nil
         }
-
+        
         let minutes = item.arrtime / 60
         let arrivalText: String
         if minutes < 1 {
@@ -333,32 +384,32 @@ extension BusRouteViewModel {
         }
         
         let cleanedBusNo = cleanBusNumber(item.routeno)
-
+        
         return (busNo: cleanedBusNo, arrivalText: arrivalText)
     }
     
     private func cleanBusNumber(_ busNo: String) -> String {
         var result = busNo
         let pattern = #"\((?!\d+\))[^)]*\)"#
-          result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
-
-          // 공백 정리
-          result = result.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
-                         .trimmingCharacters(in: .whitespacesAndNewlines)
-
-          // 짝 불일치 괄호 제거
-          let opens  = result.filter { $0 == "(" }.count
-          let closes = result.filter { $0 == ")" }.count
-          if opens != closes {
-              // 짝이 안 맞으면 괄호 전부 제거
-              result.removeAll { $0 == "(" || $0 == ")" }
-          } else {
-              // 짝은 맞지만, 예: "100)" 처럼 여는 괄호가 전혀 없는데 닫는 괄호로 끝나는 경우 방지
-              if result.hasSuffix(")") && !result.contains("(") {
-                  result.removeLast()
-              }
-          }
-
+        result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        
+        // 공백 정리
+        result = result.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // 짝 불일치 괄호 제거
+        let opens  = result.filter { $0 == "(" }.count
+        let closes = result.filter { $0 == ")" }.count
+        if opens != closes {
+            // 짝이 안 맞으면 괄호 전부 제거
+            result.removeAll { $0 == "(" || $0 == ")" }
+        } else {
+            // 짝은 맞지만, 예: "100)" 처럼 여는 괄호가 전혀 없는데 닫는 괄호로 끝나는 경우 방지
+            if result.hasSuffix(")") && !result.contains("(") {
+                result.removeLast()
+            }
+        }
+        
         // 숫자로 끝날 경우 "번" 추가
         if let lastChar = result.last, lastChar.isNumber {
             result += "번"

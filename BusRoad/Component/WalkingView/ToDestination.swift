@@ -9,7 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct ToDestination: View {
-    @ObservedObject var vm = WalkingViewModel()
+    @ObservedObject var vm: WalkingViewModel  // 파라미터로 받기
     @EnvironmentObject var coordinator: NavigationCoordinator
     
     var journey: Journey
@@ -29,7 +29,6 @@ struct ToDestination: View {
                 )
                 .foregroundColor(.primaryHeavy)
                 .padding(.top, 25.wScaled)
-
                 
                 Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
                     .font(.prereg32Scaled)
@@ -64,9 +63,6 @@ struct ToDestination: View {
                     .foregroundColor(.primaryHeavy)
             }
             .padding(.horizontal, 32.wScaled)
-            .onAppear {
-                vm.setDestination(from: node)
-            }
         } else {
             Text("경로 정보 확인 불가")
                 .font(.presemi36Scaled)

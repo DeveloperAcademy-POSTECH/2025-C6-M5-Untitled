@@ -47,7 +47,7 @@ final class SearchManager: ObservableObject {
         do {
             print("[SearchManager] 위치 가져오기 시작...")
             
-            // ✅ 변경: 캐시 우선 사용 (10분까지 허용)
+            // 캐시 우선 사용 (10분까지 허용)
             let coord = try? await locationService.getQuickCoordinate(maxAge: 600)
             
             // 1차: 키워드 검색

@@ -134,12 +134,17 @@ struct OnRideView: View {
                 .onAppear {
                     proximityManager.enableVoiceAnnouncement()
                     
-                    let arrival = ArrivalInfoManager.shared
+                    // TAGO 컨텍스트 설정 (BeforeRideView에서 이미 설정했지만 확인)
+                    Task { @MainActor in
+                        let arrival = ArrivalInfoManager.shared
                         proximityManager.applyTagoContext(
                             cityCode: arrival.lastCityCode,
-                            routeId: arrival.trackedBusRouteIdPublic
+                            routeId: arrival.trackedBusRouteIdPublic,
+                            targetVehicleNo: arrival.trackedVehicleNoPublic
                         )
+                    }
                     
+                    // busLegIndex 설정
                     guard
                         let journey = coordinator.journeyManager.selectedJourney,
                         let nodeIndex = coordinator.journeyManager.journeyIndex,
@@ -149,6 +154,20 @@ struct OnRideView: View {
                     viewModel.busLegIndex = leg
                     
                     print("[OnRideView] 탑승 화면 진입 - 기존 추적 계속 진행 (progress: \(proximityManager.progress), remaining: \(proximityManager.remainingStations))")
+//                    
+//                    // Live Activity 업데이트 (onBus 단계로)
+//                    if let busNode = journey.busSegments[safe: leg] {
+//                        Task {
+//                            await ProgressLiveActivityManager.shared.updateStage(
+//                                nextStage: RouteStage.onBus.rawValue,
+//                                nextDestination: busNode.end.name,
+//                                totalDistance: 10,
+//                                remainingBusStops: proximityManager.remainingStations,
+//                                busTravelTime: busNode.travelTime
+//                            )
+//                            print("[DEBUG] OnRideView - onBus 업데이트 완료")
+//                        }
+//                    }
                 }
                 .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
                     guard
@@ -159,6 +178,7 @@ struct OnRideView: View {
                     
                     if viewModel.busLegIndex != leg {
                         viewModel.busLegIndex = leg
+                        proximityManager.configure(busLegIndex: leg)
                         print("[OnRideView] journeyIndex 변경 감지 - busLegIndex: \(leg)")
                     }
                 }
