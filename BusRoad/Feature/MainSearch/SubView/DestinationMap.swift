@@ -20,7 +20,7 @@ struct DestinationMap: View {
         
         self._position = State(initialValue: .region(MKCoordinateRegion(
             center: destination.coordinate,
-            span: MKCoordinateSpan(latitudeDelta: 0.002, longitudeDelta: 0.002)
+            span: MKCoordinateSpan(latitudeDelta: 0.003, longitudeDelta: 0.003)
         )))
     }
     
