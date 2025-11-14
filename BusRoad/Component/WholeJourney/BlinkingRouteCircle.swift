@@ -8,7 +8,7 @@ import Combine
 import SwiftUI
 
 struct BlinkingRouteCircle: View {
-    @State var status: Status = .active
+    @State var status: NodeStatus = .active
     var routeNode: RouteNode    // 버스, 도보 노드에 따라 아이콘 변화
     
     var activeToDisableDuration: Double = 0.6

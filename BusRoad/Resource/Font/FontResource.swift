@@ -77,6 +77,10 @@ extension Font {
         return .pre(type: .medium, size: 12)
     }
     
+    static var premed14: Font {
+        return .pre(type: .medium, size: 14)
+    }
+    
     static var prereg36: Font {
         return .pre(type: .regular, size: 36)
     }
@@ -136,7 +140,7 @@ extension Font {
  
     
 
-// MARK: - 반응형 폰트 (화면 크기에 맞게 자동 조정)
+// MARK: - 반응w형 폰트 (화면 크기에 맞게 자동 조정)
 extension Font {
     /// 화면 크기에 맞게 조정된 커스텀 폰트
     static func preScaled(type: Pre, size: CGFloat) -> Font {
@@ -151,6 +155,10 @@ extension Font {
     // 프리텐다드 - 스케일링 버전
     static var prebold36Scaled: Font {
         return .preScaled(type: .bold, size: 36)
+    }
+    
+    static var prebold30Scaled: Font {
+        return .preScaled(type: .bold, size: 30)
     }
     
     static var presemi36Scaled: Font {
@@ -189,8 +197,16 @@ extension Font {
         return .preScaled(type: .medium, size: 24)
     }
     
+    static var premed14Scaled: Font {
+        return .pre(type: .medium, size: 14)
+    }
+    
     static var premed12Scaled: Font {
         return .preScaled(type: .medium, size: 12)
+    }
+    
+    static var premed16Scaled: Font {
+        return .preScaled(type: .medium, size: 16)
     }
     
     static var premed20Scaled: Font {
@@ -236,6 +252,10 @@ extension UIFont {
     
     static func pretendard(_ type: Font.Pre, size: CGFloat) -> UIFont {
         return UIFont(name: type.value, size: size) ?? .systemFont(ofSize: size)
+    }
+    
+    static var presemi24Scaled: UIFont {
+        pretendard(.semibold, size: 24.wScaled)
     }
     
     static var presemi32Scaled: UIFont {

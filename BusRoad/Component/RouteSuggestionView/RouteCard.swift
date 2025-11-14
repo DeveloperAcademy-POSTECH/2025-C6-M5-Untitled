@@ -10,71 +10,77 @@ struct RouteCard: View {
         
         if let firstBusRoute = journey.firstBusRoute {
             
-                ZStack {
-                    Rectangle()
-                        .foregroundColor(Color.primaryNormal)
-                        .cornerRadius(20)
+            ZStack {
+                Rectangle()
+                    .foregroundColor(Color.primarywhite)
+                    .cornerRadius(20)
+                    .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 0)
+                
+                VStack(spacing: 0) {
+                    Spacer()
                     
-                    VStack(spacing: 0) {
-                        Spacer()
-                                                
-                        VStack(spacing: 40.wScaled) {
-                            
-                            VStack(alignment: .leading, spacing: 36.wScaled) {
-                              ETA(journeys: allJourneys, journey: journey, index: index)
-                                BoardingLocation(route: firstBusRoute, isActive: isActive)
-                            }
-                            
-                            RouteSummary(journey: journey)
-                            
+                    VStack(spacing: 21.wScaled) {
+                        
+                        VStack(alignment: .leading, spacing: 45.wScaled) {
+                            ETA(journeys: allJourneys, journey: journey, index: index)
+                            BoardingLocation(route: firstBusRoute, isActive: isActive)
                         }
-                        .padding(.horizontal, 24.wScaled)
-                      Spacer()
+                                                
+                        RouteSummary(journey: journey)
+                        
+                    }
+                    .padding(.horizontal, 24.wScaled)
+                    
+                    Spacer()
                 }
             }
         }
     }
 }
 
+
+
+
 #Preview {
-    // MARK: - 더미 데이터
-    let start = LocationInfo(name: "포항공대 정문으로가시더라도계속이어서", latitude: 36.015149, longitude: 129.325116)
-    let transferStop = LocationInfo(name: "중앙로 환승", latitude: 36.0348, longitude: 129.3340)
-    let finalStop = LocationInfo(name: "포항역", latitude: 36.07160518, longitude: 129.3419282)
-    
-    let leg1 = BusRouteNode(
-        start: start,
-        end: transferStop,
-        busNo: "105",
-        busId: 105,
-        stations: [],
-        travelTime: 18
+    RouteCard(
+        allJourneys: [
+            Journey(totalTime: 48, nodes: [
+                .walk(WalkRouteNode(
+                    start: LocationInfo(name: "서울역", latitude: 37.55, longitude: 126.97),
+                    end: LocationInfo(name: "강남역", latitude: 37.49, longitude: 127.02),
+                    travelTime: 5
+                )),
+                .bus(BusRouteNode(
+                    start: LocationInfo(name: "서울역", latitude: 37.55, longitude: 126.97),
+                    end: LocationInfo(name: "강남역", latitude: 37.49, longitude: 127.02),
+                    busNo: ["405", "472"],
+                    busId: [1001, 1002],
+                    stations: [
+                        BusStation(index: 0, stationId: 111, stationName: "서울역", stationCityCode: 1100, localStationId: "LOCAL-SEOUL-001", nodeId: "1000001", latitude: 37.55, longitude: 126.97),
+                        BusStation(index: 1, stationId: 222, stationName: "강남역", stationCityCode: 1100, localStationId: "LOCAL-GANGNAM-001", nodeId: "1000002", latitude: 37.49, longitude: 127.02)
+                    ],
+                    travelTime: 35
+                ))
+            ])
+        ],
+        journey: Journey(totalTime: 48, nodes: [
+            .walk(WalkRouteNode(
+                start: LocationInfo(name: "서울역", latitude: 37.55, longitude: 126.97),
+                end: LocationInfo(name: "강남역", latitude: 37.49, longitude: 127.02),
+                travelTime: 5
+            )),
+            .bus(BusRouteNode(
+                start: LocationInfo(name: "서울역", latitude: 37.55, longitude: 126.97),
+                end: LocationInfo(name: "강남역", latitude: 37.49, longitude: 127.02),
+                busNo: ["472"],
+                busId: [1001],
+                stations: [
+                    BusStation(index: 0, stationId: 111, stationName: "서울역", stationCityCode: 1100, localStationId: "LOCAL-SEOUL-001", nodeId: "1000001", latitude: 37.55, longitude: 126.97),
+                    BusStation(index: 1, stationId: 222, stationName: "강남역", stationCityCode: 1100, localStationId: "LOCAL-GANGNAM-001", nodeId: "1000002", latitude: 37.49, longitude: 127.02)
+                ],
+                travelTime: 35
+            ))
+        ]),
+        index: 0
     )
-    let walk = WalkRouteNode(
-        start: transferStop,
-        end: LocationInfo(name: "버스2 정류장", latitude: 36.0350, longitude: 129.3343),
-        travelTime: 5
-    )
-    let leg2 = BusRouteNode(
-        start: walk.end,
-        end: finalStop,
-        busNo: "200",
-        busId: 200,
-        stations: [],
-        travelTime: 22
-    )
-    
-    let sampleJourney = Journey(
-        totalTime: 18 + 5 + 22,
-        nodes: [.bus(leg1), .walk(walk), .bus(leg2)]
-    )
-  
-  let allDummyJourneys = [
-    sampleJourney,
-]
-    
-    return RouteCard(allJourneys: allDummyJourneys, journey: sampleJourney, index: 0)
-        .previewLayout(.sizeThatFits)
-        .padding()
-        .background(Color(.systemBackground))
 }

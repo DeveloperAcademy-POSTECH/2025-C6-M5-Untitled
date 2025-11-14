@@ -6,23 +6,20 @@
 //
 
 import SwiftUI
+import Lottie
 
 struct CongratsView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @State private var showArrivalConfirmation = false
     @State private var isAnimating = false
-    @State private var showMarquee = false
-    
     @State private var journey: Journey? = JourneyManager.shared.selectedJourney
     
     var body: some View {
         ZStack {
             Color(.primarywhite)
                 .ignoresSafeArea()
-            
-            VStack(spacing: 0.wScaled){
-                
-                VStack(spacing: 32.wScaled) {
+            VStack(spacing: 0) {
+                VStack(spacing: 0){
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
                     
@@ -33,95 +30,102 @@ struct CongratsView: View {
                             isBeforeRide: false
                         )
                         .padding(.horizontal, 32)
+                        .padding(.vertical, 24)
                     }
-                    
-                    LineDivider()
                 }
-                .frame(height: 144)
+                .frame(height: 128)
+                
+                LineDivider()
+                
                 ZStack {
                     Color(.background)
                         .ignoresSafeArea()
                     
                     VStack(alignment: .leading) {
-                        Spacer()
                         
                         if let destination = JourneyManager.shared.destination {
-                            Group {
-                                if showMarquee {    // 1.5초 후
-                                    MarqueeText(
-                                        text: destination.name,
-                                        font: .presemi36Scaled,
-                                        uiFont: .presemi36Scaled,
-                                        startDelay: 1.0,
-                                        alignment: .leading
-                                    )
-                                    .offset(y: showArrivalConfirmation ? 150.wScaled : 0)
-                                    .foregroundColor(Color.primaryHeavy)
-                                } else {    // 처음
-                                    Group {
-                                        MarqueeText(
-                                            text: destination.name,
-                                            font: .presemi36Scaled,
-                                            uiFont: .presemi36Scaled,
-                                            startDelay: 1.0,
-                                            alignment: .leading
-                                        )
-                                        .foregroundColor(Color.primaryHeavy)
-                                    }
-                                    .offset(y: showArrivalConfirmation ? 150.wScaled : 0)
-                                    .animation(.easeOut(duration: 1.0), value: showArrivalConfirmation)
-                                }
-                            }
-                            .onAppear {
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 6.0 + 1.5) {
-                                    showMarquee = true
-                                    print("[DEBUG] showMarquee")
-                                }
-                            }
+                            
+                            // if/else 분기를 제거하고 MarqueeText 하나만 남겼습니다.
+                            MarqueeText(
+                                text: destination.name,
+                                font: .presemi36Scaled,
+                                uiFont: .presemi36Scaled,
+                                startDelay: 3.0,
+                                alignment: .leading
+                            )
+                            .foregroundColor(Color.primaryHeavy)
+                            .offset(y: showArrivalConfirmation ? 200.wScaled : 0)
+                            .animation(.easeOut(duration: 1.0), value: showArrivalConfirmation)
+                            .padding(.horizontal, 32.wScaled)
+                            .padding(.top, 25.wScaled)
                         }
                         
                         Spacer()
                         
                         if showArrivalConfirmation {
+                            
                             ArrivalConfirmation(showArrivalConfirmation: $showArrivalConfirmation)
-                        } else {
-                            HStack{
+                                .padding(.horizontal, 32.wScaled)
+                            
+                            HStack {
                                 Spacer()
-                                Image(systemName: "checkmark.circle.fill")
-                                    .font(.system(size: 148.wScaled, weight: .bold))
-                                    .foregroundColor(.subStrong)
-                                    .rotation3DEffect(
-                                        .degrees(isAnimating ? 360 : 0),
-                                        axis: (x: 0, y: 1, z: 0)
-                                    )
-                                    .onAppear {
-                                        withAnimation(.easeOut(duration: 2.0)) {
-                                            isAnimating = true
-                                        }
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 6.0) {
-                                            showArrivalConfirmation = true
-                                        }
-                                    }
+                                Button {
+                                    coordinator.popToRoot()
+                                    showArrivalConfirmation = false
+                                    ProgressLiveActivityManager.shared.endActivity()
+                                } label: {
+                                    Text("확인")
+                                        .foregroundColor(Color.subLight)
+                                        .font(.premed32)
+                                        .frame(width: 344.wScaled, height: 64)
+                                        .background(Color.subPoint)
+                                        .cornerRadius(20)
+                                }
+                                
                                 Spacer()
                             }
-                            Spacer()
                             
-                            Text("도착")
-                                .font(.presemi32Scaled)
-                                .foregroundColor(.primaryHeavy)
-                            Text("했어요!")
-                                .font(.prereg32Scaled)
-                                .foregroundColor(.primaryHeavy)
-                                .padding(.bottom, 80.wScaled)
+                        } else {
+                            
+                            VStack(alignment: .leading , spacing: 0) {
+                                
+                                Spacer()
+                                
+                                HStack{
+                                    Spacer()
+                                    
+                                    LottieView(animation: .named("check"))
+                                        .playing(loopMode: .playOnce)
+                                        .animationSpeed(1.0)
+                                        .frame(width: 180.wScaled, height: 180.wScaled)
+                                        .onAppear {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                                                showArrivalConfirmation = true
+                                            }
+                                        }
+                                    
+                                    Spacer()
+                                }
+                                
+                                Spacer()
+                                
+                                Text("도착")
+                                    .font(.presemi32Scaled)
+                                    .foregroundColor(.primaryHeavy)
+                                Text("했어요!")
+                                    .font(.prereg32Scaled)
+                                    .foregroundColor(.primaryHeavy)
+                                    .padding(.bottom, 80.wScaled)
+                            }
+                            .padding(.horizontal, 32.wScaled)
                         }
                     }
-                    .padding(.horizontal,30.wScaled)
                 }
             }
         }
     }
-    
 }
+
 
 struct ArrivalConfirmation: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
@@ -134,25 +138,7 @@ struct ArrivalConfirmation: View {
                 .font(.prereg32Scaled)
                 .foregroundColor(.primaryHeavy)
             Spacer()
-            HStack{
-                Spacer()
-                Button {
-                    coordinator.popToRoot()
-                    showArrivalConfirmation = false
-                } label: {
-                    ZStack{
-                        Rectangle()
-                            .cornerRadius(20)
-                            .foregroundColor(.subStrong)
-                            .frame(width: 240.wScaled, height: 75.wScaled)
-                        Text("확인")
-                            .font(.premed32Scaled)
-                            .foregroundColor(.subLight)
-                    }
-                }
-                Spacer()
-            }
-            .padding(.bottom, 20)
+            
         }
         
     }

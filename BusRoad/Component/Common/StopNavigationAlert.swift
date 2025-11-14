@@ -65,7 +65,7 @@ struct StopNavigationAlert: View {
         .frame(width: 320.wScaled)
         .background(
             RoundedRectangle(cornerRadius: 35)
-            .fill(.regularMaterial)
+            .fill(.alertbackground)
             .overlay(
               RoundedRectangle(cornerRadius: 35)
                 .stroke(Color.primarywhite, lineWidth: 0.5)

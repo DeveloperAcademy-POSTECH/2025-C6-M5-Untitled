@@ -10,11 +10,16 @@ import SwiftUI
 @main
 struct BusRoadApp: App {
     @StateObject var coordinator = NavigationCoordinator()
+    @StateObject private var proximityManager = AlightProximityManager(
+        locationService: LocationService.shared,
+            journeyManager: JourneyManager.shared,
+            voiceManager: VoiceAnnouncementManager()
+        )
     var body: some Scene {
         WindowGroup {
-//            ContentView()
             AppNavigationView()
                 .environmentObject(coordinator)
+                .environmentObject(proximityManager) 
         }
     }
 }

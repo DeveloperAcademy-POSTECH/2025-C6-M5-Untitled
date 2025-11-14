@@ -1,24 +1,14 @@
+//  BusRoad
 //
-//  Untitled.swift
-//  BusRoad
-//
-//  Created by 박난 on 9/23/25.
+//  Created by 박난 on 9/23/25.
 //
 
 import SwiftUI
 
 struct BeforeRideView: View {
-    @StateObject private var viewmodel = BeforeRideViewModel()
+    @StateObject private var viewModel = BeforeRideViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
-    var journey: Journey?
-    var index: Int?
-    
-    init(manager: JourneyManager = .shared) {   // TODO: 의존성 문제 해결(manager viewModel로 빼기)
-        if let journey = manager.selectedJourney, let index = manager.journeyIndex {
-            self.journey = journey
-            self.index = index
-        }
-    }
+    @EnvironmentObject var proximityManager: AlightProximityManager
     
     var body: some View {
         
@@ -29,18 +19,16 @@ struct BeforeRideView: View {
             VStack(spacing: 0) {
                 
                 VStack(spacing: 0) {
-                    
                     TopBar(isMoving: true) { coordinator.popToRoot() }
                         .padding(.horizontal, 8)
-                       
                     
-                    if let journey, let index {
+                    if let journey = viewModel.journey, let index = viewModel.index {
                         WholeJourney(journey: journey, journeyIndex: index, isBeforeRide: true)
-                            .padding(32)
+                            .padding(.horizontal,32)
+                            .padding(.vertical, 24)
                     }
-                    
                 }
-                .frame(height: 144)
+                .frame(height: 128)
                 
                 LineDivider()
                 
@@ -48,90 +36,162 @@ struct BeforeRideView: View {
                     Color(.background)
                         .ignoresSafeArea()
                     
-                    VStack(spacing: 0) {
-                        if let journey, let index, case let .bus(busNode) = journey.nodes[index] {
-                            BeforeRideCard(
-                                waitingStopName: busNode.stations[0].stationName,
-                                waitingBusNO: busNode.busNo,
-                                remainingStopsToBoarding: .constant(1),
-                                remainingTimeToBoarding: 1
-                            )
-                            .padding(.horizontal, 24.wScaled)
-                            .padding(.top, 28.wScaled)
-                            .padding(.bottom, 47.wScaled)
-                        }
+                    if viewModel.hasPassed {
                         
-                        Button {
-                            coordinator.advanceJourneyStage()
-                        } label: {
-                            Text("탔어요")
-                                .font(.premed32)
-                                .foregroundStyle(.subLight)
-                                .frame(width: 239, height: 74)
-                                .background(.subStrong)
-                                .cornerRadius(20)
+                        VStack(spacing: 0) {
+                            if let passedBus = viewModel.lastPassedBusNo {
+                                BusPassedCard(busNo: passedBus)
+                                    .padding(.horizontal, 24.wScaled)
+                                    .padding(.top, 28.wScaled)
+                                    .padding(.bottom, 30.wScaled)
+                            } else {
+                                BusPassedCard(busNo: "이전")
+                                    .padding(.horizontal, 24.wScaled)
+                                    .padding(.top, 28.wScaled)
+                                    .padding(.bottom, 30.wScaled)
+                            }
+                            
+                            HStack {
+                                
+                                Button {
+                                    viewModel.acknowledgeMiss()
+                                } label: {
+                                    Text("놓쳤어요")
+                                        .foregroundColor(.subPoint)
+                                        .font(.premed28Scaled)
+                                        .frame(width: 162.wScaled, height: 64)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .stroke(Color.subPoint, lineWidth: 1)
+                                        )
+                                }
+                                .buttonStyle(.plain)
+                                
+                                Spacer()
+                                
+                                Button {
+                                    Task { @MainActor in
+                                        
+                                        let arrival = ArrivalInfoManager.shared
+                                        proximityManager.applyTagoContext(
+                                            cityCode: arrival.lastCityCode,
+                                            routeId: arrival.trackedBusRouteIdPublic,
+                                            targetVehicleNo: arrival.trackedVehicleNoPublic
+                                        )
+                                        viewModel.stopRefreshing()
+                                        coordinator.advanceJourneyStage()
+                                            
+                                        if let index = viewModel.index, let journey = viewModel.journey,
+                                            case let .bus(busnode) = journey.nodes[index] {
+                                            await ProgressLiveActivityManager.shared.updateStage(
+                                                nextStage: RouteStage.onBus.rawValue,
+                                                nextDestination: busnode.end.name,
+                                                totalDistance: 10,
+                                                remainingBusStops: proximityManager.remainingStations,
+                                                busTravelTime: busnode.travelTime
+                                            )
+                                        }
+                                    }
+                                } label: {
+                                    Text("탔어요")
+                                        .foregroundColor(.subLight)
+                                        .font(.premed28Scaled)
+                                        .frame(width: 162.wScaled, height: 64)
+                                        .background(.subPoint)
+                                        .cornerRadius(20)
+                                }
+                            }
+                            .padding(.horizontal, 24.wScaled)
+                            
                         }
-                        .buttonStyle(.plain)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 74)
+                    }
+                    else {
+                        VStack(spacing: 0) {
+                            if let journey = viewModel.journey,
+                                let index = viewModel.index,
+                                case let .bus(busNode) = journey.nodes[index] {
+                                BeforeRideCard(
+                                    viewModel: viewModel,
+                                    waitingStopName: busNode.stations[0].stationName,
+                                    waitingBusNo: busNode.busNo
+                                )
+                                .padding(.horizontal, 24.wScaled)
+                                .padding(.top, 28.wScaled)
+                                .padding(.bottom, 30.wScaled)
+                            }
+                            Button {
+                                Task { @MainActor in
+                                    
+                                    let arrival = ArrivalInfoManager.shared
+                                    proximityManager.applyTagoContext(
+                                        cityCode: arrival.lastCityCode,
+                                        routeId: arrival.trackedBusRouteIdPublic,
+                                        targetVehicleNo: arrival.trackedVehicleNoPublic
+                                    )
+                                    viewModel.stopRefreshing()
+                                    coordinator.advanceJourneyStage()
+                                    
+                                    if let index = viewModel.index, let journey = viewModel.journey,
+                                        case let .bus(busnode) = journey.nodes[index] {
+                                        await ProgressLiveActivityManager.shared.updateStage(
+                                            nextStage: RouteStage.onBus.rawValue,
+                                            nextDestination: busnode.end.name,
+                                            totalDistance: 10,
+                                            remainingBusStops: proximityManager.remainingStations,
+                                            busTravelTime: busnode.travelTime
+                                        )
+                                    }
+                                }
+                            } label: {
+                                Text("탔어요")
+                                    .font(.premed32)
+                                    .foregroundStyle(.subLight)
+                                    .frame(width: 344.wScaled, height: 64)
+                                    .background(.subPoint)
+                                    .cornerRadius(20)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                 }
             }
         }
+        .onAppear {
+            Task {
+                await viewModel.prepareData()
+            }
+            
+            proximityManager.configure(busLegIndex: 0)
+            proximityManager.disableVoiceAnnouncement()
+            Task {
+                   do {
+                       try await proximityManager.start()  
+                       print("[BeforeRideView] GPS 추적 시작 성공")
+                   } catch {
+                       print("[BeforeRideView] GPS 추적 시작 실패: \(error)")
+                   }
+               }
+            
+            if let journey = viewModel.journey,
+                let index = viewModel.index,
+                case let .bus(busNode) = journey.nodes[index] {
+                
+                // Live Activity를 waitingForBus 단계로 업데이트하는 로직 추가
+                Task {
+                    await ProgressLiveActivityManager.shared.updateStage(
+                        nextStage: "waitingForBus", // RouteStage.waitingForBus.rawValue
+                        nextDestination: busNode.start.name,  // 승차 정류장 이름
+                        totalDistance: 0,
+                        remainingBusStops: proximityManager.remainingStations, 
+                        busTravelTime: busNode.travelTime
+                    )
+                    print("[DEBUG] BeforeRideView - Live Activity waitingForBus 업데이트 완료. Destination: \(busNode.start.name)")
+                }
+            }
+            print("[BeforeRideView] 정류장 추적 시작")
+        }
+        .onDisappear {
+            viewModel.endManager()
+        }
     }
-}
-
-#Preview {
-    let manager = JourneyManager.shared
-    
-    // 정류장들
-    let station1 = BusStation(index: 0, stationId: 1001, stationName: "포항공대 정문", stationCityCode: 37010, localStationId: "101")
-    let station2 = BusStation(index: 1, stationId: 1002, stationName: "죽도시장", stationCityCode: 37010, localStationId: "102")
-    let station3 = BusStation(index: 2, stationId: 1003, stationName: "포항역", stationCityCode: 37010, localStationId: "103")
-    let station4 = BusStation(index: 3, stationId: 1004, stationName: "포항시외버스터미널", stationCityCode: 37010, localStationId: "104")
-
-    // 버스 구간 1
-    let busNode1 = BusRouteNode(
-        start: LocationInfo(name: "포항공대 정문", latitude: 36.0186, longitude: 129.3231),
-        end: LocationInfo(name: "죽도시장", latitude: 36.0348, longitude: 129.3435),
-        busNo: "107",
-        busId: 107,
-        stations: [station1, station2],
-        travelTime: 15
-    )
-
-    // 도보 구간
-    let walkNode = WalkRouteNode(
-        start: LocationInfo(name: "죽도시장", latitude: 36.0348, longitude: 129.3435),
-        end: LocationInfo(name: "포항역", latitude: 36.0716, longitude: 129.3419),
-        travelTime: 10
-    )
-
-    // 버스 구간 2 (
-    let busNode2 = BusRouteNode(
-        start: LocationInfo(name: "포항역", latitude: 36.0716, longitude: 129.3419),
-        end: LocationInfo(name: "포항시외버스터미널", latitude: 36.0165, longitude: 129.3564),
-        busNo: "500",
-        busId: 500,
-        stations: [station3, station4],
-        travelTime: 18
-    )
-
-    // 전체 여정 구성
-    let journey = Journey(
-        totalTime: 43,
-        nodes: [
-            .bus(busNode1),
-            .walk(walkNode),
-            .bus(busNode2)
-        ]
-    )
-
-    // 매니저에 주입
-    manager.selectedJourney = journey
-    manager.journeyIndex = 0
-
-    // 프리뷰
-    return BeforeRideView(manager: manager)
-        .environmentObject(NavigationCoordinator())
 }

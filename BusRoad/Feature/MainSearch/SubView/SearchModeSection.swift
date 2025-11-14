@@ -48,13 +48,14 @@ struct SearchModeSection: View {
     private var header: some View {
         HStack(spacing: 0) {
             Button(action: onBack) {
-                Image(systemName: "chevron.left")
-                    .foregroundStyle(.greyNormal)
-                    .font(.title3)
-                    .frame(width: 44, height: 44)
-                    .bold()
+                Image("gotoback")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 20, height: 20)
+                    
             }
             .buttonStyle(.plain)
+            .frame(width: 44, height: 44)
             
             SearchBar(
                 text: $query,
@@ -86,6 +87,7 @@ struct SearchModeSection: View {
                             .controlSize(.large)
                             .scaleEffect(1.5)
                             .padding(.top, -100)
+                            .tint(.greyDisable)
                         
                         Spacer(minLength: 0)
                         

@@ -8,64 +8,86 @@
 import SwiftUI
 
 struct OriginTextField : View {
-  @EnvironmentObject var coordinator: NavigationCoordinator
-  @Binding var location: LocationInfo?
-  @Binding var isSearchMode: Bool
-  @Binding var locationType: LocationType
-  @Binding var userDidSelectOrigin: Bool
-  
-  var onRefreshTapped: () -> Void
-  
-  var body: some View {
+    @EnvironmentObject var coordinator: NavigationCoordinator
+    @Binding var location: LocationInfo?
+    @Binding var isSearchMode: Bool
+    @Binding var locationType: LocationType
+    @Binding var userDidSelectOrigin: Bool
+    @Binding var isRefreshingLocation: Bool
     
-    HStack(spacing: 12) {
-      Text("출발지")
-        .foregroundColor(Color.subPoint)
-        .font(.prereg20Scaled)
-      
-      Divider()
-        .background(Color.greyDisable)
-        .frame(height: 26)
-      
-      Button(action: {
-        locationType = .origin
-        isSearchMode = true
-//        if let name = location?.name, name != "현위치" {
-//          let searchText = (name == "현위치") ? "" : name
-//          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-//            NotificationCenter.default.post(
-//              name: .didSetPresetDestination,
-//              object: searchText
-//            )
-//          }
-//        }
-      }) {
-        HStack{
-          Text(location?.name ?? "출발지를 입력하세요")
-            .font(.prereg20Scaled)
-            .foregroundColor(userDidSelectOrigin ? .greyHeavy : .greyNormal)
-          Spacer()
+    @State private var rotationAngle: Double = 0  // 회전 각도
+    var onRefreshTapped: () async -> Void
+    
+    var body: some View {
+        
+        HStack(spacing: 12) {
+            Text("출발")
+                .foregroundColor(Color.subPoint)
+                .font(.prereg20Scaled)
+            
+            Divider()
+                .background(Color.greyDisable)
+                .frame(width: 1)
+                .frame(height: 26)
+            
+            Button(action: {
+                locationType = .origin
+                isSearchMode = true
+                //        if let name = location?.name, name != "현위치" {
+                //          let searchText = (name == "현위치") ? "" : name
+                //          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                //            NotificationCenter.default.post(
+                //              name: .didSetPresetDestination,
+                //              object: searchText
+                //            )
+                //          }
+                //        }
+            }) {
+                HStack{
+                    Text(location?.name ?? "현위치") //플레이스홀더
+                        .font(.prereg20Scaled)
+                        .foregroundColor(userDidSelectOrigin ? .greyHeavy : .greyDisable)
+                    Spacer()
+                }
+            }
+            
+            Spacer()
+            
+            Button {
+                Task {
+                    await onRefreshTapped()
+                }
+            } label: {
+                Image("update")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .foregroundColor(Color.greyNormal)
+                    .frame(width: 24, height: 24)
+                    .rotationEffect(.degrees(rotationAngle))
+            }
+            .disabled(isRefreshingLocation)
         }
-      }
-      
-      Spacer()
-      
-      Button(action: {
-        self.onRefreshTapped()
-      }, label: {
-        Image("update")
-          .resizable()
-          .foregroundColor(Color.greyNormal)
-          .frame(width: 18, height: 20)
-          .aspectRatio(contentMode: .fit)
-      })
+        .padding(.leading, 20)
+        .padding(.trailing, 15)
+        .padding(.vertical, 10)
+        .background {
+            RoundedRectangle(cornerRadius: 5)
+                .foregroundStyle(Color.background)
+            
+        }
+        .task(id: isRefreshingLocation) {
+            // ⭐ task는 id가 변경되면 자동으로 취소됨
+            if isRefreshingLocation {
+                while !Task.isCancelled {
+                    withAnimation(.linear(duration: 0.5)) {
+                        rotationAngle += 360
+                    }
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                }
+            } else {
+                // 멈춤
+                rotationAngle = 0
+            }
+        }
     }
-    .padding(.leading, 20)
-    .padding(.trailing, 25)
-    .padding(.vertical, 12)
-    .overlay {
-      RoundedRectangle(cornerRadius: 25)
-        .stroke(.subStrong, lineWidth: 1.5)
-    }
-  }
 }

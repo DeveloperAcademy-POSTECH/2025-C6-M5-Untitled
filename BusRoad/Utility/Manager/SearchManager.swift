@@ -18,7 +18,7 @@ final class SearchManager: ObservableObject {
     
     // 의존 서비스
     private let service: KakaoPlaceSearchService
-    private let locationService = LocationService()
+    private let locationService = LocationService.shared
     
     
     private init(service: KakaoPlaceSearchService? = nil) {
@@ -46,7 +46,9 @@ final class SearchManager: ObservableObject {
         
         do {
             print("[SearchManager] 위치 가져오기 시작...")
-            let coord = try? await locationService.requestOneShotCoordinate(timeout: 5)
+            
+            // 캐시 우선 사용 (10분까지 허용)
+            let coord = try? await locationService.getQuickCoordinate(maxAge: 600)
             
             // 1차: 키워드 검색
             let keywordResults: [KakaoPlace]

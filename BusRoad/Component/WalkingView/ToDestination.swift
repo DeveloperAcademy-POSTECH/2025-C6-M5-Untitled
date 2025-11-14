@@ -9,7 +9,7 @@ import SwiftUI
 import CoreLocation
 
 struct ToDestination: View {
-    @ObservedObject var vm = WalkingViewModel()
+    @ObservedObject var vm: WalkingViewModel  // 파라미터로 받기
     @EnvironmentObject var coordinator: NavigationCoordinator
     
     var journey: Journey
@@ -29,7 +29,6 @@ struct ToDestination: View {
                 )
                 .foregroundColor(.primaryHeavy)
                 .padding(.top, 25.wScaled)
-
                 
                 Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
                     .font(.prereg32Scaled)
@@ -42,7 +41,7 @@ struct ToDestination: View {
                     ZStack{
                         Circle()
                             .frame(width: 18, height: 18)
-                            .foregroundColor(.subStrong.opacity(0.5))
+                            .foregroundColor(.subPoint.opacity(0.5))
                             .offset(y: -100)
                         
                         ArrowView(bearing: vm.arrowBearing, threshold: threshold)
@@ -62,13 +61,8 @@ struct ToDestination: View {
                 Text("남았어요.")
                     .font(.prereg32Scaled)
                     .foregroundColor(.primaryHeavy)
-                    .padding(.bottom, 36.wScaled)
-//                Spacer()
             }
             .padding(.horizontal, 32.wScaled)
-            .onAppear {
-                vm.setDestination(from: node)
-            }
         } else {
             Text("경로 정보 확인 불가")
                 .font(.presemi36Scaled)
@@ -110,7 +104,7 @@ struct ArrowView: View {
         ZStack {
             if startAngle != endAngle {
                 ArcPath(startAngle: startAngle, endAngle: endAngle)
-                    .stroke(Color.subStrong.opacity(0.2),
+                    .stroke(Color.subPoint.opacity(0.2),
                             style: StrokeStyle(lineWidth: 13, lineCap: .round))
                     .frame(width: 2 * radius, height: 2 * radius)
             }
@@ -123,7 +117,7 @@ struct ArrowView: View {
                 
                 Circle()
                     .frame(width: dotSize, height: dotSize)
-                    .foregroundColor(.subStrong)
+                    .foregroundColor(.subPoint)
                     .offset(y: -radius)
             }
             .rotationEffect(.degrees(smoothAngle))
