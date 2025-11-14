@@ -12,6 +12,7 @@ struct SearchModeSection: View {
     let onSelect: (PlaceSummary) -> Void
     @Binding var hasSubmitted: Bool
     @Binding var isPresented: Bool
+    @Binding var isDestination: Bool
     let isLoading: Bool
     
     @State private var submittedQuery: String = ""
@@ -135,13 +136,14 @@ struct SearchModeSection: View {
         }
         .fullScreenCover(isPresented: $isPresented) {
             if let selectedItem = selectedItem {
-                DestinationMap(
+                LocationMap(
                     isPresented: $isPresented,
-                    destination: selectedItem,
+                    isDestination: $isDestination,
+                    location: selectedItem,
                     onSelect: {
                         isPresented = false
                         onSelect(selectedItem)
-                    }
+                    },
                 )
             }
         }

@@ -7,6 +7,8 @@ struct MainSearchView: View {
     @StateObject private var viewModel = MainSearchViewModel()
     @FocusState private var isFocused: Bool
     
+    var isDestination: Bool = true
+    
     var body: some View {
         Group {
             if viewModel.isSearchMode {
@@ -40,6 +42,7 @@ struct MainSearchView: View {
                     },
                     hasSubmitted: $viewModel.hasSubmitted,
                     isPresented: $viewModel.showDestinationMap,
+                    isDestination: .constant(isDestination),
                     isLoading: viewModel.isLoading
                 )
             } else {

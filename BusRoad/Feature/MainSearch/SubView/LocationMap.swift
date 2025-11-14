@@ -4,22 +4,25 @@ import CoreLocation
 
 // MARK: - Deprecation 수정된 DestinationMap 뷰
 
-struct DestinationMap: View {
+struct LocationMap: View {
     @Binding var isPresented: Bool
+    @Binding var isDestination: Bool
+
     let onSelect: () -> Void
-    let destination: PlaceSummary
+    let location: PlaceSummary
     
     @State private var position: MapCameraPosition
     
     private var showInformation: Bool = true
     
-    init(isPresented: Binding<Bool>, destination: PlaceSummary, onSelect: @escaping () -> Void) {
+    init(isPresented: Binding<Bool>, isDestination: Binding<Bool>, location: PlaceSummary, onSelect: @escaping () -> Void) {
         self._isPresented = isPresented
-        self.destination = destination
+        self._isDestination = isDestination
+        self.location = location
         self.onSelect = onSelect
         
         self._position = State(initialValue: .region(MKCoordinateRegion(
-            center: destination.coordinate,
+            center: location.coordinate,
             span: MKCoordinateSpan(latitudeDelta: 0.003, longitudeDelta: 0.003)
         )))
     }
@@ -28,7 +31,7 @@ struct DestinationMap: View {
         VStack(spacing:0){
             ZStack(alignment: .bottom) {
                 Map(position: $position) {
-                    Annotation("", coordinate: destination.coordinate) {
+                    Annotation("", coordinate: location.coordinate) {
                         Image("marker")
                             .offset(y: -15)
                     }
@@ -43,17 +46,17 @@ struct DestinationMap: View {
                         .ignoresSafeArea()
                 }
                 
-                .onChange(of: destination.coordinate.latitude) {
+                .onChange(of: location.coordinate.latitude) {
                     // 위도나 경도가 변경되면 region 업데이트
                     position = .region(MKCoordinateRegion(
-                        center: destination.coordinate,
+                        center: location.coordinate,
                         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
                     ))
                 }
-                .onChange(of: destination.coordinate.longitude) {
+                .onChange(of: location.coordinate.longitude) {
                     // 위도나 경도가 변경되면 region 업데이트
                     position = .region(MKCoordinateRegion(
-                        center: destination.coordinate,
+                        center: location.coordinate,
                         span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
                     ))
                 }
@@ -73,10 +76,10 @@ struct DestinationMap: View {
                     .padding(.bottom, 0)
                 VStack(spacing: 0){
                     VStack(alignment: .leading, spacing: 9){
-                        Text(destination.name)
+                        Text(location.name)
                             .font(.presemi28Scaled)
                             .foregroundStyle(Color.greyHeavy)
-                        Text(destination.address)
+                        Text(location.address)
                             .font(.prereg20Scaled)
                             .foregroundStyle(Color.gray)
                     }
@@ -88,7 +91,7 @@ struct DestinationMap: View {
                         onSelect()
                         isPresented = false
                     }) {
-                        Text("목적지로 설정")
+                        Text(isDestination ? "목적지로 설정" : "출발지로 설정")
                             .font(.premed28Scaled)
                             .foregroundColor(.subLight)
                             .padding(.horizontal, 96.wScaled)
@@ -116,12 +119,14 @@ struct DestinationMap_Previews: PreviewProvider {
         longitude: 129.3400
     )
     @State static var isPresentedPreview = true
+    @State static var isDestinationPreview = true
     
     static var previews: some View {
         NavigationView {
-            DestinationMap(
+            LocationMap(
                 isPresented: $isPresentedPreview,
-                destination: postechLocation,
+                isDestination: $isDestinationPreview,
+                location: postechLocation,
                 onSelect: {
                     print("\(postechLocation.name)이(가) 선택되었습니다.")
                 }

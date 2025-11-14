@@ -6,6 +6,8 @@ struct RouteSuggestionView: View {
     @StateObject private var viewModel = BusRouteViewModel()
     @FocusState var isFocused: Bool
     
+    @FocusState var isDestination: Bool
+    
     var body: some View {
         if viewModel.isSearchMode {
             SearchModeSection(
@@ -35,7 +37,12 @@ struct RouteSuggestionView: View {
                     viewModel.isSearchMode = false
                 },
                 hasSubmitted: $viewModel.hasSubmitted,
-                isPresented: $viewModel.showDestinationMap,
+                isPresented: $viewModel.showDestinationMap, isDestination: Binding(
+                    get: { viewModel.locationType == .destination },
+                    set: { newValue in
+                        viewModel.locationType = newValue ? .destination : .origin
+                    }
+                ),
                 isLoading: viewModel.isSearchLoading
             )
         } else {
