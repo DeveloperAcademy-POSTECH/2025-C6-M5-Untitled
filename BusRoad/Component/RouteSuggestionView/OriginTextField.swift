@@ -13,8 +13,10 @@ struct OriginTextField : View {
     @Binding var isSearchMode: Bool
     @Binding var locationType: LocationType
     @Binding var userDidSelectOrigin: Bool
+    @Binding var isRefreshingLocation: Bool
     
-    var onRefreshTapped: () -> Void
+    @State private var rotationAngle: Double = 0  // 회전 각도
+    var onRefreshTapped: () async -> Void
     
     var body: some View {
         
@@ -51,15 +53,19 @@ struct OriginTextField : View {
             
             Spacer()
             
-            Button(action: {
-                self.onRefreshTapped()
-            }, label: {
+            Button {
+                Task {
+                    await onRefreshTapped()
+                }
+            } label: {
                 Image("update")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .foregroundColor(Color.greyNormal)
                     .frame(width: 24, height: 24)
-            })
+                    .rotationEffect(.degrees(rotationAngle))
+            }
+            .disabled(isRefreshingLocation)
         }
         .padding(.leading, 20)
         .padding(.trailing, 15)
@@ -67,7 +73,21 @@ struct OriginTextField : View {
         .background {
             RoundedRectangle(cornerRadius: 5)
                 .foregroundStyle(Color.background)
-               
+            
+        }
+        .task(id: isRefreshingLocation) {
+            // ⭐ task는 id가 변경되면 자동으로 취소됨
+            if isRefreshingLocation {
+                while !Task.isCancelled {
+                    withAnimation(.linear(duration: 0.5)) {
+                        rotationAngle += 360
+                    }
+                    try? await Task.sleep(nanoseconds: 500_000_000)
+                }
+            } else {
+                // 멈춤
+                rotationAngle = 0
+            }
         }
     }
 }
