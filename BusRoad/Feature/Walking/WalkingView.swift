@@ -39,7 +39,7 @@ struct WalkingView: View {
                             if viewModel.arrived {
                                 AtArrival(journey: journey, index: index, viewModel: viewModel)
                             } else {
-                                ToDestination(vm:viewModel, journey: journey, index: index)
+                                ToDestination(vm: viewModel, journey: journey, index: index)
                                 Spacer()
                                 Button {
                                     viewModel.showAlert = true
@@ -124,7 +124,6 @@ struct WalkingView: View {
                 }
             }
         }
-        // 맵뷰 바텀 시트
         .sheet(isPresented: $viewModel.showDevSheet) {
             DevRouteMapView(
                 tmapCoordinates: viewModel.tmapCoordinates,
@@ -134,6 +133,17 @@ struct WalkingView: View {
             )
             .presentationDetents([.fraction(0.4), .large])
             .presentationDragIndicator(.visible)
+        }
+        .onAppear {
+            viewModel.start()
+            
+            // Journey에서 목적지 설정
+            if let journey = viewModel.journey,
+               let index = viewModel.journeyIndex {
+                if case .walk(let node) = journey.nodes[index] {
+                    viewModel.setDestination(from: node)
+                }
+            }
         }
     }
 }

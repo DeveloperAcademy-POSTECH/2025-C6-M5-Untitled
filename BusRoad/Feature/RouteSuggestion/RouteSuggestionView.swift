@@ -55,9 +55,10 @@ struct RouteSuggestionView: View {
                                 isSearchMode: $viewModel.isSearchMode,
                                 locationType: $viewModel.locationType,
                                 userDidSelectOrigin: $viewModel.userDidSelectOrigin,
+                                isRefreshingLocation: $viewModel.isRefreshingLocation,
                                 onRefreshTapped: {
-                                    viewModel.userDidSelectOrigin = false
-                                    viewModel.requestOrigin() }
+                                    await viewModel.forceRefreshOrigin()
+                                }
                             )
                             
                             DestinationTextField(
@@ -343,6 +344,7 @@ struct RouteSuggestionViewWithData: View {
                             isSearchMode: $viewModel.isSearchMode,
                             locationType: $viewModel.locationType,
                             userDidSelectOrigin: $viewModel.userDidSelectOrigin,
+                            isRefreshingLocation: $viewModel.isRefreshingLocation,
                             onRefreshTapped: {
                                 viewModel.userDidSelectOrigin = false
                                 viewModel.requestOrigin()

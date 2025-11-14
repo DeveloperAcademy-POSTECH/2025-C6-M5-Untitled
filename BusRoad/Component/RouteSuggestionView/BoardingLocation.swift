@@ -44,7 +44,7 @@ struct BoardingLocation: View {
                     } else {
                         if !didFetchOnce {
                             Text("도착 정보 불러오는 중...")
-                                .font(.prereg16Scaled)
+                                .font(.presemi24Scaled)
                                 .foregroundColor(Color.greyNormal)
                         } else {
                             Text(route.busNo[0])

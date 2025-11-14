@@ -119,6 +119,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
             }
         }
     }
+
     
     // 좌표만 필요한 경우 편의 메서드
     func requestOneShotCoordinate(timeout seconds: TimeInterval = 5) async throws -> CLLocationCoordinate2D {
@@ -160,6 +161,53 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         print("[LocationService] 백그라운드 트래킹 시작 (포그라운드 전용)")
     }
     
+    func forceRefreshLocation(timeout seconds: TimeInterval = 15) async throws -> CLLocation {
+        print("[LocationService] 🔄 강제 새로고침 시작")
+        
+        // 권한 보장
+        try await requestWhenInUseAuthorizationIfNeeded()
+        
+        // 기존 연속 업데이트 중지 (충돌 방지)
+        manager.stopUpdatingLocation()
+        
+        // 기존 요청이 있다면 취소
+        if let cont = locationContinuation {
+            cont.resume(throwing: LocationError.busy)
+            locationContinuation = nil
+            timeoutTask?.cancel()
+            timeoutTask = nil
+            print("[LocationService] 기존 위치 요청 중단됨")
+        }
+        
+        // 정확도를 최대로 설정
+        let previousAccuracy = manager.desiredAccuracy
+        manager.desiredAccuracy = kCLLocationAccuracyBest
+        
+        return try await withCheckedThrowingContinuation { (cont: CheckedContinuation<CLLocation, Error>) in
+            self.locationContinuation = cont
+            
+            // requestLocation() 대신 startUpdatingLocation() 사용
+            self.manager.startUpdatingLocation()
+            
+            // 타임아웃 설정
+            self.timeoutTask?.cancel()
+            self.timeoutTask = Task { [weak self] in
+                guard let self else { return }
+                try? await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+                
+                await MainActor.run {
+                    if let cont = self.locationContinuation {
+                        self.manager.stopUpdatingLocation()
+                        self.manager.desiredAccuracy = previousAccuracy
+                        cont.resume(throwing: LocationError.timeout)
+                        self.locationContinuation = nil
+                        print("[LocationService] ⏱️ 위치 요청 타임아웃")
+                    }
+                }
+            }
+        }
+    }
+    
     // MARK: - CLLocationManagerDelegate
     
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
@@ -183,16 +231,26 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
     
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         guard let loc = locations.last else { return }
-        // 공개 상태 업데이트 (옵저버들이 사용할 수 있게)
+        
+        // 공개 상태 업데이트
         self.location = loc
+        
+        print("[LocationService] 📍 위치 업데이트: \(loc.coordinate.latitude), \(loc.coordinate.longitude), 정확도: \(loc.horizontalAccuracy)m")
         
         // 대기 중인 1회 요청 완료 처리
         if let cont = locationContinuation {
-            cont.resume(returning: loc)
-            locationContinuation = nil
+            // 정확도가 충분한 위치만 반환
+            if loc.horizontalAccuracy > 0 && loc.horizontalAccuracy <= 100 {
+                manager.stopUpdatingLocation()  // ⭐ 중요: 업데이트 중지
+                cont.resume(returning: loc)
+                locationContinuation = nil
+                timeoutTask?.cancel()
+                timeoutTask = nil
+                print("[LocationService] ✅ 위치 요청 완료 (정확도: \(loc.horizontalAccuracy)m)")
+            } else {
+                print("[LocationService] ⚠️ 정확도 불충분 (\(loc.horizontalAccuracy)m), 계속 대기...")
+            }
         }
-        timeoutTask?.cancel()
-        timeoutTask = nil
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
