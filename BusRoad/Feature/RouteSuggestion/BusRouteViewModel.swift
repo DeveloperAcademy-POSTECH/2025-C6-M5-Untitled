@@ -386,7 +386,7 @@ extension BusRouteViewModel {
         }
         
         if let info = await fetchNearestBusInfo(for: route) {
-            self.arrivalText = info.arrivalText
+            self.arrivalText = arrivalText
         }
         
         let cleanedBusNo = cleanBusNumber(item.routeno)
