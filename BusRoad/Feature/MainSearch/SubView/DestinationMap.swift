@@ -25,82 +25,86 @@ struct DestinationMap: View {
     }
     
     var body: some View {
-        ZStack(alignment: .bottom) {
-            Map(position: $position) {
-                Annotation("", coordinate: destination.coordinate) {
-                                    Image("marker")
-                                        .offset(y: -15)
-                                }
-            }
-            .ignoresSafeArea()
-            
-            .overlay(alignment: .topTrailing) {
-                Button {isPresented = false} label: {Image("white.xbutton")}
-                    .padding(.top, 53)
-                    .padding(.trailing, 12)
-                    .ignoresSafeArea()
-            }
-            
-            .onChange(of: destination.coordinate.latitude) {
-                // 위도나 경도가 변경되면 region 업데이트
-                position = .region(MKCoordinateRegion(
-                    center: destination.coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                ))
-            }
-            .onChange(of: destination.coordinate.longitude) {
-                // 위도나 경도가 변경되면 region 업데이트
-                position = .region(MKCoordinateRegion(
-                    center: destination.coordinate,
-                    span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-                ))
-            }
-            Rectangle()
-                .frame(height: 205)
-                .clipShape(
-                    .rect(
-                        topLeadingRadius: 15,
-                        bottomLeadingRadius: 0,
-                        bottomTrailingRadius: 0,
-                        topTrailingRadius: 15
-                    )
-                )
-                .foregroundColor(.primarywhite)
-                .padding(.bottom, 0)
-            VStack(spacing: 0){
-                VStack(alignment: .leading, spacing: 9){
-                    Text(destination.name)
-                        .font(.presemi28Scaled)
-                        .foregroundStyle(Color.greyHeavy)
-                    Text(destination.address)
-                        .font(.prereg20Scaled)
-                        .foregroundStyle(Color.gray)
+        VStack(spacing:0){
+            ZStack(alignment: .bottom) {
+                Map(position: $position) {
+                    Annotation("", coordinate: destination.coordinate) {
+                        Image("marker")
+                            .offset(y: -15)
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 30)
-                .padding(.bottom, 25)
-                Button(action: {
-                    onSelect()
-                    isPresented = false
-                }) {
-                    Text("목적지로 설정")
-                        .font(.premed28Scaled)
-                        .foregroundColor(.subLight)
-                        .padding(.horizontal, 96)
-                        .padding(.vertical, 13.5)
-                        .background(
-                            RoundedRectangle(cornerRadius: 20)
-                                .foregroundColor(Color.subPoint)
+                .ignoresSafeArea()
+                .frame(maxHeight: .infinity)
+                
+                .overlay(alignment: .topTrailing) {
+                    Button {isPresented = false} label: {Image("white.xbutton")}
+                        .padding(.top, 53.wScaled)
+                        .padding(.trailing, 12.wScaled)
+                        .ignoresSafeArea()
+                }
+                
+                .onChange(of: destination.coordinate.latitude) {
+                    // 위도나 경도가 변경되면 region 업데이트
+                    position = .region(MKCoordinateRegion(
+                        center: destination.coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    ))
+                }
+                .onChange(of: destination.coordinate.longitude) {
+                    // 위도나 경도가 변경되면 region 업데이트
+                    position = .region(MKCoordinateRegion(
+                        center: destination.coordinate,
+                        span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
+                    ))
+                }
+            }
+            ZStack{
+                Rectangle()
+                    .frame(height: 205.wScaled)
+                    .clipShape(
+                        .rect(
+                            topLeadingRadius: 15,
+                            bottomLeadingRadius: 0,
+                            bottomTrailingRadius: 0,
+                            topTrailingRadius: 15
                         )
-                        .cornerRadius(10)
+                    )
+                    .foregroundColor(.primarywhite)
+                    .padding(.bottom, 0)
+                VStack(spacing: 0){
+                    VStack(alignment: .leading, spacing: 9){
+                        Text(destination.name)
+                            .font(.presemi28Scaled)
+                            .foregroundStyle(Color.greyHeavy)
+                        Text(destination.address)
+                            .font(.prereg20Scaled)
+                            .foregroundStyle(Color.gray)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 30.wScaled)
+                    .padding(.bottom, 25.wScaled)
+                    .padding(.top, 30.wScaled)
+                    Button(action: {
+                        onSelect()
+                        isPresented = false
+                    }) {
+                        Text("목적지로 설정")
+                            .font(.premed28Scaled)
+                            .foregroundColor(.subLight)
+                            .padding(.horizontal, 96.wScaled)
+                            .padding(.vertical, 13.5.wScaled)
+                            .background(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .foregroundColor(Color.subPoint)
+                            )
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
             }
-            .padding(.bottom, 31)
         }
     }
 }
-
 // --- 프리뷰 ---
 
 struct DestinationMap_Previews: PreviewProvider {
