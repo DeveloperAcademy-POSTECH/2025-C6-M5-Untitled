@@ -25,6 +25,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var hasSubmitted: Bool = false
     @Published var isSearchMode = false
     @Published var isLoading: Bool = false
+    @Published var isRefreshingLocation: Bool = false
     
     
     private let journeyManager: JourneyManager
