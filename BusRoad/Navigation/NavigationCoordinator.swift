@@ -11,10 +11,15 @@ import Foundation
 class NavigationCoordinator: ObservableObject {
     @Published var path: [Route] = []
     @Published var currentStage: JourneyStage?
+    @Published var isJourneyFlowPresented: Bool = false
     let journeyManager = JourneyManager.shared
     let searchManager = SearchManager.shared
     
     func push(_ path: Route) {
+        if path == .journeyFlow {
+            self.isJourneyFlowPresented = true
+            return
+        }
         self.path.append(path)
     }
     
@@ -25,17 +30,22 @@ class NavigationCoordinator: ObservableObject {
     }
     
     func popToRoot() {
-        // manager 초기화
-        journeyManager.reset()
-        searchManager.reset()
+        self.isJourneyFlowPresented = false
         self.currentStage = nil
-        self.path.removeAll()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.path.removeAll()
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
+            // manager 초기화
+            self.journeyManager.reset()
+            self.searchManager.reset()
+        }
     }
     
     // 처음 JourneyStage 설정
     func setJourneyStage() {
-        guard let journey = journeyManager.selectedJourney else { return print("[ERROR] There is no selectedJourney.") }
-        guard let firstNode = journey.nodes.first else { return print("[ERROR] There is no firstNode.") }
+        guard let journey = journeyManager.selectedJourney else { return }
+        guard let firstNode = journey.nodes.first else { return }
         
         switch firstNode {
         case .bus:
@@ -47,8 +57,8 @@ class NavigationCoordinator: ObservableObject {
     
     // 다음 JourneyStage 변경
     func advanceJourneyStage() {
-        guard let index = journeyManager.journeyIndex else { return print("[ERROR] There is no journeyIndex.")}
-        guard let journey = journeyManager.selectedJourney else { return print("[ERROR] There is no selectedJourney.") }
+        guard let index = journeyManager.journeyIndex else { return }
+        guard let journey = journeyManager.selectedJourney else { return }
         
         if let currentStage {
             if index == journey.nodes.count - 1 {   // 마지막 요소일 경우, 승차 전을 제외하고(.walking, .onRide) 모두 congrats 뷰로 이동

@@ -45,9 +45,9 @@ struct RouteSuggestionView: View {
                 
                 VStack(spacing: 0) {
                     // MARK: - 상단바
-                    VStack(spacing: 0) {
-                        TopBar(isMoving: false) { coordinator.popToRoot() }
-                            .padding(.horizontal, 8)
+                    VStack(spacing: 8) {
+                        RouteTopBar()
+                            .padding(.horizontal, 20)
                         
                         VStack(spacing: 8) {
                             OriginTextField(

@@ -26,9 +26,14 @@ struct AppNavigationView: View {
                         VoiceSearchView()
                             .toolbar(.hidden, for: .navigationBar)
                     case .journeyFlow:
-                        JourneyFlowView()
-                            .toolbar(.hidden, for: .navigationBar)
+//                        JourneyFlowView()
+//                            .toolbar(.hidden, for: .navigationBar)
+                        EmptyView()
                     }
+                }
+                .fullScreenCover(isPresented: $coordinator.isJourneyFlowPresented) {
+                    JourneyFlowView()
+                        .toolbar(.hidden, for: .navigationBar)
                 }
         }
     }
