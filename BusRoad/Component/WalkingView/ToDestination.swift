@@ -17,24 +17,8 @@ struct ToDestination: View {
     let threshold: Double = 30  // 방향 허용 오차
     
     var body: some View {
-        
         if case let .walk(node) = journey.nodes[index] {
             VStack(spacing: 60) {
-                
-                VStack(spacing: 8) {
-                    Text(index == journey.nodes.count - 1 ? "목적지까지 걷기" : "정류장까지 걷기")
-                        .font(.prereg20)
-                        .foregroundColor(.primaryHeavy)
-                    
-                    MarqueeText(
-                        text: node.end.name,
-                        font: .presemi36Scaled,
-                        uiFont: .presemi36Scaled,
-                        startDelay: 1.0,
-                        alignment: .center
-                    )
-                    .foregroundColor(.primaryHeavy)
-                }
                 
                 HStack {
                     Spacer()
@@ -52,7 +36,7 @@ struct ToDestination: View {
                 }
                 .padding(.bottom, 30.wScaled)
                 
-                
+                // 🎯 거리 표시
                 HStack {
                     Text(vm.bigDistanceText)
                         .font(.presemi32Scaled)
@@ -83,7 +67,7 @@ struct ArrowView: View {
     
     @State private var smoothAngle: Double = 0
     @State private var inDeadzone: Bool = true
-    @State private var arcAngle: Double = 0  // normalized 각도로 유지
+    @State private var arcAngle: Double = 0
     
     private var enterDeadzoneThreshold: Double { threshold }
     private var exitDeadzoneThreshold: Double { threshold + 5 }
@@ -92,7 +76,6 @@ struct ArrowView: View {
         bearing < 180 ? bearing : bearing - 360
     }
     
-    // Arc Opacity: 정면 근처에서만 사라짐
     private var arcOpacity: Double {
         let fadeStartAngle = 25.0
         let fadeEndAngle = 10.0
@@ -108,7 +91,6 @@ struct ArrowView: View {
         }
     }
     
-    // Dynamic Pad
     private func getDynamicPad() -> Double {
         let absAngle = abs(arcAngle)
         
@@ -121,7 +103,6 @@ struct ArrowView: View {
         }
     }
     
-    // Arc Start/End Angle
     private var arcStartAngle: Double {
         let dynamicPad = getDynamicPad()
         
@@ -161,7 +142,6 @@ struct ArrowView: View {
                 .opacity(arcOpacity)
             }
             
-            // 화살표 + 점
             Group {
                 Image(systemName: "arrow.up")
                     .font(.system(size: 160, weight: .bold))
@@ -185,7 +165,6 @@ struct ArrowView: View {
         }
     }
     
-    // Deadzone + 부드러운 회전 처리
     private func updateValues(_ newValue: CLLocationDirection) {
         let newBearing = newValue < 180 ? newValue : newValue - 360
         
@@ -224,16 +203,13 @@ struct ArrowView: View {
             targetAngle = smoothAngle + shortestDiff
         }
         
-        // arcAngle 계산: 최단 경로로 이동
         var targetArcAngle: Double
         if nowInDeadzone {
             targetArcAngle = 0
         } else {
-            // 현재 arcAngle에서 가장 가까운 경로로 newBearing까지 이동
             var normalized = newBearing
             let currentArc = arcAngle
             
-            // 최단 거리 계산
             let diff = normalized - currentArc
             if diff > 180 {
                 normalized -= 360

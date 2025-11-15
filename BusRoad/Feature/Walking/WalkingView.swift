@@ -36,13 +36,75 @@ struct WalkingView: View {
                     Color(.background).ignoresSafeArea()
                     VStack(spacing: 0) {
                         if let journey = viewModel.journey, let index = viewModel.journeyIndex {
+                            
+                            if case let .walk(node) = journey.nodes[index] {
+                                VStack(spacing: 8) {
+                                    Text(index == journey.nodes.count - 1 ? "목적지까지 걷기" : "정류장까지 걷기")
+                                        .font(.prereg20)
+                                        .foregroundColor(.primaryHeavy)
+                                    
+                                    MarqueeText(
+                                        text: node.end.name,
+                                        font: .presemi36Scaled,
+                                        uiFont: .presemi36Scaled,
+                                        startDelay: 1.0,
+                                        alignment: .center
+                                    )
+                                    .foregroundColor(.primaryHeavy)
+                                }
+                                .padding(.top, 44.wScaled)
+                                .padding(.horizontal, 32.wScaled)
+                                Spacer()
+                            }
+                            
                             if viewModel.arrived {
-                                AtArrival(journey: journey, index: index, viewModel: viewModel)
+                                VStack(spacing: 0) {
+                                    
+                                    Spacer()
+                                    
+                                    AtArrival(journey: journey, index: index, viewModel: viewModel)
+                                    
+                                    Spacer()
+                                    
+                                    Button {
+                                        if index == journey.nodes.count - 1 {
+                                            coordinator.popToRoot()
+                                            ProgressLiveActivityManager.shared.endActivity()
+                                        } else {
+                                            coordinator.advanceJourneyStage()
+                                            
+                                            if journey.nodes.indices.contains(index + 1),
+                                               case let .bus(busnode) = journey.nodes[index + 1] {
+                                                let boardingStopName = busnode.start.name
+                                                
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                    Task {
+                                                        await ProgressLiveActivityManager.shared.updateStage(
+                                                            nextStage: RouteStage.waitingForBus.rawValue,
+                                                            nextDestination: boardingStopName,
+                                                            totalDistance: 0,
+                                                            remainingBusStops: busnode.stations.count,
+                                                            busTravelTime: busnode.travelTime
+                                                        )
+                                                    }
+                                                    print("[DEBUG] 확인 완료 - waitingForBus 업데이트, destination: \(boardingStopName)")
+                                                }
+                                            }
+                                        }
+                                    } label: {
+                                        Text("맞아요")
+                                            .foregroundColor(.white)
+                                            .font(.premed32Scaled)
+                                            .frame(width: 344.wScaled, height: 64.wScaled)
+                                            .background(Color.subPoint)
+                                            .cornerRadius(20)
+                                    }
+                                    .opacity(viewModel.showArrivalContent ? 1 : 0)
+                                }
                             } else {
                                 VStack(spacing: 30) {
                                     VStack(spacing: 0) {
                                         ToDestination(vm: viewModel, journey: journey, index: index)
-                                            .padding(.top, 44.wScaled)
                                             .padding(.bottom, 16.wScaled)
                                         
                                         Button {
