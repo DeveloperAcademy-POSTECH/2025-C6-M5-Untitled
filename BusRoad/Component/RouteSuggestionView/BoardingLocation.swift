@@ -37,8 +37,7 @@ struct BoardingLocation: View {
                         Text(info.busNo)
                             .font(.presemi24Scaled)
                             .foregroundColor(.primaryHeavy)
-//                        Text(info.arrivalText)
-                        Text("")
+                        Text(info.arrivalText)
                             .font(.prereg16Scaled)
                             .foregroundColor(Color.greyNormal)
                     } else {
