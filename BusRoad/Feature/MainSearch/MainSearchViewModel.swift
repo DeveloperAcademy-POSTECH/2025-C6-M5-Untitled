@@ -28,9 +28,9 @@ final class MainSearchViewModel: ObservableObject {
     var isLoading: Bool { searchManager.isLoading }
     var errorMessage: String? { searchManager.errorMessage }
     
-    
     init() {
         self.hasShownVoiceHint = UserDefaults.standard.bool(forKey: kHasShownVoiceHint)
+        
         searchManager.$hasSubmitted
             .assign(to: &$hasSubmitted)
         
@@ -39,8 +39,13 @@ final class MainSearchViewModel: ObservableObject {
             .store(in: &bag)
     }
     
-    func search() async { await searchManager.search() }
-    func resetSearchMode() { searchManager.resetSearchMode() }
+    func search() async {
+        await searchManager.search()
+    }
+    
+    func resetSearchMode() {
+        searchManager.resetSearchMode()
+    }
     
     func setDestination(destination: LocationInfo) {
         journeyManager.setDestination(destination)
@@ -48,6 +53,10 @@ final class MainSearchViewModel: ObservableObject {
     
     func resetManager() {
         searchManager.reset()
+    }
+    
+    func warmUpLocation() {
+        journeyManager.warmUpLocation()
     }
     
     // MARK: - 액션 메서드들
@@ -71,9 +80,28 @@ final class MainSearchViewModel: ObservableObject {
         query = ""
     }
     
-    /// 마이크 버튼 탭
+    /// 마이크 버튼 탭 → 풀스크린 뷰 열기
     func handleMicTap() {
         showHint = false
+        VoiceSearchManager.shared.present { [weak self] text in
+            self?.handleVoiceSearchCompleted(text)
+        }
+    }
+    
+    /// 음성 검색 완료 → 쿼리 반영 + 검색 실행
+    func handleVoiceSearchCompleted(_ text: String) {
+        showHint = false
+        query = text
+        isSearchMode = true
+        
+        Task { [weak self] in
+            await self?.search()
+        }
+    }
+    
+    /// 음성 검색 뷰에서 닫기
+    func dismissVoiceSearch() {
+        VoiceSearchManager.shared.dismiss()
     }
     
     /// 장소 선택
@@ -85,9 +113,5 @@ final class MainSearchViewModel: ObservableObject {
         ))
         resetManager()
         isSearchMode = false
-    }
-    
-    func warmUpLocation() {
-        journeyManager.warmUpLocation()
     }
 }

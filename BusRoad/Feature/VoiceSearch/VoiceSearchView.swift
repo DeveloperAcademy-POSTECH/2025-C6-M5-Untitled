@@ -1,7 +1,10 @@
 import SwiftUI
 
 struct VoiceSearchView: View {
-    @EnvironmentObject private var coordinator: NavigationCoordinator
+    
+    let onCompleted: (String) -> Void
+    let onDismiss: () -> Void
+    
     @StateObject var viewModel = VoiceSearchViewModel()
     
     
@@ -61,14 +64,17 @@ struct VoiceSearchView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            // 1) 완료 시: 외부 콜백(있으면) -> pop
+           // 음성 인식 완료 시
             viewModel.onSearchCompleted = { text in
-                coordinator.pop()
+                onCompleted(text)
             }
             
-            // 2) 닫기(X) 시 pop
-            viewModel.onDismiss = { coordinator.pop() }
-            // 3) 실제 리스닝 시작/바인딩
+          // 닫기
+            viewModel.onDismiss = {
+                onDismiss()
+            }
+            
+            // 실제 리스닝 시작/바인딩
             viewModel.onAppear()
         }
         .onDisappear {
