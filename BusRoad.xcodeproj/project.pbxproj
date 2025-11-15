@@ -7,11 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		603D44A92EC7746600476C7F /* masan_detailed_walk.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 603D44A82EC7746600476C7F /* masan_detailed_walk.gpx */; };
 		608B40F62EC2DBC20005FCB5 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		608B40F72EC2DBC20005FCB5 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
-		60E4A2902EC64DB000E94D2C /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
-		60E4A2912EC64DB000E94D2C /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
+		60E4B6402EC76D3C00E94D2C /* masan_walk_test.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 60E4B63F2EC76D3C00E94D2C /* masan_walk_test.gpx */; };
 		931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 931B33E82EA5DB5D00ED7944 /* Lottie */; };
 		FEFDE9E22EB23C5200733205 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEFDE9E12EB23C5200733205 /* WidgetKit.framework */; };
 		FEFDE9E42EB23C5200733205 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEFDE9E32EB23C5200733205 /* SwiftUI.framework */; };
@@ -43,8 +43,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		603D44A82EC7746600476C7F /* masan_detailed_walk.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = masan_detailed_walk.gpx; sourceTree = "<group>"; };
 		60A8CDA12E7CDFE500530B92 /* BusRoad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BusRoad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		60E4B63F2EC76D3C00E94D2C /* masan_walk_test.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = masan_walk_test.gpx; sourceTree = "<group>"; };
 		931B33E52EA5DB1600ED7944 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 		FEFDE9DF2EB23C5200733205 /* ProgressWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ProgressWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEFDE9E12EB23C5200733205 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -141,6 +143,8 @@
 				FEFDE9E02EB23C5200733205 /* Frameworks */,
 				60A8CDA22E7CDFE500530B92 /* Products */,
 				931B33E52EA5DB1600ED7944 /* Secrets.plist */,
+				60E4B63F2EC76D3C00E94D2C /* masan_walk_test.gpx */,
+				603D44A82EC7746600476C7F /* masan_detailed_walk.gpx */,
 			);
 			sourceTree = "<group>";
 		};
@@ -261,7 +265,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
+				60E4B6402EC76D3C00E94D2C /* masan_walk_test.gpx in Resources */,
 				608B40F62EC2DBC20005FCB5 /* Secrets.plist in Resources */,
+				603D44A92EC7746600476C7F /* masan_detailed_walk.gpx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
