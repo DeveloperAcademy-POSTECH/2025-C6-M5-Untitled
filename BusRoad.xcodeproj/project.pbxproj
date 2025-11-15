@@ -74,6 +74,7 @@
 		FEFDED1F2EB305EB00733205 /* Exceptions for "BusRoad" folder in "ProgressWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Application/Secrets.plist,
 				Resource/Color.xcassets,
 				"Resource/Font/Paperlogy-5Medium.ttf",
 				"Resource/Font/Paperlogy-6SemiBold.ttf",
