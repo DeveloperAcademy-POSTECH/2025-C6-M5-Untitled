@@ -39,57 +39,59 @@ struct WalkingView: View {
                             if viewModel.arrived {
                                 AtArrival(journey: journey, index: index, viewModel: viewModel)
                             } else {
-                                ToDestination(vm: viewModel, journey: journey, index: index)
-                                Spacer()
-                                Button {
-                                    viewModel.showAlert = true
-                                } label: {
-                                    if index == journey.nodes.count - 1 {
-                                        Text("이미 목적지에 도착하셨나요?")
-                                            .font(.premed14Scaled)
-                                            .foregroundColor(.primaryHeavy)
-                                            .underline()
-                                    } else {
-                                        Text("이미 정류장에 도착하셨나요?")
-                                            .font(.premed14Scaled)
-                                            .foregroundColor(.primaryHeavy)
-                                            .underline()
+                                VStack(spacing: 30) {
+                                    VStack(spacing: 0) {
+                                        ToDestination(vm: viewModel, journey: journey, index: index)
+                                            .padding(.top, 44.wScaled)
+                                            .padding(.bottom, 16.wScaled)
+                                        
+                                        Button {
+                                            viewModel.showAlert = true
+                                        } label: {
+                                            if index == journey.nodes.count - 1 {
+                                                Text("이미 목적지에 도착하셨나요?")
+                                                    .font(.premed14Scaled)
+                                                    .foregroundColor(.primaryHeavy)
+                                                    .underline()
+                                            } else {
+                                                Text("이미 정류장에 도착하셨나요?")
+                                                    .font(.premed14Scaled)
+                                                    .foregroundColor(.primaryHeavy)
+                                                    .underline()
+                                            }
+                                        }
                                     }
+                                    
+                                    HStack {
+                                        Spacer()
+                                        Button {
+                                            viewModel.showDevSheet = true
+                                        } label: {
+                                            HStack(spacing: 8.wScaled) {
+                                                Image(systemName: "map.fill")
+                                                    .font(.presemi18)
+                                                Text("지도")
+                                                    .font(.presemi18)
+                                            }
+                                            .foregroundColor(.primaryHeavy)
+                                            .padding(.vertical, 14.wScaled)
+                                            .padding(.horizontal, 21.wScaled)
+                                            .background(
+                                                Capsule()
+                                                    .fill(Color.white)
+                                                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 0)
+                                            )
+                                        }
+                                    }
+                                    .padding(.horizontal, 21.wScaled)
                                 }
                             }
                         }
                     }
                 }
             }
-            
-            // 맵뷰 버튼
-            if let journey = viewModel.journey,
-               let index = viewModel.journeyIndex,
-               !viewModel.arrived {            
-                VStack {
-                    Spacer().frame(height: 144 + 120.wScaled) // 높이 144(고정) + 120.wScaled(변동)
-                    HStack {
-                        Spacer()
-                        Button {
-                            viewModel.showDevSheet = true
-                        } label: {
-                            Image(systemName: "map.fill")
-                                .font(.system(size: 20.wScaled, weight: .bold))
-                                .foregroundColor(.subLight)
-                                .padding(.vertical, 12.wScaled)
-                                .padding(.horizontal, 18.wScaled)
-                                .background(
-                                    UnevenRoundedRectangle(
-                                        topLeadingRadius: 10,
-                                        bottomLeadingRadius: 10
-                                    )
-                                    .fill(Color.subPoint)
-                                )
-                        }
-                    }
-                    Spacer()
-                }
-                .overlay {
+            .overlay {
+                if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                     WalkingAlert(
                         isPresented: $viewModel.showAlert,
                         viewModel: viewModel,
