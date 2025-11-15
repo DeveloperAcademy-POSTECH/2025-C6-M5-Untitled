@@ -19,22 +19,22 @@ struct ToDestination: View {
     var body: some View {
         
         if case let .walk(node) = journey.nodes[index] {
-            VStack(alignment: .leading, spacing: 0) {
-                MarqueeText(
-                    text: node.end.name,
-                    font: .presemi36Scaled,
-                    uiFont: .presemi36Scaled,
-                    startDelay: 1.0,
-                    alignment: .leading
-                )
-                .foregroundColor(.primaryHeavy)
-                .padding(.top, 25.wScaled)
+            VStack(spacing: 60) {
                 
-                Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
-                    .font(.prereg32Scaled)
+                VStack(spacing: 8) {
+                    Text(index == journey.nodes.count - 1 ? "목적지까지 걷기" : "정류장까지 걷기")
+                        .font(.prereg20)
+                        .foregroundColor(.primaryHeavy)
+                    
+                    MarqueeText(
+                        text: node.end.name,
+                        font: .presemi36Scaled,
+                        uiFont: .presemi36Scaled,
+                        startDelay: 1.0,
+                        alignment: .center
+                    )
                     .foregroundColor(.primaryHeavy)
-                    .padding(.top, 12.wScaled)
-                    .padding(.bottom, 70.wScaled)
+                }
                 
                 HStack {
                     Spacer()
@@ -50,17 +50,19 @@ struct ToDestination: View {
                     }
                     Spacer()
                 }
-                .padding(.bottom, 76.wScaled)
+                .padding(.bottom, 30.wScaled)
                 
-                Text(vm.bigDistanceText)
-                    .font(.presemi32Scaled)
-                    .foregroundColor(.primaryHeavy)
-                    .monospacedDigit()
-                    .padding(.bottom, 11.wScaled)
                 
-                Text("남았어요.")
-                    .font(.prereg32Scaled)
-                    .foregroundColor(.primaryHeavy)
+                HStack {
+                    Text(vm.bigDistanceText)
+                        .font(.presemi32Scaled)
+                        .foregroundColor(.primaryHeavy)
+                        .monospacedDigit()
+                    
+                    Text("남았어요.")
+                        .font(.prereg32Scaled)
+                        .foregroundColor(.primaryHeavy)
+                }
             }
             .padding(.horizontal, 32.wScaled)
         } else {

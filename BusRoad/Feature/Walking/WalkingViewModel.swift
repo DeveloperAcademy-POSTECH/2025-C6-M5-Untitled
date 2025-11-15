@@ -32,7 +32,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // 거리 임계값
     private let stepSwitchDistance: CLLocationDistance = 15
-    private let arrivalDistance: CLLocationDistance = 6
+    private var arrivalDistance: CLLocationDistance = 12
     private let offRouteThreshold: CLLocationDistance = 50
     
     // 오프루트 감지
@@ -77,6 +77,12 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
            let index = journeyManager.journeyIndex {
             self.journey = journey
             self.journeyIndex = index
+            
+            if index == journey.nodes.count - 1 {
+                arrivalDistance = 6
+            } else {
+                arrivalDistance = 12
+            }
         }
     }
     
