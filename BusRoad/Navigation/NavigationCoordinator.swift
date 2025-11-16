@@ -39,6 +39,9 @@ class NavigationCoordinator: ObservableObject {
             // manager 초기화
             self.journeyManager.reset()
             self.searchManager.reset()
+            
+            LocationService.shared.invalidateCache()
+            
         }
     }
     
