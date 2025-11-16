@@ -30,6 +30,14 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
         }
     }
     
+    private func vibrate(times: Int) {
+            for i in 0..<times {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 1.0) {
+                    AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                }
+            }
+        }
+    
     // 음성으로 말하기
     func announce(_ message: String) {
         let utterance = AVSpeechUtterance(string: message)
@@ -42,16 +50,19 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     
     // 2정류장 남음
     func announceTwoStations() {
+        vibrate(times: 2)
         announce("하차하기까지 두정류장 남았습니다.")
     }
     
     // 1정류장 남음
     func announceOneStation() {
+        vibrate(times: 2)
         announce("이번 정류장에서 내려야해요.하차벨을 눌러주세요")
     }
     
     // 승차 전, 곧 버스 도착 알림
     func announceBusArrival() {
+        vibrate(times: 2)
         announce("곧 버스가 도착합니다.")
     }
 }
