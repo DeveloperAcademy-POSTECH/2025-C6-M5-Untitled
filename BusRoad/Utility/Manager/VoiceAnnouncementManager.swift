@@ -32,7 +32,7 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     
     private func vibrate(times: Int) {
             for i in 0..<times {
-                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 1.0) {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.7) {
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
                 }
             }
@@ -57,7 +57,7 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     // 1정류장 남음
     func announceOneStation() {
         vibrate(times: 2)
-        announce("이번 정류장에서 내려야해요.하차벨을 눌러주세요")
+        announce("이 번 정류장에서 내려야해요. 하차벨을 눌러주세요")
     }
     
     // 승차 전, 곧 버스 도착 알림
