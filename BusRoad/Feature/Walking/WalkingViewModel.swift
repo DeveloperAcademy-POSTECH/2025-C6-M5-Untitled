@@ -3,6 +3,7 @@ import Combine
 import MapKit
 import CoreLocation
 import AVFoundation
+import AudioToolbox
 
 final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDelegate {
     
@@ -17,7 +18,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var isRerouting: Bool = false
     @Published var journey: Journey?
     @Published var journeyIndex: Int?
-//    @Published var showVerifyingStop: Bool = false
+    //    @Published var showVerifyingStop: Bool = false
     @Published var manuallyArrived: Bool = false
     @Published var showArrivalContent = false
     
@@ -26,6 +27,9 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private var currentSegmentIndex: Int = 0
     var pendingDestination: CLLocationCoordinate2D?
     private var hasCalculatedRoute = false
+    private var lastArrowBearing: CLLocationDirection = 0
+    private let arrowBearingThreshold: Double = 10
+    private var navigationStartTime: Date? = nil
     
     // TMAP 경로 데이터
     var tmapCoordinates: [CLLocationCoordinate2D] = []
@@ -53,10 +57,11 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private var lastAnnouncedTurnIndex: Int = -1
     private var currentAnnouncedTurnIndex: Int = -1  // 현재 안내 중인 회전 지점
     private var hasPassed: Bool = false  // 안내한 지점을 통과했는지
-    private let turnAngleThreshold: Double = 25  // 25도로 설정
+    private let turnAngleThreshold: Double = 20  // 20도로 설정
     private let turnCompletionDistance: CLLocationDistance = 10  // 회전 완료 판단 거리
     private let announcementDistance: CLLocationDistance = 25  // 25m 이내에서만 안내
     private let speechSynthesizer = AVSpeechSynthesizer()
+    private var hasAnnouncedStart: Bool = false // 시작 안내
     
     // Journey Manager
     private let journeyManager: JourneyManager
@@ -85,6 +90,8 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
                 arrivalDistance = 12
             }
         }
+        
+        configureAudioSession()
     }
     
     // MARK: - Public Methods
@@ -112,18 +119,24 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         guard let origin = loc.location?.coordinate,
               let dest = pendingDestination else { return }
         
+        stopAllAnnouncements()
         isRerouting = true
         showRerouteAlert = false
         offRouteSince = nil
         lastRecalcAt = Date()
+        currentAnnouncedTurnIndex = -1
+        hasPassed = false
         
         calculateRoute(origin: origin, dest: dest)
     }
     
     func dismissRerouteAlert() {
+        stopAllAnnouncements()
         showRerouteAlert = false
         lastRecalcAt = Date()
         offRouteSince = nil
+        currentAnnouncedTurnIndex = -1
+        hasPassed = false
     }
     
     func deferRealert(seconds: TimeInterval = 90) {
@@ -131,6 +144,17 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         offRouteSince = nil
     }
     
+    
+    // 음성 중단
+    func stopAllAnnouncements() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            if self.speechSynthesizer.isSpeaking {
+                self.speechSynthesizer.stopSpeaking(at: .immediate)
+                print("🔇 음성 안내 중단")
+            }
+        }
+    }
     // MARK: - Private Methods
     private func resetRouteState() {
         tmapCoordinates = []
@@ -140,11 +164,12 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         lastAnnouncedTurnIndex = -1
         currentAnnouncedTurnIndex = -1
         hasPassed = false
+        hasAnnouncedStart = false
         
         if !isRerouting {
             arrived = false
             manuallyArrived = false
-//            showVerifyingStop = false
+            //            showVerifyingStop = false
         }
         
         bigDistanceText = "-- m"
@@ -237,6 +262,11 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         ProgressLiveActivityManager.shared.updateWalkingActivity(
             newLeftDistance: Double(tmapTotalDistance)
         )
+        
+        if !hasAnnouncedStart && !isRerouting {
+            announceStart()
+            hasAnnouncedStart = true
+        }
     }
     
     // MARK: - Apple Maps Fallback
@@ -330,8 +360,11 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
               location.horizontalAccuracy < accuracyGate else { return }
         guard !isRerouting else { return }
         
-        // 구간 진행 - 개선된 점 뛰어넘기
-        advanceSegment(from: location)
+        //재탐색 알림이나 도착알림 표시 중이면 음성안내 방지
+        guard !showRerouteAlert && !showAlert else { return }
+        
+        // 구간 진행 - 점 뛰어넘기
+        advanceSegment(from: location) // 점 이동했는지 확인하고 업데이트하기
         
         // 남은 거리
         let remainDistance = calculateRemainDistance(from: location)
@@ -339,6 +372,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         
         // 도착 체크
         if remainDistance < arrivalDistance && !arrived && !manuallyArrived && !isRerouting {
+            stopAllAnnouncements()
             arrived = true
             print("목적지 도착!")
             ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: 0)
@@ -350,7 +384,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             let targetBearing = bearing(from: location.coordinate, to: nextCoord)
             let relative = (targetBearing - headingValue + 360)
                 .truncatingRemainder(dividingBy: 360)
-            arrowBearing = relative
+            updateArrowBearingSmooth(newBearing: relative)
         }
         
         // 오프루트 감지
@@ -459,6 +493,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
                 let canShowAlert = Date().timeIntervalSince(lastRecalcAt) > recalcCooldown
                 
                 if elapsed > offRouteDebounce && canShowAlert && !showRerouteAlert && !isRerouting {
+                    stopAllAnnouncements()
                     print("🔄 재탐색 알림 표시")
                     showRerouteAlert = true
                     lastRecalcAt = Date()
@@ -472,11 +507,23 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         }
     }
     
-    // MARK: - 음성 안내 (30m 이내, 한 번만)
+    // MARK: - 음성 안내 (25m 이내, 한 번만)
     private func checkForUpcomingTurn(from location: CLLocation) {
+        
+        guard !showRerouteAlert && !showAlert else {
+                stopAllAnnouncements()
+                return
+            }
         
         guard tmapCoordinates.count >= 2 else { return }  // 좌표 최소 2개
         guard currentSegmentIndex < tmapCoordinates.count - 1 else { return }  // 완전히 마지막이면 중단
+        
+        
+        if let startTime = navigationStartTime,
+           Date().timeIntervalSince(startTime) < 5 {
+            return
+        }
+        
         
         // 현재 안내 중인 회전이 있는지 체크
         if currentAnnouncedTurnIndex >= 0 {
@@ -528,14 +575,14 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
                     currentAnnouncedTurnIndex = i
                     lastAnnouncedTurnIndex = i
                     hasPassed = false
-                    announceTurn(turn)
+                    announceTurn(turn, distance: Int(distToPoint))
                     print("🔊 회전 안내: index \(i), 거리 \(Int(distToPoint))m")
                     return
                 }
             }
         }
     }
-                    
+    
     
     private func detectTurn(at index: Int) -> TurnDirection? {
         // 기본 범위 체크
@@ -614,14 +661,14 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         return nil
     }
     
-    private func announceTurn(_ direction: TurnDirection) {
+    private func announceTurn(_ direction: TurnDirection, distance: Int) {
         // 이전 음성 중단
         if speechSynthesizer.isSpeaking {
             speechSynthesizer.stopSpeaking(at: .immediate)
         }
         
-        
-        let text = "잠시 후 \(direction.korean) 입니다"
+//        let text = "잠시 후 \(direction.korean) 입니다"
+        let text = "\(distance)미터 앞 \(direction.korean) 입니다"
         
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
@@ -631,6 +678,30 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         speechSynthesizer.speak(utterance)
         
         print("🔊 음성 안내: \(text)")
+    }
+    
+    private func announceStart() {
+        
+        navigationStartTime = Date()
+        
+        AudioServicesPlayAlertSound(1110) // 1110
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self = self else { return }
+                        
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                let text = "도보 길 안내를 시작합니다"
+                
+                let utterance = AVSpeechUtterance(string: text)
+                utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
+                utterance.rate = 0.5
+                utterance.volume = 1.0
+                
+                self.speechSynthesizer.speak(utterance)
+                
+                print("🔊 시작 안내: \(text)")
+            }
+        }
     }
     
     // MARK: - 거리 계산
@@ -691,6 +762,59 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         let x = cos(φ1) * sin(φ2) - sin(φ1) * cos(φ2) * cos(dλ)
         let θ = atan2(y, x) * 180 / .pi
         return fmod(θ + 360, 360)
+    }
+    
+    // MARK: - 화살표 부드럽게 업데이트
+    private func updateArrowBearingSmooth(newBearing: CLLocationDirection) {
+        // 처음이면 바로 설정
+        if lastArrowBearing == 0 {
+            arrowBearing = newBearing
+            lastArrowBearing = newBearing
+            return
+        }
+        
+        // 각도 차이 계산
+        var diff = newBearing - lastArrowBearing
+        
+        // 360도 넘어가는 경우 처리
+        if diff > 180 {
+            diff -= 360
+        } else if diff < -180 {
+            diff += 360
+        }
+        
+        let absDiff = abs(diff)
+        
+        // 10도 이하 변화는 무시
+        if absDiff < arrowBearingThreshold {
+            return
+        }
+        
+        // 10도 이상 변화만 업데이트
+//        withAnimation(.easeInOut(duration: 0.3)) {
+            arrowBearing = newBearing
+//        }
+        lastArrowBearing = newBearing
+    }
+    
+    
+    private func configureAudioSession() {
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            
+            try audioSession.setCategory(
+                .playback,
+                mode: .spokenAudio,
+                options: [.duckOthers, .mixWithOthers]
+            )
+            
+            try audioSession.setActive(true)
+            
+            print("✅ 오디오 세션 설정 완료")
+            
+        } catch {
+            print("❌ 오디오 세션 설정 실패: \(error.localizedDescription)")
+        }
     }
 }
 

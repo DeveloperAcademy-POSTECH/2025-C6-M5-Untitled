@@ -108,6 +108,7 @@ struct WalkingView: View {
                                             .padding(.bottom, 16.wScaled)
                                         
                                         Button {
+                                            viewModel.stopAllAnnouncements()
                                             viewModel.showAlert = true
                                         } label: {
                                             if index == journey.nodes.count - 1 {
