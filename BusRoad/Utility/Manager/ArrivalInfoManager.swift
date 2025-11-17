@@ -226,7 +226,8 @@ final class ArrivalInfoManager: ObservableObject {
                 print("[ArrivalInfoManager] 추적 노선 고정: \(nearest.routeid)")
             }
             
-            guard let trackedBus = filtered.first(where: { $0.routeid == trackedBusRouteId }) else {
+            let sameRouteBuses = filtered.filter { $0.routeid == trackedBusRouteId }
+            guard let trackedBus = sameRouteBuses.min(by: { $0.arrtime < $1.arrtime }) else {
                 if let lastItem = lastNearestItem {
                     print("[ArrivalInfoManager] 추적 버스 사라짐 → 지나감")
                     let passed = lastItem
