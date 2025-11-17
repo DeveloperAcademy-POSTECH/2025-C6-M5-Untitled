@@ -4,6 +4,7 @@ struct SearchModeSection: View {
     @Binding var query: String
     let results: [PlaceSummary]          // vm.results의 요소 타입에 맞춰서
     var isFocused: FocusState<Bool>.Binding
+    let recentSearch: [PlaceSummary]
     
     let onBack: () -> Void
     let onSubmit: () -> Void
@@ -79,8 +80,28 @@ struct SearchModeSection: View {
                 VStack {
                     // 검색 전 (제출 전)
                     if !hasSubmitted {
-                        Spacer(minLength: 0)
-                        Spacer(minLength: 0)
+                        VStack {
+                            HStack {
+                                Spacer()
+                                    .frame(width: 20)
+                                Text("최근 검색")
+                                    .font(.premed16Scaled)
+                                    .foregroundStyle(.primaryblack)
+                                Spacer()
+                            }
+                            LazyVStack(spacing: 8) {
+                                ForEach(recentSearch) { item in
+                                    RecentCard(
+                                        title: item.name
+                                    ) {
+                                        onSelect(item)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            Spacer(minLength: 0)
+                        }
                         
                         // 로딩 중
                     } else if isLoading {

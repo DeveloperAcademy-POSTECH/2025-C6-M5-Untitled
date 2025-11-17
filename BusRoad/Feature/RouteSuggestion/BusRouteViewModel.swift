@@ -30,6 +30,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var showDestinationMap: Bool = false
     @Published var isRefreshingLocation: Bool = false
+    @Published var store = LocationStore()
     
     
     private let journeyManager: JourneyManager

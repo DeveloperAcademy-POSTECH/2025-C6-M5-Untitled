@@ -14,6 +14,7 @@ struct RouteSuggestionView: View {
                 query: Binding(get: { viewModel.query }, set: { viewModel.query = $0 }),
                 results: viewModel.results,
                 isFocused: $isFocused,
+                recentSearch: viewModel.store.locations,
                 onBack: {
                     viewModel.exitSearchMode()
                     viewModel.isSearchMode = false

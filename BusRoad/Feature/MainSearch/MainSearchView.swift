@@ -19,6 +19,7 @@ struct MainSearchView: View {
                     ),
                     results: viewModel.results,
                     isFocused: $isFocused,
+                    recentSearch: viewModel.store.locations,
                     onBack: {
                         viewModel.exitSearchMode()
                         isFocused = false
@@ -36,6 +37,7 @@ struct MainSearchView: View {
                         isFocused = false
                     },
                     onSelect: { item in
+                        viewModel.saveRecentSearch(item)    // 최근 검색어 저장
                         viewModel.selectPlace(item: item)
                         coordinator.push(.routeSuggestion)
                     },
