@@ -17,24 +17,8 @@ struct ToDestination: View {
     let threshold: Double = 30  // 방향 허용 오차
     
     var body: some View {
-        
         if case let .walk(node) = journey.nodes[index] {
-            VStack(alignment: .leading, spacing: 0) {
-                MarqueeText(
-                    text: node.end.name,
-                    font: .presemi36Scaled,
-                    uiFont: .presemi36Scaled,
-                    startDelay: 1.0,
-                    alignment: .leading,
-                )
-                .foregroundColor(.primaryHeavy)
-                .padding(.top, 25.wScaled)
-                
-                Text(index == journey.nodes.count - 1 ? "목적지로 가야 해요." : "정류장으로 가야 해요.")
-                    .font(.prereg32Scaled)
-                    .foregroundColor(.primaryHeavy)
-                    .padding(.top, 12.wScaled)
-                    .padding(.bottom, 70.wScaled)
+            VStack(spacing: 60) {
                 
                 HStack {
                     Spacer()
@@ -50,17 +34,19 @@ struct ToDestination: View {
                     }
                     Spacer()
                 }
-                .padding(.bottom, 76.wScaled)
+                .padding(.bottom, 30.wScaled)
                 
-                Text(vm.bigDistanceText)
-                    .font(.presemi32Scaled)
-                    .foregroundColor(.primaryHeavy)
-                    .monospacedDigit()
-                    .padding(.bottom, 11.wScaled)
-                
-                Text("남았어요.")
-                    .font(.prereg32Scaled)
-                    .foregroundColor(.primaryHeavy)
+                // 🎯 거리 표시
+                HStack {
+                    Text(vm.bigDistanceText)
+                        .font(.presemi32Scaled)
+                        .foregroundColor(.primaryHeavy)
+                        .monospacedDigit()
+                    
+                    Text("남았어요.")
+                        .font(.prereg32Scaled)
+                        .foregroundColor(.primaryHeavy)
+                }
             }
             .padding(.horizontal, 32.wScaled)
         } else {
@@ -75,38 +61,85 @@ struct ArrowView: View {
     let radius: CGFloat = 100
     let dotSize: CGFloat = 18
     let bearing: CLLocationDirection
-    let threshold: Double   // 방향 허용 오차
+    let threshold: Double
     let base: Double = -90
-    let pad: Double = 10
+    let pad: Double = 15
     
     @State private var smoothAngle: Double = 0
-    @State private var inDeadzone: Bool = true   // 현재 데드존(±threshold) 안인가?
+    @State private var inDeadzone: Bool = true
+    @State private var arcAngle: Double = 0
     
-    private var signedBearing: Double { bearing < 180 ? bearing : bearing - 360 } // -180..+180
-    private var angleDelta: Double { abs(signedBearing) }
+    private var enterDeadzoneThreshold: Double { threshold }
+    private var exitDeadzoneThreshold: Double { threshold + 5 }
     
-    private var startAngle: Double {
-        if signedBearing > 0 {
-            return base + pad
+    private var currentBearing: Double {
+        bearing < 180 ? bearing : bearing - 360
+    }
+    
+    private var arcOpacity: Double {
+        let fadeStartAngle = 25.0
+        let fadeEndAngle = 10.0
+        
+        let absAngle = abs(arcAngle)
+        
+        if absAngle <= fadeEndAngle {
+            return 0.0
+        } else if absAngle >= fadeStartAngle {
+            return 1.0
         } else {
-            return base - pad
+            return (absAngle - fadeEndAngle) / (fadeStartAngle - fadeEndAngle)
         }
     }
-    private var endAngle: Double   {
-        if signedBearing > 0 {
-            return max(startAngle, base + smoothAngle - pad)
+    
+    private func getDynamicPad() -> Double {
+        let absAngle = abs(arcAngle)
+        
+        if absAngle < 12 {
+            return 0
+        } else if absAngle < 25 {
+            return pad * (absAngle - 12) / 13
         } else {
-            return min(startAngle, base + smoothAngle + pad)
+            return pad
+        }
+    }
+    
+    private var arcStartAngle: Double {
+        let dynamicPad = getDynamicPad()
+        
+        if arcAngle > 0 {
+            return base + dynamicPad
+        } else if arcAngle < 0 {
+            return base - dynamicPad
+        } else {
+            return base
+        }
+    }
+    
+    private var arcEndAngle: Double {
+        let dynamicPad = getDynamicPad()
+        
+        if arcAngle > 0 {
+            return base + arcAngle - dynamicPad
+        } else if arcAngle < 0 {
+            return base + arcAngle + dynamicPad
+        } else {
+            return base
         }
     }
     
     var body: some View {
         ZStack {
-            if startAngle != endAngle {
-                ArcPath(startAngle: startAngle, endAngle: endAngle)
-                    .stroke(Color.subPoint.opacity(0.2),
-                            style: StrokeStyle(lineWidth: 13, lineCap: .round))
-                    .frame(width: 2 * radius, height: 2 * radius)
+            if abs(arcAngle) > 0.5 {
+                ArcPath(
+                    startAngle: arcStartAngle,
+                    endAngle: arcEndAngle
+                )
+                .stroke(
+                    Color.subPoint.opacity(0.2),
+                    style: StrokeStyle(lineWidth: 13, lineCap: .round)
+                )
+                .frame(width: 2 * radius, height: 2 * radius)
+                .opacity(arcOpacity)
             }
             
             Group {
@@ -126,60 +159,115 @@ struct ArrowView: View {
             updateValues(newValue)
         }
         .onAppear {
-            updateValues(bearing) // 첫 렌더 시 상태 맞추기
+            smoothAngle = currentBearing
+            arcAngle = currentBearing
+            inDeadzone = abs(currentBearing) <= enterDeadzoneThreshold
         }
     }
     
     private func updateValues(_ newValue: CLLocationDirection) {
-        let newSigned = newValue < 180 ? newValue : newValue - 360
-        let nowInDeadzone = abs(newSigned) <= threshold
+        let newBearing = newValue < 180 ? newValue : newValue - 360
         
-        switch (inDeadzone, nowInDeadzone) {
-        case (true, false):
-            // 데드존 → 바깥: "나가기" 순간
-            withAnimation(.easeIn(duration: 0.5)) {
-                smoothAngle = newSigned
-            }
-            
-        case (false, true):
-            // 바깥 → 데드존: "들어오기" 순간
-            withAnimation(.easeOut(duration: 0.5)) {
-                smoothAngle = 0
-            }
-            // 즉시 붙이고 싶다면 위 withAnimation 대신: smoothAngle = 0
-            
-        case (false, false):
-            // 바깥에서 계속 바깥: 즉시 업데이트
-            smoothAngle = newSigned
-            
-        case (true, true):
-            // 계속 데드존: 0 고정
-            smoothAngle = 0
+        let nowInDeadzone: Bool
+        if inDeadzone {
+            nowInDeadzone = abs(newBearing) <= exitDeadzoneThreshold
+        } else {
+            nowInDeadzone = abs(newBearing) <= enterDeadzoneThreshold
         }
         
-        inDeadzone = nowInDeadzone
+        var targetAngle: Double
+        
+        if nowInDeadzone {
+            let currentNormalized = smoothAngle.truncatingRemainder(dividingBy: 360)
+            var normalizedSigned = currentNormalized
+            
+            if normalizedSigned > 180 {
+                normalizedSigned -= 360
+            } else if normalizedSigned < -180 {
+                normalizedSigned += 360
+            }
+            
+            targetAngle = smoothAngle - normalizedSigned
+            
+        } else {
+            let currentNormalized = smoothAngle.truncatingRemainder(dividingBy: 360)
+            let diff = newBearing - currentNormalized
+            
+            var shortestDiff = diff
+            if diff > 180 {
+                shortestDiff = diff - 360
+            } else if diff < -180 {
+                shortestDiff = diff + 360
+            }
+            
+            targetAngle = smoothAngle + shortestDiff
+        }
+        
+        var targetArcAngle: Double
+        if nowInDeadzone {
+            targetArcAngle = 0
+        } else {
+            var normalized = newBearing
+            let currentArc = arcAngle
+            
+            let diff = normalized - currentArc
+            if diff > 180 {
+                normalized -= 360
+            } else if diff < -180 {
+                normalized += 360
+            }
+            
+            targetArcAngle = normalized
+        }
+        
+        let animationDuration: Double = 0.4
+        
+        if nowInDeadzone {
+            withAnimation(.easeOut(duration: animationDuration)) {
+                smoothAngle = targetAngle
+                arcAngle = targetArcAngle
+                inDeadzone = nowInDeadzone
+            }
+        } else if inDeadzone {
+            withAnimation(.easeIn(duration: animationDuration)) {
+                smoothAngle = targetAngle
+                arcAngle = targetArcAngle
+                inDeadzone = nowInDeadzone
+            }
+        } else {
+            withAnimation(.easeInOut(duration: animationDuration)) {
+                smoothAngle = targetAngle
+                arcAngle = targetArcAngle
+                inDeadzone = nowInDeadzone
+            }
+        }
     }
 }
 
 struct ArcPath: Shape {
-    var startAngle: Double  // degrees
-    var endAngle: Double    // degrees
+    var startAngle: Double
+    var endAngle: Double
     
-    var animatableData: Double {
-        get { endAngle }
-        set { endAngle = newValue }
+    var animatableData: AnimatablePair<Double, Double> {
+        get { AnimatablePair(startAngle, endAngle) }
+        set {
+            startAngle = newValue.first
+            endAngle = newValue.second
+        }
     }
     
     func path(in rect: CGRect) -> Path {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         let radius = rect.width / 2
+        
         return Path { p in
-            p.addArc(center: center,
-                     radius: radius,
-                     startAngle: .degrees(startAngle),
-                     endAngle:   .degrees(endAngle),
-                     clockwise: endAngle < startAngle)
+            p.addArc(
+                center: center,
+                radius: radius,
+                startAngle: .degrees(startAngle),
+                endAngle: .degrees(endAngle),
+                clockwise: startAngle > endAngle 
+            )
         }
     }
 }
-

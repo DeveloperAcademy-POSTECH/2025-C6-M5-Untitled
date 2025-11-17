@@ -1,6 +1,11 @@
 import SwiftUI
 
 struct RouteCard: View {
+    @ObservedObject var viewModel: BusRouteViewModel
+
+    @State private var didFetchOnce = false
+    @State private var nearestBusInfo: (busNo: String, arrivalText: String)?
+    
     var allJourneys: [Journey]
     var journey: Journey
     var index: Int
@@ -9,29 +14,40 @@ struct RouteCard: View {
     var body: some View {
         
         if let firstBusRoute = journey.firstBusRoute {
-            
             ZStack {
                 Rectangle()
                     .foregroundColor(Color.primarywhite)
                     .cornerRadius(20)
                     .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 0)
-                
-                VStack(spacing: 0) {
-                    Spacer()
-                    
-                    VStack(spacing: 21.wScaled) {
+                if !didFetchOnce{
+                    ProgressView()
+                        .tint(.greyDisable)
+                        .scaleEffect(3)
+                } else {
+                    VStack(spacing: 0) {
+                        Spacer()
                         
-                        VStack(alignment: .leading, spacing: 45.wScaled) {
-                            ETA(journeys: allJourneys, journey: journey, index: index)
-                            BoardingLocation(route: firstBusRoute, isActive: isActive)
+                        VStack(spacing: 21.wScaled) {
+                            VStack(alignment: .leading, spacing: 45.wScaled) {
+                                ETA(journeys: allJourneys, journey: journey, index: index)
+                                BoardingLocation(route: firstBusRoute, isActive: isActive, nearestBusInfo: $nearestBusInfo)
+                            }
+                                                    
+                            RouteSummary(journey: journey)
+                            
                         }
-                                                
-                        RouteSummary(journey: journey)
+                        .padding(.horizontal, 24.wScaled)
                         
+                        Spacer()
                     }
-                    .padding(.horizontal, 24.wScaled)
-                    
-                    Spacer()
+                }
+            }
+            .onAppear {
+                if !didFetchOnce {
+                    Task {
+                        nearestBusInfo = await viewModel.fetchNearestBusInfo(for: firstBusRoute)
+                        didFetchOnce = true
+                    }
                 }
             }
         }
@@ -42,7 +58,10 @@ struct RouteCard: View {
 
 
 #Preview {
+    @Previewable var previewBusInfo: (busNo: String, arrivalText: String)? = nil
+
     RouteCard(
+        viewModel: BusRouteViewModel(),
         allJourneys: [
             Journey(totalTime: 48, nodes: [
                 .walk(WalkRouteNode(

@@ -6,6 +6,8 @@ struct RouteSuggestionView: View {
     @StateObject private var viewModel = BusRouteViewModel()
     @FocusState var isFocused: Bool
     
+    @FocusState var isDestination: Bool
+    
     var body: some View {
         if viewModel.isSearchMode {
             SearchModeSection(
@@ -28,13 +30,19 @@ struct RouteSuggestionView: View {
                 },
                 onMicTap: {
                     isFocused = false
-                    coordinator.push(.voiceSearch)
+                    viewModel.handleMicTap()
                 },
                 onSelect: { item in
                     viewModel.selectPlace(item: item, locationType: viewModel.locationType)
                     viewModel.isSearchMode = false
                 },
                 hasSubmitted: $viewModel.hasSubmitted,
+                isPresented: $viewModel.showDestinationMap, isDestination: Binding(
+                    get: { viewModel.locationType == .destination },
+                    set: { newValue in
+                        viewModel.locationType = newValue ? .destination : .origin
+                    }
+                ),
                 isLoading: viewModel.isSearchLoading
             )
         } else {
@@ -45,9 +53,9 @@ struct RouteSuggestionView: View {
                 
                 VStack(spacing: 0) {
                     // MARK: - 상단바
-                    VStack(spacing: 0) {
-                        TopBar(isMoving: false) { coordinator.popToRoot() }
-                            .padding(.horizontal, 8)
+                    VStack(spacing: 8) {
+                        RouteTopBar()
+                            .padding(.horizontal, 20)
                         
                         VStack(spacing: 8) {
                             OriginTextField(

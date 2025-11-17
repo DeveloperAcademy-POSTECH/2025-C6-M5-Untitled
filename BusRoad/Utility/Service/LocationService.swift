@@ -132,7 +132,7 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
         // 최근 위치가 있으면 즉시 반환
         if let cached = location,
            Date().timeIntervalSince(cached.timestamp) < maxAge {
-            print("[LocationService] 캐시된 위치 사용 (나이: \(Int(Date().timeIntervalSince(cached.timestamp)))초)")
+            print("[LocationService] 캐시된 위치 사용 (시간: \(Int(Date().timeIntervalSince(cached.timestamp)))초)")
             return cached
         }
         
@@ -206,6 +206,12 @@ final class LocationService: NSObject, ObservableObject, CLLocationManagerDelega
                 }
             }
         }
+    }
+    
+    // 캐시 위치 무효
+    func invalidateCache() {
+        self.location = nil
+        print("[LocationService] 위치 캐시 무효화됨")
     }
     
     // MARK: - CLLocationManagerDelegate

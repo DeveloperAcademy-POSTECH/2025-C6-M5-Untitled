@@ -36,60 +36,125 @@ struct WalkingView: View {
                     Color(.background).ignoresSafeArea()
                     VStack(spacing: 0) {
                         if let journey = viewModel.journey, let index = viewModel.journeyIndex {
-                            if viewModel.arrived {
-                                AtArrival(journey: journey, index: index, viewModel: viewModel)
-                            } else {
-                                ToDestination(vm: viewModel, journey: journey, index: index)
+                            
+                            if case let .walk(node) = journey.nodes[index] {
+                                VStack(spacing: 8) {
+                                    Text(index == journey.nodes.count - 1 ? "목적지까지 걷기" : "정류장까지 걷기")
+                                        .font(.prereg20)
+                                        .foregroundColor(.primaryHeavy)
+                                    
+                                    MarqueeText(
+                                        text: node.end.name,
+                                        font: .presemi36Scaled,
+                                        uiFont: .presemi36Scaled,
+                                        startDelay: 1.0,
+                                        alignment: .center
+                                    )
+                                    .foregroundColor(.primaryHeavy)
+                                }
+                                .padding(.top, 44.wScaled)
+                                .padding(.horizontal, 32.wScaled)
                                 Spacer()
-                                Button {
-                                    viewModel.showAlert = true
-                                } label: {
-                                    if index == journey.nodes.count - 1 {
-                                        Text("이미 목적지에 도착하셨나요?")
-                                            .font(.premed14Scaled)
-                                            .foregroundColor(.primaryHeavy)
-                                            .underline()
-                                    } else {
-                                        Text("이미 정류장에 도착하셨나요?")
-                                            .font(.premed14Scaled)
-                                            .foregroundColor(.primaryHeavy)
-                                            .underline()
+                            }
+                            
+                            if viewModel.arrived {
+                                VStack(spacing: 0) {
+                                    
+                                    Spacer()
+                                    
+                                    AtArrival(journey: journey, index: index, viewModel: viewModel)
+                                    
+                                    Spacer()
+                                    
+                                    Button {
+                                        if index == journey.nodes.count - 1 {
+                                            coordinator.popToRoot()
+                                            ProgressLiveActivityManager.shared.endActivity()
+                                        } else {
+                                            coordinator.advanceJourneyStage()
+                                            
+                                            if journey.nodes.indices.contains(index + 1),
+                                               case let .bus(busnode) = journey.nodes[index + 1] {
+                                                let boardingStopName = busnode.start.name
+                                                
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                    Task {
+                                                        await ProgressLiveActivityManager.shared.updateStage(
+                                                            nextStage: RouteStage.waitingForBus.rawValue,
+                                                            nextDestination: boardingStopName,
+                                                            totalDistance: 0,
+                                                            remainingBusStops: busnode.stations.count,
+                                                            busTravelTime: busnode.travelTime
+                                                        )
+                                                    }
+                                                    print("[DEBUG] 확인 완료 - waitingForBus 업데이트, destination: \(boardingStopName)")
+                                                }
+                                            }
+                                        }
+                                    } label: {
+                                        Text("맞아요")
+                                            .foregroundColor(.white)
+                                            .font(.premed32Scaled)
+                                            .frame(width: 344.wScaled, height: 64.wScaled)
+                                            .background(Color.subPoint)
+                                            .cornerRadius(20)
                                     }
+                                    .opacity(viewModel.showArrivalContent ? 1 : 0)
+                                }
+                            } else {
+                                VStack(spacing: 30) {
+                                    VStack(spacing: 0) {
+                                        ToDestination(vm: viewModel, journey: journey, index: index)
+                                            .padding(.bottom, 16.wScaled)
+                                        
+                                        Button {
+                                            viewModel.stopAllAnnouncements()
+                                            viewModel.showAlert = true
+                                        } label: {
+                                            if index == journey.nodes.count - 1 {
+                                                Text("이미 목적지에 도착하셨나요?")
+                                                    .font(.premed14Scaled)
+                                                    .foregroundColor(.primaryHeavy)
+                                                    .underline()
+                                            } else {
+                                                Text("이미 정류장에 도착하셨나요?")
+                                                    .font(.premed14Scaled)
+                                                    .foregroundColor(.primaryHeavy)
+                                                    .underline()
+                                            }
+                                        }
+                                    }
+                                    
+                                    HStack {
+                                        Spacer()
+                                        Button {
+                                            viewModel.showDevSheet = true
+                                        } label: {
+                                            HStack(spacing: 8.wScaled) {
+                                                Image(systemName: "map.fill")
+                                                    .font(.presemi18)
+                                                Text("지도")
+                                                    .font(.presemi18)
+                                            }
+                                            .foregroundColor(.primaryHeavy)
+                                            .padding(.vertical, 14.wScaled)
+                                            .padding(.horizontal, 21.wScaled)
+                                            .background(
+                                                Capsule()
+                                                    .fill(Color.white)
+                                                    .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 0)
+                                            )
+                                        }
+                                    }
+                                    .padding(.horizontal, 21.wScaled)
                                 }
                             }
                         }
                     }
                 }
             }
-            
-            // 맵뷰 버튼
-            if let journey = viewModel.journey,
-               let index = viewModel.journeyIndex,
-               !viewModel.arrived {            
-                VStack {
-                    Spacer().frame(height: 144 + 120.wScaled) // 높이 144(고정) + 120.wScaled(변동)
-                    HStack {
-                        Spacer()
-                        Button {
-                            viewModel.showDevSheet = true
-                        } label: {
-                            Image(systemName: "map.fill")
-                                .font(.system(size: 20.wScaled, weight: .bold))
-                                .foregroundColor(.subLight)
-                                .padding(.vertical, 12.wScaled)
-                                .padding(.horizontal, 18.wScaled)
-                                .background(
-                                    UnevenRoundedRectangle(
-                                        topLeadingRadius: 10,
-                                        bottomLeadingRadius: 10
-                                    )
-                                    .fill(Color.subPoint)
-                                )
-                        }
-                    }
-                    Spacer()
-                }
-                .overlay {
+            .overlay {
+                if let journey = viewModel.journey, let index = viewModel.journeyIndex {
                     WalkingAlert(
                         isPresented: $viewModel.showAlert,
                         viewModel: viewModel,

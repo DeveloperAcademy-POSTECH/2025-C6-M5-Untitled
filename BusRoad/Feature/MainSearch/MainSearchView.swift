@@ -7,6 +7,8 @@ struct MainSearchView: View {
     @StateObject private var viewModel = MainSearchViewModel()
     @FocusState private var isFocused: Bool
     
+    var isDestination: Bool = true
+    
     var body: some View {
         Group {
             if viewModel.isSearchMode {
@@ -32,13 +34,14 @@ struct MainSearchView: View {
                     onMicTap: {
                         viewModel.handleMicTap()
                         isFocused = false
-                        coordinator.push(.voiceSearch)
                     },
                     onSelect: { item in
                         viewModel.selectPlace(item: item)
                         coordinator.push(.routeSuggestion)
                     },
                     hasSubmitted: $viewModel.hasSubmitted,
+                    isPresented: $viewModel.showDestinationMap,
+                    isDestination: .constant(isDestination),
                     isLoading: viewModel.isLoading
                 )
             } else {
@@ -53,7 +56,6 @@ struct MainSearchView: View {
                     onMicTap: {
                         viewModel.handleMicTap()
                         isFocused = false
-                        coordinator.push(.voiceSearch)
                     },
                     onClear: {
                         viewModel.clearQuery()

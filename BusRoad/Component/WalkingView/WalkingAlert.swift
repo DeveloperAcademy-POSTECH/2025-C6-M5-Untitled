@@ -53,7 +53,6 @@ struct WalkingAlert: View {
                         Button{
                             viewModel.manuallyArrived = true
                             viewModel.arrived = true
-                            viewModel.showVerifyingStop = true
                             isPresented = false
                         } label:{
                             ZStack{
