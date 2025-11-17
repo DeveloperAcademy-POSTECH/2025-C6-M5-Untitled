@@ -56,7 +56,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private var lastAnnouncedTurnIndex: Int = -1
     private var currentAnnouncedTurnIndex: Int = -1  // 현재 안내 중인 회전 지점
     private var hasPassed: Bool = false  // 안내한 지점을 통과했는지
-    private let turnAngleThreshold: Double = 20  // 20도로 설정
+    private let turnAngleThreshold: Double = 30  // 30도로 설정
     private let turnCompletionDistance: CLLocationDistance = 10  // 회전 완료 판단 거리
     private let announcementDistance: CLLocationDistance = 25  // 25m 이내에서만 안내
     private let speechSynthesizer = AVSpeechSynthesizer()
