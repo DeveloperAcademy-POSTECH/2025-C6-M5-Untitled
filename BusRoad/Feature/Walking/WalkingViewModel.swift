@@ -665,8 +665,8 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             speechSynthesizer.stopSpeaking(at: .immediate)
         }
         
-//        let text = "잠시 후 \(direction.korean) 입니다"
-        let text = "\(distance)미터 앞 \(direction.korean) 입니다"
+        let text = "잠시 후 \(direction.korean) 입니다"
+//        let text = "\(distance)미터 앞 \(direction.korean) 입니다"
         
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
