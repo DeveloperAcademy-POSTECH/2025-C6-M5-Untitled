@@ -15,6 +15,7 @@ final class SearchManager: ObservableObject {
     @Published var errorMessage: String?
     @Published var shouldShowSearchMode = false
     @Published var hasSubmitted = false
+    @Published var isResetting = false
     
     // 의존 서비스
     private let service: KakaoPlaceSearchService
@@ -32,6 +33,11 @@ final class SearchManager: ObservableObject {
         self.errorMessage = nil
         self.shouldShowSearchMode = false
         self.hasSubmitted = false
+        self.isResetting = true
+        
+        Task { @MainActor in
+                    self.isResetting = false
+                }
     }
     
     // 일반 검색

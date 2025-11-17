@@ -38,6 +38,13 @@ final class MainSearchViewModel: ObservableObject {
         searchManager.objectWillChange
             .sink { [weak self] _ in self?.objectWillChange.send() }
             .store(in: &bag)
+        
+        searchManager.$isResetting
+            .filter { $0 }  // true일 때만
+            .sink { [weak self] _ in
+                self?.isSearchMode = false
+            }
+            .store(in: &bag)
     }
     
     func search() async {
