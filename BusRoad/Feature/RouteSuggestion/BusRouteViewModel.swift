@@ -18,6 +18,9 @@ class BusRouteViewModel: ObservableObject {
     @Published var locationType: LocationType = .origin
     @Published var totalDistance: Double = 0.0
     
+    //버스 도착 시간 관련
+    @Published var arrivalText: String? = nil
+    
     // 에러 케이스 분류용
     @Published var errorMessage: String?
     
@@ -25,6 +28,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var hasSubmitted: Bool = false
     @Published var isSearchMode = false
     @Published var isLoading: Bool = false
+    @Published var showDestinationMap: Bool = false
     @Published var isRefreshingLocation: Bool = false
     
     
@@ -381,6 +385,9 @@ extension BusRouteViewModel {
         } else {
             arrivalText = "\(minutes)분 후"
         }
+        
+        self.arrivalText = arrivalText
+        print("버스 도착 예정 시간 업데이트 완료")
         
         let cleanedBusNo = cleanBusNumber(item.routeno)
         

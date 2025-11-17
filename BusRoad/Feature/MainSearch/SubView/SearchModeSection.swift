@@ -11,9 +11,12 @@ struct SearchModeSection: View {
     let onMicTap: () -> Void
     let onSelect: (PlaceSummary) -> Void
     @Binding var hasSubmitted: Bool
+    @Binding var isPresented: Bool
+    @Binding var isDestination: Bool
     let isLoading: Bool
     
     @State private var submittedQuery: String = ""
+    @State private var selectedItem: PlaceSummary?
     
     var body: some View {
         ZStack {
@@ -117,7 +120,8 @@ struct SearchModeSection: View {
                                     searchQuery: submittedQuery
                                 ) {
                                     // onTap
-                                    onSelect(item)
+                                    selectedItem = item
+                                    isPresented = true
                                 }
                             }
                         }
@@ -129,6 +133,19 @@ struct SearchModeSection: View {
                 .frame(maxWidth: .infinity, minHeight: results.isEmpty || !hasSubmitted || isLoading ? geo.size.height : 0)
             }
             .scrollDismissesKeyboard(.interactively)
+        }
+        .fullScreenCover(isPresented: $isPresented) {
+            if let selectedItem = selectedItem {
+                LocationMap(
+                    isPresented: $isPresented,
+                    isDestination: $isDestination,
+                    location: selectedItem,
+                    onSelect: {
+                        isPresented = false
+                        onSelect(selectedItem)
+                    },
+                )
+            }
         }
     }
 }
