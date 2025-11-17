@@ -18,7 +18,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var isRerouting: Bool = false
     @Published var journey: Journey?
     @Published var journeyIndex: Int?
-    //    @Published var showVerifyingStop: Bool = false
     @Published var manuallyArrived: Bool = false
     @Published var showArrivalContent = false
     
@@ -169,7 +168,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         if !isRerouting {
             arrived = false
             manuallyArrived = false
-            //            showVerifyingStop = false
         }
         
         bigDistanceText = "-- m"
