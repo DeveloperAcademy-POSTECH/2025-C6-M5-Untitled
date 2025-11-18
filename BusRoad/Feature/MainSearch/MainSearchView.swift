@@ -70,9 +70,15 @@ struct MainSearchView: View {
         .background(Color(.systemBackground).ignoresSafeArea())
         .onAppear {
             if coordinator.isReturningFromRoute {
-                        viewModel.isSearchMode = true
-                        coordinator.isReturningFromRoute = false
-                    }
+                viewModel.isReturningFromRoute = true  // ViewModel에도 전달
+                viewModel.isSearchMode = true
+                coordinator.isReturningFromRoute = false
+                
+                // 플래그 리셋
+                DispatchQueue.main.async {
+                    viewModel.isReturningFromRoute = false
+                }
+            }
             
             Task {
                 try? await LocationService.shared.startLightTracking()

@@ -7,6 +7,7 @@ final class MainSearchViewModel: ObservableObject {
     @Published var hasSubmitted: Bool = false
     @Published var isSearchMode: Bool = false
     @Published var showHint: Bool = false
+    @Published var isReturningFromRoute: Bool = false
     @Published var showDestinationMap: Bool = false
     @Published var hasShownVoiceHint: Bool {
         didSet {
@@ -42,7 +43,11 @@ final class MainSearchViewModel: ObservableObject {
         searchManager.$isResetting
             .filter { $0 }  // true일 때만
             .sink { [weak self] _ in
-                self?.isSearchMode = false
+                guard let self = self else { return }
+                // popToRoot로 돌아온 경우가 아닐 때만 false로 설정
+                if !self.isReturningFromRoute {
+                    self.isSearchMode = false
+                }
             }
             .store(in: &bag)
     }
@@ -70,9 +75,9 @@ final class MainSearchViewModel: ObservableObject {
     // MARK: - 액션 메서드들
     /// 검색 모드 종료
     func exitSearchMode() {
+        isSearchMode = false
         query = ""
         resetManager()
-        isSearchMode = false
     }
     
     /// 검색 수행
@@ -119,7 +124,7 @@ final class MainSearchViewModel: ObservableObject {
             latitude: item.latitude,
             longitude: item.longitude
         ))
-        resetManager()
-        isSearchMode = true
+        
+        searchManager.placeReset()
     }
 }
