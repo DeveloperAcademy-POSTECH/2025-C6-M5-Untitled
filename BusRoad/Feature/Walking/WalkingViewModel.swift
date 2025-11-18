@@ -370,6 +370,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         guard location.horizontalAccuracy > 0,
               location.horizontalAccuracy < accuracyGate else { return }
         guard !isRerouting else { return }
+        guard finishedOnboarding else {return}
         
         //재탐색 알림이나 도착알림 표시 중이면 음성안내 방지
         guard !showRerouteAlert && !showAlert else { return }
