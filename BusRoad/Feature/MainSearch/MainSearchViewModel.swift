@@ -120,6 +120,6 @@ final class MainSearchViewModel: ObservableObject {
             longitude: item.longitude
         ))
         resetManager()
-        isSearchMode = false
+        isSearchMode = true
     }
 }
