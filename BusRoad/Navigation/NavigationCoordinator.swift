@@ -51,11 +51,6 @@ class NavigationCoordinator: ObservableObject {
         // 그 다음에 navigation 처리
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             self.path.removeAll()
-            
-            // path가 비워진 후에 플래그 설정
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
-                self.isReturningFromRoute = true
-            }
         }
     }
     
