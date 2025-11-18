@@ -12,6 +12,8 @@ class NavigationCoordinator: ObservableObject {
     @Published var path: [Route] = []
     @Published var currentStage: JourneyStage?
     @Published var isJourneyFlowPresented: Bool = false
+    @Published var isReturningFromRoute: Bool = false
+    
     let journeyManager = JourneyManager.shared
     let searchManager = SearchManager.shared
     
@@ -24,10 +26,18 @@ class NavigationCoordinator: ObservableObject {
     }
     
     func pop() {
-        if !self.path.isEmpty {
-            self.path.removeLast()
+            if !self.path.isEmpty {
+                // pop하기 전에 현재 route 확인
+                let currentRoute = self.path.last
+                self.path.removeLast()
+                
+                // routeSuggestion에서 돌아오는 경우 플래그 설정
+                if currentRoute == .routeSuggestion {
+                    isReturningFromRoute = true
+                }
+            }
         }
-    }
+
     
     func popToRoot() {
         self.isJourneyFlowPresented = false

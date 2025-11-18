@@ -69,6 +69,11 @@ struct MainSearchView: View {
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
         .onAppear {
+            if coordinator.isReturningFromRoute {
+                        viewModel.isSearchMode = true
+                        coordinator.isReturningFromRoute = false
+                    }
+            
             Task {
                 try? await LocationService.shared.startLightTracking()
             }
@@ -93,6 +98,7 @@ struct MainSearchView: View {
             viewModel.showHint = false
         }
         .onAppear {
+            
             guard !viewModel.hasShownVoiceHint else { return }  // 이미 본 적 있으면 패스
             viewModel.showHint = true
             viewModel.hasShownVoiceHint = true
