@@ -14,7 +14,6 @@ struct RouteSuggestionView: View {
                 query: Binding(get: { viewModel.query }, set: { viewModel.query = $0 }),
                 results: viewModel.results,
                 isFocused: $isFocused,
-                recentSearch: viewModel.store.locations,
                 onBack: {
                     viewModel.exitSearchMode()
                     viewModel.isSearchMode = false
@@ -34,8 +33,12 @@ struct RouteSuggestionView: View {
                     viewModel.handleMicTap()
                 },
                 onSelect: { item in
+                    viewModel.saveRecentSearch(item)    // 최근 검색어 저장
                     viewModel.selectPlace(item: item, locationType: viewModel.locationType)
                     viewModel.isSearchMode = false
+                },
+                onDelete: { item in
+                    viewModel.deleteRecentItem(item)
                 },
                 hasSubmitted: $viewModel.hasSubmitted,
                 isPresented: $viewModel.showDestinationMap, isDestination: Binding(
@@ -44,7 +47,8 @@ struct RouteSuggestionView: View {
                         viewModel.locationType = newValue ? .destination : .origin
                     }
                 ),
-                isLoading: viewModel.isSearchLoading
+                isLoading: viewModel.isSearchLoading,
+                store: viewModel.store
             )
         } else {
             ZStack {

@@ -40,6 +40,12 @@ class LocationStore: ObservableObject {
         }
     }
     
+    func remove(_ location: PlaceSummary) {
+        if let index = locations.firstIndex(of: location) {
+            locations.remove(at: index)
+        }
+    }
+    
     private func load() {
         let decoder = JSONDecoder()
         if let data = UserDefaults.standard.data(forKey: key),

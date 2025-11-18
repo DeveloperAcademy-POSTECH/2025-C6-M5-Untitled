@@ -19,7 +19,6 @@ struct MainSearchView: View {
                     ),
                     results: viewModel.results,
                     isFocused: $isFocused,
-                    recentSearch: viewModel.store.locations,
                     onBack: {
                         viewModel.exitSearchMode()
                         isFocused = false
@@ -41,10 +40,14 @@ struct MainSearchView: View {
                         viewModel.selectPlace(item: item)
                         coordinator.push(.routeSuggestion)
                     },
+                    onDelete: { item in
+                        viewModel.deleteRecentItem(item)    // 최근 검색어 삭제
+                    },
                     hasSubmitted: $viewModel.hasSubmitted,
                     isPresented: $viewModel.showDestinationMap,
                     isDestination: .constant(isDestination),
-                    isLoading: viewModel.isLoading
+                    isLoading: viewModel.isLoading,
+                    store: viewModel.store
                 )
             } else {
                 IntroSection(

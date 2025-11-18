@@ -4,13 +4,13 @@ struct SearchModeSection: View {
     @Binding var query: String
     let results: [PlaceSummary]          // vm.results의 요소 타입에 맞춰서
     var isFocused: FocusState<Bool>.Binding
-    let recentSearch: [PlaceSummary]
     
     let onBack: () -> Void
     let onSubmit: () -> Void
     let onClear: () -> Void
     let onMicTap: () -> Void
     let onSelect: (PlaceSummary) -> Void
+    let onDelete: (PlaceSummary) -> Void
     @Binding var hasSubmitted: Bool
     @Binding var isPresented: Bool
     @Binding var isDestination: Bool
@@ -18,6 +18,8 @@ struct SearchModeSection: View {
     
     @State private var submittedQuery: String = ""
     @State private var selectedItem: PlaceSummary?
+    
+    @ObservedObject var store: LocationStore
     
     var body: some View {
         ZStack {
@@ -90,12 +92,12 @@ struct SearchModeSection: View {
                                 Spacer()
                             }
                             LazyVStack(spacing: 8) {
-                                ForEach(recentSearch) { item in
+                                ForEach(store.locations) { item in
                                     RecentCard(
-                                        title: item.name
-                                    ) {
-                                        onSelect(item)
-                                    }
+                                        title: item.name,
+                                        onSelect: { onSelect(item) },
+                                        onDelete: { onDelete(item) }
+                                    )
                                 }
                             }
                             .padding(.horizontal, 16)
