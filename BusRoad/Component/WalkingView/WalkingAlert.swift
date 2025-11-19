@@ -45,7 +45,7 @@ struct WalkingAlert: View {
                                     .cornerRadius(100)
                                     .foregroundColor(Color.greybutton)
                                     .frame(width: 139.wScaled, height: 48.wScaled)
-                                Text("닫기")
+                                Text("아니오")
                                     .foregroundColor(Color.primaryblack)
                                     .font(.premed20Scaled)
                             }
