@@ -1,4 +1,5 @@
 import SwiftUI
+import Lottie
 
 struct OnboardingView: View {
     @Binding var isFirstLaunching: Bool
@@ -7,15 +8,30 @@ struct OnboardingView: View {
     var body: some View {
         ZStack(alignment: .bottom){
             Color.black.opacity(0.7).ignoresSafeArea()
-            VStack {
-                Spacer()
+            
+            VStack(alignment: .center, content: {
+
+                Spacer().frame(height: 100)
                 
                 //로티 영역
-                Rectangle()
-                    .frame(width: 300.wScaled, height: 400.wScaled)
+                LottieView(animation: .named("WalkingTutorial"))
+                    .playing(loopMode: .loop)
+                    .animationSpeed(1.0)
+                    .frame(width: 500, height: 500)
                 
+                VStack(alignment: .center, spacing: 10, content: {
+                    Text("화살표 방향에 맞춰")
+                        .font(.prebold28)
+                        .foregroundStyle(.primarywhite)
+                    Text("따라 걸어가세요")
+                        .font(.prebold28)
+                        .foregroundStyle(.primarywhite)
+                })
+                .padding(.top, -130)
+            
                 Spacer()
-            }
+            })
+
             Button {
                 isFirstLaunching.toggle()
                 viewModel.finishedOnboarding = true
