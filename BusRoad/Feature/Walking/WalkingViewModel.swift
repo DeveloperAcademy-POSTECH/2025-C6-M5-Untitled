@@ -20,7 +20,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var journeyIndex: Int?
     @Published var manuallyArrived: Bool = false
     @Published var showArrivalContent = false
-    @Published var finishedOnboarding: Bool = false
+    @Published var finishedOnboarding: Bool = true
     
     // MARK: - 내부 상태
     let loc = CLLocationManager()
