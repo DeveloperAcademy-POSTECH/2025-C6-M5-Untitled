@@ -20,14 +20,16 @@ class LocationStore: ObservableObject {
     
     /// 최대 10개까지 추가
     func add(_ location: PlaceSummary) {
-        // 중복은 제거 (옵션)
-        if let index = locations.firstIndex(of: location) {
+        // 이름 기준으로 중복 판단
+        if let index = locations.firstIndex(where: {
+            $0.name == location.name
+        }) {
             locations.remove(at: index)
             print("[DEBUG] 최근검색어: 중복 제거")
         }
-        
-        locations.insert(location, at: 0)   // 최근이 앞으로 오도록
-        
+
+        locations.insert(location, at: 0)
+
         if locations.count > 10 {
             locations = Array(locations.prefix(10))
         }
