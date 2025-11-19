@@ -179,6 +179,9 @@ struct WalkingView: View {
             }
             if isFirstLaunching {
                 OnboardingView(isFirstLaunching: $isFirstLaunching, viewModel: viewModel)
+                    .onAppear {
+                        viewModel.finishedOnboarding.toggle()
+                    }
             }
         }
         .overlay(alignment: .center) {
