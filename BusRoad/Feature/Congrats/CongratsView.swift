@@ -11,6 +11,7 @@ import Lottie
 struct CongratsView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @State private var journey: Journey? = JourneyManager.shared.selectedJourney
+    @State private var showConfetti: Bool = false
     
     var body: some View {
         ZStack {
@@ -70,6 +71,13 @@ struct CongratsView: View {
                                         .playing(loopMode: .playOnce)
                                         .animationSpeed(1.0)
                                         .frame(width: 180, height: 180)
+                                        .onAppear {
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                                withAnimation(.easeOut(duration: 0.3)) {
+                                                    showConfetti = true
+                                                }
+                                            }
+                                        }
                                     Spacer()
                                 }
                                 
@@ -94,8 +102,69 @@ struct CongratsView: View {
                                     .cornerRadius(20)
                             }
                         }
+                    
+                    if showConfetti {
+                        GeometryReader { proxy in
+                            let screenWidth = proxy.size.width
+                            let screenHeight = proxy.size.height
+                            
+                            let animationWidth: CGFloat = 1400
+                            let animationHeight: CGFloat = 1080
+                            
+                            // 세로 기준으로만 스케일 (아래까지 꽉 차게)
+                            let scale = screenHeight / animationHeight
+                            
+                            LottieView(animation: .named("confetti"))
+                                .playing(loopMode: .playOnce)
+                                .animationSpeed(0.5)
+                                .frame(width: animationWidth, height: animationHeight)
+                                .scaleEffect(scale)
+                                .position(x: screenWidth / 2, y: screenHeight / 2)
+                                .clipped()
+                        }
+                        .ignoresSafeArea()
+                    }
                 }
             }
         }
     }
+}
+
+#Preview {
+    // Seed shared managers for a meaningful preview
+    let jm = JourneyManager.shared
+    // Sample locations
+    let origin = LocationInfo(name: "현위치", latitude: 37.5665, longitude: 126.9780)
+    let mid = LocationInfo(name: "버스 환승 지점", latitude: 37.5651, longitude: 126.9895)
+    let dest = LocationInfo(name: "포스텍 정문", latitude: 36.0133, longitude: 129.3235)
+
+    // Build a simple journey: walk -> bus -> walk
+    let walk1 = WalkRouteNode(start: origin, end: mid, travelTime: 8).asRouteNode
+    let busStations = [
+        BusStation(index: 0, stationId: 1001, stationName: "시청", stationCityCode: 11, localStationId: "loc-1001", nodeId: "ars-1001", latitude: 37.5665, longitude: 126.9780),
+        BusStation(index: 1, stationId: 1002, stationName: "을지로입구", stationCityCode: 11, localStationId: "loc-1002", nodeId: "ars-1002", latitude: 37.5663, longitude: 126.9820)
+    ]
+    let busNode = BusRouteNode(
+        start: mid,
+        end: dest,
+        busNo: ["100번"],
+        busId: [100],
+        stations: busStations,
+        travelTime: 30
+    ).asRouteNode
+    let walk2 = WalkRouteNode(start: dest, end: dest, travelTime: 1).asRouteNode
+
+    let sampleJourney = Journey(totalTime: 39, nodes: [walk1, busNode, walk2])
+
+    // Set JourneyManager shared state
+    jm.setOrigin(origin)
+    jm.setDestination(dest)
+    jm.selectedJourney = sampleJourney
+    jm.journeyIndex = sampleJourney.nodes.count - 1 // last node for Congrats
+
+    // Coordinator environment object
+    let coordinator = NavigationCoordinator()
+
+    return CongratsView()
+        .environmentObject(coordinator)
 }
