@@ -4,6 +4,7 @@ import MapKit
 struct WalkingView: View {
     @ObservedObject var viewModel = WalkingViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
+    @AppStorage("isFirstLaunching") var isFirstLaunching: Bool = true
     
     var body: some View {
         ZStack {
@@ -176,6 +177,9 @@ struct WalkingView: View {
                 .background(Color.black.opacity(0.6))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
+            if isFirstLaunching {
+                OnboardingView(isFirstLaunching: $isFirstLaunching, viewModel: viewModel)
+            }
         }
         .overlay(alignment: .center) {
             Group {
@@ -200,7 +204,9 @@ struct WalkingView: View {
             .presentationDragIndicator(.visible)
         }
         .onAppear {
-            viewModel.start()
+            if !isFirstLaunching {
+                viewModel.start()
+            }
             
             // Journey에서 목적지 설정
             if let journey = viewModel.journey,

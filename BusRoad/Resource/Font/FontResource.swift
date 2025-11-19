@@ -33,6 +33,10 @@ extension Font {
         return .pre(type: .bold, size: 36)
     }
     
+    static var prebold28: Font {
+        return .pre(type: .bold, size: 28)
+    }
+    
     static var presemi36: Font {
         return .pre(type: .semibold, size: 36)
     }

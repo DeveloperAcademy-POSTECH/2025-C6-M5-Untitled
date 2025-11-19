@@ -20,6 +20,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     @Published var journeyIndex: Int?
     @Published var manuallyArrived: Bool = false
     @Published var showArrivalContent = false
+    @Published var finishedOnboarding: Bool = false
     
     // MARK: - 내부 상태
     let loc = CLLocationManager()
@@ -29,6 +30,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private var lastArrowBearing: CLLocationDirection = 0
     private let arrowBearingThreshold: Double = 10
     private var navigationStartTime: Date? = nil
+    private var isRouteApplied: Bool = false
     
     // TMAP 경로 데이터
     var tmapCoordinates: [CLLocationCoordinate2D] = []
@@ -248,24 +250,35 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         }
         self.nextCards = Array(cards.prefix(3))
         
-        if isRerouting {
-            isRerouting = false
-            if tmapTotalDistance < 10 {
-                arrived = true
-                manuallyArrived = true
-            }
-        }
+        self.isRouteApplied = true
+        self.isRerouting = false
+        
+        self.tryAnnounceStart()
         
         ProgressLiveActivityManager.totalDistance = Double(tmapTotalDistance)
         ProgressLiveActivityManager.shared.updateWalkingActivity(
             newLeftDistance: Double(tmapTotalDistance)
         )
         
-        if !hasAnnouncedStart && !isRerouting {
+        if !hasAnnouncedStart && !isRerouting && finishedOnboarding {
             announceStart()
             hasAnnouncedStart = true
         }
     }
+    
+    // MARK: - 안내 시작음
+    func tryAnnounceStart() {
+            guard !hasAnnouncedStart,
+                  isRouteApplied,
+                  finishedOnboarding,
+                  !isRerouting else {
+                return
+            }
+            
+            // 모든 조건 충족 시 안내
+            announceStart()
+            hasAnnouncedStart = true
+        }
     
     // MARK: - Apple Maps Fallback
     private func fallbackToAppleMaps(origin: CLLocationCoordinate2D, dest: CLLocationCoordinate2D) {
@@ -357,6 +370,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         guard location.horizontalAccuracy > 0,
               location.horizontalAccuracy < accuracyGate else { return }
         guard !isRerouting else { return }
+        guard finishedOnboarding else {return}
         
         //재탐색 알림이나 도착알림 표시 중이면 음성안내 방지
         guard !showRerouteAlert && !showAlert else { return }
@@ -568,7 +582,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             let distToPoint = location.distance(from: checkPoint)
             
             // 미터 이내에서만 한 번만 안내
-            if distToPoint <= announcementDistance {
+            if distToPoint <= announcementDistance && finishedOnboarding {
                 if let turn = detectTurn(at: i) {
                     currentAnnouncedTurnIndex = i
                     lastAnnouncedTurnIndex = i

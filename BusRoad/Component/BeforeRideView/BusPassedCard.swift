@@ -5,7 +5,6 @@
 //  Created by 박난 on 11/4/25.
 //
 import SwiftUI
-import Lottie
 
 
 struct BusPassedCard: View {
