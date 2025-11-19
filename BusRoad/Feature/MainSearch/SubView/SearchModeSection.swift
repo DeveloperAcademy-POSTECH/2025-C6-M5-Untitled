@@ -10,6 +10,7 @@ struct SearchModeSection: View {
     let onClear: () -> Void
     let onMicTap: () -> Void
     let onSelect: (PlaceSummary) -> Void
+    let onDelete: (PlaceSummary) -> Void
     @Binding var hasSubmitted: Bool
     @Binding var isPresented: Bool
     @Binding var isDestination: Bool
@@ -17,6 +18,8 @@ struct SearchModeSection: View {
     
     @State private var submittedQuery: String = ""
     @State private var selectedItem: PlaceSummary?
+    
+    @ObservedObject var store: LocationStore
     
     var body: some View {
         ZStack {
@@ -79,8 +82,28 @@ struct SearchModeSection: View {
                 VStack {
                     // 검색 전 (제출 전)
                     if !hasSubmitted {
-                        Spacer(minLength: 0)
-                        Spacer(minLength: 0)
+                        VStack {
+                            HStack {
+                                Spacer()
+                                    .frame(width: 20)
+                                Text("최근 검색")
+                                    .font(.premed16Scaled)
+                                    .foregroundStyle(.primaryblack)
+                                Spacer()
+                            }
+                            LazyVStack(spacing: 8) {
+                                ForEach(store.locations) { item in
+                                    RecentCard(
+                                        title: item.name,
+                                        onSelect: { onSelect(item) },
+                                        onDelete: { onDelete(item) }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            Spacer(minLength: 0)
+                        }
                         
                         // 로딩 중
                     } else if isLoading {

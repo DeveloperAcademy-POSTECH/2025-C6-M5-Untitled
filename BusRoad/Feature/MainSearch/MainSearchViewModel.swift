@@ -1,6 +1,7 @@
 import Combine
 import Foundation
 import MapKit
+import SwiftUI
 
 @MainActor
 final class MainSearchViewModel: ObservableObject {
@@ -13,6 +14,7 @@ final class MainSearchViewModel: ObservableObject {
             UserDefaults.standard.set(hasShownVoiceHint, forKey: kHasShownVoiceHint)
         }
     }
+    let store = LocationStore()
     
     private let kHasShownVoiceHint = "hasShownVoiceHint_v1"
     private var bag = Set<AnyCancellable>()
@@ -121,5 +123,15 @@ final class MainSearchViewModel: ObservableObject {
         ))
         resetManager()
         isSearchMode = false
+    }
+    
+    func saveRecentSearch(_ item: PlaceSummary) {
+        store.add(item)
+        print("[DEBUG] LocationStore에 최근검색어 저장: \(item.name)")
+    }
+    
+    func deleteRecentItem(_ item: PlaceSummary) {
+        store.remove(item)
+        print("[DEBUG] LocationStore에서 최근검색어 삭제: \(item.name)")
     }
 }

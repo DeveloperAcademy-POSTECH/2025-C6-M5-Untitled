@@ -36,13 +36,18 @@ struct MainSearchView: View {
                         isFocused = false
                     },
                     onSelect: { item in
+                        viewModel.saveRecentSearch(item)    // 최근 검색어 저장
                         viewModel.selectPlace(item: item)
                         coordinator.push(.routeSuggestion)
+                    },
+                    onDelete: { item in
+                        viewModel.deleteRecentItem(item)    // 최근 검색어 삭제
                     },
                     hasSubmitted: $viewModel.hasSubmitted,
                     isPresented: $viewModel.showDestinationMap,
                     isDestination: .constant(isDestination),
-                    isLoading: viewModel.isLoading
+                    isLoading: viewModel.isLoading,
+                    store: viewModel.store
                 )
             } else {
                 IntroSection(

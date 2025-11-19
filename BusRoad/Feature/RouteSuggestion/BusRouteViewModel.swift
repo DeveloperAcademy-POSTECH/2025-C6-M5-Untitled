@@ -32,6 +32,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var isRefreshingLocation: Bool = false
     
     
+    let store = LocationStore()
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
     private let arrivalInfoManager: ArrivalInfoManager
@@ -307,6 +308,16 @@ class BusRouteViewModel: ObservableObject {
     
     func fetchFirstLoadedLocation() {
         journeyManager.useFirstLoadedLocation()
+    }
+    
+    func saveRecentSearch(_ item: PlaceSummary) {
+        store.add(item)
+        print("[DEBUG] LocationStore에 최근검색어 저장: \(item.name)")
+    }
+    
+    func deleteRecentItem(_ item: PlaceSummary) {
+        store.remove(item)
+        print("[DEBUG] LocationStore에서 최근검색어 삭제: \(item.name)")
     }
 }
 
