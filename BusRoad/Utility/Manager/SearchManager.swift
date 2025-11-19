@@ -34,10 +34,17 @@ final class SearchManager: ObservableObject {
         self.shouldShowSearchMode = false
         self.hasSubmitted = false
         self.isResetting = true
-        
-        Task { @MainActor in
-                    self.isResetting = false
-                }
+           DispatchQueue.main.async { [weak self] in
+               self?.isResetting = false
+           }
+    }
+    
+    func placeReset() {
+        self.query = ""
+        self.isLoading = false
+        self.errorMessage = nil
+        self.shouldShowSearchMode = false
+        self.hasSubmitted = false
     }
     
     // 일반 검색

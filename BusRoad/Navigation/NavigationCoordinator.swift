@@ -12,6 +12,8 @@ class NavigationCoordinator: ObservableObject {
     @Published var path: [Route] = []
     @Published var currentStage: JourneyStage?
     @Published var isJourneyFlowPresented: Bool = false
+    @Published var isReturningFromRoute: Bool = false
+    
     let journeyManager = JourneyManager.shared
     let searchManager = SearchManager.shared
     
@@ -24,24 +26,31 @@ class NavigationCoordinator: ObservableObject {
     }
     
     func pop() {
-        if !self.path.isEmpty {
-            self.path.removeLast()
+            if !self.path.isEmpty {
+                // pop하기 전에 현재 route 확인
+                let currentRoute = self.path.last
+                self.path.removeLast()
+                
+                // routeSuggestion에서 돌아오는 경우 플래그 설정
+                if currentRoute == .routeSuggestion {
+                    isReturningFromRoute = true
+                }
+            }
         }
-    }
+
     
     func popToRoot() {
         self.isJourneyFlowPresented = false
         self.currentStage = nil
+        
+        // 먼저 reset을 동기적으로 실행
+        self.journeyManager.reset()
+        self.searchManager.reset()
+        LocationService.shared.invalidateCache()
+        
+        // 그 다음에 navigation 처리
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             self.path.removeAll()
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) {
-            // manager 초기화
-            self.journeyManager.reset()
-            self.searchManager.reset()
-            
-            LocationService.shared.invalidateCache()
-            
         }
     }
     

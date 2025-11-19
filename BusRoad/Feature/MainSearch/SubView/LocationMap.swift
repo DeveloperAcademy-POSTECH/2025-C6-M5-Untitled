@@ -61,19 +61,7 @@ struct LocationMap: View {
                     ))
                 }
             }
-            ZStack{
-                Rectangle()
-                    .frame(height: 205.wScaled)
-                    .clipShape(
-                        .rect(
-                            topLeadingRadius: 15,
-                            bottomLeadingRadius: 0,
-                            bottomTrailingRadius: 0,
-                            topTrailingRadius: 15
-                        )
-                    )
-                    .foregroundColor(.primarywhite)
-                    .padding(.bottom, 0)
+            
                 VStack(spacing: 0){
                     VStack(alignment: .leading, spacing: 9){
                         Text(location.name)
@@ -104,7 +92,13 @@ struct LocationMap: View {
                     }
                     .padding(.horizontal)
                 }
-            }
+                .frame(height: 205.wScaled)
+                .background(
+                    Rectangle()
+                        .ignoresSafeArea(edges: .bottom)
+                        .foregroundColor(.primarywhite)
+                        .padding(.bottom, 0)
+                )
         }
     }
 }
