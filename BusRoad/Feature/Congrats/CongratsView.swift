@@ -121,6 +121,8 @@ struct CongratsView: View {
                                 .scaleEffect(scale)
                                 .position(x: screenWidth / 2, y: screenHeight / 2)
                                 .clipped()
+                                .allowsHitTesting(false)
+
                         }
                         .ignoresSafeArea()
                     }
