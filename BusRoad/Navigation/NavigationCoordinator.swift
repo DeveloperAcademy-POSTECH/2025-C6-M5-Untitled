@@ -41,15 +41,16 @@ class NavigationCoordinator: ObservableObject {
     
     func popToRoot() {
         self.isJourneyFlowPresented = false
-        self.currentStage = nil
+    
         
         // 먼저 reset을 동기적으로 실행
-        self.journeyManager.reset()
         self.searchManager.reset()
         LocationService.shared.invalidateCache()
         
         // 그 다음에 navigation 처리
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.journeyManager.reset()
+            self.currentStage = nil
             self.path.removeAll()
         }
     }

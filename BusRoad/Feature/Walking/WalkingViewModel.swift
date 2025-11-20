@@ -120,6 +120,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         guard let origin = loc.location?.coordinate,
               let dest = pendingDestination else { return }
         
+        currentSegmentIndex = 0
         stopAllAnnouncements()
         isRerouting = true
         showRerouteAlert = false
@@ -230,6 +231,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         }
         
         self.tmapCoordinates = allCoordinates
+        self.currentSegmentIndex = 0
         print("📍 좌표 \(allCoordinates.count)개 수집 완료")
         print("좌표\(allCoordinates)")
         print("🗺️ === TMAP 안내 정보 ===")
@@ -417,9 +419,12 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - 점 뛰어넘기
     private func advanceSegment(from location: CLLocation) {
-        // 현재 위치 주변의 여러 점들을 체크
-        let checkRange = min(10, tmapCoordinates.count - currentSegmentIndex - 1)
         
+        currentSegmentIndex = max(0, min(currentSegmentIndex, tmapCoordinates.count - 1))
+
+        let checkRange = min(10, tmapCoordinates.count - currentSegmentIndex - 1)
+        guard checkRange > 0 else { return }
+                
         var closestIndex = currentSegmentIndex
         var closestDistance = Double.greatestFiniteMagnitude
         
@@ -461,6 +466,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - 오프루트 감지
     private func checkOffRoute(location: CLLocation) {
+        
         if firstLocationTime == nil {
             firstLocationTime = Date()
         }
@@ -482,8 +488,10 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         
         var minDistance = Double.greatestFiniteMagnitude
         
-        let checkStart = max(0, currentSegmentIndex - 5)
-        let checkEnd = min(tmapCoordinates.count - 1, currentSegmentIndex + 10)
+        let checkStart = max(0, min(currentSegmentIndex - 5, tmapCoordinates.count - 1))
+        let checkEnd = min(tmapCoordinates.count - 1, max(0, currentSegmentIndex + 10))
+        
+        guard checkStart <= checkEnd else { return }
         
         for i in checkStart...checkEnd {
             let point = CLLocation(
