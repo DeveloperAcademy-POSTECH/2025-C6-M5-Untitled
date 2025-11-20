@@ -30,7 +30,7 @@ struct WalkingView: View {
                         coordinator.advanceJourneyStage()
                     }
                 }
-              
+                
                 LineDivider()
                 
                 ZStack {
@@ -177,12 +177,6 @@ struct WalkingView: View {
                 .background(Color.black.opacity(0.6))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             }
-            if isFirstLaunching {
-                OnboardingView(isFirstLaunching: $isFirstLaunching, viewModel: viewModel)
-                    .onAppear {
-                        viewModel.finishedOnboarding.toggle()
-                    }
-            }
         }
         .overlay(alignment: .center) {
             Group {
@@ -191,6 +185,14 @@ struct WalkingView: View {
                         isPresented: $viewModel.showRerouteAlert,
                         viewModel: viewModel
                     )
+                } else if isFirstLaunching {
+                    OnboardingView(
+                        isFirstLaunching: $isFirstLaunching,
+                        viewModel: viewModel
+                    )
+                    .onAppear {
+                        viewModel.finishedOnboarding.toggle()
+                    }
                 } else {
                     EmptyView()
                 }
