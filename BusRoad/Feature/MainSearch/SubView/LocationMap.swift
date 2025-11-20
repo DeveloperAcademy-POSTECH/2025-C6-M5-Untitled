@@ -73,8 +73,8 @@ struct LocationMap: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 30.wScaled)
-                    .padding(.bottom, 25.wScaled)
                     .padding(.top, 30.wScaled)
+                    Spacer()
                     Button(action: {
                         onSelect()
                         isPresented = false
@@ -83,15 +83,17 @@ struct LocationMap: View {
                             .font(.premed28Scaled)
                             .foregroundColor(.subLight)
                             .padding(.horizontal, 96.wScaled)
-                            .padding(.vertical, 13.5.wScaled)
+                            .frame(height: 64.wScaled)
                             .background(
                                 RoundedRectangle(cornerRadius: 20)
                                     .foregroundColor(Color.subPoint)
                             )
                             .cornerRadius(10)
                     }
+                    .padding(.bottom, 34.wScaled)
                     .padding(.horizontal)
                 }
+                .ignoresSafeArea()
                 .frame(height: 205.wScaled)
                 .background(
                     Rectangle()
