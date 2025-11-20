@@ -18,6 +18,7 @@ struct SearchModeSection: View {
     
     @State private var submittedQuery: String = ""
     @State private var selectedItem: PlaceSummary?
+    @State private var isSelected: Bool = false
     
     @ObservedObject var store: LocationStore
     
@@ -33,7 +34,7 @@ struct SearchModeSection: View {
         }
         .ignoresSafeArea(.keyboard)
         .onAppear {
-            if results.isEmpty && query.isEmpty {
+            if results.isEmpty && query.isEmpty && !isSelected {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     isFocused.wrappedValue = true
                 }
@@ -95,7 +96,10 @@ struct SearchModeSection: View {
                                 ForEach(store.locations) { item in
                                     RecentCard(
                                         title: item.name,
-                                        onSelect: { onSelect(item) },
+                                        onSelect: {
+                                            isSelected = true
+                                            onSelect(item)
+                                        },
                                         onDelete: { onDelete(item) }
                                     )
                                 }
