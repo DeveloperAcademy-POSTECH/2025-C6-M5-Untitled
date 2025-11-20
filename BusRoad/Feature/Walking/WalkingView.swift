@@ -169,6 +169,7 @@ struct WalkingView: View {
                 Color.black.opacity(0.25).ignoresSafeArea()
                 VStack(spacing: 12) {
                     ProgressView()
+                        .tint(.primarywhite)
                     Text("경로 재탐색 중…")
                         .font(.callout)
                         .foregroundColor(.white)
