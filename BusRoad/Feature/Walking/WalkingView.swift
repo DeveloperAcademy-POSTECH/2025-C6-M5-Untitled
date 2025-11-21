@@ -30,7 +30,7 @@ struct WalkingView: View {
                         coordinator.advanceJourneyStage()
                     }
                 }
-              
+                
                 LineDivider()
                 
                 ZStack {
@@ -169,6 +169,7 @@ struct WalkingView: View {
                 Color.black.opacity(0.25).ignoresSafeArea()
                 VStack(spacing: 12) {
                     ProgressView()
+                        .tint(.primarywhite)
                     Text("경로 재탐색 중…")
                         .font(.callout)
                         .foregroundColor(.white)
@@ -176,12 +177,6 @@ struct WalkingView: View {
                 .padding(16)
                 .background(Color.black.opacity(0.6))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-            }
-            if isFirstLaunching {
-                OnboardingView(isFirstLaunching: $isFirstLaunching, viewModel: viewModel)
-                    .onAppear {
-                        viewModel.finishedOnboarding.toggle()
-                    }
             }
         }
         .overlay(alignment: .center) {
@@ -191,6 +186,14 @@ struct WalkingView: View {
                         isPresented: $viewModel.showRerouteAlert,
                         viewModel: viewModel
                     )
+                } else if isFirstLaunching {
+                    OnboardingView(
+                        isFirstLaunching: $isFirstLaunching,
+                        viewModel: viewModel
+                    )
+                    .onAppear {
+                        viewModel.finishedOnboarding.toggle()
+                    }
                 } else {
                     EmptyView()
                 }
