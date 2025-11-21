@@ -10,10 +10,17 @@ struct SearchModeSection: View {
     let onClear: () -> Void
     let onMicTap: () -> Void
     let onSelect: (PlaceSummary) -> Void
+    let onDelete: (PlaceSummary) -> Void
     @Binding var hasSubmitted: Bool
+    @Binding var isPresented: Bool
+    @Binding var isDestination: Bool
     let isLoading: Bool
     
     @State private var submittedQuery: String = ""
+    @State private var selectedItem: PlaceSummary?
+    @State private var isSelected: Bool = false
+    
+    @ObservedObject var store: LocationStore
     
     var body: some View {
         ZStack {
@@ -27,7 +34,7 @@ struct SearchModeSection: View {
         }
         .ignoresSafeArea(.keyboard)
         .onAppear {
-            if results.isEmpty && query.isEmpty {
+            if results.isEmpty && query.isEmpty && !isSelected {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                     isFocused.wrappedValue = true
                 }
@@ -76,8 +83,31 @@ struct SearchModeSection: View {
                 VStack {
                     // 검색 전 (제출 전)
                     if !hasSubmitted {
-                        Spacer(minLength: 0)
-                        Spacer(minLength: 0)
+                        VStack {
+                            HStack {
+                                Spacer()
+                                    .frame(width: 20)
+                                Text("최근 검색")
+                                    .font(.premed16Scaled)
+                                    .foregroundStyle(.primaryblack)
+                                Spacer()
+                            }
+                            LazyVStack(spacing: 8) {
+                                ForEach(store.locations) { item in
+                                    RecentCard(
+                                        title: item.name,
+                                        onSelect: {
+                                            isSelected = true
+                                            onSelect(item)
+                                        },
+                                        onDelete: { onDelete(item) }
+                                    )
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 8)
+                            Spacer(minLength: 0)
+                        }
                         
                         // 로딩 중
                     } else if isLoading {
@@ -117,7 +147,8 @@ struct SearchModeSection: View {
                                     searchQuery: submittedQuery
                                 ) {
                                     // onTap
-                                    onSelect(item)
+                                    selectedItem = item
+                                    isPresented = true
                                 }
                             }
                         }
@@ -129,6 +160,19 @@ struct SearchModeSection: View {
                 .frame(maxWidth: .infinity, minHeight: results.isEmpty || !hasSubmitted || isLoading ? geo.size.height : 0)
             }
             .scrollDismissesKeyboard(.interactively)
+        }
+        .fullScreenCover(isPresented: $isPresented) {
+            if let selectedItem = selectedItem {
+                LocationMap(
+                    isPresented: $isPresented,
+                    isDestination: $isDestination,
+                    location: selectedItem,
+                    onSelect: {
+                        isPresented = false
+                        onSelect(selectedItem)
+                    },
+                )
+            }
         }
     }
 }

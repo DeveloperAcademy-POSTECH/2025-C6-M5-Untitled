@@ -128,7 +128,7 @@ struct RouteSelectButton: View {
                 Text("새로고침 하기")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
-                    .frame(width: 305.wScaled, height: 64)
+                    .frame(width: 305.wScaled, height: 64.wScaled)
                     .background(Color.subPoint)
                     .cornerRadius(20)
             }

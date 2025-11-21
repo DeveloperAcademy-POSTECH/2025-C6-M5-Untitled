@@ -14,7 +14,8 @@ struct RouteCardSlide: View {
                     ZStack {
                         ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in
                             let relativeIndex: CGFloat = CGFloat(index - currentIndex)
-                            RouteCard(allJourneys: routes,
+                            RouteCard(viewModel: viewModel,
+                                      allJourneys: routes,
                                       journey: item,
                                       index: index,
                                       isActive: currentIndex == index
@@ -32,12 +33,18 @@ struct RouteCardSlide: View {
                                 if abs(value.translation.width) < 50 {
                                     return
                                 }
-                                
+                                let newIndex: Int
                                 if value.translation.width > 0 {
-                                    currentIndex = max(0, currentIndex - 1)
+                                    newIndex = max(0, currentIndex - 1)
                                 } else {
-                                    currentIndex = min(routes.count - 1, currentIndex + 1)
+                                    newIndex = min(routes.count - 1, currentIndex + 1)
                                 }
+                                
+                                if newIndex != currentIndex {
+                                    viewModel.arrivalText = nil
+                                }
+                                
+                                currentIndex = newIndex
                             }
                     )
                 } else {

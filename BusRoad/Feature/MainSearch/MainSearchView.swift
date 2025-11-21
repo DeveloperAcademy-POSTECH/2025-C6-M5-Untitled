@@ -7,6 +7,8 @@ struct MainSearchView: View {
     @StateObject private var viewModel = MainSearchViewModel()
     @FocusState private var isFocused: Bool
     
+    var isDestination: Bool = true
+    
     var body: some View {
         Group {
             if viewModel.isSearchMode {
@@ -32,14 +34,20 @@ struct MainSearchView: View {
                     onMicTap: {
                         viewModel.handleMicTap()
                         isFocused = false
-                        coordinator.push(.voiceSearch)
                     },
                     onSelect: { item in
+                        viewModel.saveRecentSearch(item)    // 최근 검색어 저장
                         viewModel.selectPlace(item: item)
                         coordinator.push(.routeSuggestion)
                     },
+                    onDelete: { item in
+                        viewModel.deleteRecentItem(item)    // 최근 검색어 삭제
+                    },
                     hasSubmitted: $viewModel.hasSubmitted,
-                    isLoading: viewModel.isLoading
+                    isPresented: $viewModel.showDestinationMap,
+                    isDestination: .constant(isDestination),
+                    isLoading: viewModel.isLoading,
+                    store: viewModel.store
                 )
             } else {
                 IntroSection(
@@ -53,7 +61,6 @@ struct MainSearchView: View {
                     onMicTap: {
                         viewModel.handleMicTap()
                         isFocused = false
-                        coordinator.push(.voiceSearch)
                     },
                     onClear: {
                         viewModel.clearQuery()
@@ -67,6 +74,17 @@ struct MainSearchView: View {
         .toolbar(.hidden, for: .navigationBar)
         .background(Color(.systemBackground).ignoresSafeArea())
         .onAppear {
+            if coordinator.isReturningFromRoute {
+                viewModel.isReturningFromRoute = true  // ViewModel에도 전달
+                viewModel.isSearchMode = true
+                coordinator.isReturningFromRoute = false
+                
+                // 플래그 리셋
+                DispatchQueue.main.async {
+                    viewModel.isReturningFromRoute = false
+                }
+            }
+            
             Task {
                 try? await LocationService.shared.startLightTracking()
             }
@@ -91,6 +109,7 @@ struct MainSearchView: View {
             viewModel.showHint = false
         }
         .onAppear {
+            
             guard !viewModel.hasShownVoiceHint else { return }  // 이미 본 적 있으면 패스
             viewModel.showHint = true
             viewModel.hasShownVoiceHint = true

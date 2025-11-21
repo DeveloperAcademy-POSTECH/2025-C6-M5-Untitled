@@ -11,31 +11,54 @@ import Foundation
 class NavigationCoordinator: ObservableObject {
     @Published var path: [Route] = []
     @Published var currentStage: JourneyStage?
+    @Published var isJourneyFlowPresented: Bool = false
+    @Published var isReturningFromRoute: Bool = false
+    
     let journeyManager = JourneyManager.shared
     let searchManager = SearchManager.shared
     
     func push(_ path: Route) {
+        if path == .journeyFlow {
+            self.isJourneyFlowPresented = true
+            return
+        }
         self.path.append(path)
     }
     
     func pop() {
-        if !self.path.isEmpty {
-            self.path.removeLast()
+            if !self.path.isEmpty {
+                // pop하기 전에 현재 route 확인
+                let currentRoute = self.path.last
+                self.path.removeLast()
+                
+                // routeSuggestion에서 돌아오는 경우 플래그 설정
+                if currentRoute == .routeSuggestion {
+                    isReturningFromRoute = true
+                }
+            }
         }
-    }
+
     
     func popToRoot() {
-        // manager 초기화
-        journeyManager.reset()
-        searchManager.reset()
-        self.currentStage = nil
-        self.path.removeAll()
+        self.isJourneyFlowPresented = false
+    
+        
+        // 먼저 reset을 동기적으로 실행
+        self.searchManager.reset()
+        LocationService.shared.invalidateCache()
+        
+        // 그 다음에 navigation 처리
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.journeyManager.reset()
+            self.currentStage = nil
+            self.path.removeAll()
+        }
     }
     
     // 처음 JourneyStage 설정
     func setJourneyStage() {
-        guard let journey = journeyManager.selectedJourney else { return print("[ERROR] There is no selectedJourney.") }
-        guard let firstNode = journey.nodes.first else { return print("[ERROR] There is no firstNode.") }
+        guard let journey = journeyManager.selectedJourney else { return }
+        guard let firstNode = journey.nodes.first else { return }
         
         switch firstNode {
         case .bus:
@@ -47,8 +70,8 @@ class NavigationCoordinator: ObservableObject {
     
     // 다음 JourneyStage 변경
     func advanceJourneyStage() {
-        guard let index = journeyManager.journeyIndex else { return print("[ERROR] There is no journeyIndex.")}
-        guard let journey = journeyManager.selectedJourney else { return print("[ERROR] There is no selectedJourney.") }
+        guard let index = journeyManager.journeyIndex else { return }
+        guard let journey = journeyManager.selectedJourney else { return }
         
         if let currentStage {
             if index == journey.nodes.count - 1 {   // 마지막 요소일 경우, 승차 전을 제외하고(.walking, .onRide) 모두 congrats 뷰로 이동

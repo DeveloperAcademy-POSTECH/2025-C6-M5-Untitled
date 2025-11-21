@@ -15,6 +15,7 @@ final class SearchManager: ObservableObject {
     @Published var errorMessage: String?
     @Published var shouldShowSearchMode = false
     @Published var hasSubmitted = false
+    @Published var isResetting = false
     
     // 의존 서비스
     private let service: KakaoPlaceSearchService
@@ -28,6 +29,18 @@ final class SearchManager: ObservableObject {
     func reset() {
         self.query = ""
         self.results = []
+        self.isLoading = false
+        self.errorMessage = nil
+        self.shouldShowSearchMode = false
+        self.hasSubmitted = false
+        self.isResetting = true
+           DispatchQueue.main.async { [weak self] in
+               self?.isResetting = false
+           }
+    }
+    
+    func placeReset() {
+        self.query = ""
         self.isLoading = false
         self.errorMessage = nil
         self.shouldShowSearchMode = false

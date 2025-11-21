@@ -5,124 +5,138 @@ struct RouteSuggestionView: View {
     @EnvironmentObject var coordinator: NavigationCoordinator
     @StateObject private var viewModel = BusRouteViewModel()
     @FocusState var isFocused: Bool
-    
+    @FocusState var isDestination: Bool
+
     var body: some View {
-        if viewModel.isSearchMode {
-            SearchModeSection(
-                query: Binding(get: { viewModel.query }, set: { viewModel.query = $0 }),
-                results: viewModel.results,
-                isFocused: $isFocused,
-                onBack: {
-                    viewModel.exitSearchMode()
-                    viewModel.isSearchMode = false
-                    isFocused = false
-                },
-                onSubmit: {
-                    viewModel.isSearchMode = true
-                    isFocused = false
-                    Task { await viewModel.performSearch() }
-                },
-                onClear: {
-                    viewModel.clearQuery()
-                    isFocused = true
-                },
-                onMicTap: {
-                    isFocused = false
-                    coordinator.push(.voiceSearch)
-                },
-                onSelect: { item in
-                    viewModel.selectPlace(item: item, locationType: viewModel.locationType)
-                    viewModel.isSearchMode = false
-                },
-                hasSubmitted: $viewModel.hasSubmitted,
-                isLoading: viewModel.isSearchLoading
-            )
-        } else {
-            ZStack {
-                Color.primarywhite
-                    .ignoresSafeArea()
-                
-                
-                VStack(spacing: 0) {
-                    // MARK: - 상단바
-                    VStack(spacing: 0) {
-                        TopBar(isMoving: false) { coordinator.popToRoot() }
-                            .padding(.horizontal, 8)
-                        
-                        VStack(spacing: 8) {
-                            OriginTextField(
-                                location: $viewModel.origin,
-                                isSearchMode: $viewModel.isSearchMode,
-                                locationType: $viewModel.locationType,
-                                userDidSelectOrigin: $viewModel.userDidSelectOrigin,
-                                isRefreshingLocation: $viewModel.isRefreshingLocation,
-                                onRefreshTapped: {
-                                    await viewModel.forceRefreshOrigin()
-                                }
-                            )
-                            
-                            DestinationTextField(
-                                location: $viewModel.destination,
-                                locationType: $viewModel.locationType,
-                                isSearchMode: $viewModel.isSearchMode
-                            )
+        ZStack {
+            EnablePopGesture()
+                .frame(width: 0, height: 0)
+
+            if viewModel.isSearchMode {
+                SearchModeSection(
+                    query: Binding(get: { viewModel.query }, set: { viewModel.query = $0 }),
+                    results: viewModel.results,
+                    isFocused: $isFocused,
+                    onBack: {
+                        viewModel.exitSearchMode()
+                        viewModel.isSearchMode = false
+                        isFocused = false
+                    },
+                    onSubmit: {
+                        viewModel.isSearchMode = true
+                        isFocused = false
+                        Task { await viewModel.performSearch() }
+                    },
+                    onClear: {
+                        viewModel.clearQuery()
+                        isFocused = true
+                    },
+                    onMicTap: {
+                        isFocused = false
+                        viewModel.handleMicTap()
+                    },
+                    onSelect: { item in
+                        viewModel.saveRecentSearch(item)
+                        viewModel.selectPlace(item: item, locationType: viewModel.locationType)
+                        viewModel.isSearchMode = false
+                    },
+                    onDelete: { item in
+                        viewModel.deleteRecentItem(item)
+                    },
+                    hasSubmitted: $viewModel.hasSubmitted,
+                    isPresented: $viewModel.showDestinationMap,
+                    isDestination: Binding(
+                        get: { viewModel.locationType == .destination },
+                        set: { newValue in
+                            viewModel.locationType = newValue ? .destination : .origin
                         }
-                        .padding(.horizontal, 22)
-                        .padding(.top, 8)
-                        .padding(.bottom, 16)
-                    }
-                    .frame(height: 166)
-                    
-                    LineDivider()
-                    
-                    ZStack {
-                        Color.background
-                            .ignoresSafeArea()
-                        
-                        // MARK: - 경로추천카드
-                        VStack(spacing:0) {
-                            
-                            RouteCardSlide(
-                                currentIndex: $viewModel.currentIndex,
-                                routes: $viewModel.routes,
-                                viewModel: viewModel
-                            )
-                            .padding(.horizontal, 44.wScaled)
-                            .padding(.top, 30.wScaled)
-                            .padding(.bottom, 17.wScaled)
-                            
-                            // MARK: - 버튼
-                            
-                            if viewModel.isLoading {
-                                Rectangle()
-                                    .fill(.subDisable)
-                                    .frame(width: 305.wScaled, height: 64)
-                                    .cornerRadius(20)
-                                
-                            } else {
-                                RouteSelectButton(
-                                    viewModel: viewModel,
-                                    currentIndex: $viewModel.currentIndex,
-                                    routes: viewModel.routes,
-                                    onSelect: {
-                                        viewModel.selectJourney(at: viewModel.currentIndex)
-                                        coordinator.push(.journeyFlow)
-                                    },
-                                    retrySearch: {
-                                        print(viewModel.errorMessage ?? "Unknown error")
-                                        coordinator.popToRoot() // MainSearch로 초기화
+                    ),
+                    isLoading: viewModel.isSearchLoading,
+                    store: viewModel.store
+                )
+            } else {
+                ZStack {
+                    Color.primarywhite
+                        .ignoresSafeArea()
+
+                    VStack(spacing: 0) {
+                        // MARK: - 상단바
+                        VStack(spacing: 8) {
+                            RouteTopBar()
+                                .padding(.horizontal, 20)
+
+                            VStack(spacing: 8) {
+                                OriginTextField(
+                                    location: $viewModel.origin,
+                                    isSearchMode: $viewModel.isSearchMode,
+                                    locationType: $viewModel.locationType,
+                                    userDidSelectOrigin: $viewModel.userDidSelectOrigin,
+                                    isRefreshingLocation: $viewModel.isRefreshingLocation,
+                                    onRefreshTapped: {
+                                        await viewModel.forceRefreshOrigin()
                                     }
                                 )
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 64)
+
+                                DestinationTextField(
+                                    location: $viewModel.destination,
+                                    locationType: $viewModel.locationType,
+                                    isSearchMode: $viewModel.isSearchMode
+                                )
+                            }
+                            .padding(.horizontal, 22)
+                            .padding(.top, 8)
+                            .padding(.bottom, 16)
+                        }
+                        .frame(height: 166)
+
+                        LineDivider()
+
+                        // 배경
+                        ZStack {
+                            Color.background
+                                .ignoresSafeArea()
+
+                            // MARK: - 경로 추천카드
+                            VStack(spacing: 0) {
+                                RouteCardSlide(
+                                    currentIndex: $viewModel.currentIndex,
+                                    routes: $viewModel.routes,
+                                    viewModel: viewModel
+                                )
+                                .padding(.horizontal, 44.wScaled)
+                                .padding(.top, 30.wScaled)
+                                .padding(.bottom, 17.wScaled)
+
+                                // MARK: - 검색 버튼
+                                if viewModel.isLoading {
+                                    Rectangle()
+                                        .fill(.subDisable)
+                                        .frame(width: 305.wScaled, height: 64)
+                                        .cornerRadius(20)
+                                } else {
+                                    RouteSelectButton(
+                                        viewModel: viewModel,
+                                        currentIndex: $viewModel.currentIndex,
+                                        routes: viewModel.routes,
+                                        onSelect: {
+                                            viewModel.selectJourney(at: viewModel.currentIndex)
+                                            coordinator.push(.journeyFlow)
+                                        },
+                                        retrySearch: {
+                                            print(viewModel.errorMessage ?? "Unknown error")
+                                            coordinator.popToRoot()
+                                        }
+                                    )
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 64)
+                                }
                             }
                         }
                     }
                 }
                 .onAppear {
-                    print("[DEBUG] onAppear")
                     if viewModel.isFirstLoad {
-                        viewModel.fetchFirstLoadedLocation()    // warm-up때 가져왔던 현위치 그대로 사용(단 한번만)
+                        viewModel.fetchFirstLoadedLocation()
                         if !viewModel.userDidSelectOrigin {
                             viewModel.requestOrigin()
                         }
@@ -133,27 +147,8 @@ struct RouteSuggestionView: View {
                         destination: viewModel.destination
                     )
                 }
-                //                .task {
-                //                    NotificationCenter.default.addObserver(
-                //                        forName: .didSetPresetDestination,
-                //                        object: nil,
-                //                        queue: .main
-                //                    ) { notification in
-                //                        if let destinationName = notification.object as? String {
-                //                            viewModel.query = destinationName
-                //                            isSearchMode = true
-                //                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                //                                isFocused = true
-                //                            }
-                //                            Task {
-                //                                await viewModel.search()
-                //                            }
-                //                        }
-                //                    }
-                //                }
                 .onChange(of: viewModel.origin) { _, newOrigin in
                     if !viewModel.isFirstLoad {
-                        print("[DEBUG] origin updated")
                         viewModel.validateAndFetchRoute(
                             origin: newOrigin,
                             destination: viewModel.destination
@@ -162,15 +157,13 @@ struct RouteSuggestionView: View {
                 }
                 .onChange(of: viewModel.destination) { _, newDestination in
                     if !viewModel.isFirstLoad {
-                        print("[DEBUG] destination updated")
                         viewModel.validateAndFetchRoute(
                             origin: viewModel.origin,
                             destination: newDestination
                         )
                     }
                 }
-                .onChange(of: viewModel.routes) { _, _ in
-                    print("[DEBUG] routes updated")
+                .onChange(of: viewModel.routes) { _ , _ in
                     viewModel.currentIndex = 0
                 }
             }

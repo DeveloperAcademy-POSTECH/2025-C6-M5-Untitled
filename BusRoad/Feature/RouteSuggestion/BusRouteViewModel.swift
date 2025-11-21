@@ -18,6 +18,9 @@ class BusRouteViewModel: ObservableObject {
     @Published var locationType: LocationType = .origin
     @Published var totalDistance: Double = 0.0
     
+    //버스 도착 시간 관련
+    @Published var arrivalText: String? = nil
+    
     // 에러 케이스 분류용
     @Published var errorMessage: String?
     
@@ -25,9 +28,11 @@ class BusRouteViewModel: ObservableObject {
     @Published var hasSubmitted: Bool = false
     @Published var isSearchMode = false
     @Published var isLoading: Bool = false
+    @Published var showDestinationMap: Bool = false
     @Published var isRefreshingLocation: Bool = false
     
     
+    let store = LocationStore()
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
     private let arrivalInfoManager: ArrivalInfoManager
@@ -304,6 +309,16 @@ class BusRouteViewModel: ObservableObject {
     func fetchFirstLoadedLocation() {
         journeyManager.useFirstLoadedLocation()
     }
+    
+    func saveRecentSearch(_ item: PlaceSummary) {
+        store.add(item)
+        print("[DEBUG] LocationStore에 최근검색어 저장: \(item.name)")
+    }
+    
+    func deleteRecentItem(_ item: PlaceSummary) {
+        store.remove(item)
+        print("[DEBUG] LocationStore에서 최근검색어 삭제: \(item.name)")
+    }
 }
 
 extension BusRouteViewModel {
@@ -382,6 +397,9 @@ extension BusRouteViewModel {
             arrivalText = "\(minutes)분 후"
         }
         
+        self.arrivalText = arrivalText
+        print("버스 도착 예정 시간 업데이트 완료")
+        
         let cleanedBusNo = cleanBusNumber(item.routeno)
         
         return (busNo: cleanedBusNo, arrivalText: arrivalText)
@@ -415,5 +433,29 @@ extension BusRouteViewModel {
         }
         
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+// MARK: - 음성 검색 관련 메서드들
+extension BusRouteViewModel {
+    /// 마이크 버튼 탭 → 풀스크린 뷰 열기
+    func handleMicTap() {
+        VoiceSearchManager.shared.present { [weak self] text in
+            self?.handleVoiceSearchCompleted(text)
+        }
+    }
+    
+    /// 음성 검색 완료 → 쿼리 반영 + 검색 실행
+    func handleVoiceSearchCompleted(_ text: String) {
+        query = text
+        isSearchMode = true
+        Task {
+            await search()
+        }
+    }
+    
+    /// 음성 검색 뷰에서 닫기
+    func dismissVoiceSearch() {
+        VoiceSearchManager.shared.dismiss()
     }
 }
