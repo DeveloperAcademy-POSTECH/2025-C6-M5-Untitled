@@ -25,6 +25,12 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     // MARK: - 내부 상태
     let loc = CLLocationManager()
     private var currentSegmentIndex: Int = 0
+    
+    // 현재 세그먼트 내에서의 진행률 (0.0 ~ 1.0)
+    private var currentSegmentProgress: Double = 0.0
+    // 현재 경로 선상에 투영된 좌표 (UI 표시 및 오차 계산용)
+    private var projectedLocation: CLLocationCoordinate2D?
+    
     var pendingDestination: CLLocationCoordinate2D?
     private var hasCalculatedRoute = false
     private var lastArrowBearing: CLLocationDirection = 0
@@ -37,13 +43,12 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     var tmapTotalDistance: Int = 0
     
     // 거리 임계값
-    private let stepSwitchDistance: CLLocationDistance = 15
     private var arrivalDistance: CLLocationDistance = 12
     private let offRouteThreshold: CLLocationDistance = 50
     
     // 오프루트 감지
     private var offRouteSince: Date? = nil
-    private let offRouteDebounce: TimeInterval = 5
+    private let offRouteDebounce: TimeInterval = 8 // 5초 -> 8초
     private var lastRecalcAt: Date = .distantPast
     private let recalcCooldown: TimeInterval = 60
     
@@ -52,17 +57,18 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private let gpsWarmupTime: TimeInterval = 5
     
     // 정확도 게이트
-    private let accuracyGate: CLLocationAccuracy = 50
+    private let accuracyGate: CLLocationAccuracy = 60
     
-    // 음성 안내
-    private var lastAnnouncedTurnIndex: Int = -1
-    private var currentAnnouncedTurnIndex: Int = -1  // 현재 안내 중인 회전 지점
-    private var hasPassed: Bool = false  // 안내한 지점을 통과했는지
-    private let turnAngleThreshold: Double = 30  // 30도로 설정
-    private let turnCompletionDistance: CLLocationDistance = 5  // 회전 완료 판단 거리
-    private let announcementDistance: CLLocationDistance = 17  // 25m 이내에서만 안내
+    // 음성 안내 관련 변수
+    private var announcedTurnIndices: Set<Int> = []
+    private var lastAnnouncementTime: Date? = nil
+    private let announcementCooldown: TimeInterval = 4.0 // 안내 쿨타임 4초
+    
+    // 회전
+    private let turnAngleThreshold: Double = 30// 각도 30도
+    private let announcementDistance: CLLocationDistance = 20 // 20m 이내일 때만
     private let speechSynthesizer = AVSpeechSynthesizer()
-    private var hasAnnouncedStart: Bool = false // 시작 안내
+    private var hasAnnouncedStart: Bool = false
     
     // Journey Manager
     private let journeyManager: JourneyManager
@@ -121,13 +127,14 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
               let dest = pendingDestination else { return }
         
         currentSegmentIndex = 0
+        currentSegmentProgress = 0.0
         stopAllAnnouncements()
         isRerouting = true
         showRerouteAlert = false
         offRouteSince = nil
         lastRecalcAt = Date()
-        currentAnnouncedTurnIndex = -1
-        hasPassed = false
+        announcedTurnIndices.removeAll() // 재탐색 시 안내 기록 초기화
+        lastAnnouncementTime = nil
         
         calculateRoute(origin: origin, dest: dest)
     }
@@ -137,15 +144,12 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         showRerouteAlert = false
         lastRecalcAt = Date()
         offRouteSince = nil
-        currentAnnouncedTurnIndex = -1
-        hasPassed = false
     }
     
     func deferRealert(seconds: TimeInterval = 90) {
         lastRecalcAt = Date()
         offRouteSince = nil
     }
-    
     
     // 음성 중단
     func stopAllAnnouncements() {
@@ -157,16 +161,18 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             }
         }
     }
+    
     // MARK: - Private Methods
     private func resetRouteState() {
         tmapCoordinates = []
         tmapTotalDistance = 0
         currentSegmentIndex = 0
+        currentSegmentProgress = 0.0
+        projectedLocation = nil
         hasCalculatedRoute = false
-        lastAnnouncedTurnIndex = -1
-        currentAnnouncedTurnIndex = -1
-        hasPassed = false
+        announcedTurnIndices.removeAll() // 초기화
         hasAnnouncedStart = false
+        lastAnnouncementTime = nil
         
         if !isRerouting {
             arrived = false
@@ -232,16 +238,8 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         
         self.tmapCoordinates = allCoordinates
         self.currentSegmentIndex = 0
+        self.currentSegmentProgress = 0.0
         print("📍 좌표 \(allCoordinates.count)개 수집 완료")
-        print("좌표\(allCoordinates)")
-        print("🗺️ === TMAP 안내 정보 ===")
-        for (index, feature) in tmapResponse.features.enumerated() {
-            if let desc = feature.properties.index,
-               let dist = feature.properties.distance {
-                print("[\(index)] \(desc) - \(dist)m")
-            }
-        }
-        print("========================")
         
         var cards: [String] = []
         for feature in tmapResponse.features {
@@ -270,17 +268,16 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - 안내 시작음
     func tryAnnounceStart() {
-            guard !hasAnnouncedStart,
-                  isRouteApplied,
-                  finishedOnboarding,
-                  !isRerouting else {
-                return
-            }
-            
-            // 모든 조건 충족 시 안내
-            announceStart()
-            hasAnnouncedStart = true
+        guard !hasAnnouncedStart,
+              isRouteApplied,
+              finishedOnboarding,
+              !isRerouting else {
+            return
         }
+        
+        announceStart()
+        hasAnnouncedStart = true
+    }
     
     // MARK: - Apple Maps Fallback
     private func fallbackToAppleMaps(origin: CLLocationCoordinate2D, dest: CLLocationCoordinate2D) {
@@ -365,107 +362,192 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     // MARK: - 핵심 업데이트 로직
     private func updateWithTmapRoute(location: CLLocation, heading: CLHeading?) {
         guard !manuallyArrived else { return }
-        guard !tmapCoordinates.isEmpty else {
+        guard tmapCoordinates.count >= 2 else {
             bigDistanceText = "-- m"
             return
         }
+        
         guard location.horizontalAccuracy > 0,
               location.horizontalAccuracy < accuracyGate else { return }
-        guard !isRerouting else { return }
-        guard finishedOnboarding else {return}
         
-        //재탐색 알림이나 도착알림 표시 중이면 음성안내 방지
+        guard !isRerouting else { return }
+        guard finishedOnboarding else { return }
+        
         guard !showRerouteAlert && !showAlert else { return }
         
-        // 구간 진행 - 점 뛰어넘기
-        advanceSegment(from: location) // 점 이동했는지 확인하고 업데이트하기
+        // 1. 선분 기반 위치 매칭
+        let matchingResult = updateCurrentSegment(location: location)
         
-        // 남은 거리
-        let remainDistance = calculateRemainDistance(from: location)
+        // 2. 남은 거리 계산
+        let remainDistance = calculateRemainDistance(
+            fromSegmentIndex: currentSegmentIndex,
+            progress: currentSegmentProgress,
+            projectedPoint: projectedLocation ?? location.coordinate
+        )
         bigDistanceText = "\(Int(remainDistance)) m"
         
-        // 도착 체크
+        // 3. 도착 체크
         if remainDistance < arrivalDistance && !arrived && !manuallyArrived && !isRerouting {
             stopAllAnnouncements()
             arrived = true
-            print("목적지 도착!")
+            print("🎉 목적지 도착!")
             ProgressLiveActivityManager.shared.updateWalkingActivity(newLeftDistance: 0)
         }
         
-        // 화살표 방향
-        if let nextCoord = findNextCoordinate(from: location),
-           let headingValue = heading?.trueHeading, headingValue >= 0 {
-            let targetBearing = bearing(from: location.coordinate, to: nextCoord)
-            let relative = (targetBearing - headingValue + 360)
-                .truncatingRemainder(dividingBy: 360)
+        // 4. 화살표 업데이트 (Look-Ahead)
+        if let lookAheadCoord = getLookAheadCoordinate(
+            from: currentSegmentIndex,
+            projectedT: currentSegmentProgress,
+            meters: 15.0
+        ), let headingValue = heading?.trueHeading, headingValue >= 0 {
+            
+            let targetBearing = bearing(from: location.coordinate, to: lookAheadCoord)
+            let relative = (targetBearing - headingValue + 360).truncatingRemainder(dividingBy: 360)
             updateArrowBearingSmooth(newBearing: relative)
         }
         
-        // 오프루트 감지
+        // 5. 오프루트 감지
         if !arrived {
-            checkOffRoute(location: location)
+            checkOffRoute(distanceFromPath: matchingResult.distance, accuracy: location.horizontalAccuracy)
         }
         
-        // 라이브 액티비티
+        // 6. 라이브 액티비티
         if !arrived {
             ProgressLiveActivityManager.shared.updateWalkingActivity(
                 newLeftDistance: remainDistance
             )
         }
         
-        //  음성 안내 - 거리 무관하게 체크
+        // 7. 음성 안내
         checkForUpcomingTurn(from: location)
     }
     
-    // MARK: - 점 뛰어넘기
-    private func advanceSegment(from location: CLLocation) {
+    // MARK: - 선분 투영 매칭 로직
+    private func updateCurrentSegment(location: CLLocation) -> (distance: CLLocationDistance, coordinate: CLLocationCoordinate2D) {
         
-        currentSegmentIndex = max(0, min(currentSegmentIndex, tmapCoordinates.count - 1))
-
-        let checkRange = min(10, tmapCoordinates.count - currentSegmentIndex - 1)
-        guard checkRange > 0 else { return }
-                
-        var closestIndex = currentSegmentIndex
-        var closestDistance = Double.greatestFiniteMagnitude
+        let searchStart = max(0, currentSegmentIndex - 2)
+        let searchEnd = min(tmapCoordinates.count - 2, currentSegmentIndex + 10)
         
-        // 현재부터 앞으로 10개 점까지 확인
-        for i in currentSegmentIndex..<min(currentSegmentIndex + checkRange, tmapCoordinates.count) {
-            let pointLocation = CLLocation(
-                latitude: tmapCoordinates[i].latitude,
-                longitude: tmapCoordinates[i].longitude
-            )
-            let distance = location.distance(from: pointLocation)
+        var bestIndex = currentSegmentIndex
+        var minProjDistance = Double.greatestFiniteMagnitude
+        var bestT: Double = 0.0
+        var bestCoordinate = tmapCoordinates[currentSegmentIndex]
+        
+        for i in searchStart...searchEnd {
+            let startNode = tmapCoordinates[i]
+            let endNode = tmapCoordinates[i+1]
             
-            if distance < closestDistance {
-                closestDistance = distance
-                closestIndex = i
+            let result = getProjectedPoint(
+                location: location.coordinate,
+                start: startNode,
+                end: endNode
+            )
+            
+            // 진행 방향 가중치
+            let progressWeight = (i < currentSegmentIndex) ? 5.0 : 0.0
+            let weightedDistance = result.distance + progressWeight
+            
+            if weightedDistance < minProjDistance {
+                minProjDistance = weightedDistance
+                bestIndex = i
+                bestT = result.t
+                bestCoordinate = result.coordinate
             }
         }
         
-        // 가장 가까운 점이 현재보다 앞에 있으면 그 점으로 이동
-        if closestIndex > currentSegmentIndex {
-            let jumped = closestIndex - currentSegmentIndex
-            print("구간 \(currentSegmentIndex) → \(closestIndex) (건너뛴 점: \(jumped)개, 거리: \(Int(closestDistance))m)")
-            currentSegmentIndex = closestIndex
+        // 너무 멀어지면 인덱스 업데이트 안함 (오프루트 처리를 위해)
+        if minProjDistance < offRouteThreshold + 20 {
+            self.currentSegmentIndex = bestIndex
+            self.currentSegmentProgress = bestT
+            self.projectedLocation = bestCoordinate
         }
-        // 아니면 기존처럼 다음 점만 체크
-        else if currentSegmentIndex < tmapCoordinates.count - 1 {
-            let nextPointIndex = currentSegmentIndex + 1
-            let nextPointLocation = CLLocation(
-                latitude: tmapCoordinates[nextPointIndex].latitude,
-                longitude: tmapCoordinates[nextPointIndex].longitude
-            )
-            let distanceToNext = location.distance(from: nextPointLocation)
+        
+        return (minProjDistance, bestCoordinate)
+    }
+    
+    // MARK: - 수학적 투영 계산
+    private func getProjectedPoint(
+        location: CLLocationCoordinate2D,
+        start: CLLocationCoordinate2D,
+        end: CLLocationCoordinate2D
+    ) -> (coordinate: CLLocationCoordinate2D, t: Double, distance: CLLocationDistance) {
+        
+        let p = MKMapPoint(location)
+        let a = MKMapPoint(start)
+        let b = MKMapPoint(end)
+        
+        let dx = b.x - a.x
+        let dy = b.y - a.y
+        
+        if dx == 0 && dy == 0 {
+            return (start, 0, location.distance(from: start))
+        }
+        
+        let t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)
+        let clampedT = max(0, min(1, t))
+        
+        let projX = a.x + clampedT * dx
+        let projY = a.y + clampedT * dy
+        let projectedMapPoint = MKMapPoint(x: projX, y: projY)
+        let projectedCoord = projectedMapPoint.coordinate
+        
+        let dist = location.distance(from: projectedCoord)
+        
+        return (projectedCoord, clampedT, dist)
+    }
+    
+    // MARK: - Look-Ahead 좌표 계산
+    private func getLookAheadCoordinate(
+        from currentIdx: Int,
+        projectedT: Double,
+        meters: Double
+    ) -> CLLocationCoordinate2D? {
+        
+        guard tmapCoordinates.count > 1 else { return nil }
+        
+        var remainingMeters = meters
+        
+        let currentStart = tmapCoordinates[currentIdx]
+        let nextIdx = min(currentIdx + 1, tmapCoordinates.count - 1)
+        let currentEnd = tmapCoordinates[nextIdx]
+        
+        let segDist = CLLocation(latitude: currentStart.latitude, longitude: currentStart.longitude)
+            .distance(from: CLLocation(latitude: currentEnd.latitude, longitude: currentEnd.longitude))
+        
+        let distOnCurrentSeg = segDist * (1.0 - projectedT)
+        
+        if distOnCurrentSeg > remainingMeters {
+            let newT = projectedT + (remainingMeters / segDist)
+            return interpolate(from: currentStart, to: currentEnd, t: newT)
+        }
+        
+        remainingMeters -= distOnCurrentSeg
+        
+        for i in (currentIdx + 1)..<(tmapCoordinates.count - 1) {
+            let start = tmapCoordinates[i]
+            let end = tmapCoordinates[i+1]
+            let dist = CLLocation(latitude: start.latitude, longitude: start.longitude)
+                .distance(from: CLLocation(latitude: end.latitude, longitude: end.longitude))
             
-            if distanceToNext < stepSwitchDistance {
-                currentSegmentIndex = nextPointIndex
-                print("구간 \(nextPointIndex) 통과")
+            if dist > remainingMeters {
+                let t = remainingMeters / dist
+                return interpolate(from: start, to: end, t: t)
             }
+            
+            remainingMeters -= dist
         }
+        
+        return tmapCoordinates.last
+    }
+    
+    private func interpolate(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D, t: Double) -> CLLocationCoordinate2D {
+        let lat = from.latitude + (to.latitude - from.latitude) * t
+        let lon = from.longitude + (to.longitude - from.longitude) * t
+        return CLLocationCoordinate2D(latitude: lat, longitude: lon)
     }
     
     // MARK: - 오프루트 감지
-    private func checkOffRoute(location: CLLocation) {
+    private func checkOffRoute(distanceFromPath: CLLocationDistance, accuracy: CLLocationAccuracy) {
         
         if firstLocationTime == nil {
             firstLocationTime = Date()
@@ -475,39 +557,21 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             return
         }
         
-        guard location.horizontalAccuracy < 20 else { return }
-        guard !tmapCoordinates.isEmpty else { return }
+        // [수정] GPS 정확도가 매우 나쁘면(30m 이상 오차) 경로 이탈 판정 보류 (안정성 확보)
+        if accuracy > 30 { return }
         
         if let dest = pendingDestination {
-            let destLocation = CLLocation(latitude: dest.latitude, longitude: dest.longitude)
-            let distToDest = location.distance(from: destLocation)
-            if distToDest < 20 {
-                return
-            }
+            let lastPoint = tmapCoordinates.last ?? dest
+            let distToDest = CLLocation(latitude: lastPoint.latitude, longitude: lastPoint.longitude)
+                .distance(from: CLLocation(latitude: projectedLocation?.latitude ?? lastPoint.latitude, longitude: projectedLocation?.longitude ?? lastPoint.longitude))
+            
+            if distToDest < 12 { return }
         }
         
-        var minDistance = Double.greatestFiniteMagnitude
-        
-        let checkStart = max(0, min(currentSegmentIndex - 5, tmapCoordinates.count - 1))
-        let checkEnd = min(tmapCoordinates.count - 1, max(0, currentSegmentIndex + 10))
-        
-        guard checkStart <= checkEnd else { return }
-        
-        for i in checkStart...checkEnd {
-            let point = CLLocation(
-                latitude: tmapCoordinates[i].latitude,
-                longitude: tmapCoordinates[i].longitude
-            )
-            let distance = location.distance(from: point)
-            minDistance = min(minDistance, distance)
-        }
-        
-        let effectiveThreshold = offRouteThreshold + location.horizontalAccuracy
-        
-        if minDistance > effectiveThreshold {
+        if distanceFromPath > offRouteThreshold {
             if offRouteSince == nil {
                 offRouteSince = Date()
-                print("⚠️ 경로 이탈 감지 시작: \(Int(minDistance))m")
+                print("⚠️ 경로 이탈 감지 시작: \(Int(distanceFromPath))m")
             } else if let since = offRouteSince {
                 let elapsed = Date().timeIntervalSince(since)
                 let canShowAlert = Date().timeIntervalSince(lastRecalcAt) > recalcCooldown
@@ -521,174 +585,213 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             }
         } else {
             if offRouteSince != nil {
-                print("✅ 경로로 복귀: \(Int(minDistance))m")
+                print("✅ 경로로 복귀")
                 offRouteSince = nil
             }
         }
     }
     
-    // MARK: - 음성 안내 (25m 이내, 한 번만)
+    // MARK: - 음성 안내
     private func checkForUpcomingTurn(from location: CLLocation) {
-        
         guard !showRerouteAlert && !showAlert else {
-                stopAllAnnouncements()
-                return
-            }
-        
-        guard tmapCoordinates.count >= 2 else { return }  // 좌표 최소 2개
-        guard currentSegmentIndex < tmapCoordinates.count - 1 else { return }  // 완전히 마지막이면 중단
-        
-        
-        if let startTime = navigationStartTime,
-           Date().timeIntervalSince(startTime) < 5 {
+            stopAllAnnouncements()
             return
         }
         
+        guard tmapCoordinates.count >= 2 else { return }
         
-        // 현재 안내 중인 회전이 있는지 체크
-        if currentAnnouncedTurnIndex >= 0 {
-            let announcedPoint = CLLocation(
-                latitude: tmapCoordinates[currentAnnouncedTurnIndex].latitude,
-                longitude: tmapCoordinates[currentAnnouncedTurnIndex].longitude
-            )
-            let distToAnnounced = location.distance(from: announcedPoint)
-            
-            // 통과 체크
-            if distToAnnounced < turnCompletionDistance && !hasPassed {
-                hasPassed = true
-                print("회전 지점(\(currentAnnouncedTurnIndex)) 통과 감지")
-            }
-            
-            // 회전 완료 판단
-            if hasPassed && (currentSegmentIndex > currentAnnouncedTurnIndex + 3 ||
-                             distToAnnounced > 20) {
-                print("회전 완료! 다음 안내 준비")
-                currentAnnouncedTurnIndex = -1
-                hasPassed = false
-            } else {
-                return  // 아직 회전 중
+        // 시작 안내 직후 3초간 침묵
+        if let startTime = navigationStartTime, Date().timeIntervalSince(startTime) < 3.0 {
+            return
+        }
+        
+        // 시간 기반 디바운스
+        if let lastTime = lastAnnouncementTime {
+            let elapsed = Date().timeIntervalSince(lastTime)
+            if elapsed < announcementCooldown {
+                return
             }
         }
         
-        // 새로운 회전 찾기 - 25m 이내만 체크
-        let searchStart = currentSegmentIndex + 1
-        let searchEnd = min(currentSegmentIndex + 15, tmapCoordinates.count - 1)
+        // 도착 임박 시 안내 차단
+        let remainingDist = calculateRemainDistance(
+            fromSegmentIndex: currentSegmentIndex,
+            progress: currentSegmentProgress,
+            projectedPoint: projectedLocation ?? location.coordinate
+        )
         
-        // 검색 범위 유효성 확인
+        if remainingDist < 10 {
+            return
+        }
+        
+        // 지나간 인덱스 정리 (루프 전에 한 번만 실행)
+        announcedTurnIndices = announcedTurnIndices.filter { $0 > currentSegmentIndex }
+        
+        // 누적 거리 기반 탐색
+        let maxLookAheadDistance: CLLocationDistance = 20.0
+        var accumulatedDistance: CLLocationDistance = 0.0
+        
+        let searchStart = currentSegmentIndex + 1
+        let searchEnd = min(currentSegmentIndex + 30, tmapCoordinates.count - 1)
+        
         guard searchStart < searchEnd else { return }
         
+        // 현재 세그먼트의 남은 부분부터 거리 계산 시작
+        if currentSegmentIndex < tmapCoordinates.count - 1 {
+            let segStart = CLLocation(
+                latitude: tmapCoordinates[currentSegmentIndex].latitude,
+                longitude: tmapCoordinates[currentSegmentIndex].longitude
+            )
+            let segEnd = CLLocation(
+                latitude: tmapCoordinates[currentSegmentIndex + 1].latitude,
+                longitude: tmapCoordinates[currentSegmentIndex + 1].longitude
+            )
+            let segmentLength = segStart.distance(from: segEnd)
+            accumulatedDistance = segmentLength * (1.0 - currentSegmentProgress)
+        }
+        
+        // 다음 노드들을 누적 거리 20m까지만 검사
         for i in searchStart..<searchEnd {
-            // 이미 안내한 회전은 스킵
-            if i <= lastAnnouncedTurnIndex {
+            // 20m 초과하면 더 이상 검사 안 함
+            if accumulatedDistance > maxLookAheadDistance {
+                break
+            }
+            
+            // 이미 안내한 노드 패스
+            if announcedTurnIndices.contains(i) {
+                // 다음 노드로의 거리는 누적에 추가
+                if i < tmapCoordinates.count - 1 {
+                    let curr = CLLocation(
+                        latitude: tmapCoordinates[i].latitude,
+                        longitude: tmapCoordinates[i].longitude
+                    )
+                    let next = CLLocation(
+                        latitude: tmapCoordinates[i + 1].latitude,
+                        longitude: tmapCoordinates[i + 1].longitude
+                    )
+                    accumulatedDistance += curr.distance(from: next)
+                }
                 continue
             }
             
+            // 현재 위치에서 해당 노드까지의 직선 거리
             let checkPoint = CLLocation(
                 latitude: tmapCoordinates[i].latitude,
                 longitude: tmapCoordinates[i].longitude
             )
             let distToPoint = location.distance(from: checkPoint)
             
-            // 미터 이내에서만 한 번만 안내
+            // 20m 이내일 때만 회전 감지 시도
             if distToPoint <= announcementDistance && finishedOnboarding {
+                
+                // 회전 감지
                 if let turn = detectTurn(at: i) {
-                    currentAnnouncedTurnIndex = i
-                    lastAnnouncedTurnIndex = i
-                    hasPassed = false
-                    announceTurn(turn, distance: Int(distToPoint))
-                    print("🔊 회전 안내: index \(i), 거리 \(Int(distToPoint))m")
+                    print("🔍 [회전 감지] 인덱스 \(i), 거리 \(Int(distToPoint))m, 누적거리 \(Int(accumulatedDistance))m, 방향: \(turn.korean)")
+                    
+                    let text = "잠시 후 \(turn.korean)입니다"
+                    announceTurnText(text)
+                    markConsecutiveTurns(from: i, direction: turn)
+                    
+                    // 안내 완료 기록
+                    announcedTurnIndices.insert(i)
+                    lastAnnouncementTime = Date()
+                    
                     return
                 }
+            }
+            
+            // 다음 노드로의 거리를 누적에 추가
+            if i < tmapCoordinates.count - 1 {
+                let curr = CLLocation(
+                    latitude: tmapCoordinates[i].latitude,
+                    longitude: tmapCoordinates[i].longitude
+                )
+                let next = CLLocation(
+                    latitude: tmapCoordinates[i + 1].latitude,
+                    longitude: tmapCoordinates[i + 1].longitude
+                )
+                accumulatedDistance += curr.distance(from: next)
             }
         }
     }
     
+    // 연속된 같은 방향 회전을 모두 기록
+    private func markConsecutiveTurns(from startIndex: Int, direction: TurnDirection) {
+        let searchStart = max(1, startIndex - 2)
+        let searchEnd = min(tmapCoordinates.count - 2, startIndex + 2)
+        
+        for i in searchStart...searchEnd {
+            if i == startIndex {
+                continue
+            }
+            
+            if let turn = detectTurn(at: i), turn == direction {
+                announcedTurnIndices.insert(i)
+                print("  └─ 연속 회전 노드 \(i)도 기록")
+            }
+        }
+    }
     
+    // 회전 감지 로직
     private func detectTurn(at index: Int) -> TurnDirection? {
-        // 기본 범위 체크
         guard index > 0 && index < tmapCoordinates.count - 1 else { return nil }
         
-        // 실제 거리 기반으로 lookback/lookahead 계산
-        let targetDistance: CLLocationDistance = 15  // 15m 전후로 확인
+        let vectorLength: CLLocationDistance = 10 // 최소 10m 거리 확보
         
-        // before 방향 포인트 찾기
         var beforeIndex = index
         var beforeDist: CLLocationDistance = 0
         for i in stride(from: index - 1, through: max(0, index - 10), by: -1) {
-            // 배열 범위 확인
             guard i >= 0 && i + 1 < tmapCoordinates.count else { break }
-            
-            let p1 = CLLocation(
-                latitude: tmapCoordinates[i].latitude,
-                longitude: tmapCoordinates[i].longitude
-            )
-            let p2 = CLLocation(
-                latitude: tmapCoordinates[i + 1].latitude,
-                longitude: tmapCoordinates[i + 1].longitude
-            )
+            let p1 = CLLocation(latitude: tmapCoordinates[i].latitude, longitude: tmapCoordinates[i].longitude)
+            let p2 = CLLocation(latitude: tmapCoordinates[i+1].latitude, longitude: tmapCoordinates[i+1].longitude)
             beforeDist += p1.distance(from: p2)
-            if beforeDist >= targetDistance {
+            if beforeDist >= vectorLength {
                 beforeIndex = i
                 break
             }
         }
         
-        // after 방향 포인트 찾기
         var afterIndex = index
         var afterDist: CLLocationDistance = 0
         for i in index..<min(index + 10, tmapCoordinates.count - 1) {
-            // 배열 범위 확인
             guard i >= 0 && i + 1 < tmapCoordinates.count else { break }
-            
-            let p1 = CLLocation(
-                latitude: tmapCoordinates[i].latitude,
-                longitude: tmapCoordinates[i].longitude
-            )
-            let p2 = CLLocation(
-                latitude: tmapCoordinates[i + 1].latitude,
-                longitude: tmapCoordinates[i + 1].longitude
-            )
+            let p1 = CLLocation(latitude: tmapCoordinates[i].latitude, longitude: tmapCoordinates[i].longitude)
+            let p2 = CLLocation(latitude: tmapCoordinates[i+1].latitude, longitude: tmapCoordinates[i+1].longitude)
             afterDist += p1.distance(from: p2)
-            if afterDist >= targetDistance {
+            if afterDist >= vectorLength {
                 afterIndex = i + 1
                 break
             }
         }
         
-        // 최종 범위 확인
-        guard beforeIndex >= 0 && beforeIndex < tmapCoordinates.count,
-              afterIndex >= 0 && afterIndex < tmapCoordinates.count else {
-            return nil
-        }
+        guard beforeIndex >= 0 && afterIndex < tmapCoordinates.count else { return nil }
         
         let p1 = tmapCoordinates[beforeIndex]
-        let p2 = tmapCoordinates[index]
+        let pCenter = tmapCoordinates[index]
         let p3 = tmapCoordinates[afterIndex]
         
-        let bearing1 = bearing(from: p1, to: p2)
-        let bearing2 = bearing(from: p2, to: p3)
+        let bearing1 = bearing(from: p1, to: pCenter)
+        let bearing2 = bearing(from: pCenter, to: p3)
         
         var angleDiff = bearing2 - bearing1
-        
         if angleDiff > 180 { angleDiff -= 360 }
         if angleDiff < -180 { angleDiff += 360 }
         
         if abs(angleDiff) > turnAngleThreshold {
-            print("🔄 회전 감지: \(Int(angleDiff))도 at index \(index) (before: \(beforeIndex), after: \(afterIndex))")
             return angleDiff > 0 ? .right : .left
         }
         
         return nil
     }
     
-    private func announceTurn(_ direction: TurnDirection, distance: Int) {
-        // 이전 음성 중단
+    // MARK: - 안내 실행
+    private func announceTurnText(_ text: String) {
+        // 이미 말하고 있으면 끊고 새로 말함 (긴급성)
         if speechSynthesizer.isSpeaking {
             speechSynthesizer.stopSpeaking(at: .immediate)
         }
+        
         AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
-        let text = "잠시 후 \(direction.korean) 입니다"
-//        let text = "\(distance)미터 앞 \(direction.korean) 입니다"
         
         let utterance = AVSpeechUtterance(string: text)
         utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
@@ -696,48 +799,47 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         utterance.volume = 1.0
         
         speechSynthesizer.speak(utterance)
-        
         print("🔊 음성 안내: \(text)")
     }
     
+    // MARK: - 시작 안내
     private func announceStart() {
-        
         navigationStartTime = Date()
+        AudioServicesPlayAlertSound(1110)
         
-        AudioServicesPlayAlertSound(1110) // 1110
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
             guard let self = self else { return }
-                        
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                let text = "도보 길 안내를 시작합니다"
-                
-                let utterance = AVSpeechUtterance(string: text)
-                utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
-                utterance.rate = 0.5
-                utterance.volume = 1.0
-                
-                self.speechSynthesizer.speak(utterance)
-                
-                print("🔊 시작 안내: \(text)")
+            
+            if self.speechSynthesizer.isSpeaking {
+                return
             }
+            
+            let text = "도보 길 안내를 시작합니다"
+            
+            let utterance = AVSpeechUtterance(string: text)
+            utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
+            utterance.rate = 0.5
+            utterance.volume = 1.0
+            
+            self.speechSynthesizer.speak(utterance)
+            print("🔊 시작 안내: \(text)")
         }
     }
     
     // MARK: - 거리 계산
-    private func calculateRemainDistance(from userLocation: CLLocation) -> CLLocationDistance {
+    private func calculateRemainDistance(
+        fromSegmentIndex index: Int,
+        progress: Double,
+        projectedPoint: CLLocationCoordinate2D
+    ) -> CLLocationDistance {
         guard !tmapCoordinates.isEmpty else { return 0 }
-        guard currentSegmentIndex < tmapCoordinates.count else { return 0 }
+        guard index < tmapCoordinates.count - 1 else { return 0 }
         
-        let targetIndex = min(currentSegmentIndex + 1, tmapCoordinates.count - 1)
+        let endOfSegment = CLLocation(latitude: tmapCoordinates[index+1].latitude, longitude: tmapCoordinates[index+1].longitude)
+        let currentLoc = CLLocation(latitude: projectedPoint.latitude, longitude: projectedPoint.longitude)
+        var remainingDistance = currentLoc.distance(from: endOfSegment)
         
-        let targetLocation = CLLocation(
-            latitude: tmapCoordinates[targetIndex].latitude,
-            longitude: tmapCoordinates[targetIndex].longitude
-        )
-        var remainingDistance = userLocation.distance(from: targetLocation)
-        
-        for i in targetIndex..<(tmapCoordinates.count - 1) {
+        for i in (index + 1)..<(tmapCoordinates.count - 1) {
             let from = CLLocation(
                 latitude: tmapCoordinates[i].latitude,
                 longitude: tmapCoordinates[i].longitude
@@ -752,28 +854,6 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         return remainingDistance
     }
     
-    // MARK: - 다음 좌표 찾기
-    private func findNextCoordinate(from userLocation: CLLocation) -> CLLocationCoordinate2D? {
-        guard !tmapCoordinates.isEmpty else { return nil }
-        
-        let minTargetDistance: CLLocationDistance = 15  // 15m로 변경
-        let searchStartIndex = min(currentSegmentIndex + 1, tmapCoordinates.count - 1)
-        
-        for i in searchStartIndex..<tmapCoordinates.count {
-            let nextLocation = CLLocation(
-                latitude: tmapCoordinates[i].latitude,
-                longitude: tmapCoordinates[i].longitude
-            )
-            let distance = userLocation.distance(from: nextLocation)
-            
-            if distance >= minTargetDistance {
-                return tmapCoordinates[i]
-            }
-        }
-        
-        return tmapCoordinates.last
-    }
-    
     // MARK: - Bearing 계산
     private func bearing(from: CLLocationCoordinate2D, to: CLLocationCoordinate2D) -> CLLocationDirection {
         let φ1 = from.latitude * .pi/180, φ2 = to.latitude * .pi/180
@@ -786,52 +866,34 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - 화살표 부드럽게 업데이트
     private func updateArrowBearingSmooth(newBearing: CLLocationDirection) {
-        // 처음이면 바로 설정
         if lastArrowBearing == 0 {
             arrowBearing = newBearing
             lastArrowBearing = newBearing
             return
         }
         
-        // 각도 차이 계산
         var diff = newBearing - lastArrowBearing
+        if diff > 180 { diff -= 360 }
+        else if diff < -180 { diff += 360 }
         
-        // 360도 넘어가는 경우 처리
-        if diff > 180 {
-            diff -= 360
-        } else if diff < -180 {
-            diff += 360
-        }
-        
-        let absDiff = abs(diff)
-        
-        // 10도 이하 변화는 무시
-        if absDiff < arrowBearingThreshold {
+        if abs(diff) < arrowBearingThreshold {
             return
         }
         
-        // 10도 이상 변화만 업데이트
-//        withAnimation(.easeInOut(duration: 0.3)) {
-            arrowBearing = newBearing
-//        }
+        arrowBearing = newBearing
         lastArrowBearing = newBearing
     }
-    
     
     private func configureAudioSession() {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            
             try audioSession.setCategory(
                 .playback,
                 mode: .spokenAudio,
                 options: [.duckOthers, .mixWithOthers]
             )
-            
             try audioSession.setActive(true)
-            
             print("✅ 오디오 세션 설정 완료")
-            
         } catch {
             print("❌ 오디오 세션 설정 실패: \(error.localizedDescription)")
         }
@@ -839,7 +901,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
 }
 
 // MARK: - TurnDirection
-enum TurnDirection {
+enum TurnDirection: Equatable {
     case left, right
     
     var korean: String {
@@ -847,5 +909,14 @@ enum TurnDirection {
         case .left: return "좌회전"
         case .right: return "우회전"
         }
+    }
+}
+
+// 거리 계산용 Extension
+extension CLLocationCoordinate2D {
+    func distance(from other: CLLocationCoordinate2D) -> CLLocationDistance {
+        let loc1 = CLLocation(latitude: self.latitude, longitude: self.longitude)
+        let loc2 = CLLocation(latitude: other.latitude, longitude: other.longitude)
+        return loc1.distance(from: loc2)
     }
 }
