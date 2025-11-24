@@ -320,7 +320,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             
             if self.isRerouting {
                 self.isRerouting = false
-                if self.tmapTotalDistance < 10 {
+                if self.tmapTotalDistance < 20 {
                     self.arrived = true
                     self.manuallyArrived = true
                 }
