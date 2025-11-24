@@ -44,6 +44,23 @@ struct OnRideView: View {
                         .padding(.horizontal, 24.wScaled)
                         .padding(.top, 28.wScaled)
                         .padding(.bottom, 30.wScaled)
+                        //MARK: - 시연용 버튼 
+                        .overlay(alignment: .topTrailing) {
+                                Button {
+                                    proximityManager.simulateOneStopBefore()
+                                } label: {
+                                    Text("1정류장 전")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(proximityManager.canAlight ? .primaryStrong : .primarywhite)
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 12)
+//                                        .background(Color.orange.opacity(0.9))
+                                        .cornerRadius(8)
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.trailing, 16)
+                                .padding(.top, 60)
+                            }
                         
                         // 버튼 영역
                         if proximityManager.canAlight {

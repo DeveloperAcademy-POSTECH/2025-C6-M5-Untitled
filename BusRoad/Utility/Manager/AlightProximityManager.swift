@@ -1,5 +1,4 @@
 import Foundation
-//import UIKit
 import CoreLocation
 import Combine
 
@@ -275,10 +274,8 @@ final class AlightProximityManager: ObservableObject {
         
         if shouldAnnounce {
             if remainingStations == 2 {
-//                playHapticFeedback()
                 voiceManager.announceTwoStations()
             } else if remainingStations == 1 {
-//                playHapticFeedback()
                 voiceManager.announceOneStation()
             }
         }
@@ -453,10 +450,19 @@ final class AlightProximityManager: ObservableObject {
         stationProximityState.removeAll()
     }
     
-//    private func playHapticFeedback() {
-//        let generator = UINotificationFeedbackGenerator()
-//        generator.notificationOccurred(.warning)
-//    }
+    // MARK: - 시연용
+    func simulateOneStopBefore() {
+        remainingStations = 1
+        canAlight = true
+        progress = 0.9
+        
+        // 하차 알림 직접 호출
+        if shouldAnnounce {
+            voiceManager.announceOneStation()
+        }
+        
+        ProgressLiveActivityManager.shared.forceUpdateForDemo(busProgress: 0.9, remainingStops: 1)
+    }
 }
 
 // MARK: - 배열 safe 인덱스
