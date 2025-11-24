@@ -36,6 +36,7 @@ struct DevRouteMapView: View {
     
     var body: some View {
         Map(position: $camera) {
+            
             // 1) 경로
             if !tmapCoordinates.isEmpty {
                 MapPolyline(coordinates: tmapCoordinates)
@@ -105,17 +106,17 @@ struct DevRouteMapView: View {
         
         // --- (1) 유저가 첫 번째 좌표 근처라면: 첫 번째 → 두 번째로 방향 설정 ---
         if tmapCoordinates.count >= 2 {
-            let first = tmapCoordinates[0]
-            let second = tmapCoordinates[1]
+            let first = tmapCoordinates[1]
+            let second = tmapCoordinates[2]
             
             let userLoc = CLLocation(latitude: user.latitude, longitude: user.longitude)
             let firstLoc = CLLocation(latitude: first.latitude, longitude: first.longitude)
             
             // “근처” 판단 거리 (예: 15~20m)
-            if userLoc.distance(from: firstLoc) < 20 {
+            if userLoc.distance(from: firstLoc) < 40 {
                 let hdg = bearing(from: first, to: second)
                 camera = .camera(
-                    MapCamera(centerCoordinate: user,
+                    MapCamera(centerCoordinate: first,
                               distance: firstPersonDistance,
                               heading: hdg,
                               pitch: firstPersonPitch)
