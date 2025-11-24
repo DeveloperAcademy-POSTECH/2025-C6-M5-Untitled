@@ -108,7 +108,7 @@ struct RouteSelectButton: View {
             Button {
                 retrySearch()
             } label: {
-                Text("처음으로")
+                Text("다시 검색하기")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
                     .frame(width: 305.wScaled, height: 64)
