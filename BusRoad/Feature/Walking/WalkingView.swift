@@ -5,7 +5,6 @@ struct WalkingView: View {
     @ObservedObject var viewModel = WalkingViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @AppStorage("isFirstLaunching") var isFirstLaunching: Bool = true
-    @State private var showOnboarding: Bool = true // MARK: 시연용 온보딩
     
     var body: some View {
         ZStack {
@@ -187,26 +186,14 @@ struct WalkingView: View {
                         isPresented: $viewModel.showRerouteAlert,
                         viewModel: viewModel
                     )
-                    //MARK: - 시연용 온보딩
-                } else if let index = viewModel.journeyIndex,
-                          index == 0,
-                          showOnboarding {  // showOnboarding 체크 추가
+                } else if isFirstLaunching {
                     OnboardingView(
-                        isFirstLaunching: $showOnboarding,  // showOnboarding 바인딩
+                        isFirstLaunching: $isFirstLaunching,
                         viewModel: viewModel
                     )
                     .onAppear {
                         viewModel.finishedOnboarding.toggle()
                     }
-            
-//                } else if isFirstLaunching {
-//                    OnboardingView(
-//                        isFirstLaunching: $isFirstLaunching,
-//                        viewModel: viewModel
-//                    )
-//                    .onAppear {
-//                        viewModel.finishedOnboarding.toggle()
-//                    }
                 } else {
                     EmptyView()
                 }

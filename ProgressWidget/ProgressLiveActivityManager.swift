@@ -380,38 +380,5 @@ final class ProgressLiveActivityManager {
             print("Activity ended.")
         }
     }
-    
-    
-    //MARK: - 시연용
-    func forceUpdateForDemo(busProgress: Double, remainingStops: Int) {
-        updateQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            guard let activity = Activity<ProgressAttributes>.activities.first else {
-                print("[LiveActivity] 활성 액티비티 없음")
-                return
-            }
-            
-            Self.busProgress = busProgress
-            Self.remainingBusStops = remainingStops
-            
-            var updatedState = activity.content.state
-            updatedState.busProgress = busProgress
-            updatedState.currentProgressValue = busProgress
-            updatedState.maxProgressValue = busProgress  // 강제로 덮어쓰기
-            updatedState.remainingBusStops = remainingStops
-            updatedState.subDescription = Self.subDescription(
-                for: updatedState.stage,
-                leftDistance: updatedState.leftDistance,
-                remainingBusStops: remainingStops,
-                busTravelTime: updatedState.busTravelTime
-            )
-            
-            Task {
-                await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-                print("[시연용] 강제 업데이트 완료 - progress: \(busProgress), remaining: \(remainingStops)")
-            }
-        }
-    }
 }
 

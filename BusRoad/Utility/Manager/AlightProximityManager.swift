@@ -449,20 +449,6 @@ final class AlightProximityManager: ObservableObject {
         missedStationsCheck.removeAll()
         stationProximityState.removeAll()
     }
-    
-    // MARK: - 시연용
-    func simulateOneStopBefore() {
-        remainingStations = 1
-        canAlight = true
-        progress = 0.9
-        
-        // 하차 알림 직접 호출
-        if shouldAnnounce {
-            voiceManager.announceOneStation()
-        }
-        
-        ProgressLiveActivityManager.shared.forceUpdateForDemo(busProgress: 0.9, remainingStops: 1)
-    }
 }
 
 // MARK: - 배열 safe 인덱스
