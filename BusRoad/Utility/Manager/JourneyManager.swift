@@ -150,8 +150,6 @@ final class JourneyManager: ObservableObject {
             let startName = sub["startName"] as? String,
             let endName = sub["endName"] as? String,
             let lanes = sub["lane"] as? [[String: Any]],
-            let passStopList = sub["passStopList"] as? [String: Any],
-            let stations = passStopList["stations"] as? [[String: Any]],
             let travelTime = sub["sectionTime"] as? Int
         else {
             return nil
@@ -169,23 +167,45 @@ final class JourneyManager: ObservableObject {
             return nil
         }
         
+        // 정류장 리스트 파싱
+        let passStopList = sub["passStopList"] as? [String: Any]
+        let rawStations = passStopList?["stations"] as? [[String: Any]] ?? []
+        
+        
+        func toInt(_ value: Any?) -> Int? {
+            if let v = value as? Int { return v }
+            if let v = value as? String { return Int(v) }
+            return nil
+        }
+        
+        func toDouble(_ value: Any?) -> Double? {
+            if let v = value as? Double { return v }
+            if let v = value as? String { return Double(v) }
+            return nil
+        }
+        
+        func toString(_ value: Any?) -> String? {
+            if let v = value as? String { return v }
+            if let v = value as? Int { return String(v) }
+            return nil
+        }
+        
         // stations 정보 중 필요한 정보만 뽑아내기
-        let stationsInfo: [BusStation] = stations.compactMap { dict in
-            guard
-                let index = dict["index"] as? Int,
-                let stationId = dict["stationID"] as? Int,
-                let stationName = dict["stationName"] as? String,
-                let stationCityCode = dict["stationCityCode"] as? Int,
-                let arsId = dict["arsID"] as? String,
-                let xString = dict["x"] as? String,
-                let yString = dict["y"] as? String,
-                let longitude = Double(xString),
-                let latitude = Double(yString)
-            else {
-                return nil
-            }
+        let stationsInfo: [BusStation] = rawStations.compactMap { dict in
+                    // 필수값만 guard로 체크 (arsID는 뺌)
+                    guard
+                        let index = toInt(dict["index"]),
+                        let stationId = toInt(dict["stationID"]),
+                        let stationName = toString(dict["stationName"]),
+                        let stationCityCode = toInt(dict["stationCityCode"]),
+                        let x = toDouble(dict["x"]),
+                        let y = toDouble(dict["y"])
+                    else {
+                        return nil
+                    }
             
-            let localStationId = dict["localStationID"] as? String
+            let arsId = toString(dict["arsID"]) ?? ""
+            let localStationId = toString(dict["localStationID"])
             
             return BusStation(index: index,
                               stationId: stationId,
@@ -193,8 +213,8 @@ final class JourneyManager: ObservableObject {
                               stationCityCode: stationCityCode,
                               localStationId: localStationId,
                               nodeId: arsId,
-                              latitude: latitude,
-                              longitude: longitude
+                              latitude: y,
+                              longitude: x
             )
         }
         
@@ -211,24 +231,24 @@ final class JourneyManager: ObservableObject {
     private func cleanBusNumber(_ busNo: String) -> String {
         var result = busNo
         let pattern = #"\((?!\d+\))[^)]*\)"#
-          result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
-
-          // 공백 정리
-          result = result.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
-                         .trimmingCharacters(in: .whitespacesAndNewlines)
-
-          // 짝 불일치 괄호 제거
-          let opens  = result.filter { $0 == "(" }.count
-          let closes = result.filter { $0 == ")" }.count
-          if opens != closes {
-              // 짝이 안 맞으면 괄호 전부 제거
-              result.removeAll { $0 == "(" || $0 == ")" }
-          } else {
-              // 짝은 맞지만, 예: "100)" 처럼 여는 괄호가 전혀 없는데 닫는 괄호로 끝나는 경우 방지
-              if result.hasSuffix(")") && !result.contains("(") {
-                  result.removeLast()
-              }
-          }
+        result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
+        
+        // 공백 정리
+        result = result.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // 짝 불일치 괄호 제거
+        let opens  = result.filter { $0 == "(" }.count
+        let closes = result.filter { $0 == ")" }.count
+        if opens != closes {
+            // 짝이 안 맞으면 괄호 전부 제거
+            result.removeAll { $0 == "(" || $0 == ")" }
+        } else {
+            // 짝은 맞지만, 예: "100)" 처럼 여는 괄호가 전혀 없는데 닫는 괄호로 끝나는 경우 방지
+            if result.hasSuffix(")") && !result.contains("(") {
+                result.removeLast()
+            }
+        }
         
         // 숫자로 끝날 경우 "번" 추가
         if let lastChar = result.last, lastChar.isNumber {
