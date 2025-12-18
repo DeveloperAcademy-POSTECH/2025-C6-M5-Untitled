@@ -18,12 +18,13 @@ final class ProgressLiveActivityManager {
     
     private var currentActivity: Activity<ProgressAttributes>?
     private var maxProgress: Double = 0.0
-    private var isBusUpdating = false
     
     private var lastWalkingUpdateTime: Date = .distantPast
     private var lastBusProgressUpdateTime: Date = .distantPast
     private var pendingStageUpdate: (nextStage: String, nextDestination: String, totalDistance: Double, remainingBusStops: Int, busTravelTime: Int)?
     private var pendingRemainingBusStops: Int?
+    private var isBusProgressUpdating = false
+    private var isRemainingStopsUpdating = false
     
     private let updateQueue = DispatchQueue(label: "com.busroad.liveactivity.updateQueue")
     
@@ -293,26 +294,22 @@ final class ProgressLiveActivityManager {
     func updateRemainingBusStops(remaining: Int) {
         updateQueue.async { [weak self] in
             guard let self = self else { return }
-
-            let timestamp = Date().timeIntervalSince1970
-
-            // 이미 다른 업데이트 중이라면 pending으로 저장하고 return
-            if self.isBusUpdating {
-                print("[남은 정류장 \(String(format: "%.3f", timestamp))] 대기 중 - pendingRemainingBusStops에 저장")
+            
+            // 자기 자신의 플래그만 체크
+            guard !self.isRemainingStopsUpdating else {
                 self.pendingRemainingBusStops = remaining
                 return
             }
             
-            self.isBusUpdating = true
-
+            self.isRemainingStopsUpdating = true
+            
             guard let activity = Activity<ProgressAttributes>.activities.first else {
-                print("[LiveActivity] No active activity found for remaining bus stops update")
-                self.isBusUpdating = false
+                self.isRemainingStopsUpdating = false
                 return
             }
-
+            
             Self.remainingBusStops = remaining
-
+            
             var updatedState = activity.content.state
             updatedState.remainingBusStops = remaining
             updatedState.subDescription = Self.subDescription(
@@ -321,17 +318,15 @@ final class ProgressLiveActivityManager {
                 remainingBusStops: remaining,
                 busTravelTime: updatedState.busTravelTime
             )
-
+            
             Task {
                 await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-                print("[남은 정류장 \(String(format: "%.3f", timestamp))] Updated remaining bus stops: \(remaining)")
+                print("[남은 정류장] Updated: \(remaining)")
                 
-                self.isBusUpdating = false
+                self.isRemainingStopsUpdating = false
                 
-                // 대기 중이던 값 있으면 바로 재실행
                 if let pending = self.pendingRemainingBusStops {
                     self.pendingRemainingBusStops = nil
-                    print("[남은 정류장 \(String(format: "%.3f", timestamp))] pendingRemainingBusStops 재실행")
                     self.updateRemainingBusStops(remaining: pending)
                 }
             }
@@ -342,70 +337,48 @@ final class ProgressLiveActivityManager {
         updateQueue.async { [weak self] in
             guard let self = self else { return }
             
-            let timestamp = Date().timeIntervalSince1970
-            
-            // 1초 throttle을 먼저 체크 (isBusUpdating 전에)
             let now = Date()
             guard now.timeIntervalSince(self.lastBusProgressUpdateTime) >= 1.0 else {
-                print("[버스 진행률 \(String(format: "%.3f", timestamp))] throttle로 스킵")
                 return
             }
             
-            // 이미 업데이트 중이면 대기
-            guard !self.isBusUpdating else {
-                print("[버스 진행률 \(String(format: "%.3f", timestamp))] 이미 업데이트 중 - 스킵")
+            // 자기 자신의 플래그만 체크
+            guard !self.isBusProgressUpdating else {
                 return
             }
             
-            self.isBusUpdating = true
+            self.isBusProgressUpdating = true
             self.lastBusProgressUpdateTime = now
             
             guard let activity = Activity<ProgressAttributes>.activities.first else {
-                print("[LiveActivity] 버스 업데이트가 없습니다.")
-                self.isBusUpdating = false
+                self.isBusProgressUpdating = false
                 return
             }
             
             Self.busProgress = busProgress
             
-            let currentStage = activity.content.state.stage
-            let currentLeftDistance = activity.content.state.leftDistance
-            
-            let progressValue = ProgressLiveActivityManager.progress(
-                for: currentStage,
-                totalDistance: activity.content.state.totalDistance,
-                leftDistance: currentLeftDistance,
-                busProgess: busProgress,
-                remainingBusStops: activity.content.state.remainingBusStops
-            )
-            
             var updatedState = activity.content.state
             updatedState.busProgress = busProgress
-            updatedState.currentProgressValue = progressValue
-            updatedState.maxProgressValue = max(updatedState.maxProgressValue, progressValue)
+            updatedState.currentProgressValue = busProgress
+            updatedState.maxProgressValue = max(updatedState.maxProgressValue, busProgress)
             
             Task {
                 await activity.update(ActivityContent(state: updatedState, staleDate: nil))
-                print("[버스 진행률 \(String(format: "%.3f", timestamp))] 업데이트 완료. busProgress: \(busProgress), progressValue: \(progressValue)")
+                print("[버스 진행률] 업데이트 완료: \(busProgress)")
                 
-                self.isBusUpdating = false
-                
-                if let pending = self.pendingRemainingBusStops {
-                    self.pendingRemainingBusStops = nil
-                    self.updateRemainingBusStops(remaining: pending)
-                }
+                self.isBusProgressUpdating = false
             }
         }
     }
-        
-        func endActivity() {
-            Task {
-                for activity in Activity<ProgressAttributes>.activities {
-                    await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .after(Date().addingTimeInterval(3)))
-                }
-                currentActivity = nil
-                print("Activity ended.")
+    
+    func endActivity() {
+        Task {
+            for activity in Activity<ProgressAttributes>.activities {
+                await activity.end(ActivityContent(state: activity.content.state, staleDate: nil), dismissalPolicy: .after(Date().addingTimeInterval(3)))
             }
+            currentActivity = nil
+            print("Activity ended.")
         }
     }
+}
 
