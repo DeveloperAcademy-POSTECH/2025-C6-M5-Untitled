@@ -76,7 +76,9 @@ extension Font {
     static var premed12: Font {
         return .pre(type: .medium, size: 12)
     }
-    
+    static var premed14: Font {
+        return .pre(type: .medium, size: 14)
+    }
     static var prereg36: Font {
         return .pre(type: .regular, size: 36)
     }
