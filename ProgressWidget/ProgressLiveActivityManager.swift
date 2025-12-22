@@ -291,7 +291,7 @@ final class ProgressLiveActivityManager {
         print("[단계변경 \(String(format: "%.3f", timestamp))] 업데이트 성공 - 새 단계: \(nextStage), destination: \(nextDestination)")
     }
     
-    func updateRemainingBusStops(remaining: Int) {
+    func updateRemainingBusStops(remaining: Int, currentStage: String) {
         updateQueue.async { [weak self] in
             guard let self = self else { return }
             
@@ -312,6 +312,7 @@ final class ProgressLiveActivityManager {
             
             var updatedState = activity.content.state
             updatedState.remainingBusStops = remaining
+            updatedState.stage = currentStage
             updatedState.subDescription = Self.subDescription(
                 for: updatedState.stage,
                 leftDistance: updatedState.leftDistance,
@@ -327,13 +328,13 @@ final class ProgressLiveActivityManager {
                 
                 if let pending = self.pendingRemainingBusStops {
                     self.pendingRemainingBusStops = nil
-                    self.updateRemainingBusStops(remaining: pending)
+                    self.updateRemainingBusStops(remaining: pending, currentStage: currentStage)
                 }
             }
         }
     }
     
-    func updateBusProgress(busProgress: Double) {
+    func updateBusProgress(busProgress: Double, currentStage: String) {
         updateQueue.async { [weak self] in
             guard let self = self else { return }
             
@@ -358,6 +359,7 @@ final class ProgressLiveActivityManager {
             Self.busProgress = busProgress
             
             var updatedState = activity.content.state
+            updatedState.stage = currentStage
             updatedState.busProgress = busProgress
             updatedState.currentProgressValue = busProgress
             updatedState.maxProgressValue = max(updatedState.maxProgressValue, busProgress)

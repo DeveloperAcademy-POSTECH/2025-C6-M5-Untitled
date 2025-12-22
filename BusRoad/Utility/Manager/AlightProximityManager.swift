@@ -91,7 +91,7 @@ final class AlightProximityManager: ObservableObject {
         
         print("[AlightProximityManager] 구성 완료 / 정류장: \(stations.count), 다음 index: \(currentStationIndex), 남은: \(remainingStations)")
         
-        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
+        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations, currentStage: "onBus")
     }
     
     func setTagoContext(cityCode: Int, routeId: String, vehicleNo: String?) {
@@ -213,7 +213,7 @@ final class AlightProximityManager: ObservableObject {
                 progress = 1.0
                 hasArrived = true
                 Task {
-                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0)
+                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0, currentStage: "onBus" )
                 }
             }
             
@@ -263,7 +263,7 @@ final class AlightProximityManager: ObservableObject {
         missedStationsCheck.remove(index)
         
         Task {
-            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
+            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations, currentStage: "onBus")
         }
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)")
@@ -320,7 +320,7 @@ final class AlightProximityManager: ObservableObject {
         if newProgress > Double(progress) {
             progress = CGFloat(newProgress)
             Task {
-                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress)
+                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress, currentStage: "onBus")
             }
         }
     }
