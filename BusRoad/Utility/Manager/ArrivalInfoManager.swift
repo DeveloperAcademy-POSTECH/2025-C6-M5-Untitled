@@ -11,8 +11,6 @@ import Combine
 @MainActor
 final class ArrivalInfoManager: ObservableObject {
     static let shared = ArrivalInfoManager()
-    
-    private let busArrivalService: BusArrivalService
     private let voiceManager: VoiceAnnouncementManager
     private let busLocationService: BusLocationService
     private let locationService: LocationService
@@ -43,12 +41,10 @@ final class ArrivalInfoManager: ObservableObject {
     
     @MainActor
     private init(
-        busArrivalService: BusArrivalService? = nil,
         voiceManager: VoiceAnnouncementManager = .shared,
         busLocationService: BusLocationService = .shared,
         locationService: LocationService = .shared
     ) {
-        self.busArrivalService = busArrivalService ?? BusArrivalService()
         self.voiceManager = voiceManager
         self.busLocationService = busLocationService
         self.locationService = locationService
@@ -174,35 +170,77 @@ final class ArrivalInfoManager: ObservableObject {
         }
         
         lastCityCode = cityCode
+        let busService = BusServiceFactory.create(cityCode: cityCode)
         
         guard let firstStation = busRouteNode.stations.first else {
             print("[ArrivalInfoManager] 정류장 정보 없음")
             return (nil, false, nil)
         }
         
+        
+        var allArrivals: [BusArrivalItem] = []
+        
+        
+        
         do {
-            var nodeId = ""
-            if let local = firstStation.localStationId {
-                nodeId = local
-                print("[ArrivalInfoManager] localStationId 사용: \(nodeId)")
-            } else {
-                nodeId = try await busArrivalService.fetchNodeId(
-                    cityCode: cityCode,
-                    stationName: firstStation.stationName
-                )
-                print("[ArrivalInfoManager] nodeId 조회: \(nodeId)")
+            // 서울시 로직
+            if cityCode == 1000, let seoulService = busService as? SeoulBusService {
+
+                let stationName = firstStation.stationName
+                guard let stId = firstStation.localStationId else {
+                    print("[Manager] stId(localStationId) 없음 - 서울 도착조회 불가")
+                    return (nil, false, nil)
+                }
+
+                print("[Manager] stId 기반 검색: stId(\(stId)), 정류장(\(stationName)), 버스(\(busRouteNode.busNo))")
+
+                for targetBusNo in busRouteNode.busNo {
+                    let cleanedBusNo = cleanBusNumber(targetBusNo)
+
+                    if let info = BusDataManager.shared.findTargetRouteInfo(
+                        stId: stId,
+                        stationName: stationName,
+                        busName: cleanedBusNo
+                    ) {
+                        print("[Manager] 매칭 성공! API 호출: stId=\(info.stId), routeId=\(info.routeId), ord=\(info.ord)")
+
+                        let items = try await seoulService.fetchBusArrivalByRoute(
+                            stId: info.stId,
+                            busRouteId: info.routeId,
+                            ord: info.ord
+                        )
+                        allArrivals.append(contentsOf: items)
+
+                    } else {
+                        print("[Manager] CSV 매칭 실패: stId(\(stId)) bus(\(cleanedBusNo))")
+                    }
+                }
             }
             
-            let arrivals = try await busArrivalService.fetchBusArrivalInfo(
-                cityCode: cityCode,
-                nodeId: nodeId
-            )
+            else {
+                var nodeId = ""
+                if let local = firstStation.localStationId {
+                    nodeId = local
+                } else {
+                    nodeId = try await busService.fetchNodeId(
+                        cityCode: cityCode,
+                        stationName: firstStation.stationName,
+                        arsId: nil
+                    )
+                }
+                
+                allArrivals = try await busService.fetchBusArrivalInfo(
+                    cityCode: cityCode,
+                    nodeId: nodeId
+                )
+            }
             
-            let filtered = arrivals.filter { arrival in
+            // 필터링 및 결과 처리
+            let filtered = allArrivals.filter { arrival in
                 busRouteNode.busNo.contains(cleanBusNumber(arrival.routeno))
             }
             
-            print("[ArrivalInfoManager] 필터 후: \(filtered.map { "\(cleanBusNumber($0.routeno)) - \($0.arrtime)s" })")
+            print("[ArrivalInfoManager] 조회 결과: \(filtered.map { "\(cleanBusNumber($0.routeno)) - \($0.arrtime)s" })")
             
             if filtered.isEmpty {
                 if let lastItem = lastNearestItem {
@@ -424,6 +462,15 @@ final class ArrivalInfoManager: ObservableObject {
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
     
+    private func normalizeStationName(_ name: String) -> String {
+        name
+            .replacingOccurrences(of: #"\([^)]*\)"#, with: "", options: .regularExpression)
+            .replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    
+    
+    
     // MARK: - 도착 정보 요약
     
     func prepareRouteArrivalSummary(for busRouteNode: BusRouteNode) async -> BusArrivalItem? {
@@ -433,32 +480,54 @@ final class ArrivalInfoManager: ObservableObject {
             latitude: busLocation.latitude,
             longitude: busLocation.longitude
         ) else {
-            print("[ArrivalInfoManager] 도시코드 없음")
             return nil
         }
         
-        guard let station = busRouteNode.stations.first else {
-            print("[ArrivalInfoManager] 정류장 정보 없음")
-            return nil
-        }
+        let busService = BusServiceFactory.create(cityCode: cityCode)
+        guard let station = busRouteNode.stations.first else { return nil }
+        
+        var allArrivals: [BusArrivalItem] = []
         
         do {
-            let nodeId: String
-            if let local = station.localStationId {
-                nodeId = local
-            } else {
-                nodeId = try await busArrivalService.fetchNodeId(
+            if cityCode == 1000, let seoulService = busService as? SeoulBusService {
+                
+                let stationName = station.stationName
+                let stId = station.localStationId
+                
+                for targetBusNo in busRouteNode.busNo {
+                    if let info = BusDataManager.shared.findTargetRouteInfo(
+                        stId: stId,
+                        stationName: stationName,
+                        busName: targetBusNo
+                    ) {
+                        let items = try await seoulService.fetchBusArrivalByRoute(
+                            stId: info.stId,
+                            busRouteId: info.routeId,
+                            ord: info.ord
+                        )
+                        allArrivals.append(contentsOf: items)
+                    }
+                }
+            }
+            else {
+                var nodeId = ""
+                if let local = station.localStationId {
+                    nodeId = local
+                } else {
+                    nodeId = try await busService.fetchNodeId(
+                        cityCode: cityCode,
+                        stationName: station.stationName,
+                        arsId: nil
+                    )
+                }
+                
+                allArrivals = try await busService.fetchBusArrivalInfo(
                     cityCode: cityCode,
-                    stationName: station.stationName
+                    nodeId: nodeId
                 )
             }
             
-            let arrivals = try await busArrivalService.fetchBusArrivalInfo(
-                cityCode: cityCode,
-                nodeId: nodeId
-            )
-            
-            let filtered = arrivals.filter { arrival in
+            let filtered = allArrivals.filter { arrival in
                 busRouteNode.busNo.contains(cleanBusNumber(arrival.routeno))
             }
             
