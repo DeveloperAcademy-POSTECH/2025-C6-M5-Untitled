@@ -12,14 +12,19 @@ struct BusRoadApp: App {
     @StateObject var coordinator = NavigationCoordinator()
     @StateObject private var proximityManager = AlightProximityManager(
         locationService: LocationService.shared,
-            journeyManager: JourneyManager.shared,
-            voiceManager: VoiceAnnouncementManager()
-        )
+        journeyManager: JourneyManager.shared,
+        voiceManager: VoiceAnnouncementManager()
+    )
+    
+    init() {
+        _ = BusDataManager.shared
+    }
+    
     var body: some Scene {
         WindowGroup {
             AppNavigationView()
                 .environmentObject(coordinator)
-                .environmentObject(proximityManager) 
+                .environmentObject(proximityManager)
         }
     }
 }
