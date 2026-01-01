@@ -70,7 +70,7 @@ struct OnRideView: View {
                                             nextDestination: boardingStopName,
                                             totalDistance: 0,
                                             remainingBusStops: busNode.stations.count,
-                                            busTravelTime: busNode.travelTime
+                                            timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
                                         )
                                     }
                                     print("[DEBUG] OnRideView - 환승 waitingForBus 업데이트, destination: \(boardingStopName)")
@@ -84,7 +84,7 @@ struct OnRideView: View {
                                                 nextDestination: walkNode.end.name,
                                                 totalDistance: Double(WalkingViewModel().tmapTotalDistance),
                                                 remainingBusStops: 0,
-                                                busTravelTime: 0
+                                                timeTillBusArrival: 0
                                             )
                                         }
                                         print("[DEBUG] OnRideView - walkingToDestination 업데이트, destination: \(walkNode.end.name)")
@@ -96,7 +96,7 @@ struct OnRideView: View {
                                                 nextDestination: walkNode.end.name,
                                                 totalDistance: Double(WalkingViewModel().tmapTotalDistance),
                                                 remainingBusStops: 0,
-                                                busTravelTime: 0
+                                                timeTillBusArrival: 0
                                             )
                                         }
                                         print("[DEBUG] OnRideView - 환승 walkingToBus 업데이트, destination: \(walkNode.end.name)")
@@ -154,20 +154,7 @@ struct OnRideView: View {
                     viewModel.busLegIndex = leg
                     
                     print("[OnRideView] 탑승 화면 진입 - 기존 추적 계속 진행 (progress: \(proximityManager.progress), remaining: \(proximityManager.remainingStations))")
-//                    
-//                    // Live Activity 업데이트 (onBus 단계로)
-//                    if let busNode = journey.busSegments[safe: leg] {
-//                        Task {
-//                            await ProgressLiveActivityManager.shared.updateStage(
-//                                nextStage: RouteStage.onBus.rawValue,
-//                                nextDestination: busNode.end.name,
-//                                totalDistance: 10,
-//                                remainingBusStops: proximityManager.remainingStations,
-//                                busTravelTime: busNode.travelTime
-//                            )
-//                            print("[DEBUG] OnRideView - onBus 업데이트 완료")
-//                        }
-//                    }
+
                 }
                 .onReceive(coordinator.journeyManager.$journeyIndex) { _ in
                     guard

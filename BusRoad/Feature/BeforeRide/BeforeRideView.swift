@@ -88,7 +88,7 @@ struct BeforeRideView: View {
                                                 nextDestination: busnode.end.name,
                                                 totalDistance: 10,
                                                 remainingBusStops: proximityManager.remainingStations,
-                                                busTravelTime: busnode.travelTime
+                                                timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
                                             )
                                         }
                                     }
@@ -138,7 +138,7 @@ struct BeforeRideView: View {
                                             nextDestination: busnode.end.name,
                                             totalDistance: 10,
                                             remainingBusStops: proximityManager.remainingStations,
-                                            busTravelTime: busnode.travelTime
+                                            timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
                                         )
                                     }
                                 }
@@ -183,7 +183,7 @@ struct BeforeRideView: View {
                         nextDestination: busNode.start.name,  // 승차 정류장 이름
                         totalDistance: 0,
                         remainingBusStops: proximityManager.remainingStations, 
-                        busTravelTime: busNode.travelTime
+                        timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
                     )
                     print("[DEBUG] BeforeRideView - Live Activity waitingForBus 업데이트 완료. Destination: \(busNode.start.name)")
                 }

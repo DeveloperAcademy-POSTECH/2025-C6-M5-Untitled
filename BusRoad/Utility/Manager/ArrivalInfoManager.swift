@@ -19,7 +19,6 @@ final class ArrivalInfoManager: ObservableObject {
     
     private var refreshTask: Task<Void, Never>?
     private var lastNearestRouteId: String?
-    private var lastNearestArrTime: Int?
     private var lastNearestItem: BusArrivalItem?
     
     private var suppressPassUntil: Date?
@@ -31,6 +30,8 @@ final class ArrivalInfoManager: ObservableObject {
     // 목표 정류장 정보 저장
     private var targetStationNodeId: String?
     private var targetStationOrder: Int?
+    
+    @Published var lastNearestArrTime: Int?
     
     @Published var nearestBusInfo: (busNo: String, arrivalText: String)?
     @Published var isArrivingSoon: Bool = false
@@ -259,6 +260,10 @@ final class ArrivalInfoManager: ObservableObject {
             
             lastNearestRouteId = trackedBus.routeid
             lastNearestArrTime = trackedBus.arrtime
+            ProgressLiveActivityManager.shared.updateBusArrivalTime(
+                timeTillBusArrival: lastNearestArrTime ?? 0,
+                currentStage: "waitingForBus"
+            )
             lastNearestItem = trackedBus
             
             return (trackedBus, didPass, passedBus)
