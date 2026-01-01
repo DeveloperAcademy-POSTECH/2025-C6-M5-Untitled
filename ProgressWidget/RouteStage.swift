@@ -11,8 +11,10 @@ enum RouteStage: String, CaseIterable {
         switch self {
         case .walkingToBus, .walkingToDestination:
             return "RouteWalkingIcon"
-        case .waitingForBus, .onBus:
+        case .onBus:
             return "RouteBusIcon"
+        case .waitingForBus:
+            return "RouteBusWait"
         }
     }
     
@@ -20,16 +22,20 @@ enum RouteStage: String, CaseIterable {
         switch self {
         case  .walkingToDestination, .walkingToBus:
             return "WalkingIcon"
-        case .waitingForBus, .onBus:
+        case .onBus:
             return "BusIcon"
+        case .waitingForBus:
+            return "TimerIcon"
         }
     }
     var expandImage: String {
         switch self {
         case  .walkingToDestination, .walkingToBus:
             return "expandwalk"
-        case .waitingForBus, .onBus:
+        case .onBus:
             return "expandbus"
+        case .waitingForBus:
+            return "expandbuswait"
         }
     }
 }
