@@ -9,7 +9,11 @@ struct RouteCardSlide: View {
         VStack(spacing: 0) {
             ZStack {
                 if viewModel.errorMessage != nil {
-                    RouteErrorCard(viewModel: viewModel)
+                    if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다." {
+                        RouteWalkCard(viewModel: viewModel)
+                    } else {
+                        RouteErrorCard(viewModel: viewModel)
+                    }
                 } else if let routes {
                     ZStack {
                         ForEach(Array(routes.enumerated()), id: \.element.id) { index, item in

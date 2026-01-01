@@ -55,7 +55,7 @@ struct RouteSelectButton: View {
                     print("[DEBUG] routes가 존재하지 않습니다.")
                 }
             } label: {
-                Text("시작하기")
+                Text("안내 시작")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
                     .frame(width: 305.wScaled, height: 64)
@@ -68,7 +68,7 @@ struct RouteSelectButton: View {
             Button {
                 retrySearch()
             } label: {
-                Text("다시 검색하기")
+                Text("다시 검색")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
                     .frame(width: 305.wScaled, height: 64)
@@ -95,7 +95,7 @@ struct RouteSelectButton: View {
                 }
                 
             } label: {
-                Text("도보 이동하기")
+                Text("안내 시작")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
                     .frame(width: 305.wScaled, height: 64)
@@ -108,7 +108,7 @@ struct RouteSelectButton: View {
             Button {
                 retrySearch()
             } label: {
-                Text("다시 검색하기")
+                Text("다시 검색")
                     .foregroundColor(Color.subLight)
                     .font(.premed32)
                     .frame(width: 305.wScaled, height: 64)
