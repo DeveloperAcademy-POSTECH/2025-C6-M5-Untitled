@@ -128,7 +128,11 @@ final class ProgressLiveActivityManager {
             let hours = timeTillBusArrival / 3600
             let minutes = (timeTillBusArrival % 3600) / 60
             
-            if hours > 0 && minutes == 0 {
+            if timeTillBusArrival == -1 {
+                return "n번 버스가 지나갔어요"
+            } else if timeTillBusArrival == 1 {
+                return "버스가 곧 도착해요"
+            } else if hours > 0 && minutes == 0 {
                 return "\(hours)시간 후 버스가 도착해요"
             } else if hours > 0 {
                 return "\(hours)시간 \(minutes)분 후 버스가 도착해요"

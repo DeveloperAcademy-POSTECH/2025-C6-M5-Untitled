@@ -45,7 +45,6 @@ struct ProgressLiveActivity: Widget {
                             .font(.premed14)
                             .foregroundColor(.liveSubtitle)
                     }
-//                    .frame(height: 60)
                 }
                 .padding(.horizontal, 30)
                 .frame(maxWidth: .infinity,  alignment: .leading)

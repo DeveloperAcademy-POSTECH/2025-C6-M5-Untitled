@@ -256,7 +256,7 @@ class BusRouteViewModel: ObservableObject {
         print("[DEBUG] 현위치 강제 새로고침 시작")
         
         let minimumDurationTask = Task {
-            try? await Task.sleep(nanoseconds: 500_000_000) 
+            try? await Task.sleep(nanoseconds: 500_000_000)
         }
         
         do {
@@ -386,6 +386,10 @@ extension BusRouteViewModel {
     func fetchNearestBusInfo(for route: BusRouteNode) async -> (busNo: String, arrivalText: String)? {
         guard let item = await ArrivalInfoManager.shared.prepareRouteArrivalSummary(for: route) else {
             print("[DEBUG] 도착 정보 없음")
+            ProgressLiveActivityManager.shared.updateBusArrivalTime(
+                timeTillBusArrival: -1,
+                currentStage: "waitingForBus"
+            )
             return nil
         }
         
@@ -393,6 +397,10 @@ extension BusRouteViewModel {
         let arrivalText: String
         if minutes < 1 {
             arrivalText = "곧 도착"
+            ProgressLiveActivityManager.shared.updateBusArrivalTime(
+                timeTillBusArrival: 1,
+                currentStage: "waitingForBus"
+            )
         } else {
             arrivalText = "\(minutes)분 후"
         }
