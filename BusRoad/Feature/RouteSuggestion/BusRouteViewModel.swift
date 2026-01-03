@@ -386,10 +386,6 @@ extension BusRouteViewModel {
     func fetchNearestBusInfo(for route: BusRouteNode) async -> (busNo: String, arrivalText: String)? {
         guard let item = await ArrivalInfoManager.shared.prepareRouteArrivalSummary(for: route) else {
             print("[DEBUG] 도착 정보 없음")
-            ProgressLiveActivityManager.shared.updateBusArrivalTime(
-                timeTillBusArrival: -1,
-                currentStage: "waitingForBus"
-            )
             return nil
         }
         
@@ -397,10 +393,6 @@ extension BusRouteViewModel {
         let arrivalText: String
         if minutes < 1 {
             arrivalText = "곧 도착"
-            ProgressLiveActivityManager.shared.updateBusArrivalTime(
-                timeTillBusArrival: 1,
-                currentStage: "waitingForBus"
-            )
         } else {
             arrivalText = "\(minutes)분 후"
         }

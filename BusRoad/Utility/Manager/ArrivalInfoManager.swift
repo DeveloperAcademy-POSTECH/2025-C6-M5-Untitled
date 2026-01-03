@@ -137,6 +137,10 @@ final class ArrivalInfoManager: ObservableObject {
                 if let passed = result.passedBus {
                     lastPassedBusNo = cleanBusNumber(passed.routeno)
                     print("[ArrivalInfoManager] 지나감 표시: \(lastPassedBusNo ?? "")")
+                    ProgressLiveActivityManager.shared.updateBusArrivalTime(
+                        timeTillBusArrival: -1,
+                        currentStage: "waitingForBus"
+                    )
                 }
             } else {
                 print("[ArrivalInfoManager] 지나감 감지되었으나 보류 상태")
@@ -260,10 +264,12 @@ final class ArrivalInfoManager: ObservableObject {
             
             lastNearestRouteId = trackedBus.routeid
             lastNearestArrTime = trackedBus.arrtime
-            ProgressLiveActivityManager.shared.updateBusArrivalTime(
-                timeTillBusArrival: lastNearestArrTime ?? 0,
-                currentStage: "waitingForBus"
-            )
+            if lastPassedBusNo == nil{
+                ProgressLiveActivityManager.shared.updateBusArrivalTime(
+                    timeTillBusArrival: lastNearestArrTime ?? 0,
+                    currentStage: "waitingForBus"
+                )
+            }
             lastNearestItem = trackedBus
             
             return (trackedBus, didPass, passedBus)
