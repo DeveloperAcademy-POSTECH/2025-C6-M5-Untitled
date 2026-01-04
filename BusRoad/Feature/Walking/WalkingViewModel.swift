@@ -37,7 +37,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     var tmapTotalDistance: Int = 0
     
     // 거리 임계값
-    private let stepSwitchDistance: CLLocationDistance = 15
+    private let stepSwitchDistance: CLLocationDistance = 3 // 다음 좌표까지 ?m 이내이면 해당 점을 "지나간 것으로 판단"
     private var arrivalDistance: CLLocationDistance = 12
     private let offRouteThreshold: CLLocationDistance = 50
     
