@@ -345,7 +345,7 @@ final class AlightProximityManager: ObservableObject {
                 print("[AlightProximityManager] 📊 진행률 강제 업데이트: \(Int(progress * 100))%")
                 
                 Task {
-                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress)
+                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress, currentStage: "onBus")
                 }
             }
         }
