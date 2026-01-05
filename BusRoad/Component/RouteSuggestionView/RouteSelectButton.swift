@@ -33,7 +33,7 @@ struct RouteSelectButton: View {
                                         stage: RouteStage.walkingToBus.rawValue,
                                         destination: walkNode.end.name,  // 승차 정류장 이름
                                         remainingBusStops: 0,
-                                        busTravelTime: 0
+                                        timeTillBusArrival: 0
                                     )
                                 }
                                 print("[DEBUG] Live Activity 시작 - walkingToBus, destination: \(walkNode.end.name)")
@@ -44,7 +44,7 @@ struct RouteSelectButton: View {
                                     stage: RouteStage.waitingForBus.rawValue,
                                     destination: destinationName,
                                     remainingBusStops: busNode.stations.count,
-                                    busTravelTime: busNode.travelTime
+                                    timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
                                 )
                                 print("[DEBUG] Live Activity 시작 - waitingForBus, destination: \(destinationName)")
                             }
@@ -89,7 +89,7 @@ struct RouteSelectButton: View {
                             stage: RouteStage.walkingToDestination.rawValue,
                             destination: node.end.name,
                             remainingBusStops: 0,
-                            busTravelTime: 0
+                            timeTillBusArrival: 0
                         )
                     }
                 }

@@ -256,7 +256,7 @@ class BusRouteViewModel: ObservableObject {
         print("[DEBUG] 현위치 강제 새로고침 시작")
         
         let minimumDurationTask = Task {
-            try? await Task.sleep(nanoseconds: 500_000_000) 
+            try? await Task.sleep(nanoseconds: 500_000_000)
         }
         
         do {

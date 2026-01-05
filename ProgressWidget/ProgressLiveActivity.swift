@@ -14,7 +14,7 @@ struct ProgressAttributes: ActivityAttributes {
         var currentProgressValue: Double
         var busProgress: Double
         var remainingBusStops: Int
-        var busTravelTime: Int
+        var timeTillBusArrival: Int
     }
 }
 
@@ -39,13 +39,12 @@ struct ProgressLiveActivity: Widget {
                                 for: context.state.stage,
                                 leftDistance: context.state.leftDistance ?? context.state.totalDistance,
                                 remainingBusStops: context.state.remainingBusStops,
-                                busTravelTime: context.state.busTravelTime
+                                timeTillBusArrival: context.state.timeTillBusArrival
                             )
                         )
-                            .font(.premed12)
+                            .font(.premed14)
                             .foregroundColor(.liveSubtitle)
                     }
-//                    .frame(height: 60)
                 }
                 .padding(.horizontal, 30)
                 .frame(maxWidth: .infinity,  alignment: .leading)
@@ -65,6 +64,7 @@ struct ProgressLiveActivity: Widget {
                         Image(RouteStage(rawValue: context.state.stage)?.expandImage ?? "BusIcon")
                             .resizable()
                             .frame(width: 48, height: 48)
+                        
                         VStack(alignment:.leading, spacing: 3){
                             Text(ProgressLiveActivityManager.expandedDescription(for: context.state.stage, destination: context.state.destination))
                                 .font(.presemi18)
@@ -77,10 +77,10 @@ struct ProgressLiveActivity: Widget {
                                     for: context.state.stage,
                                     leftDistance: context.state.leftDistance ?? context.state.totalDistance,
                                     remainingBusStops: context.state.remainingBusStops,
-                                    busTravelTime: context.state.busTravelTime
+                                    timeTillBusArrival: context.state.timeTillBusArrival
                                 )
                             )
-                            .font(.premed12)
+                            .font(.premed14)
                             .foregroundColor(.liveSubtitle)
                         }
                         .padding(.leading, 12)
@@ -108,6 +108,7 @@ struct ProgressLiveActivity: Widget {
     }
 }
 
+// MARK: - ProgressBar
 struct ProgressBarWithTracker: View {
     let progressValue: Double
     let imageName: String
@@ -154,6 +155,7 @@ struct ProgressBarWithTracker: View {
     }
 }
 
+// MARK: - Preview
 extension ProgressAttributes {
     fileprivate static var preview: ProgressAttributes {
         ProgressAttributes()
@@ -163,11 +165,14 @@ extension ProgressAttributes {
 extension ProgressAttributes.ContentState {
     fileprivate static var walking: ProgressAttributes.ContentState {
         ProgressAttributes.ContentState(stage: RouteStage.walkingToBus.rawValue,
-                                        leftDistance: 35, totalDistance: 70, destination: "띄어쓰기가 어떻게 되는지 알아보기 위한 아무렇게나 넣는 목적지 입니다.", subDescription: "약 3분 정도 걸려요", maxProgressValue: 0, currentProgressValue: 0, busProgress: 0, remainingBusStops: 10, busTravelTime: 0)
+                                        leftDistance: 35, totalDistance: 70, destination: "띄어쓰기가 어떻게 되는지 알아보기 위한 아무렇게나 넣는 목적지 입니다.", subDescription: "약 3분 정도 걸려요", maxProgressValue: 0, currentProgressValue: 0, busProgress: 0, remainingBusStops: 10, timeTillBusArrival: 0)
     }
     
     fileprivate static var onBus: ProgressAttributes.ContentState {
-        ProgressAttributes.ContentState(stage: RouteStage.onBus.rawValue, leftDistance: 30, totalDistance: 50, destination: "포항역", subDescription: "2정류장 남았어요", maxProgressValue: 0.5, currentProgressValue: 0.5, busProgress: 0.5, remainingBusStops: 2, busTravelTime: 27)
+        ProgressAttributes.ContentState(stage: RouteStage.onBus.rawValue, leftDistance: 30, totalDistance: 50, destination: "포항역", subDescription: "2정류장 남았어요", maxProgressValue: 0.5, currentProgressValue: 0.5, busProgress: 0.5, remainingBusStops: 2, timeTillBusArrival: 27)
+    }
+    fileprivate static var waitingForBus: ProgressAttributes.ContentState {
+        ProgressAttributes.ContentState(stage: RouteStage.waitingForBus.rawValue, leftDistance: 30, totalDistance: 50, destination: "포항역", subDescription: "2정류장 남았어요", maxProgressValue: 0, currentProgressValue: 0, busProgress: 0, remainingBusStops: 2, timeTillBusArrival: 27)
     }
 }
 
@@ -177,6 +182,7 @@ extension ProgressAttributes.ContentState {
 } contentStates: {
     ProgressAttributes.ContentState.walking
     ProgressAttributes.ContentState.onBus
+    ProgressAttributes.ContentState.waitingForBus
 }
 
 #Preview("dynamic", as: .dynamicIsland(.expanded), using: ProgressAttributes.preview) {
@@ -184,10 +190,12 @@ extension ProgressAttributes.ContentState {
 } contentStates: {
     ProgressAttributes.ContentState.walking
     ProgressAttributes.ContentState.onBus
+    ProgressAttributes.ContentState.waitingForBus
 }
 #Preview("compact", as: .dynamicIsland(.compact), using: ProgressAttributes.preview) {
     ProgressLiveActivity()
 } contentStates: {
     ProgressAttributes.ContentState.walking
     ProgressAttributes.ContentState.onBus
+    ProgressAttributes.ContentState.waitingForBus
 }
