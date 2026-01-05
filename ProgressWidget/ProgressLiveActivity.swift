@@ -174,6 +174,9 @@ extension ProgressAttributes.ContentState {
     fileprivate static var waitingForBus: ProgressAttributes.ContentState {
         ProgressAttributes.ContentState(stage: RouteStage.waitingForBus.rawValue, leftDistance: 30, totalDistance: 50, destination: "포항역", subDescription: "2정류장 남았어요", maxProgressValue: 0, currentProgressValue: 0, busProgress: 0, remainingBusStops: 2, timeTillBusArrival: 27)
     }
+    fileprivate static var waitingForBus: ProgressAttributes.ContentState {
+        ProgressAttributes.ContentState(stage: RouteStage.waitingForBus.rawValue, leftDistance: 30, totalDistance: 50, destination: "포항역", subDescription: "2정류장 남았어요", maxProgressValue: 0, currentProgressValue: 0, busProgress: 0, remainingBusStops: 2, busTravelTime: 27)
+    }
 }
 
 
