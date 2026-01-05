@@ -27,22 +27,15 @@ struct NodeIdItems: Codable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // 먼저 어떤 타입인지 확인
         if let itemsArray = try? container.decode([NodeIdItem].self, forKey: .item) {
-            print("[NodeIdItems] 배열로 디코딩 성공: \(itemsArray.count)개")
             self.item = itemsArray
         } else if let singleItem = try? container.decode(NodeIdItem.self, forKey: .item) {
-            // 단일 객체인 경우
-            print("[NodeIdItems] 단일 객체로 디코딩 성공, 배열로 변환")
             self.item = [singleItem]
         } else {
-            // 둘 다 안 되면 빈 배열
-            print("[NodeIdItems] 디코딩 실패, 빈 배열 반환")
             self.item = []
         }
     }
 }
-
 
 struct NodeIdItem: Codable {
     let nodeid: String
@@ -50,7 +43,7 @@ struct NodeIdItem: Codable {
     let nodeno: Int
 }
 
-//MARK: - 버스 도착 정보 응답
+// MARK: - 버스 도착 정보 응답
 struct BusArrivalResponse: Codable {
     let response: BusArrivalResponseBody
 }
@@ -102,14 +95,12 @@ struct BusArrivalItems: Codable {
         
         // 빈 문자열인 경우 처리 (버스가 없는 경우)
         if let emptyString = try? container.decode(String.self, forKey: .item) {
-            print("[BusArrivalItems] items가 빈 문자열입니다: '\(emptyString)'")
             self.item = []
             return
         }
         
         // 배열인 경우
         if let itemsArray = try? container.decode([BusArrivalItem].self, forKey: .item) {
-            print("[BusArrivalItems] 배열로 디코딩 성공: \(itemsArray.count)개")
             self.item = itemsArray
             return
         }
@@ -143,20 +134,25 @@ struct BusArrivalItem: Codable, Identifiable {
         case arrprevstationcnt
     }
     
+    // 서울 서비스용
+    init(routeno: String, routeid: String, arrtime: Int, vehicletp: String?, arrprevstationcnt: Int) {
+        self.routeno = routeno
+        self.routeid = routeid
+        self.arrtime = arrtime
+        self.vehicletp = vehicletp
+        self.arrprevstationcnt = arrprevstationcnt
+    }
+    
+    // TAGO 서비스용 (JSON 파싱할 때 씀)
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
-        // routeno는 String 또는 Int로 올 수 있음
         if let routenoString = try? container.decode(String.self, forKey: .routeno) {
             routeno = routenoString
         } else if let routenoInt = try? container.decode(Int.self, forKey: .routeno) {
             routeno = String(routenoInt)
         } else {
-            throw DecodingError.dataCorruptedError(
-                forKey: .routeno,
-                in: container,
-                debugDescription: "routeno는 String 또는 Int여야 합니다"
-            )
+            throw DecodingError.dataCorruptedError(forKey: .routeno, in: container, debugDescription: "routeno error")
         }
         
         routeid = try container.decode(String.self, forKey: .routeid)
