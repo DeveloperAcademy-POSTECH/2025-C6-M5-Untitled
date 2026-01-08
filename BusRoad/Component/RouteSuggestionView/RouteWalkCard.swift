@@ -8,6 +8,15 @@ import SwiftUI
 
 struct RouteWalkCard: View {
     @ObservedObject var viewModel: BusRouteViewModel
+    var journey: Journey
+    
+    // estimatedArrivalTime = 현재 시간 + totalTime
+    var estimatedArrivalTime: String {
+        let arrival = Date().addingTimeInterval(TimeInterval(journey.totalTime * 60))
+        let formatter = DateFormatter()
+        formatter.dateFormat = "HH:mm"
+        return formatter.string(from: arrival)
+    }
     
     var body: some View {
         ZStack{
@@ -17,29 +26,10 @@ struct RouteWalkCard: View {
                 .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 0)
             
             VStack(alignment: .leading, spacing: 75, content: {
-                walkInfo
+                ETA(journeys: [journey], journey: journey, index: 0)
                 walkNaviText
             })
         }
-    }
-    
-    private var walkInfo: some View {
-        VStack(alignment: .leading, spacing: 4, content: {
-            
-            Text("최적")
-                .foregroundStyle(.subPoint)
-                .font(.presemi20Scaled)
-                .padding(.bottom, 3)
-            
-            
-            Text("도보 12분")
-                .font(.presemi32)
-                .foregroundStyle(Color.primaryHeavy)
-            
-            Text("14:20 도착 예정")
-                .foregroundStyle(Color.greyNormal)
-                .font(.prereg16Scaled)
-        })
     }
     
     private var walkNaviText: some View {
@@ -67,11 +57,15 @@ struct RouteWalkCard: View {
 }
 
 // MARK: - 프리뷰
-#Preview("도보 경로 예시") {
-    let vm = BusRouteViewModel()
-    vm.origin = LocationInfo(name: "서울역", latitude: 37.5547125, longitude: 126.9707878)
-    vm.destination = LocationInfo(name: "시청역", latitude: 37.565135, longitude: 126.976889)
-    vm.createWalkingJourneyIfNeeded()
-    return RouteWalkCard(viewModel: vm)
+#Preview {
+    let walkNode = WalkRouteNode(
+        start: LocationInfo(name: "출발지", latitude: 37.0, longitude: 127.0),
+        end: LocationInfo(name: "도착지", latitude: 37.1, longitude: 127.1),
+        travelTime: 15  // 15분 도보
+    )
+    let journey = Journey(totalTime: 15, nodes: [.walk(walkNode)])
+    let viewModel = BusRouteViewModel()
+    return RouteWalkCard(viewModel: viewModel, journey: journey)
         .padding()
+        .background(Color.gray.opacity(0.1))
 }

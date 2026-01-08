@@ -4,13 +4,15 @@ struct RouteCardSlide: View {
     @Binding var currentIndex: Int
     @Binding var routes: [Journey]?
     @ObservedObject var viewModel: BusRouteViewModel
-    
+
     var body: some View {
         VStack(spacing: 0) {
             ZStack {
                 if viewModel.errorMessage != nil {
                     if viewModel.errorMessage == "출발지와 목적지가 너무 가깝습니다." {
-                        RouteWalkCard(viewModel: viewModel)
+                        if let journey = routes?.first {
+                            RouteWalkCard(viewModel: viewModel, journey: journey)
+                        }
                     } else {
                         RouteErrorCard(viewModel: viewModel)
                     }
@@ -43,11 +45,11 @@ struct RouteCardSlide: View {
                                 } else {
                                     newIndex = min(routes.count - 1, currentIndex + 1)
                                 }
-                                
+
                                 if newIndex != currentIndex {
                                     viewModel.arrivalText = nil
                                 }
-                                
+
                                 currentIndex = newIndex
                             }
                     )
@@ -55,7 +57,7 @@ struct RouteCardSlide: View {
                     ProgressRouteCard()
                 }
             }
-            
+
             // 항상 28 높이의 공간 차지
             if let routes = routes, routes.count > 1 {
                 HStack {
