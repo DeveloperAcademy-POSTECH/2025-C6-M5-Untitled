@@ -45,12 +45,13 @@ struct RouteWalkCard: View {
                 Image(systemName: "figure.walk")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
-                    .frame(width:16.wScaled, height:16.wScaled)
+                    .frame(width:17.wScaled, height:17.wScaled)
                     .foregroundStyle(Color.subPoint)
             }
             
             Text("가장 빠른\n도보 경로로 안내해요")
                 .font(.presemi24Scaled)
+                .foregroundStyle(.greyHeavy)
                 .padding(.bottom, 30)
         })
     }
