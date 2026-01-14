@@ -27,6 +27,7 @@ struct RouteWalkCard: View {
             
             VStack(alignment: .leading, spacing: 75, content: {
                 ETA(journeys: [journey], journey: journey, index: 0)
+                
                 walkNaviText
             })
         }
@@ -35,7 +36,7 @@ struct RouteWalkCard: View {
     private var walkNaviText: some View {
         VStack(alignment: .leading, spacing: 16, content: {
             Divider().frame(width: 250)
-                .padding(.bottom, 30)
+                .padding(.bottom, 40)
             
             ZStack{
                 Circle()
