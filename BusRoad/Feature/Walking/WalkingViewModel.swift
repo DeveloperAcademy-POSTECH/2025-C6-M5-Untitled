@@ -57,9 +57,20 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     // 음성 안내
     private let speechSynthesizer = AVSpeechSynthesizer()
     private var hasAnnouncedStart: Bool = false // 시작 안내
+    private var hasAnnouncedNearArrival: Bool = false // 종료 안내
     
     // Journey Manager
     private let journeyManager: JourneyManager
+    
+    // 설정탭
+    private func isEnabled(_ key: String, default defaultValue: Bool = true) -> Bool {
+        (UserDefaults.standard.object(forKey: key) as? Bool) ?? defaultValue
+    }
+    
+    private var walkingVoiceEnabled: Bool { isEnabled(SettingsKeys.walkingVoice) }
+    private var vibrationEnabled: Bool { isEnabled(SettingsKeys.vibration) }
+    
+    
     
     // MARK: - Init
     init(journeyManager: JourneyManager = .shared) {
@@ -153,6 +164,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         currentSegmentIndex = 0
         hasCalculatedRoute = false
         hasAnnouncedStart = false
+        hasAnnouncedNearArrival = false
         
         if !isRerouting {
             arrived = false
@@ -256,17 +268,17 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     
     // MARK: - 안내 시작음
     func tryAnnounceStart() {
-            guard !hasAnnouncedStart,
-                  isRouteApplied,
-                  finishedOnboarding,
-                  !isRerouting else {
-                return
-            }
-            
-            // 모든 조건 충족 시 안내
-            announceStart()
-            hasAnnouncedStart = true
+        guard !hasAnnouncedStart,
+              isRouteApplied,
+              finishedOnboarding,
+              !isRerouting else {
+            return
         }
+        
+        // 모든 조건 충족 시 안내
+        announceStart()
+        hasAnnouncedStart = true
+    }
     
     // MARK: - Apple Maps Fallback
     private func fallbackToAppleMaps(origin: CLLocationCoordinate2D, dest: CLLocationCoordinate2D) {
@@ -372,6 +384,13 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         
         // 도착 체크
         if remainDistance < arrivalDistance && !arrived && !manuallyArrived && !isRerouting {
+            
+            if !hasAnnouncedNearArrival {
+                hasAnnouncedNearArrival = true
+                vibrateIfEnabled(times: 2)
+                speakIfEnabled("도착지 부근입니다.")
+            }
+            
             stopAllAnnouncements()
             arrived = true
             print("목적지 도착!")
@@ -404,10 +423,10 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
     private func advanceSegment(from location: CLLocation) {
         
         currentSegmentIndex = max(0, min(currentSegmentIndex, tmapCoordinates.count - 1))
-
+        
         let checkRange = min(10, tmapCoordinates.count - currentSegmentIndex - 1)
         guard checkRange > 0 else { return }
-                
+        
         var closestIndex = currentSegmentIndex
         var closestDistance = Double.greatestFiniteMagnitude
         
@@ -514,22 +533,20 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         
         navigationStartTime = Date()
         
-        AudioServicesPlayAlertSound(1110) // 1110
-
+        //        AudioServicesPlayAlertSound(1110)
+        vibrateIfEnabled(times: 1)
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             guard let self = self else { return }
-                        
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                 let text = "도보 길 안내를 시작합니다"
                 
-                let utterance = AVSpeechUtterance(string: text)
-                utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
-                utterance.rate = 0.5
-                utterance.volume = 1.0
-                
-                self.speechSynthesizer.speak(utterance)
-                
-                print("🔊 시작 안내: \(text)")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                    let text = "도보 길 안내를 시작합니다"
+                    self.speakIfEnabled(text)   // ✅ 도보 음성 토글 반영
+                    print("🔊 시작 안내: \(text)")
+                }
             }
         }
     }
@@ -621,9 +638,9 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         }
         
         // 10도 이상 변화만 업데이트
-//        withAnimation(.easeInOut(duration: 0.3)) {
-            arrowBearing = newBearing
-//        }
+        //        withAnimation(.easeInOut(duration: 0.3)) {
+        arrowBearing = newBearing
+        //        }
         lastArrowBearing = newBearing
     }
     
@@ -645,5 +662,28 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
         } catch {
             print("❌ 오디오 세션 설정 실패: \(error.localizedDescription)")
         }
+    }
+    
+    // MARK: - 설정탭
+    ///진동
+    private func vibrateIfEnabled(times: Int = 1) {
+        guard vibrationEnabled else { return }
+        for i in 0..<times {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 0.7) {
+                AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+            }
+        }
+    }
+    
+    /// 말하기
+    private func speakIfEnabled(_ text: String) {
+        guard walkingVoiceEnabled else { return }
+        
+        let utterance = AVSpeechUtterance(string: text)
+        utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
+        utterance.rate = 0.5
+        utterance.volume = 1.0
+        
+        speechSynthesizer.speak(utterance)
     }
 }

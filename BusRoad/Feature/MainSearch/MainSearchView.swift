@@ -65,6 +65,9 @@ struct MainSearchView: View {
                     onClear: {
                         viewModel.clearQuery()
                         isFocused = true
+                    },
+                    onSettingsTap: {
+                        coordinator.push(.settings)
                     }
                 )
             }

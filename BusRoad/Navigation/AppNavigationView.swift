@@ -27,6 +27,8 @@ struct AppNavigationView: View {
 //                        JourneyFlowView()
 //                            .toolbar(.hidden, for: .navigationBar)
                         EmptyView()
+                    case .settings:
+                        SettingsView()
                     }
                 }
                 .fullScreenCover(isPresented: $coordinator.isJourneyFlowPresented) {
