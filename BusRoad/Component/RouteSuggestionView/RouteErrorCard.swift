@@ -43,7 +43,7 @@ struct RouteErrorCard: View {
                     .lineSpacing(5)
                 
                 Text("다른 장소를 검색해주세요")
-                    .font(.premed20)
+                    .font(.premed16Scaled)
                     .foregroundColor(Color.primaryHeavy)
                 
             } else if viewModel.errorMessage == "출발지와 도착지가 같습니다." {
@@ -54,7 +54,7 @@ struct RouteErrorCard: View {
                     .lineSpacing(5)
                 
                 Text("다른 장소를 검색해주세요")
-                    .font(.premed20)
+                    .font(.premed16Scaled)
                     .foregroundColor(Color.primaryHeavy)
                 
             } else {
@@ -65,7 +65,7 @@ struct RouteErrorCard: View {
                     .lineSpacing(5)
                 
                 Text("경로를 새로고침 해주세요")
-                    .font(.premed20)
+                    .font(.premed16Scaled)
                     .foregroundColor(Color.primaryHeavy)
             }
         })
