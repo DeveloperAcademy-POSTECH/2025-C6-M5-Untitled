@@ -24,10 +24,10 @@ struct IntroSection: View {
                     } label: {
                         Image("setting")
                             .foregroundStyle(.greyStrong)
-                            .frame(width: 44, height: 44)
+                            .frame(width: 30.wScaled, height: 30.wScaled)
                     }
                 }
-                .padding(.top, 16)
+                .padding(.top, 44)
                 .padding(.horizontal, 16)
                 
                 Spacer()
