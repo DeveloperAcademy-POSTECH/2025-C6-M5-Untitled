@@ -7,12 +7,15 @@ struct SettingsView: View {
     @AppStorage(SettingsKeys.walkingVoice)    private var walkingVoiceEnabled: Bool = true
     @AppStorage(SettingsKeys.vibration)       private var vibrationEnabled: Bool = true
     
-    @State private var showVoiceTooltip: Bool = false
+    @State private var showVoiceTooltip: Bool = true
     
     var body: some View {
         ZStack {
             Color(.background)
                 .ignoresSafeArea()
+                .onTapGesture {
+                    showVoiceTooltip = false
+                }
             
             VStack(alignment: .leading, spacing:0) {
                 
@@ -20,15 +23,26 @@ struct SettingsView: View {
                 HStack(spacing: 1) {
                     Text("음성 알림")
                         .font(.presemi18)
+                        .foregroundStyle(.primaryblack)
+                        .dynamicTypeSize(.large)
                     
                     Button {
                         showVoiceTooltip.toggle()
                     } label: {
                         Image("info")
                     }
+                    
+                    .overlay(alignment: .topLeading) {
+                        if showVoiceTooltip {
+                            VoiceTooltipView { showVoiceTooltip = false }
+                                .fixedSize()
+                                .offset(x:0, y:20)
+                                .dynamicTypeSize(.large)
+                        }
+                    }
                 }
                 .padding(.vertical, 9)
-                
+                .zIndex(1)
                 // 카드
                 VStack(spacing: 0) {
                     settingRow(title: "버스 승차(도착) 알림", isOn: $busArrivalVoiceEnabled)
@@ -38,24 +52,21 @@ struct SettingsView: View {
                     settingRow(title: "도보 안내 알림", isOn: $walkingVoiceEnabled)
                 }
                 .background(
-                    RoundedRectangle(cornerRadius: 14)
+                    RoundedRectangle(cornerRadius: 8)
                         .fill(Color(.primarywhite))
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(Color.black.opacity(0.04), lineWidth: 1)
                 )
-                //                .overlay(alignment: .topLeading) {
-                //                    if showVoiceTooltip {
-                //                        VoiceTooltipView { showVoiceTooltip = false }
-                //                    }
-                //
-                //                }
+                
                 
                 // 진동 알림
                 HStack {
                     Text("진동 알림")
                         .font(.presemi18)
+                        .foregroundStyle(.primaryblack)
+                        .dynamicTypeSize(.large)
                     Spacer()
                     Toggle("", isOn: $vibrationEnabled)
                         .labelsHidden()
@@ -67,22 +78,6 @@ struct SettingsView: View {
                 Spacer()
             }
             .padding(.horizontal, 23)
-            
-            
-            if showVoiceTooltip {
-                Color.black.opacity(0.001)
-                    .ignoresSafeArea()
-                    .onTapGesture {
-                        showVoiceTooltip = false
-                    }
-                
-                VoiceTooltipView {
-                    showVoiceTooltip = false
-                }
-                .frame(height: 77)
-                .position(x: UIScreen.main.bounds.width / 1.7,
-                          y: 70)
-            }
             
         }
         .navigationTitle("설정")
@@ -119,9 +114,9 @@ struct SettingsView: View {
         let onClose: () -> Void
         
         var body: some View {
-            VStack(spacing: 3) {
-                HStack(alignment: .top) {
-                    VStack {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(alignment: .top, spacing: 16) {
+                    VStack(alignment: .leading) {
                         Spacer()
                         
                         Text("아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요.")
