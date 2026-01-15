@@ -650,7 +650,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             let audioSession = AVAudioSession.sharedInstance()
             
             try audioSession.setCategory(
-                .playback,
+                .ambient,
                 mode: .spokenAudio,
                 options: [.duckOthers, .mixWithOthers]
             )
