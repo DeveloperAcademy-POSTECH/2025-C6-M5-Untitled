@@ -34,39 +34,39 @@ struct RouteErrorCard: View {
     
     //MARK: - 에러메시지 텍스트
     private var errorMessageText: some View {
-        VStack(alignment: .center, spacing: 20, content: {
+        VStack(alignment: .center, spacing: 12, content: {
             if viewModel.errorMessage == "지원하지 않는 교통수단이 포함되어 있습니다." {
                 Text("지원하지 않는 경로예요")
                     .font(.presemi24)
-                    .foregroundColor(Color.primaryHeavy)
+                    .foregroundStyle(Color.primaryHeavy)
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                 
                 Text("다른 장소를 검색해주세요")
                     .font(.premed16Scaled)
-                    .foregroundColor(Color.primaryHeavy)
+                    .foregroundStyle(.greyNormal)
                 
             } else if viewModel.errorMessage == "출발지와 도착지가 같습니다." {
                 Text("출발지와 도착지가\n동일해요")
                     .font(.presemi24)
-                    .foregroundColor(Color.primaryHeavy)
+                    .foregroundStyle(Color.primaryHeavy)
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                 
                 Text("다른 장소를 검색해주세요")
                     .font(.premed16Scaled)
-                    .foregroundColor(Color.primaryHeavy)
+                    .foregroundStyle(Color.greyNormal)
                 
             } else {
                 Text("오류가 발생했어요")
                     .font(.presemi24)
-                    .foregroundColor(Color.primaryHeavy)
+                    .foregroundStyle(Color.primaryHeavy)
                     .multilineTextAlignment(.center)
                     .lineSpacing(5)
                 
                 Text("경로를 새로고침 해주세요")
                     .font(.premed16Scaled)
-                    .foregroundColor(Color.primaryHeavy)
+                    .foregroundStyle(Color.greyNormal)
             }
         })
     }
