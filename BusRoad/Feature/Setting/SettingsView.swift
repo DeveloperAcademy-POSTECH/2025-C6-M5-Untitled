@@ -8,13 +8,46 @@ struct SettingsView: View {
     @AppStorage(SettingsKeys.vibration)       private var vibrationEnabled: Bool = true
     
     @State private var showVoiceTooltip: Bool = false
+    @EnvironmentObject private var coordinator: NavigationCoordinator
     
     var body: some View {
         ZStack {
+            EnablePopGesture()
+                .frame(width: 0, height: 0)
+            
             Color(.background)
                 .ignoresSafeArea()
             
             VStack(alignment: .leading, spacing:0) {
+                
+                // 상단바
+                ZStack {
+                    // 뒤로 가기 버튼
+                    HStack {
+                        Button {
+                            coordinator.pop()
+                        } label: {
+                            Image("gotoback")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 20.wScaled, height: 20.wScaled)
+                                .foregroundColor(.greyNormal)
+                        }
+                        Spacer()
+                    }
+                    
+                    HStack {
+                        Spacer()
+                        Text("설정")
+                            .font(.presemi18Scaled)
+                            .foregroundStyle(.primaryblack)
+                        Spacer()
+                    }
+                }
+                .padding(.top, 8)
+                
+                Spacer()
+                    .frame(height: 20.wScaled)
                 
                 // 음성 알림 헤더
                 HStack(spacing: 1) {
@@ -83,10 +116,7 @@ struct SettingsView: View {
                 .position(x: UIScreen.main.bounds.width / 1.7,
                           y: 70)
             }
-            
         }
-        .navigationTitle("설정")
-        .navigationBarTitleDisplayMode(.inline)
     }
     
     
