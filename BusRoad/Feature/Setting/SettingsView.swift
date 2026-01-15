@@ -7,7 +7,7 @@ struct SettingsView: View {
     @AppStorage(SettingsKeys.walkingVoice)    private var walkingVoiceEnabled: Bool = true
     @AppStorage(SettingsKeys.vibration)       private var vibrationEnabled: Bool = true
     
-    @State private var showVoiceTooltip: Bool = true
+    @State private var showVoiceTooltip: Bool = false
     
     var body: some View {
         ZStack {
