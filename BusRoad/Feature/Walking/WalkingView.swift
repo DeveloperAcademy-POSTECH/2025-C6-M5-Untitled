@@ -68,6 +68,8 @@ struct WalkingView: View {
                                     Spacer()
                                     
                                     Button {
+                                        viewModel.stopAllAnnouncements()
+                                        
                                         if index == journey.nodes.count - 1 {
                                             coordinator.popToRoot()
                                             ProgressLiveActivityManager.shared.endActivity()

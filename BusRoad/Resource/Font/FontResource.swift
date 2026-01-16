@@ -85,6 +85,10 @@ extension Font {
         return .pre(type: .medium, size: 14)
     }
     
+    static var prereg14:Font {
+        return .pre(type: .regular, size: 14)
+    }
+    
     static var prereg36: Font {
         return .pre(type: .regular, size: 36)
     }
