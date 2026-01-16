@@ -42,6 +42,11 @@ struct Journey: Identifiable, Equatable {
             }
         }
     }
+    
+    // 버스 구간이 하나도 없으면 도보-only 경로 분기처리
+    var isWalkingOnly: Bool {
+        firstBusRoute == nil
+    }
 }
 
 
