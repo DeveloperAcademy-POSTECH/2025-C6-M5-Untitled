@@ -68,6 +68,8 @@ struct WalkingView: View {
                                     Spacer()
                                     
                                     Button {
+                                        viewModel.stopAllAnnouncements()
+                                        
                                         if index == journey.nodes.count - 1 {
                                             coordinator.popToRoot()
                                             ProgressLiveActivityManager.shared.endActivity()
@@ -85,7 +87,7 @@ struct WalkingView: View {
                                                             nextDestination: boardingStopName,
                                                             totalDistance: 0,
                                                             remainingBusStops: busnode.stations.count,
-                                                            busTravelTime: busnode.travelTime
+                                                            timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
                                                         )
                                                     }
                                                     print("[DEBUG] 확인 완료 - waitingForBus 업데이트, destination: \(boardingStopName)")

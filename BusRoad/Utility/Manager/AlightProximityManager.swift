@@ -91,7 +91,7 @@ final class AlightProximityManager: ObservableObject {
         
         print("[AlightProximityManager] 구성 완료 / 정류장: \(stations.count), 다음 index: \(currentStationIndex), 남은: \(remainingStations)")
         
-        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations)
+        ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: remainingStations, currentStage: "onBus")
     }
     
     func setTagoContext(cityCode: Int, routeId: String, vehicleNo: String?) {
@@ -213,7 +213,7 @@ final class AlightProximityManager: ObservableObject {
                 progress = 1.0
                 hasArrived = true
                 Task {
-                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0)
+                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: 1.0, currentStage: "onBus" )
                 }
             }
             
@@ -262,8 +262,10 @@ final class AlightProximityManager: ObservableObject {
         lastStationPassedTime = Date()
         missedStationsCheck.remove(index)
         
+        updateProgressForcefully()
+        
         Task {
-            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations)
+            ProgressLiveActivityManager.shared.updateRemainingBusStops(remaining: self.remainingStations, currentStage: "onBus")
         }
         
         print("[AlightProximityManager] 남은 정류장: \(remainingStations)")
@@ -320,10 +322,33 @@ final class AlightProximityManager: ObservableObject {
         if newProgress > Double(progress) {
             progress = CGFloat(newProgress)
             Task {
-                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress)
+                ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress, currentStage: "onBus")
             }
         }
     }
+    
+    // MARK: - 진행률 강제 업데이트 (TAGO 보정용)
+    private func updateProgressForcefully() {
+            guard stations.count >= 2 else { return }
+            
+            let totalStops = stations.count - 1
+            let completedStops = currentStationIndex - 1
+            
+            // 현재 정류장을 막 통과했으므로, 해당 구간은 100% 완료된 것으로 간주
+            // (다음 정류장까지 가는 길의 0% 지점이라고 봐도 됨)
+            let totalProgress = Double(completedStops) / Double(totalStops)
+            let newProgress = min(1.0, max(0, totalProgress))
+            
+            // 진행률은 뒤로 가지 않도록 방어
+            if newProgress > Double(progress) {
+                progress = CGFloat(newProgress)
+                print("[AlightProximityManager] 📊 진행률 강제 업데이트: \(Int(progress * 100))%")
+                
+                Task {
+                    ProgressLiveActivityManager.shared.updateBusProgress(busProgress: newProgress, currentStage: "onBus")
+                }
+            }
+        }
     
     // MARK: - TAGO 보정 (GPS 실패 시만 사용)
     

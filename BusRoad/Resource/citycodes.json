@@ -526,5 +526,9 @@
   {
     "citycode": 38400,
     "cityname": "합천군"
+  },
+  {
+    "citycode": 1000,
+    "cityname": "서울특별시"
   }
 ]

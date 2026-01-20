@@ -1,6 +1,6 @@
 import Foundation
 
-class BusArrivalService {
+class TagoBusService: BusServiceType {
     private let apiKey: String
     private let baseURL = "http://apis.data.go.kr/1613000"
     

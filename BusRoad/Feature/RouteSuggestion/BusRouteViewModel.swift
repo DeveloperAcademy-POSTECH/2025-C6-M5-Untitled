@@ -171,6 +171,8 @@ class BusRouteViewModel: ObservableObject {
                                     let distance = origin.asCLLocation.distance(from: destination.asCLLocation)
                                 }
                                 self.errorMessage = "출발지와 목적지가 너무 가깝습니다."
+                                self.createWalkingJourneyIfNeeded()
+                                return
                             case "500":
                                 self.errorMessage = "출발지 또는 목적지 주변에 정류장이 없습니다."
                             default:
@@ -256,7 +258,7 @@ class BusRouteViewModel: ObservableObject {
         print("[DEBUG] 현위치 강제 새로고침 시작")
         
         let minimumDurationTask = Task {
-            try? await Task.sleep(nanoseconds: 500_000_000) 
+            try? await Task.sleep(nanoseconds: 500_000_000)
         }
         
         do {
@@ -340,9 +342,9 @@ extension BusRouteViewModel {
         )
         
         // JourneyManager에 직접 등록
-        JourneyManager.shared.journeyList = [walkingJourney]
-        JourneyManager.shared.selectedJourney = walkingJourney
-        JourneyManager.shared.journeyIndex = 0
+        journeyManager.journeyList = [walkingJourney]
+        journeyManager.selectedJourney = walkingJourney
+        journeyManager.journeyIndex = 0
         print("도보 경로 Journey 생성 완료")
     }
 }

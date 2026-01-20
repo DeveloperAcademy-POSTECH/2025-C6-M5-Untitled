@@ -47,6 +47,7 @@ struct RouteSummary: View {
                             .frame(width:12.wScaled.minimum(12), height:16.wScaled.minimum(16))
                             .foregroundColor(Color.subStrong)
                     }
+                    
                     Text("도보 \(journey.walkingTime)분")
                         .font(.prereg16Scaled)
                         .foregroundColor(Color.primaryHeavy)

@@ -23,14 +23,18 @@ struct ETA: View {
     var timeText: String {
         let hours = journey.totalTime / 60
         let minutes = journey.totalTime % 60
-        
+
+        let base: String
         if hours > 0 && minutes > 0 {
-            return "\(hours)시간 \(minutes)분"
-        } else if hours > 0 && minutes == 0 {
-            return "\(hours)시간"
+            base = "\(hours)시간 \(minutes)분"
+        } else if hours > 0 {
+            base = "\(hours)시간"
         } else {
-            return "\(minutes)분"
+            base = "\(minutes)분"
         }
+
+        // ✅ 도보-only면 "도보 " 붙임
+        return journey.isWalkingOnly ? "도보 \(base)" : base
     }
     
     var isMinimumTransfer: Bool {
