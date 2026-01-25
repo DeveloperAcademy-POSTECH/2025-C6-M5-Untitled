@@ -19,7 +19,8 @@ struct DestinationTextField : View {
             Text("도착")
                 .foregroundColor(Color.subPoint)
                 .font(.prereg20Scaled)
-            
+                .frame(width: 48.wScaled, alignment: .leading)
+
             Divider()
                 .background(Color.greyDisable)
                 .frame(width: 1)

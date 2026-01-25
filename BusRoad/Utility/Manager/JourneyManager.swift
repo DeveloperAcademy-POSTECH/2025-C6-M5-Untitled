@@ -40,7 +40,7 @@ final class JourneyManager: ObservableObject {
                 // ✅ 타임아웃 늘림
                 let loc = try await locationService.requestOneShotLocation(timeout: 10)
                 self.firstLoadedLocation = LocationInfo(
-                    name: "현위치",
+                    name: NSLocalizedString("현위치", comment: "현위치"),
                     latitude: loc.coordinate.latitude,
                     longitude: loc.coordinate.longitude
                 )
@@ -72,7 +72,7 @@ final class JourneyManager: ObservableObject {
                 print("[DEBUG] 현재 위치 저장 (캐시 사용 가능)")
                 self.setOrigin(
                     LocationInfo(
-                        name: "현위치",
+                        name: NSLocalizedString("현위치", comment: "현위치"),
                         latitude: loc.coordinate.latitude,
                         longitude: loc.coordinate.longitude
                     )

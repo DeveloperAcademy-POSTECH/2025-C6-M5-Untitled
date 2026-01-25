@@ -24,7 +24,8 @@ struct OriginTextField : View {
             Text("출발")
                 .foregroundColor(Color.subPoint)
                 .font(.prereg20Scaled)
-            
+                .frame(width: 48.wScaled, alignment: .leading)
+
             Divider()
                 .background(Color.greyDisable)
                 .frame(width: 1)
@@ -33,18 +34,9 @@ struct OriginTextField : View {
             Button(action: {
                 locationType = .origin
                 isSearchMode = true
-                //        if let name = location?.name, name != "현위치" {
-                //          let searchText = (name == "현위치") ? "" : name
-                //          DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                //            NotificationCenter.default.post(
-                //              name: .didSetPresetDestination,
-                //              object: searchText
-                //            )
-                //          }
-                //        }
             }) {
                 HStack{
-                    Text(location?.name ?? "현위치") //플레이스홀더
+                    Text(location?.name ?? NSLocalizedString("현위치", comment: "현위치")) //플레이스홀더
                         .font(.prereg20Scaled)
                         .foregroundColor(userDidSelectOrigin ? .greyHeavy : .greyDisable)
                     Spacer()

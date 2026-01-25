@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		248377062ECDD30E0005F935 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		603D50272ECAB88C00476C7F /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
 		92888BD32F20AEDD00A5AB0A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 92888BD22F20AEDD00A5AB0A /* InfoPlist.xcstrings */; };
@@ -266,7 +265,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
-				248377062ECDD30E0005F935 /* Secrets.plist in Resources */,
 				92888BD52F20AF3B00A5AB0A /* Localizable.xcstrings in Resources */,
 				92888BD32F20AEDD00A5AB0A /* InfoPlist.xcstrings in Resources */,
 			);
