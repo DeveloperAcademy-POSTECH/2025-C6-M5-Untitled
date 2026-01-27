@@ -62,21 +62,21 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     func announceTwoStations() {
         guard isEnabled(SettingsKeys.busAlightVoice) else { return }
         vibrate(times: 2)
-        announce("하차하기까지 두정류장 남았습니다.")
+        announce(NSLocalizedString("하차하기까지 두정류장 남았습니다.", comment: "하차하기까지 두정류장 남았습니다."))
     }
     
     // 1정류장 남음
     func announceOneStation() {
         guard isEnabled(SettingsKeys.busAlightVoice) else { return }
         vibrate(times: 2)
-        announce("이번 정류장에서 내려야해요. 하차벨을 눌러주세요")
+        announce(NSLocalizedString("이번 정류장에서 내려야해요. 하차벨을 눌러주세요", comment: "이번 정류장에서 내려야해요. 하차벨을 눌러주세요"))
     }
     
     // 승차 전, 곧 버스 도착 알림
     func announceBusArrival() {
         guard isEnabled(SettingsKeys.busArrivalVoice) else { return } 
         vibrate(times: 2)
-        announce("곧 버스가 도착합니다.")
+        announce(NSLocalizedString("곧 버스가 도착합니다.", comment: "곧 버스가 도착합니다."))
     }
 }
 

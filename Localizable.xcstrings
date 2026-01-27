@@ -431,6 +431,17 @@
         }
       }
     },
+    "곧 버스가 도착합니다." : {
+      "comment" : "곧 버스가 도착합니다.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soon the bus is arriving."
+          }
+        }
+      }
+    },
     "남았어요" : {
       "localizations" : {
         "en" : {
@@ -512,6 +523,17 @@
         }
       }
     },
+    "도보 길 안내를 시작합니다" : {
+      "comment" : "도보 길 안내를 시작합니다",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walk navigation is starting"
+          }
+        }
+      }
+    },
     "도보 안내 알림" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -560,6 +582,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "No arrival"
+          }
+        }
+      }
+    },
+    "도착지 부근입니다." : {
+      "comment" : "도착지 부근입니다.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "you are approaching your destination"
+          }
+        }
+      }
+    },
+    "도착지를 입력하세요" : {
+      "comment" : "도착지를 입력하세요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter destination"
           }
         }
       }
@@ -830,6 +874,17 @@
         }
       }
     },
+    "이번 정류장에서 내려야해요. 하차벨을 눌러주세요" : {
+      "comment" : "이번 정류장에서 내려야해요. 하차벨을 눌러주세요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This is your stop. Please press the stop button."
+          }
+        }
+      }
+    },
     "이번 정류장에서 내리세요" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -876,7 +931,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Please"
+            "value" : " "
           }
         }
       }
@@ -1031,6 +1086,17 @@
         }
       }
     },
+    "하차하기까지 두정류장 남았습니다." : {
+      "comment" : "하차하기까지 두정류장 남았습니다.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You have two stops left before getting off."
+          }
+        }
+      }
+    },
     "현위치" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1077,7 +1143,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "check the stop name"
+            "value" : "Check the stop name"
           }
         }
       }

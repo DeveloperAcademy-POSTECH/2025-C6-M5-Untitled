@@ -24,7 +24,7 @@ struct OriginTextField : View {
             Text("출발")
                 .foregroundColor(Color.subPoint)
                 .font(.prereg20Scaled)
-                .frame(width: 48.wScaled, alignment: .leading)
+                .frame(width: 60.wScaled, alignment: .leading)
 
             Divider()
                 .background(Color.greyDisable)

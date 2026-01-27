@@ -19,7 +19,7 @@ struct DestinationTextField : View {
             Text("도착")
                 .foregroundColor(Color.subPoint)
                 .font(.prereg20Scaled)
-                .frame(width: 48.wScaled, alignment: .leading)
+                .frame(width: 60.wScaled, alignment: .leading)
 
             Divider()
                 .background(Color.greyDisable)
@@ -39,7 +39,7 @@ struct DestinationTextField : View {
                 //        }
             }) {
                 HStack{
-                    Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
+                    Text(location?.name.isEmpty == false ? location?.name ?? "" : NSLocalizedString("도착지를 입력하세요", comment: "도착지를 입력하세요"))
                         .foregroundColor(Color.greyHeavy)
                         .font(.prereg20Scaled)
                         .lineLimit(1)
