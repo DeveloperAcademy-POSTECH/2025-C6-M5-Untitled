@@ -132,6 +132,57 @@
         }
       }
     },
+    "ETA_HOUR" : {
+      "comment" : "X시간",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%dhour"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간"
+          }
+        }
+      }
+    },
+    "ETA_HOUR_MIN" : {
+      "comment" : "X시간 Y분",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%dhour %dmin"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간 %d분"
+          }
+        }
+      }
+    },
+    "ETA_MIN" : {
+      "comment" : "X분",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%dmin"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d분"
+          }
+        }
+      }
+    },
     "subdesc_bus_arriving_soon" : {
       "comment" : "버스가 곧 도착해요",
       "localizations" : {
@@ -679,27 +730,6 @@
         }
       }
     },
-    "버스" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bus"
-          }
-        }
-      }
-    },
-    "버스 승차(도착) 알림" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bus boarding alerts"
-          }
-        }
-      }
-    },
     "버스 이동" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -718,6 +748,38 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bus exit alerts"
+          }
+        }
+      }
+    },
+    "번" : {
+      "comment" : "번",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " "
+          }
+        }
+      }
+    },
+    "버스" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus"
+          }
+        }
+      }
+    },
+    "버스 승차(도착) 알림" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus boarding alerts"
           }
         }
       }

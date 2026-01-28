@@ -431,7 +431,7 @@ extension BusRouteViewModel {
         
         // 숫자로 끝날 경우 "번" 추가
         if let lastChar = result.last, lastChar.isNumber {
-            result += "번"
+            result += NSLocalizedString("번", comment: "번")
         }
         
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
