@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		24BD58212F2B849C00826F57 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 24BD58202F2B849C00826F57 /* Secrets.plist */; };
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
 		92888BD32F20AEDD00A5AB0A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 92888BD22F20AEDD00A5AB0A /* InfoPlist.xcstrings */; };
 		92888BD52F20AF3B00A5AB0A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 92888BD42F20AF3B00A5AB0A /* Localizable.xcstrings */; };
@@ -42,6 +43,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		24BD58202F2B849C00826F57 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 		60A8CDA12E7CDFE500530B92 /* BusRoad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BusRoad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
 		92888BD22F20AEDD00A5AB0A /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
@@ -142,6 +144,7 @@
 				FEFDE9E52EB23C5200733205 /* ProgressWidget */,
 				FEFDE9E02EB23C5200733205 /* Frameworks */,
 				60A8CDA22E7CDFE500530B92 /* Products */,
+				24BD58202F2B849C00826F57 /* Secrets.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -261,6 +264,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				24BD58212F2B849C00826F57 /* Secrets.plist in Resources */,
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
 				92888BD52F20AF3B00A5AB0A /* Localizable.xcstrings in Resources */,
 				92888BD32F20AEDD00A5AB0A /* InfoPlist.xcstrings in Resources */,
