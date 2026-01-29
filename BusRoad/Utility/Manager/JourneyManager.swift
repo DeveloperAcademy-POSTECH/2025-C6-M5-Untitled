@@ -137,7 +137,10 @@ final class JourneyManager: ObservableObject {
                 continue
             }
         }
-        return Journey(totalTime: totalTime, nodes: nodes)
+        
+        let added_nodes = addEnglishNameInWalkRouteNode(nodes: nodes)
+        
+        return Journey(totalTime: totalTime, nodes: added_nodes)
     }
     
     private func parseBusNode(_ sub: [String: Any]) -> BusRouteNode? {
@@ -190,22 +193,8 @@ final class JourneyManager: ObservableObject {
             return nil
         }
         
-//        // 영어 정류장명 가져오기. 안 나오면 한국어로 대체
-//        var startEnglishName = startName
-//        var endEnglishName = endName
-//        if let firstId = busIds.first {
-//            print("aaa")
-//            print(firstId)
-//            startEnglishName = loadEnglishStationName(targetId: String(firstId)) ?? startName
-//        }
-//        if let endId = busIds.last {
-//            print("bbb")
-//            print(endId)
-//            endEnglishName = loadEnglishStationName(targetId: String(endId)) ?? endName
-//        }
-        
         // stations 정보 중 필요한 정보만 뽑아내기
-        let stationsInfo: [BusStation] = rawStations.compactMap { dict in
+        let stationsInfo: [BusStation] = rawStations.enumerated().compactMap { (i, dict) in
                     // 필수값만 guard로 체크 (arsID는 뺌)
                     guard
                         let index = toInt(dict["index"]),
@@ -222,7 +211,10 @@ final class JourneyManager: ObservableObject {
             let localStationId = toString(dict["localStationID"])
             
             // 영어 정류장명 가져오기. 안 나오면 한국어로 대체
-            let englishStationName = loadEnglishStationName(targetId: arsId) ?? stationName
+            var englishStationName: String?
+            if i == 0 || i == rawStations.count - 1 {
+                englishStationName = loadEnglishStationName(targetId: arsId) ?? stationName
+            }
             
             return BusStation(index: index,
                               stationId: stationId,
@@ -398,6 +390,52 @@ final class JourneyManager: ObservableObject {
             )
         }
         return nil
+    }
+    
+    private func addEnglishNameInWalkRouteNode(nodes: [RouteNode]) -> [RouteNode] {
+        var addedNodes: [RouteNode] = nodes
+        
+        for (i, node) in nodes.enumerated() {
+            switch node {
+            case .bus:
+                continue
+            case .walk(var walkNode):
+                if nodes.count == 1 {   // only 도보 노드라면 -> TODO: 최종목적지 영어로 바꾸기
+                    continue
+                } else if i == 0 { // 도보 노드가 처음이라면 -> 목적지를 다음 버스노드의 출발정류장 에서 가져오기
+                    switch nodes[i+1] {
+                    case .walk:
+                        fatalError("[ERROR] addEnglishNameInWalkRouteNode 설계 오류")
+                    case .bus(let b):
+                        let walkDestination = b.start.englishName ?? b.start.name
+                        walkNode.end.englishName = walkDestination
+                        
+                        addedNodes[i] = .walk(walkNode) // 수정한 값 넣기
+                    }
+                } else if (i == nodes.count - 1) {  // 도보 노드가 마지막이라면 -> TODO: 최종목적지 영어로 바꾸기
+                    continue
+                } else {    // 중간 도보 노드라면 -> 이전, 이후 버스노드에서 가져오기
+                    switch nodes[i-1] {
+                    case .walk:
+                        fatalError("[ERROR] addEnglishNameInWalkRouteNode 설계 오류")
+                    case .bus(let b):
+                        let walkOrigin = b.end.englishName ?? b.end.name
+                        walkNode.start.englishName = walkOrigin
+                    }
+                    switch nodes[i+1] {
+                    case .walk:
+                        fatalError("[ERROR] addEnglishNameInWalkRouteNode 설계 오류")
+                    case .bus(let b):
+                        let walkDestination = b.start.englishName ?? b.start.name
+                        walkNode.end.englishName = walkDestination
+                    }
+                    
+                    addedNodes[i] = .walk(walkNode) // 수정한 값 넣기
+                }
+            }
+        }
+        
+        return addedNodes
     }
     
     func clusterJourneys(_ journeys: [Journey]) -> [Journey] {

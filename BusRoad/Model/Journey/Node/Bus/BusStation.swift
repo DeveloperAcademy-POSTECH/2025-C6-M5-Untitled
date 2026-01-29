@@ -9,7 +9,7 @@ struct BusStation {
     let index: Int
     let stationId: Int
     let stationName: String
-    let englishStationName: String
+    let englishStationName: String?
     let stationCityCode: Int
     let localStationId: String?   // 필요한 게 stationId인지 localStationId인지 아직 몰라서 일단 다 가져옴
     let nodeId: String            // [주의] ODsayAPI에서는 arsID로 받아옴. 공공데이터에서의 정류장ID(nodeId)
