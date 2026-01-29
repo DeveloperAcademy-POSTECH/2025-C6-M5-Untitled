@@ -7,9 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		248377062ECDD30E0005F935 /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		603D50272ECAB88C00476C7F /* Secrets.plist in Resources */ = {isa = PBXBuildFile; fileRef = 931B33E52EA5DB1600ED7944 /* Secrets.plist */; };
 		60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */ = {isa = PBXBuildFile; fileRef = 60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */; };
+		92888BD32F20AEDD00A5AB0A /* InfoPlist.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 92888BD22F20AEDD00A5AB0A /* InfoPlist.xcstrings */; };
+		92888BD52F20AF3B00A5AB0A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 92888BD42F20AF3B00A5AB0A /* Localizable.xcstrings */; };
+		92888BD62F20AF3B00A5AB0A /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 92888BD42F20AF3B00A5AB0A /* Localizable.xcstrings */; };
 		931B33E92EA5DB5D00ED7944 /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 931B33E82EA5DB5D00ED7944 /* Lottie */; };
 		FEFDE9E22EB23C5200733205 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEFDE9E12EB23C5200733205 /* WidgetKit.framework */; };
 		FEFDE9E42EB23C5200733205 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FEFDE9E32EB23C5200733205 /* SwiftUI.framework */; };
@@ -43,6 +45,8 @@
 /* Begin PBXFileReference section */
 		60A8CDA12E7CDFE500530B92 /* BusRoad.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BusRoad.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = .swiftlint.yml; sourceTree = "<group>"; };
+		92888BD22F20AEDD00A5AB0A /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
+		92888BD42F20AF3B00A5AB0A /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		931B33E52EA5DB1600ED7944 /* Secrets.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Secrets.plist; sourceTree = "<group>"; };
 		FEFDE9DF2EB23C5200733205 /* ProgressWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ProgressWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FEFDE9E12EB23C5200733205 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -133,6 +137,8 @@
 		60A8CD982E7CDFE500530B92 = {
 			isa = PBXGroup;
 			children = (
+				92888BD22F20AEDD00A5AB0A /* InfoPlist.xcstrings */,
+				92888BD42F20AF3B00A5AB0A /* Localizable.xcstrings */,
 				60A8CDAF2E7CE7A100530B92 /* .swiftlint.yml */,
 				60A8CDA32E7CDFE500530B92 /* BusRoad */,
 				FEFDE9E52EB23C5200733205 /* ProgressWidget */,
@@ -259,7 +265,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				60A8CDB02E7CE7B900530B92 /* .swiftlint.yml in Resources */,
-				248377062ECDD30E0005F935 /* Secrets.plist in Resources */,
+				92888BD52F20AF3B00A5AB0A /* Localizable.xcstrings in Resources */,
+				92888BD32F20AEDD00A5AB0A /* InfoPlist.xcstrings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -267,6 +274,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				92888BD62F20AF3B00A5AB0A /* Localizable.xcstrings in Resources */,
 				603D50272ECAB88C00476C7F /* Secrets.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

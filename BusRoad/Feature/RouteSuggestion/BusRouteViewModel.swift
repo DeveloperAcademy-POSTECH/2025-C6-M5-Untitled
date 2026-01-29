@@ -265,7 +265,7 @@ class BusRouteViewModel: ObservableObject {
             let newLocation = try await LocationService.shared.forceRefreshLocation(timeout: 15)
             
             let locationInfo = LocationInfo(
-                name: "현위치",
+                name: NSLocalizedString("현위치", comment: "현위치"),
                 latitude: newLocation.coordinate.latitude,
                 longitude: newLocation.coordinate.longitude
             )
@@ -431,7 +431,7 @@ extension BusRouteViewModel {
         
         // 숫자로 끝날 경우 "번" 추가
         if let lastChar = result.last, lastChar.isNumber {
-            result += "번"
+            result += NSLocalizedString("번", comment: "번")
         }
         
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
