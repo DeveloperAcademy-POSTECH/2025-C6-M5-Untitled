@@ -5,6 +5,8 @@ struct BoardingLocation: View {
     var isActive: Bool = true
     @ObservedObject var viewModel = BusRouteViewModel()
     @Binding var nearestBusInfo: (busNo: String, arrivalText: String)?
+    
+    let languageCode = Locale.current.language.languageCode?.identifier
 
     var body: some View {
         VStack(alignment: .leading, spacing: 15.wScaled) {
@@ -16,7 +18,7 @@ struct BoardingLocation: View {
                     .foregroundColor(Color.greyNormal)
                 
                 MarqueeText(
-                    text: route.start.name,
+                    text: languageCode == "ko" ? route.start.name : route.start.englishName ?? route.start.name,
                     font: .presemi24Scaled,
                     uiFont: .presemi24Scaled,
                     startDelay: 1.0,

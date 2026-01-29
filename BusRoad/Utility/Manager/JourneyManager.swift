@@ -190,6 +190,20 @@ final class JourneyManager: ObservableObject {
             return nil
         }
         
+//        // 영어 정류장명 가져오기. 안 나오면 한국어로 대체
+//        var startEnglishName = startName
+//        var endEnglishName = endName
+//        if let firstId = busIds.first {
+//            print("aaa")
+//            print(firstId)
+//            startEnglishName = loadEnglishStationName(targetId: String(firstId)) ?? startName
+//        }
+//        if let endId = busIds.last {
+//            print("bbb")
+//            print(endId)
+//            endEnglishName = loadEnglishStationName(targetId: String(endId)) ?? endName
+//        }
+        
         // stations 정보 중 필요한 정보만 뽑아내기
         let stationsInfo: [BusStation] = rawStations.compactMap { dict in
                     // 필수값만 guard로 체크 (arsID는 뺌)
@@ -207,9 +221,13 @@ final class JourneyManager: ObservableObject {
             let arsId = toString(dict["arsID"]) ?? ""
             let localStationId = toString(dict["localStationID"])
             
+            // 영어 정류장명 가져오기. 안 나오면 한국어로 대체
+            let englishStationName = loadEnglishStationName(targetId: arsId) ?? stationName
+            
             return BusStation(index: index,
                               stationId: stationId,
                               stationName: stationName,
+                              englishStationName: englishStationName,
                               stationCityCode: stationCityCode,
                               localStationId: localStationId,
                               nodeId: arsId,
@@ -219,14 +237,51 @@ final class JourneyManager: ObservableObject {
         }
         
         return BusRouteNode(
-            start: LocationInfo(name: startName, latitude: startY, longitude: startX),
-            end: LocationInfo(name: endName, latitude: endY, longitude: endX),
+            start: LocationInfo(name: startName, englishName: stationsInfo.first?.englishStationName ?? startName, latitude: startY, longitude: startX),
+            end: LocationInfo(name: endName, englishName: stationsInfo.last?.englishStationName ?? endName, latitude: endY, longitude: endX),
             busNo: busNumbers,    // 버스 번호만 추출
             busId: busIds,
             stations: stationsInfo,
             travelTime: travelTime
         )
     }
+    
+    private func loadEnglishStationName(targetId: String) -> String? {
+        let normalizedTarget = String(format: "%05d", Int(targetId.trimmingCharacters(in: .whitespacesAndNewlines)) ?? 0)
+
+        guard let url = Bundle.main.url(forResource: "english_seoul_bus_stop", withExtension: "json"),
+              let data = try? Data(contentsOf: url),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let dataArray = json["DATA"] as? [[String: Any]] else {
+            return nil
+        }
+
+        let matched = dataArray.first { dict in
+            guard let rawId = dict["stops_id"] as? String else { return false }
+
+            let cleanedId = rawId
+                .replacingOccurrences(of: "\t", with: "")   // 실제 탭 제거
+                .replacingOccurrences(of: "\\t", with: "")  // 텍스트 \t 제거
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+
+            return cleanedId == normalizedTarget
+        }
+
+        guard let rawName = matched?["stops_nm"] as? String else {
+            print("[DEBUG] English name not found")
+            print("targetId: \(normalizedTarget)")
+            return nil
+        }
+
+        let cleanedName = rawName
+            .replacingOccurrences(of: "\t", with: "")
+            .replacingOccurrences(of: "\\t", with: "")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return cleanedName
+    }
+
+
     
     private func cleanBusNumber(_ busNo: String) -> String {
         var result = busNo

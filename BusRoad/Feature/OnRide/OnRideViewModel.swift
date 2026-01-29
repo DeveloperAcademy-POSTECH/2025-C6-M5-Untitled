@@ -7,6 +7,7 @@ final class OnRideViewModel: ObservableObject {
     @Published var journey: Journey?
     @Published var index: Int?
     @Published var stopName: String = ""
+    @Published var englishStopName: String = ""
     @Published var busLegIndex: Int = 0 {
         didSet {
             setupBusLeg(busLegIndex: busLegIndex)
@@ -33,6 +34,7 @@ final class OnRideViewModel: ObservableObject {
         
         if let alight = journey.alightStop(ofBusLeg: busLegIndex) {
             self.stopName = alight.name
+            self.englishStopName = alight.englishName ?? self.stopName
         }
     }
 }

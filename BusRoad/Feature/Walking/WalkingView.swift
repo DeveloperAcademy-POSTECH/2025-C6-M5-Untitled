@@ -6,6 +6,8 @@ struct WalkingView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @AppStorage("isFirstLaunching") var isFirstLaunching: Bool = true
     
+    let languageCode = Locale.current.language.languageCode?.identifier
+    
     var body: some View {
         ZStack {
             Color(.primarywhite).ignoresSafeArea()
@@ -45,7 +47,7 @@ struct WalkingView: View {
                                         .foregroundColor(.primaryHeavy)
                                     
                                     MarqueeText(
-                                        text: node.end.name,
+                                        text: languageCode == "ko" ? node.end.name : node.end.englishName ?? node.end.name,
                                         font: .presemi36Scaled,
                                         uiFont: .presemi36Scaled,
                                         startDelay: 1.0,

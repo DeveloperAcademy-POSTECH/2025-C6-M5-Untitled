@@ -113,6 +113,7 @@ struct BeforeRideView: View {
                                 BeforeRideCard(
                                     viewModel: viewModel,
                                     waitingStopName: busNode.stations[0].stationName,
+                                    englishWaitingStopName: busNode.stations[0].englishStationName,
                                     waitingBusNo: busNode.busNo
                                 )
                                 .padding(.horizontal, 24.wScaled)
