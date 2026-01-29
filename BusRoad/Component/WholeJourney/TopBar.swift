@@ -66,12 +66,12 @@ struct TopBar: View {
         switch currentNode {
         case .walk(let walkNode):
             if index == 0 {
-                return "도보 이동"
+                return NSLocalizedString("도보 이동", comment: "도보 이동")
             } else {
-                return "도보 이동"
+                return NSLocalizedString("도보 이동", comment: "도보 이동")
             }
         case .bus:
-            return "버스 이동"
+            return NSLocalizedString("버스 이동", comment: "버스 이동")
         }
     }
 }

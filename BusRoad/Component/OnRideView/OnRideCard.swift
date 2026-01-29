@@ -4,10 +4,12 @@ import Lottie
 struct OnRideCard: View {
     
     let busStopName: String
+    let englishBusStopName: String
     let canAlight: Bool
     let progress: CGFloat
     let remainingStations: Int
     let hasArrived: Bool
+    let languageCode = Locale.current.language.languageCode?.identifier
     
     var body: some View {
         ZStack {
@@ -26,7 +28,7 @@ struct OnRideCard: View {
                                 .foregroundStyle(canAlight ? .subLight : .primaryHeavy)
                             
                             MarqueeText(
-                                text: busStopName,
+                                text: languageCode == "ko" ? busStopName : englishBusStopName,
                                 font: .presemi36Scaled,
                                 uiFont: .presemi36Scaled,
                                 startDelay: 1.0,
@@ -151,6 +153,7 @@ struct BusStopProgress: View {
 #Preview("하차 가능 - 3정류장 남음") {
     OnRideCard(
         busStopName: "강남역 9번 출구",
+        englishBusStopName: "english stop name",
         canAlight: true,
         progress: 0.7,
         remainingStations: 3,
@@ -162,6 +165,7 @@ struct BusStopProgress: View {
 #Preview("하차 불가 - 5정류장 남음") {
     OnRideCard(
         busStopName: "서울역 12번 출구 앞",
+        englishBusStopName: "english stop name",
         canAlight: false,
         progress: 0.4,
         remainingStations: 5,
@@ -173,6 +177,7 @@ struct BusStopProgress: View {
 #Preview("도착 완료") {
     OnRideCard(
         busStopName: "역삼역 2번 출구",
+        englishBusStopName: "english stop name",
         canAlight: true,
         progress: 1.0,
         remainingStations: 0,
@@ -184,6 +189,7 @@ struct BusStopProgress: View {
 #Preview("시작 - 10정류장 남음") {
     OnRideCard(
         busStopName: "포항시청 앞 정류장",
+        englishBusStopName: "english stop name",
         canAlight: false,
         progress: 0.1,
         remainingStations: 10,
@@ -195,6 +201,7 @@ struct BusStopProgress: View {
 #Preview("긴 이름 정류장") {
     OnRideCard(
         busStopName: "포항공과대학교 제2학생회관 앞 정류장",
+        englishBusStopName: "english stop name",
         canAlight: true,
         progress: 0.85,
         remainingStations: 1,

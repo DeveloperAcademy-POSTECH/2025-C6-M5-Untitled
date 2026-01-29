@@ -78,11 +78,11 @@ struct SettingsView: View {
                 .zIndex(1)
                 // 카드
                 VStack(spacing: 0) {
-                    settingRow(title: "버스 승차(도착) 알림", isOn: $busArrivalVoiceEnabled)
+                    settingRow(title: NSLocalizedString("버스 승차(도착) 알림", comment: "버스 승차(도착) 알림"), isOn: $busArrivalVoiceEnabled)
                     divider()
-                    settingRow(title: "버스 하차 알림", isOn: $busAlightVoiceEnabled)
+                    settingRow(title: NSLocalizedString("버스 하차 알림", comment: "버스 하차 알림"), isOn: $busAlightVoiceEnabled)
                     divider()
-                    settingRow(title: "도보 안내 알림", isOn: $walkingVoiceEnabled)
+                    settingRow(title: NSLocalizedString("도보 안내 알림", comment: "도보 안내 알림"), isOn: $walkingVoiceEnabled)
                 }
                 .background(
                     RoundedRectangle(cornerRadius: 8)

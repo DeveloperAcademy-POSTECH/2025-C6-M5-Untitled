@@ -19,7 +19,8 @@ struct DestinationTextField : View {
             Text("도착")
                 .foregroundColor(Color.subPoint)
                 .font(.prereg20Scaled)
-            
+                .frame(width: 60.wScaled, alignment: .leading)
+
             Divider()
                 .background(Color.greyDisable)
                 .frame(width: 1)
@@ -38,7 +39,7 @@ struct DestinationTextField : View {
                 //        }
             }) {
                 HStack{
-                    Text(location?.name.isEmpty == false ? location?.name ?? "" : "도착지를 입력하세요")
+                    Text(location?.name.isEmpty == false ? location?.name ?? "" : NSLocalizedString("도착지를 입력하세요", comment: "도착지를 입력하세요"))
                         .foregroundColor(Color.greyHeavy)
                         .font(.prereg20Scaled)
                         .lineLimit(1)
@@ -63,7 +64,7 @@ struct DestinationTextField : View {
 //}
 
 #Preview {
-    @Previewable @State var location: LocationInfo? = .init(name: "아주 긴 텍스트는 어떻게 보이는지 보기위해서 아주 긴 텍스트를 입력합니다.", latitude: 0, longitude: 0)
+    @Previewable @State var location: LocationInfo? = .init(name: "아주 긴 텍스트는 어떻게 보이는지 보기위해서 아주 긴 텍스트를 입력합니다.", englishName: "What does this text look like in a long way", latitude: 0, longitude: 0)
     @Previewable @State var locationType: LocationType = .origin
     @Previewable @State var isSearchMode: Bool = false
     @Previewable @StateObject var coordinator: NavigationCoordinator = .init()

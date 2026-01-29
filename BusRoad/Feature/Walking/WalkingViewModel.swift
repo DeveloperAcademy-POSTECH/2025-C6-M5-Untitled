@@ -388,7 +388,7 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             if !hasAnnouncedNearArrival {
                 hasAnnouncedNearArrival = true
                 vibrateIfEnabled(times: 2)
-                speakIfEnabled("도착지 부근입니다.")
+                speakIfEnabled(NSLocalizedString("도착지 부근입니다.", comment: "도착지 부근입니다."))
             }
             
             stopAllAnnouncements()
@@ -540,10 +540,10 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             guard let self = self else { return }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                let text = "도보 길 안내를 시작합니다"
+                let text = NSLocalizedString("도보 길 안내를 시작합니다", comment: "도보 길 안내를 시작합니다")
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                    let text = "도보 길 안내를 시작합니다"
+                    let text = NSLocalizedString("도보 길 안내를 시작합니다", comment: "도보 길 안내를 시작합니다")
                     self.speakIfEnabled(text)   // ✅ 도보 음성 토글 반영
                     print("🔊 시작 안내: \(text)")
                 }
