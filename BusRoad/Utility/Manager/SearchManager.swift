@@ -20,10 +20,14 @@ final class SearchManager: ObservableObject {
     // 의존 서비스
     private let service: KakaoPlaceSearchService
     private let locationService = LocationService.shared
+    private let googleService: GooglePlaceSearchService
+    
+    private let languageCode = Locale.current.language.languageCode?.identifier
     
     
-    private init(service: KakaoPlaceSearchService? = nil) {
+    private init(service: KakaoPlaceSearchService? = nil, googleService: GooglePlaceSearchService? = nil) {
         self.service = service ?? KakaoPlaceSearchService()
+        self.googleService = googleService ?? GooglePlaceSearchService()
     }
     
     func reset() {
@@ -109,12 +113,59 @@ final class SearchManager: ObservableObject {
         }
     }
     
+    func searchInEnglish() async {
+        errorMessage = nil
+        let kw = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !kw.isEmpty else { results = []; return }
+        
+        hasSubmitted = true
+        isLoading = true
+        defer { isLoading = false }
+        
+        do {
+            print("[SearchManager] Google Text Search 시작...")
+            
+            let coord = try? await locationService.getQuickCoordinate(maxAge: 600)
+            
+            let places: [GooglePlace]
+            if let coord = coord {
+                places = try await googleService.searchByText(
+                    query: kw,
+                    language: "en",
+                    latitude: coord.latitude,
+                    longitude: coord.longitude,
+                    radius: 5000
+                )
+            } else {
+                places = try await googleService.searchByText(
+                    query: kw,
+                    language: "en"
+                )
+            }
+            
+            print("[SearchManager] 검색 결과: \(places.count)개")
+            
+            results = places.compactMap { $0.toSummary() }
+            
+        } catch {
+            print("[SearchManager] 에러: \(error.localizedDescription)")
+            errorMessage = error.localizedDescription
+            results = []
+        }
+    }
     
     // 음성검색: 전환 신호 먼저 → 검색
     func searchWithVoiceResult(_ text: String) async {
         query = text
         shouldShowSearchMode = true
-        await search()
+        switch languageCode {
+        case "en":
+            await searchInEnglish()
+        case "ko":
+            await search()
+        default:
+            await searchInEnglish()
+        }
         print("[SearchManager] After search - hasSubmitted: \(hasSubmitted)")
     }
     

@@ -7,6 +7,7 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     static let shared = VoiceAnnouncementManager()
     
     private let synthesizer = AVSpeechSynthesizer()
+    private let languageCode = Locale.current.language.languageCode?.identifier
     
     private func isEnabled(_ key: String, default defaultValue: Bool = true) -> Bool {
         (UserDefaults.standard.object(forKey: key) as? Bool) ?? defaultValue
@@ -51,7 +52,8 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     // 음성으로 말하기
     func announce(_ message: String) {
         let utterance = AVSpeechUtterance(string: message)
-        utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
+        let language = languageCode == "en" ? "en-US" : "ko-KR"     // 언어 설정
+        utterance.voice = AVSpeechSynthesisVoice(language: language)
         utterance.rate = 0.5  // 말하는 속도 (0.5)
         
         print("[음성안내] '\(message)'")
