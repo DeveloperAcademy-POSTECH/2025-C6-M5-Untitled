@@ -189,7 +189,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Soon arriving"
+            "value" : "The bus is arriving soon."
           }
         },
         "ko" : {
@@ -325,7 +325,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Near the destination"
+            "value" : "You’re near your destination"
           }
         },
         "ko" : {
@@ -498,7 +498,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " remaining"
+            "value" : " left"
           }
         }
       }
@@ -508,7 +508,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "remaining"
+            "value" : "left"
           }
         }
       }
@@ -538,7 +538,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search a different place"
+            "value" : "Search again"
           }
         }
       }
@@ -580,7 +580,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Walk navigation is starting"
+            "value" : "Starting walking directions."
           }
         }
       }
@@ -725,29 +725,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Set as destination"
-          }
-        }
-      }
-    },
-    "버스 이동" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bus"
-          }
-        }
-      }
-    },
-    "버스 하차 알림" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bus exit alerts"
+            "value" : "Confirm"
           }
         }
       }
@@ -780,6 +758,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bus boarding alerts"
+          }
+        }
+      }
+    },
+    "버스 이동" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus"
+          }
+        }
+      }
+    },
+    "버스 하차 알림" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus exit alerts"
           }
         }
       }
@@ -839,7 +839,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voice alerts won’t play when Silent Mode is on"
+            "value" : "Voice alerts are muted in Silent Mode"
           }
         }
       }
@@ -900,7 +900,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Turn off Silent Mode to hear voice alerts"
+            "value" : "Turn off Silent Mode to hear them"
           }
         }
       }
@@ -942,7 +942,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This is your stop. Please press the stop button."
+            "value" : "You need to get off at this stop. Please press the stop button."
           }
         }
       }
@@ -973,7 +973,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Search for a place"
+            "value" : "Search place"
           }
         }
       }
@@ -1154,7 +1154,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "You have two stops left before getting off."
+            "value" : "Two stops remaining until you get off."
           }
         }
       }
@@ -1195,7 +1195,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Okay"
+            "value" : "Ok"
           }
         }
       }
