@@ -36,6 +36,7 @@ struct OnRideView: View {
                     VStack(spacing: 0) {
                         OnRideCard(
                             busStopName: viewModel.stopName,
+                            englishBusStopName: viewModel.englishStopName,
                             canAlight: proximityManager.canAlight,
                             progress: proximityManager.progress,
                             remainingStations: proximityManager.remainingStations,

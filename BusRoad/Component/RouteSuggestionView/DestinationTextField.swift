@@ -64,7 +64,7 @@ struct DestinationTextField : View {
 //}
 
 #Preview {
-    @Previewable @State var location: LocationInfo? = .init(name: "아주 긴 텍스트는 어떻게 보이는지 보기위해서 아주 긴 텍스트를 입력합니다.", latitude: 0, longitude: 0)
+    @Previewable @State var location: LocationInfo? = .init(name: "아주 긴 텍스트는 어떻게 보이는지 보기위해서 아주 긴 텍스트를 입력합니다.", englishName: "What does this text look like in a long way", latitude: 0, longitude: 0)
     @Previewable @State var locationType: LocationType = .origin
     @Previewable @State var isSearchMode: Bool = false
     @Previewable @StateObject var coordinator: NavigationCoordinator = .init()
