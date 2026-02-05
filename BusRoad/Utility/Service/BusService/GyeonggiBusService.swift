@@ -5,7 +5,7 @@ class GyeonggiBusService: BusServiceType {
     private let apiKey: String
     private let baseURL = "https://apis.data.go.kr/6410000/busarrivalservice/v2"
 
-    init(apiKey: String = Secrets.tagoApiKey) {
+    init(apiKey: String = Secrets.gyeonggiApiKey) {
         self.apiKey = apiKey
     }
 
