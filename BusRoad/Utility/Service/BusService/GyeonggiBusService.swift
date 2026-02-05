@@ -33,28 +33,20 @@ class GyeonggiBusService: BusServiceType {
             "format": "json"
         ]
 
-        print("[경기 도착정보 조회] stationId: \(stationId)")
-
         let data = try await request(urlString: urlString, params: params)
+        let decoded = try JSONDecoder().decode(GyeonggiArrivalResponse.self, from: data)
+        let header = decoded.response.msgHeader
 
-        // 디버깅용 원본 JSON 출력
-        if let jsonString = String(data: data, encoding: .utf8) {
-            print("[경기 도착정보 응답 원본]")
-            print(jsonString.prefix(1000))
-        }
-
-        let response = try JSONDecoder().decode(GyeonggiArrivalResponse.self, from: data)
-
-        guard response.msgHeader.resultCode == 0 else {
-            print("[경기 도착정보] API 오류: \(response.msgHeader.resultMessage)")
+        guard header.resultCode == 0 else {
+            print("[경기 도착정보] API 오류: \(header.resultMessage)")
             throw NSError(
                 domain: "GyeonggiBusService",
-                code: response.msgHeader.resultCode,
-                userInfo: [NSLocalizedDescriptionKey: response.msgHeader.resultMessage]
+                code: header.resultCode,
+                userInfo: [NSLocalizedDescriptionKey: header.resultMessage]
             )
         }
 
-        guard let body = response.msgBody,
+        guard let body = decoded.response.msgBody,
               let arrivalList = body.busArrivalList else {
             print("[경기 도착정보] 도착 정보 없음")
             return []
@@ -62,17 +54,15 @@ class GyeonggiBusService: BusServiceType {
 
         var resultItems: [BusArrivalItem] = []
 
-        for item in arrivalList.items {
+        for item in arrivalList {
             // 첫 번째 버스
             if let busItem1 = item.toBusArrivalItem1() {
                 resultItems.append(busItem1)
-                print("  🚌 1번째: \(busItem1.routeno) - \(busItem1.arrtime)초")
             }
 
             // 두 번째 버스
             if let busItem2 = item.toBusArrivalItem2() {
                 resultItems.append(busItem2)
-                print("  🚌 2번째: \(busItem2.routeno) - \(busItem2.arrtime)초")
             }
         }
 
@@ -92,27 +82,26 @@ class GyeonggiBusService: BusServiceType {
             "format": "json"
         ]
 
-        print("[경기 특정노선 도착정보] stationId: \(stationId), routeId: \(routeId), staOrder: \(staOrder)")
-
         let data = try await request(urlString: urlString, params: params)
-        let response = try JSONDecoder().decode(GyeonggiArrivalResponse.self, from: data)
+        let decoded = try JSONDecoder().decode(GyeonggiArrivalResponse.self, from: data)
+        let header = decoded.response.msgHeader
 
-        guard response.msgHeader.resultCode == 0 else {
+        guard header.resultCode == 0 else {
             throw NSError(
                 domain: "GyeonggiBusService",
-                code: response.msgHeader.resultCode,
-                userInfo: [NSLocalizedDescriptionKey: response.msgHeader.resultMessage]
+                code: header.resultCode,
+                userInfo: [NSLocalizedDescriptionKey: header.resultMessage]
             )
         }
 
-        guard let body = response.msgBody,
+        guard let body = decoded.response.msgBody,
               let arrivalList = body.busArrivalList else {
             return []
         }
 
         var resultItems: [BusArrivalItem] = []
 
-        for item in arrivalList.items {
+        for item in arrivalList {
             if let busItem1 = item.toBusArrivalItem1() {
                 resultItems.append(busItem1)
             }
