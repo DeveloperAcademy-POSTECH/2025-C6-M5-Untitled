@@ -127,18 +127,28 @@ class GyeonggiBusService: BusServiceType {
     // MARK: - 네트워크 요청
 
     private func request(urlString: String, params: [String: String]) async throws -> Data {
-        var components = URLComponents(string: urlString)
-        components?.queryItems = params.map { URLQueryItem(name: $0.key, value: $0.value) }
+        // serviceKey의 + 문자를 %2B로 인코딩하기 위해 URL을 직접 구성
+        var queryParts: [String] = []
+        for (key, value) in params {
+            if key == "serviceKey" {
+                // serviceKey는 +, = 등 특수문자를 명시적으로 percent encoding
+                let encoded = value.addingPercentEncoding(withAllowedCharacters: .alphanumerics) ?? value
+                queryParts.append("\(key)=\(encoded)")
+            } else {
+                let encoded = value.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? value
+                queryParts.append("\(key)=\(encoded)")
+            }
+        }
 
-        guard let url = components?.url else {
+        let fullURLString = urlString + "?" + queryParts.joined(separator: "&")
+
+        guard let url = URL(string: fullURLString) else {
             throw NSError(
                 domain: "GyeonggiBusService",
                 code: -1,
                 userInfo: [NSLocalizedDescriptionKey: "잘못된 URL"]
             )
         }
-
-        print("요청 URL: \(url.absoluteString)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
