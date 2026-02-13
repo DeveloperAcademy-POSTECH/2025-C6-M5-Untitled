@@ -18,6 +18,7 @@ final class MainSearchViewModel: ObservableObject {
     let store = LocationStore()
     
     private let kHasShownVoiceHint = "hasShownVoiceHint_v1"
+    private let languageCode = Locale.current.language.languageCode?.identifier
     private var bag = Set<AnyCancellable>()
     
     let searchManager = SearchManager.shared
@@ -55,7 +56,8 @@ final class MainSearchViewModel: ObservableObject {
     }
     
     func search() async {
-        await searchManager.search()
+        languageCode == "ko" ? await searchManager.search() : await searchManager.searchInEnglish()
+//        await searchManager.search()
     }
     
     func resetSearchMode() {

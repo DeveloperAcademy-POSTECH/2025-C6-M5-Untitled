@@ -36,6 +36,7 @@ class BusRouteViewModel: ObservableObject {
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
     private let arrivalInfoManager: ArrivalInfoManager
+    private let languageCode = Locale.current.language.languageCode?.identifier
     private var bag = Set<AnyCancellable>()
     
     init(journeyManager: JourneyManager = .shared, searchManager: SearchManager = .shared, arrivalInfoManager: ArrivalInfoManager = .shared) {
@@ -75,7 +76,9 @@ class BusRouteViewModel: ObservableObject {
     var isSearchLoading: Bool { searchManager.isLoading }
     var searchErrorMessage: String? { searchManager.errorMessage }
     
-    func search() async { await searchManager.search() }
+    func search() async {
+        languageCode == "ko" ? await searchManager.search() : await searchManager.searchInEnglish()
+    }
     
     func resetSearchMode() { searchManager.resetSearchMode() }
     
