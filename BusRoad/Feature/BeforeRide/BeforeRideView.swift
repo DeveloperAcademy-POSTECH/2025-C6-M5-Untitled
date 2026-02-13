@@ -9,7 +9,9 @@ struct BeforeRideView: View {
     @StateObject private var viewModel = BeforeRideViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @EnvironmentObject var proximityManager: AlightProximityManager
-    
+
+    private let languageCode = Locale.current.language.languageCode?.identifier
+
     var body: some View {
         
         ZStack {
@@ -83,9 +85,10 @@ struct BeforeRideView: View {
                                             
                                         if let index = viewModel.index, let journey = viewModel.journey,
                                             case let .bus(busnode) = journey.nodes[index] {
+                                            let destination = languageCode == "ko" ? busnode.end.name : busnode.end.englishName ?? busnode.end.name
                                             await ProgressLiveActivityManager.shared.updateStage(
                                                 nextStage: RouteStage.onBus.rawValue,
-                                                nextDestination: busnode.end.name,
+                                                nextDestination: destination,
                                                 totalDistance: 10,
                                                 remainingBusStops: proximityManager.remainingStations,
                                                 timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
@@ -134,9 +137,10 @@ struct BeforeRideView: View {
                                     
                                     if let index = viewModel.index, let journey = viewModel.journey,
                                         case let .bus(busnode) = journey.nodes[index] {
+                                        let destination = languageCode == "ko" ? busnode.end.name : busnode.end.englishName ?? busnode.end.name
                                         await ProgressLiveActivityManager.shared.updateStage(
                                             nextStage: RouteStage.onBus.rawValue,
-                                            nextDestination: busnode.end.name,
+                                            nextDestination: destination,
                                             totalDistance: 10,
                                             remainingBusStops: proximityManager.remainingStations,
                                             timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
@@ -178,15 +182,16 @@ struct BeforeRideView: View {
                 case let .bus(busNode) = journey.nodes[index] {
                 
                 // Live Activity를 waitingForBus 단계로 업데이트하는 로직 추가
+                let destination = languageCode == "ko" ? busNode.start.name : busNode.start.englishName ?? busNode.start.name
                 Task {
                     await ProgressLiveActivityManager.shared.updateStage(
                         nextStage: "waitingForBus", // RouteStage.waitingForBus.rawValue
-                        nextDestination: busNode.start.name,  // 승차 정류장 이름
+                        nextDestination: destination,  // 승차 정류장 이름
                         totalDistance: 0,
-                        remainingBusStops: proximityManager.remainingStations, 
+                        remainingBusStops: proximityManager.remainingStations,
                         timeTillBusArrival: ArrivalInfoManager.shared.lastNearestArrTime ?? 0
                     )
-                    print("[DEBUG] BeforeRideView - Live Activity waitingForBus 업데이트 완료. Destination: \(busNode.start.name)")
+                    print("[DEBUG] BeforeRideView - Live Activity waitingForBus 업데이트 완료. Destination: \(destination)")
                 }
             }
             print("[BeforeRideView] 정류장 추적 시작")
