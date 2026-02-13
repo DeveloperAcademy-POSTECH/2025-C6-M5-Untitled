@@ -80,8 +80,8 @@ struct WalkingView: View {
                                             
                                             if journey.nodes.indices.contains(index + 1),
                                                case let .bus(busnode) = journey.nodes[index + 1] {
-                                                let boardingStopName = busnode.start.name
-                                                
+                                                let boardingStopName = languageCode == "ko" ? busnode.start.name : busnode.start.englishName ?? busnode.start.name
+
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                                     Task {
                                                         await ProgressLiveActivityManager.shared.updateStage(
