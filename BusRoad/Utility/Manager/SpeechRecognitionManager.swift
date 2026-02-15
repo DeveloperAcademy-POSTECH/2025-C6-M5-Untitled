@@ -14,7 +14,11 @@ class SpeechRecognitionManager: ObservableObject {
     @Published var errorMessage: String?    // 에러 메시지
     
     // MARK: - 프라이빗 프로퍼티들
-    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "ko-KR"))
+    private let speechRecognizer: SFSpeechRecognizer? = {
+        let languageCode = Locale.current.language.languageCode?.identifier ?? "en"
+        let localeIdentifier = languageCode == "ko" ? "ko-KR" : "en-US"
+        return SFSpeechRecognizer(locale: Locale(identifier: localeIdentifier))
+    }()
     private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
     private var recognitionTask: SFSpeechRecognitionTask?
     private let audioEngine = AVAudioEngine()
