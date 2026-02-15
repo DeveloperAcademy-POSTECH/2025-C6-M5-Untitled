@@ -245,6 +245,10 @@ extension Font {
         return .preScaled(type: .regular, size: 16)
     }
     
+    static var prereg12Scaled: Font {
+        return .preScaled(type: .regular, size: 12)
+    }
+    
     // 페이퍼로지 - 스케일링 버전
     static var papersemi36Scaled: Font {
         return .paperScaled(type: .semibold, size: 36)

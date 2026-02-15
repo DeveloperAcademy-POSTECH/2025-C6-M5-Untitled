@@ -397,9 +397,9 @@ extension BusRouteViewModel {
         let minutes = item.arrtime / 60
         let arrivalText: String
         if minutes < 1 {
-            arrivalText = "곧 도착"
+            arrivalText = String(localized: "곧 도착")
         } else {
-            arrivalText = "\(minutes)분 후"
+            arrivalText = String(localized: "\(minutes)분 후")
         }
         
         self.arrivalText = arrivalText
