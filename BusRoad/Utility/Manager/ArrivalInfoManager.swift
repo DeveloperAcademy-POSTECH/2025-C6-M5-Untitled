@@ -450,7 +450,9 @@ final class ArrivalInfoManager: ObservableObject {
     
     private func updateUI(with item: BusArrivalItem) {
         let minutes = item.arrtime / 60
-        let text = minutes < 1 ? "곧 도착" : "\(minutes)분 후"
+        let text = minutes < 1
+            ? String(localized: "곧 도착")
+            : String(localized: "\(minutes)분 후")
         let wasArrivingSoon = isArrivingSoon
         
         isArrivingSoon = minutes < 2
@@ -538,14 +540,15 @@ final class ArrivalInfoManager: ObservableObject {
                 )
             }
             
+            let targetBusNumbers = busRouteNode.busNo.map { cleanBusNumber($0) }
             let filtered = allArrivals.filter { arrival in
-                busRouteNode.busNo.contains(cleanBusNumber(arrival.routeno))
+                targetBusNumbers.contains(cleanBusNumber(arrival.routeno))
             }
-            
+
             if let nearest = filtered.min(by: { $0.arrtime < $1.arrtime }) {
                 return nearest
             }
-            
+
             return nil
             
         } catch {
