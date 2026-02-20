@@ -34,20 +34,20 @@ struct BoardingLocation: View {
                     .font(.premed16Scaled)
                     .foregroundColor(Color.greyNormal)
                 
-                HStack(spacing: 8.wScaled) {
+                HStack(alignment: .lastTextBaseline, spacing: 8.wScaled) {
                     if let info = nearestBusInfo {
                         Text(info.busNo)
                             .font(.presemi24Scaled)
                             .foregroundColor(.primaryHeavy)
                         Text(info.arrivalText)
-                            .font(.prereg16Scaled)
+                            .font(.prereg12Scaled)
                             .foregroundColor(Color.greyNormal)
                     } else {
                             Text(route.busNo[0])
                                 .font(.presemi24Scaled)
                                 .foregroundColor(.greyHeavy)
                             Text("도착 예정 정보 없음")
-                                .font(.prereg16Scaled)
+                                .font(.prereg12Scaled)
                                 .foregroundColor(Color.greyNormal)
                     }
                 }

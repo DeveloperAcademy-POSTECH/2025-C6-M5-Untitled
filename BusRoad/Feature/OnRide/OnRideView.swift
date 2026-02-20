@@ -4,7 +4,9 @@ struct OnRideView: View {
     @StateObject private var viewModel = OnRideViewModel()
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @EnvironmentObject var proximityManager: AlightProximityManager
-    
+
+    private let languageCode = Locale.current.language.languageCode?.identifier
+
     var body: some View {
         ZStack {
             Color(.primarywhite)
@@ -64,7 +66,7 @@ struct OnRideView: View {
                                 switch nextNode {
                                 case .bus(let busNode):
                                     // 다음 버스 기다리는 상태
-                                    let boardingStopName = busNode.start.name
+                                    let boardingStopName = languageCode == "ko" ? busNode.start.name : busNode.start.englishName ?? busNode.start.name
                                     Task {
                                         await ProgressLiveActivityManager.shared.updateStage(
                                             nextStage: RouteStage.waitingForBus.rawValue,
@@ -75,32 +77,33 @@ struct OnRideView: View {
                                         )
                                     }
                                     print("[DEBUG] OnRideView - 환승 waitingForBus 업데이트, destination: \(boardingStopName)")
-                                    
+
                                 case .walk(let walkNode):
+                                    let walkDestination = languageCode == "ko" ? walkNode.end.name : walkNode.end.englishName ?? walkNode.end.name
                                     if nextIndex == journey.nodes.count - 1 {
                                         // 마지막 도보 → 목적지
                                         Task {
                                             await ProgressLiveActivityManager.shared.updateStage(
                                                 nextStage: RouteStage.walkingToDestination.rawValue,
-                                                nextDestination: walkNode.end.name,
+                                                nextDestination: walkDestination,
                                                 totalDistance: Double(WalkingViewModel().tmapTotalDistance),
                                                 remainingBusStops: 0,
                                                 timeTillBusArrival: 0
                                             )
                                         }
-                                        print("[DEBUG] OnRideView - walkingToDestination 업데이트, destination: \(walkNode.end.name)")
+                                        print("[DEBUG] OnRideView - walkingToDestination 업데이트, destination: \(walkDestination)")
                                     } else {
                                         // 환승을 위한 도보 → 다음 승차 정류장
                                         Task {
                                             await ProgressLiveActivityManager.shared.updateStage(
                                                 nextStage: RouteStage.walkingToBus.rawValue,
-                                                nextDestination: walkNode.end.name,
+                                                nextDestination: walkDestination,
                                                 totalDistance: Double(WalkingViewModel().tmapTotalDistance),
                                                 remainingBusStops: 0,
                                                 timeTillBusArrival: 0
                                             )
                                         }
-                                        print("[DEBUG] OnRideView - 환승 walkingToBus 업데이트, destination: \(walkNode.end.name)")
+                                        print("[DEBUG] OnRideView - 환승 walkingToBus 업데이트, destination: \(walkDestination)")
                                     }
                                 }
                             } label: {

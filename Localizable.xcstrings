@@ -37,6 +37,16 @@
         }
       }
     },
+    "%lld분 후" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        }
+      }
+    },
     "%lld정류장 " : {
       "localizations" : {
         "en" : {
