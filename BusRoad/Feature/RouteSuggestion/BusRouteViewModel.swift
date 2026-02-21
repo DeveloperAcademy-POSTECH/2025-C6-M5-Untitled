@@ -32,7 +32,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var isRefreshingLocation: Bool = false
     
     
-    let store = LocationStore()
+    let store = LocationStore.shared
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
     private let arrivalInfoManager: ArrivalInfoManager

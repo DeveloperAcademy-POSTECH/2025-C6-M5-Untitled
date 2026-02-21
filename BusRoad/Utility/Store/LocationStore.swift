@@ -8,13 +8,15 @@ import SwiftUI
 import Combine
 
 class LocationStore: ObservableObject {
+    static let shared = LocationStore()
+
     @Published var locations: [PlaceSummary] = [] {
         didSet { save() }
     }
-    
+
     private let key = "savedLocations"
-    
-    init() {
+
+    private init() {
         load()
     }
     
