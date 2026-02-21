@@ -155,10 +155,11 @@ class BusRouteViewModel: ObservableObject {
                     return
                 }
                 
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("📬 [ODsay API 응답 원본]")
-                    print(jsonString)
-                }
+                // 원본 JSON 출력 주석처리
+//                if let jsonString = String(data: data, encoding: .utf8) {
+//                    print("📬 [ODsay API 응답 원본]")
+//                    print(jsonString)
+//                }
                 
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
