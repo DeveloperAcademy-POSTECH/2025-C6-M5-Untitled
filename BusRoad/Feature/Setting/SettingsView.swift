@@ -35,7 +35,10 @@ struct SettingsView: View {
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 20.wScaled, height: 20.wScaled)
                                 .foregroundColor(.greyNormal)
+                                .padding(12.wScaled)
+                                .contentShape(Rectangle())
                         }
+                        .padding(-12.wScaled)
                         Spacer()
                     }
                     
