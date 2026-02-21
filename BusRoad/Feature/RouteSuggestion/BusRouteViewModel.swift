@@ -433,11 +433,12 @@ extension BusRouteViewModel {
             }
         }
         
-        // 숫자로 끝날 경우 "번" 추가
-        if let lastChar = result.last, lastChar.isNumber {
+        // 한국어일 때만 숫자로 끝날 경우 "번" 추가
+        let isKorean = Locale.current.language.languageCode?.identifier == "ko"
+        if isKorean, let lastChar = result.last, lastChar.isNumber {
             result += NSLocalizedString("번", comment: "번")
         }
-        
+
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

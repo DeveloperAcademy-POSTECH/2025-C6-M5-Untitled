@@ -474,7 +474,9 @@ final class ArrivalInfoManager: ObservableObject {
         while let _ = result.range(of: pattern, options: .regularExpression) {
             result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
         }
-        if let last = result.last, last.isNumber {
+        // 한국어일 때만 "번" 추가
+        let isKorean = Locale.current.language.languageCode?.identifier == "ko"
+        if isKorean, let last = result.last, last.isNumber {
             result += "번"
         }
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
