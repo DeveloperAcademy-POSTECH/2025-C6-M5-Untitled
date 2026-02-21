@@ -62,6 +62,8 @@ struct BeforeRideCard: View {
                         Text(info.busNo)
                             .font(.presemi32Scaled)
                             .foregroundStyle(viewModel.isArrivingSoon ? .primaryHeavy : .subLight)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                             .padding(.horizontal, 8.wScaled)
                             .padding(.vertical, 4.wScaled)
                             .background(
@@ -85,6 +87,8 @@ struct BeforeRideCard: View {
                         Text(waitingBusNo[0])
                             .font(.presemi32Scaled)
                             .foregroundStyle(.subLight)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                             .padding(.horizontal, 8.wScaled)
                             .padding(.vertical, 4.wScaled)
                             .background(
