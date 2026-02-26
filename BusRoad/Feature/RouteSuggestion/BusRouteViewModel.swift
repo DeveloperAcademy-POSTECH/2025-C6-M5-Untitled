@@ -32,7 +32,7 @@ class BusRouteViewModel: ObservableObject {
     @Published var isRefreshingLocation: Bool = false
     
     
-    let store = LocationStore()
+    let store = LocationStore.shared
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
     private let arrivalInfoManager: ArrivalInfoManager
@@ -155,10 +155,11 @@ class BusRouteViewModel: ObservableObject {
                     return
                 }
                 
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("📬 [ODsay API 응답 원본]")
-                    print(jsonString)
-                }
+                // 원본 JSON 출력 주석처리
+//                if let jsonString = String(data: data, encoding: .utf8) {
+//                    print("📬 [ODsay API 응답 원본]")
+//                    print(jsonString)
+//                }
                 
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
@@ -432,11 +433,12 @@ extension BusRouteViewModel {
             }
         }
         
-        // 숫자로 끝날 경우 "번" 추가
-        if let lastChar = result.last, lastChar.isNumber {
+        // 한국어일 때만 숫자로 끝날 경우 "번" 추가
+        let isKorean = Locale.current.language.languageCode?.identifier == "ko"
+        if isKorean, let lastChar = result.last, lastChar.isNumber {
             result += NSLocalizedString("번", comment: "번")
         }
-        
+
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

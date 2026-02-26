@@ -35,7 +35,10 @@ struct SettingsView: View {
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 20.wScaled, height: 20.wScaled)
                                 .foregroundColor(.greyNormal)
+                                .padding(12.wScaled)
+                                .contentShape(Rectangle())
                         }
+                        .padding(-12.wScaled)
                         Spacer()
                     }
                     
@@ -150,7 +153,7 @@ struct SettingsView: View {
                     VStack(alignment: .leading) {
                         Spacer()
                         
-                        Text("아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요.")
+                        Text("아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요")
                             .font(.premed14)
                             .foregroundStyle(.primaryblack)
                     }
@@ -162,7 +165,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
                 
-                Text("음성 알림을 들으려면 무음 모드를 해제해주세요.")
+                Text("음성 알림을 들으려면 무음 모드를 해제해주세요")
                     .font(.prereg14)
                     .foregroundStyle(.primaryblack)
             }

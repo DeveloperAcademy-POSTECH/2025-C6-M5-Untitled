@@ -91,9 +91,9 @@ final class WalkingViewModel: NSObject, ObservableObject, CLLocationManagerDeleg
             self.journeyIndex = index
             
             if index == journey.nodes.count - 1 {
-                arrivalDistance = 6
+                arrivalDistance = 10
             } else {
-                arrivalDistance = 12
+                arrivalDistance = 15
             }
         }
         

@@ -163,33 +163,27 @@ final class ArrivalInfoManager: ObservableObject {
     
     func refreshNearestBusArrival(for busRouteNode: BusRouteNode)
     async -> (item: BusArrivalItem?, didPass: Bool, passedBus: BusArrivalItem?) {
-        
-        let busLocation = busRouteNode.start
-        
-        guard let cityCode = await CityCodeManager.shared.getCityCodeByLocationAsync(
-            latitude: busLocation.latitude,
-            longitude: busLocation.longitude
-        ) else {
-            print("[ArrivalInfoManager] 도시코드 찾기 실패")
-            return (nil, false, nil)
-        }
-        
-        lastCityCode = cityCode
-        let busService = BusServiceFactory.create(cityCode: cityCode)
-        
+
+        // 먼저 승차 정류장 확인
         guard let firstStation = busRouteNode.stations.first else {
             print("[ArrivalInfoManager] 정류장 정보 없음")
             return (nil, false, nil)
         }
-        
-        
+
+        // 승차 정류장의 도시 코드 사용 (출발지가 아닌 정류장 기준)
+        let cityCode = firstStation.stationCityCode
+        let isSeoul = BusServiceFactory.isSeoul(cityCode: cityCode)
+        print("[ArrivalInfoManager] 승차정류장: \(firstStation.stationName), cityCode: \(cityCode), isSeoul: \(isSeoul)")
+        lastCityCode = cityCode
+        let busService = BusServiceFactory.create(cityCode: cityCode)
+
         var allArrivals: [BusArrivalItem] = []
         
         
         
         do {
-            // 서울시 로직
-            if cityCode == 1000, let seoulService = busService as? SeoulBusService {
+            // 서울시 로직 (cityCode 1000 또는 구 단위 11xx)
+            if BusServiceFactory.isSeoul(cityCode: cityCode), let seoulService = busService as? SeoulBusService {
 
                 let stationName = firstStation.stationName
                 guard let stId = firstStation.localStationId else {
@@ -220,8 +214,18 @@ final class ArrivalInfoManager: ObservableObject {
                         print("[Manager] CSV 매칭 실패: stId(\(stId)) bus(\(cleanedBusNo))")
                     }
                 }
+
+                // 서울 API에서 결과 없으면 경기도 API로 fallback (서울 정류장에서 경기도 버스 탑승 시)
+                if allArrivals.isEmpty {
+                    print("[Manager] 서울 API 결과 없음, 경기도 API로 fallback")
+                    let gyeonggiService = GyeonggiBusService()
+                    allArrivals = try await gyeonggiService.fetchBusArrivalInfo(
+                        cityCode: 31010,
+                        nodeId: stId
+                    )
+                }
             }
-            
+
             else {
                 var nodeId = ""
                 if let local = firstStation.localStationId {
@@ -470,7 +474,9 @@ final class ArrivalInfoManager: ObservableObject {
         while let _ = result.range(of: pattern, options: .regularExpression) {
             result = result.replacingOccurrences(of: pattern, with: "", options: .regularExpression)
         }
-        if let last = result.last, last.isNumber {
+        // 한국어일 때만 "번" 추가
+        let isKorean = Locale.current.language.languageCode?.identifier == "ko"
+        if isKorean, let last = result.last, last.isNumber {
             result += "번"
         }
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -488,39 +494,54 @@ final class ArrivalInfoManager: ObservableObject {
     // MARK: - 도착 정보 요약
     
     func prepareRouteArrivalSummary(for busRouteNode: BusRouteNode) async -> BusArrivalItem? {
-        let busLocation = busRouteNode.start
-        
-        guard let cityCode = await CityCodeManager.shared.getCityCodeByLocationAsync(
-            latitude: busLocation.latitude,
-            longitude: busLocation.longitude
-        ) else {
+        // 승차 정류장 확인
+        guard let station = busRouteNode.stations.first else {
+            print("[prepareRouteArrivalSummary] 정류장 없음")
             return nil
         }
-        
+
+        // 승차 정류장의 도시 코드 사용 (출발지가 아닌 정류장 기준)
+        let cityCode = station.stationCityCode
+        let isSeoul = BusServiceFactory.isSeoul(cityCode: cityCode)
+        let isGyeonggi = BusServiceFactory.isGyeonggi(cityCode: cityCode)
+        print("[prepareRouteArrivalSummary] 정류장: \(station.stationName), cityCode: \(cityCode), isSeoul: \(isSeoul), isGyeonggi: \(isGyeonggi)")
         let busService = BusServiceFactory.create(cityCode: cityCode)
-        guard let station = busRouteNode.stations.first else { return nil }
         
         var allArrivals: [BusArrivalItem] = []
         
         do {
-            if cityCode == 1000, let seoulService = busService as? SeoulBusService {
-                
+            if BusServiceFactory.isSeoul(cityCode: cityCode), let seoulService = busService as? SeoulBusService {
+
                 let stationName = station.stationName
                 let stId = station.localStationId
-                
+                print("[prepareRouteArrivalSummary] 서울 API 사용, stId: \(stId ?? "nil"), busNo: \(busRouteNode.busNo)")
+
                 for targetBusNo in busRouteNode.busNo {
                     if let info = BusDataManager.shared.findTargetRouteInfo(
                         stId: stId,
                         stationName: stationName,
                         busName: targetBusNo
                     ) {
+                        print("[prepareRouteArrivalSummary] CSV 매칭 성공: \(targetBusNo)")
                         let items = try await seoulService.fetchBusArrivalByRoute(
                             stId: info.stId,
                             busRouteId: info.routeId,
                             ord: info.ord
                         )
                         allArrivals.append(contentsOf: items)
+                    } else {
+                        print("[prepareRouteArrivalSummary] CSV 매칭 실패: \(targetBusNo)")
                     }
+                }
+
+                // 서울 API에서 결과 없으면 경기도 API로 fallback (서울 정류장에서 경기도 버스 탑승 시)
+                if allArrivals.isEmpty, let nodeId = stId {
+                    print("[prepareRouteArrivalSummary] 서울 API 결과 없음, 경기도 API로 fallback")
+                    let gyeonggiService = GyeonggiBusService()
+                    allArrivals = try await gyeonggiService.fetchBusArrivalInfo(
+                        cityCode: 31010, // 경기도 기본 코드
+                        nodeId: nodeId
+                    )
                 }
             }
             else {
@@ -534,7 +555,7 @@ final class ArrivalInfoManager: ObservableObject {
                         arsId: nil
                     )
                 }
-                
+
                 allArrivals = try await busService.fetchBusArrivalInfo(
                     cityCode: cityCode,
                     nodeId: nodeId

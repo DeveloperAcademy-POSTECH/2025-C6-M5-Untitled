@@ -27,7 +27,7 @@ struct IntroSection: View {
                             .frame(width: 30.wScaled, height: 30.wScaled)
                     }
                 }
-                .padding(.top, 44)
+                .padding(.top, 55)
                 .padding(.horizontal, 16)
                 
                 Spacer()

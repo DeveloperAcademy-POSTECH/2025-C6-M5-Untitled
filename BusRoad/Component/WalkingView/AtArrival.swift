@@ -33,7 +33,7 @@ struct AtArrival: View {
                         .font(.prereg24Scaled)
                         .foregroundColor(.primaryHeavy)
                     
-                    Text("확인해주세요.")
+                    Text("확인해주세요")
                         .font(.prereg24Scaled)
                         .foregroundColor(.primaryHeavy)
                 }

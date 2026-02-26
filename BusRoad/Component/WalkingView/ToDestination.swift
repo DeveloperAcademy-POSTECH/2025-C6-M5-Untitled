@@ -43,7 +43,7 @@ struct ToDestination: View {
                         .foregroundColor(.primaryHeavy)
                         .monospacedDigit()
                     
-                    Text("남았어요.")
+                    Text("남았어요")
                         .font(.prereg32Scaled)
                         .foregroundColor(.primaryHeavy)
                 }

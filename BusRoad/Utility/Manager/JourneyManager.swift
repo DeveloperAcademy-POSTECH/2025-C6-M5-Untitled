@@ -297,14 +297,15 @@ final class JourneyManager: ObservableObject {
             }
         }
         
-        // 숫자로 끝날 경우 "번" 추가
-        if let lastChar = result.last, lastChar.isNumber {
+        // 한국어일 때만 숫자로 끝날 경우 "번" 추가
+        let isKorean = Locale.current.language.languageCode?.identifier == "ko"
+        if isKorean, let lastChar = result.last, lastChar.isNumber {
             result += NSLocalizedString("번", comment: "번")
         }
-        
+
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
-    
+
     /// 이전 노드의 end와 다음 노드의 start가 이름/좌표 모두 '완전히 동일'한지 검사
     private func isSameStopStrict(prev: [String: Any], next: [String: Any]) -> Bool {
         guard
