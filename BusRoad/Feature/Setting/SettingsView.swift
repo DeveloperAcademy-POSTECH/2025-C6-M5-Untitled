@@ -63,6 +63,7 @@ struct SettingsView: View {
                         showVoiceTooltip.toggle()
                     } label: {
                         Image("info")
+                            .padding(.horizontal, 3)
                     }
                     
                     .overlay(alignment: .topLeading) {
