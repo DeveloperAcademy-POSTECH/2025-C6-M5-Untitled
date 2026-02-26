@@ -569,7 +569,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%@ min walk"
+            "value" : "%@ walk"
           }
         }
       }
