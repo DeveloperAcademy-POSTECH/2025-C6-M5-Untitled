@@ -401,7 +401,18 @@
         }
       }
     },
+    "검색 결과가 없어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results found"
+          }
+        }
+      }
+    },
     "검색 결과가 없어요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -508,12 +519,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : " left"
+            "value" : "left"
           }
         }
       }
     },
     "남았어요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -689,6 +701,17 @@
         }
       }
     },
+    "마이크를 눌러서 다시 말해주세요" : {
+      "comment" : "마이크를 눌러서 다시 말해주세요.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the microphone and try again"
+          }
+        }
+      }
+    },
     "마이크를 눌러서 다시 말해주세요." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -725,7 +748,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Walk to the desstination"
+            "value" : "Walk to the destination"
           }
         }
       }
@@ -844,7 +867,18 @@
         }
       }
     },
+    "아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice alerts are muted in Silent Mode"
+          }
+        }
+      }
+    },
     "아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -884,6 +918,17 @@
         }
       }
     },
+    "원하는 장소를 말해보세요" : {
+      "comment" : "원하는 장소를 말해보세요.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Say the place you’re looking for."
+          }
+        }
+      }
+    },
     "원하는 장소를 말해보세요." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -905,7 +950,18 @@
         }
       }
     },
+    "음성 알림을 들으려면 무음 모드를 해제해주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off Silent Mode to hear them"
+          }
+        }
+      }
+    },
     "음성 알림을 들으려면 무음 모드를 해제해주세요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -969,6 +1025,7 @@
       }
     },
     "이번 정류장에서 내리세요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1058,7 +1115,18 @@
         }
       }
     },
+    "찾고 있는 장소를 다시 검색해 주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try searching another place"
+          }
+        }
+      }
+    },
     "찾고 있는 장소를 다시 검색해 주세요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1138,7 +1206,18 @@
         }
       }
     },
+    "페이지를 나가면 경로 안내가\n종료돼요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigation will end if you leave this page"
+          }
+        }
+      }
+    },
     "페이지를 나가면 경로 안내가\n종료돼요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1210,7 +1289,11 @@
         }
       }
     },
+    "확인해주세요" : {
+
+    },
     "확인해주세요." : {
+      "extractionState" : "stale",
       "localizations" : {
         "en" : {
           "stringUnit" : {

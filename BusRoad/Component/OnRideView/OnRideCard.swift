@@ -50,7 +50,7 @@ struct OnRideCard: View {
                 VStack(spacing: 11 .wScaled) {
                     HStack {
                         if canAlight {
-                            Text("이번 정류장에서 내리세요.")
+                            Text("이번 정류장에서 내리세요")
                                 .font(.presemi20Scaled)
                                 .foregroundStyle(canAlight ? .subNormal : .primaryStrong)
                         } else {
