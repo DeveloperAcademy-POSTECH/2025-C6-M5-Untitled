@@ -62,7 +62,8 @@ final class ProgressLiveActivityManager {
         }
         
         // splitTextToFit을 static 함수로 변경하여 호출
-        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: 16)
+        let maxCount = isEnglish(text: baseText) ? 26 : 16
+        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: maxCount)
         
         return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
     }
@@ -88,6 +89,13 @@ final class ProgressLiveActivityManager {
     }
     
     // static 함수로 변경
+    private static func isEnglish(text: String) -> Bool {
+        for scalar in text.unicodeScalars {
+            if !(scalar.value < 128) { return false }
+        }
+        return true
+    }
+
     private static func splitTextToFit(text: String, maxCharactersPerLine: Int) -> String {
         guard text.count > maxCharactersPerLine else {
             return text // 1줄이면 그대로 반환

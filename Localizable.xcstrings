@@ -740,6 +740,17 @@
         }
       }
     },
+    "버스 하차 알림" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus exit alerts"
+          }
+        }
+      }
+    },
     "번" : {
       "comment" : "번",
       "localizations" : {
@@ -779,17 +790,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bus"
-          }
-        }
-      }
-    },
-    "버스 하차 알림" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bus exit alerts"
           }
         }
       }
@@ -849,7 +849,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Voice alerts are muted in Silent Mode"
+            "value" : "Voice alerts mute in Silent Mode"
           }
         }
       }
