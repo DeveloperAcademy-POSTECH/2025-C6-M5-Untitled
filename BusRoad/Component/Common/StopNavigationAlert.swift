@@ -25,7 +25,7 @@ struct StopNavigationAlert: View {
             .padding(.top, 20.wScaled)
             .padding(.bottom, 10.wScaled)
             
-          Text("페이지를 나가면 경로 안내가\n종료돼요.")
+          Text("페이지를 나가면 경로 안내가\n종료돼요")
             .font(.prereg20Scaled)
             .foregroundColor(.primaryblack)
            .multilineTextAlignment(.center)

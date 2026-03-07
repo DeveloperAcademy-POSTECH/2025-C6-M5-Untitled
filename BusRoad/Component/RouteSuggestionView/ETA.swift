@@ -26,15 +26,15 @@ struct ETA: View {
 
         let base: String
         if hours > 0 && minutes > 0 {
-            base = "\(hours)시간 \(minutes)분"
+            base = String(format: NSLocalizedString("ETA_HOUR_MIN", comment: "X시간 Y분"), hours, minutes)
         } else if hours > 0 {
-            base = "\(hours)시간"
+            base = String(format: NSLocalizedString("ETA_HOUR", comment: "X시간"), hours)
         } else {
-            base = "\(minutes)분"
+            base = String(format: NSLocalizedString("ETA_MIN", comment: "X분"), minutes)
         }
 
         // ✅ 도보-only면 "도보 " 붙임
-        return journey.isWalkingOnly ? "도보 \(base)" : base
+        return journey.isWalkingOnly ? String(format: NSLocalizedString("도보 %@", comment: "도보 %@"), base) : base
     }
     
     var isMinimumTransfer: Bool {

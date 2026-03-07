@@ -35,7 +35,10 @@ struct SettingsView: View {
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 20.wScaled, height: 20.wScaled)
                                 .foregroundColor(.greyNormal)
+                                .padding(12.wScaled)
+                                .contentShape(Rectangle())
                         }
+                        .padding(-12.wScaled)
                         Spacer()
                     }
                     
@@ -63,6 +66,7 @@ struct SettingsView: View {
                         showVoiceTooltip.toggle()
                     } label: {
                         Image("info")
+                            .padding(.horizontal, 3)
                     }
                     
                     .overlay(alignment: .topLeading) {
@@ -78,11 +82,11 @@ struct SettingsView: View {
                 .zIndex(1)
                 // 카드
                 VStack(spacing: 0) {
-                    settingRow(title: "버스 승차(도착) 알림", isOn: $busArrivalVoiceEnabled)
+                    settingRow(title: NSLocalizedString("버스 승차(도착) 알림", comment: "버스 승차(도착) 알림"), isOn: $busArrivalVoiceEnabled)
                     divider()
-                    settingRow(title: "버스 하차 알림", isOn: $busAlightVoiceEnabled)
+                    settingRow(title: NSLocalizedString("버스 하차 알림", comment: "버스 하차 알림"), isOn: $busAlightVoiceEnabled)
                     divider()
-                    settingRow(title: "도보 안내 알림", isOn: $walkingVoiceEnabled)
+                    settingRow(title: NSLocalizedString("도보 안내 알림", comment: "도보 안내 알림"), isOn: $walkingVoiceEnabled)
                 }
                 .background(
                     RoundedRectangle(cornerRadius: 8)
@@ -150,7 +154,7 @@ struct SettingsView: View {
                     VStack(alignment: .leading) {
                         Spacer()
                         
-                        Text("아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요.")
+                        Text("아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요")
                             .font(.premed14)
                             .foregroundStyle(.primaryblack)
                     }
@@ -162,7 +166,7 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
                 
-                Text("음성 알림을 들으려면 무음 모드를 해제해주세요.")
+                Text("음성 알림을 들으려면 무음 모드를 해제해주세요")
                     .font(.prereg14)
                     .foregroundStyle(.primaryblack)
             }

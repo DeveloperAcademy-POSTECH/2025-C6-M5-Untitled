@@ -7,6 +7,7 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     static let shared = VoiceAnnouncementManager()
     
     private let synthesizer = AVSpeechSynthesizer()
+    private let languageCode = Locale.current.language.languageCode?.identifier
     
     private func isEnabled(_ key: String, default defaultValue: Bool = true) -> Bool {
         (UserDefaults.standard.object(forKey: key) as? Bool) ?? defaultValue
@@ -51,7 +52,8 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     // 음성으로 말하기
     func announce(_ message: String) {
         let utterance = AVSpeechUtterance(string: message)
-        utterance.voice = AVSpeechSynthesisVoice(language: "ko-KR")
+        let language = languageCode == "en" ? "en-US" : "ko-KR"     // 언어 설정
+        utterance.voice = AVSpeechSynthesisVoice(language: language)
         utterance.rate = 0.5  // 말하는 속도 (0.5)
         
         print("[음성안내] '\(message)'")
@@ -62,21 +64,21 @@ final class VoiceAnnouncementManager: NSObject, ObservableObject {
     func announceTwoStations() {
         guard isEnabled(SettingsKeys.busAlightVoice) else { return }
         vibrate(times: 2)
-        announce("하차하기까지 두정류장 남았습니다.")
+        announce(NSLocalizedString("하차하기까지 두정류장 남았습니다.", comment: "하차하기까지 두정류장 남았습니다."))
     }
     
     // 1정류장 남음
     func announceOneStation() {
         guard isEnabled(SettingsKeys.busAlightVoice) else { return }
         vibrate(times: 2)
-        announce("이번 정류장에서 내려야해요. 하차벨을 눌러주세요")
+        announce(NSLocalizedString("이번 정류장에서 내려야해요. 하차벨을 눌러주세요", comment: "이번 정류장에서 내려야해요. 하차벨을 눌러주세요"))
     }
     
     // 승차 전, 곧 버스 도착 알림
     func announceBusArrival() {
         guard isEnabled(SettingsKeys.busArrivalVoice) else { return } 
         vibrate(times: 2)
-        announce("곧 버스가 도착합니다.")
+        announce(NSLocalizedString("곧 버스가 도착합니다.", comment: "곧 버스가 도착합니다."))
     }
 }
 

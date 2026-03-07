@@ -9,6 +9,7 @@ import CoreLocation
 
 struct LocationInfo: Equatable, Hashable {
     var name: String
+    var englishName: String?
     var latitude: Double
     var longitude: Double
     

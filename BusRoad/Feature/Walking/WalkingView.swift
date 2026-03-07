@@ -6,6 +6,8 @@ struct WalkingView: View {
     @EnvironmentObject private var coordinator: NavigationCoordinator
     @AppStorage("isFirstLaunching") var isFirstLaunching: Bool = true
     
+    let languageCode = Locale.current.language.languageCode?.identifier
+    
     var body: some View {
         ZStack {
             Color(.primarywhite).ignoresSafeArea()
@@ -45,7 +47,7 @@ struct WalkingView: View {
                                         .foregroundColor(.primaryHeavy)
                                     
                                     MarqueeText(
-                                        text: node.end.name,
+                                        text: languageCode == "ko" ? node.end.name : node.end.englishName ?? node.end.name,
                                         font: .presemi36Scaled,
                                         uiFont: .presemi36Scaled,
                                         startDelay: 1.0,
@@ -78,8 +80,8 @@ struct WalkingView: View {
                                             
                                             if journey.nodes.indices.contains(index + 1),
                                                case let .bus(busnode) = journey.nodes[index + 1] {
-                                                let boardingStopName = busnode.start.name
-                                                
+                                                let boardingStopName = languageCode == "ko" ? busnode.start.name : busnode.start.englishName ?? busnode.start.name
+
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                                     Task {
                                                         await ProgressLiveActivityManager.shared.updateStage(

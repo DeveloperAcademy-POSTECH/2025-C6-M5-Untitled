@@ -27,7 +27,7 @@ struct IntroSection: View {
                             .frame(width: 30.wScaled, height: 30.wScaled)
                     }
                 }
-                .padding(.top, 44)
+                .padding(.top, 55)
                 .padding(.horizontal, 16)
                 
                 Spacer()
@@ -48,11 +48,17 @@ struct IntroSection: View {
                     .padding(.horizontal, 22)
                     .overlay(alignment: .topTrailing) {
                         if showHint {
-                            Image("voicetip")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 148, height: 47)
-                                .offset(x: -10, y: 67)
+                            ZStack{
+                                Image("voicetip")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 148, height: 47)
+                                    .offset(x: -10, y: 67)
+                                Text("음성으로 찾기")
+                                    .font(.premed14)
+                                    .foregroundStyle(.primaryHeavy)
+                                    .offset(x: -10, y: 71)
+                            }
                         }
                     }
                 }

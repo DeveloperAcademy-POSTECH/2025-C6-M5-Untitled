@@ -69,10 +69,10 @@ class TagoBusService: BusServiceType {
         let data = try await request(urlString: urlString, params: params)
         
         // 원본 JSON 출력 (디버깅용)
-        if let jsonString = String(data: data, encoding: .utf8) {
-            print("[도착정보 응답 원본 JSON]")
-            print(jsonString)
-        }
+//        if let jsonString = String(data: data, encoding: .utf8) {
+//            print("[도착정보 응답 원본 JSON]")
+//            print(jsonString)
+//        }
         
         let response = try JSONDecoder().decode(BusArrivalResponse.self, from: data)
         

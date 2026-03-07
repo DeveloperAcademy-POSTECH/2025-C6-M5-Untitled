@@ -95,7 +95,7 @@ final class VoiceSearchViewModel: ObservableObject {
         print("[DEBUG] cancelListening 완료")
     }
     
-    /// 사용자가 버튼을 눌렀을 때 
+    /// 사용자가 버튼을 눌렀을 때
     func handleMicButtonTap() {
         switch state {
         case .ready, .failed:
@@ -217,16 +217,17 @@ extension VoiceSearchViewModel {
     var centerMessage: String {
         switch state {
         case .ready:
-            return "원하는 장소를 말해보세요."
+            return NSLocalizedString("원하는 장소를 말해보세요", comment: "원하는 장소를 말해보세요.")
         case .listening:
             // 듣는 중에도 실시간으로 인식된 텍스트 표시
-            return recognizedText.isEmpty ? "원하는 장소를 말해보세요." : recognizedText
+            return recognizedText.isEmpty ? NSLocalizedString("원하는 장소를 말해보세요", comment: "원하는 장소를 말해보세요.") : recognizedText
         case .processing:
             return recognizedText.isEmpty ? "" : recognizedText
         case .completed:
             return recognizedText
         case .failed:
-            return "마이크를 눌러서 다시 말해주세요."
+//            return "마이크를 눌러서 다시 말해주세요."
+            return recognizedText.isEmpty ? NSLocalizedString("마이크를 눌러서 다시 말해주세요", comment: "마이크를 눌러서 다시 말해주세요.") : recognizedText
         }
     }
     

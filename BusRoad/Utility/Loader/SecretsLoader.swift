@@ -24,4 +24,6 @@ enum Secrets {
     static let kakaoApiKey = _SecretsLoader.string(for: "KAKAO_API_KEY")
     static let tmapApiKey = _SecretsLoader.string(for: "TMAP_API_KEY")
     static let tagoApiKey = _SecretsLoader.string(for: "TAGO_API_KEY")
+    static let gyeonggiApiKey = _SecretsLoader.string(for: "GYEONGGI_API_KEY")
+    static let googleApiKey = _SecretsLoader.string(for: "GOOGLE_PLACES_API_KEY")
 }

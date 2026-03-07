@@ -1,0 +1,1318 @@
+{
+  "sourceLanguage" : "ko",
+  "strings" : {
+    "" : {
+
+    },
+    " " : {
+
+    },
+    "%@ 도착 예정" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ETA %@"
+          }
+        }
+      }
+    },
+    "%@ 버스가 지나갔어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Route %@ has passed"
+          }
+        }
+      }
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "ko" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%lld분 후" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "%lld정류장 " : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld bus stop"
+          }
+        }
+      }
+    },
+    "alert_arrival_busStop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Have you arrived?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미 정류장에 도착하셨나요?"
+          }
+        }
+      }
+    },
+    "alert_arrival_destination" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Have you arrived?"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이미 목적지에 도착하셨나요?"
+          }
+        }
+      }
+    },
+    "description_board_at" : {
+      "comment" : "ex: %@에서 승차",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Board at %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@에서 승차"
+          }
+        }
+      }
+    },
+    "description_getoff_at" : {
+      "comment" : "ex: %@에서 하차",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get off at %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@에서 하차"
+          }
+        }
+      }
+    },
+    "description_walk_to" : {
+      "comment" : "ex: %@까지 걷기",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walking to %@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@까지 걷기"
+          }
+        }
+      }
+    },
+    "ETA_HOUR" : {
+      "comment" : "X시간",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%dhour"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간"
+          }
+        }
+      }
+    },
+    "ETA_HOUR_MIN" : {
+      "comment" : "X시간 Y분",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%dhour %dmin"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간 %d분"
+          }
+        }
+      }
+    },
+    "ETA_MIN" : {
+      "comment" : "X분",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "%dmin"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d분"
+          }
+        }
+      }
+    },
+    "subdesc_bus_arriving_soon" : {
+      "comment" : "버스가 곧 도착해요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The bus is arriving soon."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버스가 곧 도착해요"
+          }
+        }
+      }
+    },
+    "subdesc_bus_passed" : {
+      "comment" : "버스가 지나갔어요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus has passed"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "버스가 지나갔어요"
+          }
+        }
+      }
+    },
+    "subdesc_hours_left" : {
+      "comment" : "ex: %d시간 남았어요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%dhour remaining"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간 남았어요"
+          }
+        }
+      }
+    },
+    "subdesc_hours_minutes_left" : {
+      "comment" : "ex: %d시간 %d분 남았어요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%dhour %d min remaining"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간 %d분 남았어요"
+          }
+        }
+      }
+    },
+    "subdesc_hours_minutes_until_bus" : {
+      "comment" : "ex: %d시간 %d분 후 버스가 도착해요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%dhour %d min remaining"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간 %d분 후 버스가 도착해요"
+          }
+        }
+      }
+    },
+    "subdesc_hours_until_bus" : {
+      "comment" : "ex: %d시간 후 버스가 도착해요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d hour remaining"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d시간 후 버스가 도착해요"
+          }
+        }
+      }
+    },
+    "subdesc_minutes_left" : {
+      "comment" : "ex: %d분 남았어요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d min remaining"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d분 남았어요"
+          }
+        }
+      }
+    },
+    "subdesc_minutes_until_bus" : {
+      "comment" : "ex: %d분 후 버스가 도착해요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d min remaining"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d분 후 버스가 도착해요"
+          }
+        }
+      }
+    },
+    "subdesc_near_destination" : {
+      "comment" : "목적지 근처에요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re near your destination"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목적지 근처에요"
+          }
+        }
+      }
+    },
+    "subdesc_stops_left" : {
+      "comment" : "ex: %d정류장 남았어요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d stops remaining"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d정류장 남았어요"
+          }
+        }
+      }
+    },
+    "walking_alert_arrived" : {
+      "comment" : "도착",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Arrived"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "도착"
+          }
+        }
+      }
+    },
+    "가장 빠른\n도보 경로로 안내해요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We’ll guide you on the fastest walking route"
+          }
+        }
+      }
+    },
+    "검색" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search"
+          }
+        }
+      }
+    },
+    "검색 결과가 없어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results found"
+          }
+        }
+      }
+    },
+    "검색 결과가 없어요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results found"
+          }
+        }
+      }
+    },
+    "경로 불러오는 중..." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "loading…"
+          }
+        }
+      }
+    },
+    "경로 안내를 종료할까요?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End Navigation?"
+          }
+        }
+      }
+    },
+    "경로 재탐색 중…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reloading…"
+          }
+        }
+      }
+    },
+    "경로 정보 확인 불가" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No results found"
+          }
+        }
+      }
+    },
+    "경로 탐색" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Route Search"
+          }
+        }
+      }
+    },
+    "경로를 새로고침 해주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh the route"
+          }
+        }
+      }
+    },
+    "경로에서 벗어났어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’re off route"
+          }
+        }
+      }
+    },
+    "곧 도착" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soon"
+          }
+        }
+      }
+    },
+    "곧 버스가 도착합니다." : {
+      "comment" : "곧 버스가 도착합니다.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soon the bus is arriving."
+          }
+        }
+      }
+    },
+    "남았어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "left"
+          }
+        }
+      }
+    },
+    "남았어요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "left"
+          }
+        }
+      }
+    },
+    "내렸어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Got off"
+          }
+        }
+      }
+    },
+    "놓쳤어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Missed it"
+          }
+        }
+      }
+    },
+    "다른 장소를 검색해주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search again"
+          }
+        }
+      }
+    },
+    "다시 검색" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recalculate"
+          }
+        }
+      }
+    },
+    "도보 %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ walk"
+          }
+        }
+      }
+    },
+    "도보 %lld분" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min walk"
+          }
+        }
+      }
+    },
+    "도보 길 안내를 시작합니다" : {
+      "comment" : "도보 길 안내를 시작합니다",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Starting walking directions."
+          }
+        }
+      }
+    },
+    "도보 안내 알림" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walking guidance alerts"
+          }
+        }
+      }
+    },
+    "도보 이동" : {
+      "comment" : "도보 이동",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walking"
+          }
+        }
+      }
+    },
+    "도착" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To"
+          }
+        }
+      }
+    },
+    "도착 예정 정보 없음" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No arrival"
+          }
+        }
+      }
+    },
+    "도착 정보 없음" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No arrival"
+          }
+        }
+      }
+    },
+    "도착지 부근입니다." : {
+      "comment" : "도착지 부근입니다.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "you are approaching your destination"
+          }
+        }
+      }
+    },
+    "도착지를 입력하세요" : {
+      "comment" : "도착지를 입력하세요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enter destination"
+          }
+        }
+      }
+    },
+    "도착했어요!" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ve arrived!"
+          }
+        }
+      }
+    },
+    "따라 걸어가세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "arrow’s direction"
+          }
+        }
+      }
+    },
+    "마이크를 눌러서 다시 말해주세요" : {
+      "comment" : "마이크를 눌러서 다시 말해주세요.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the microphone and try again"
+          }
+        }
+      }
+    },
+    "마이크를 눌러서 다시 말해주세요." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap the microphone and try again."
+          }
+        }
+      }
+    },
+    "맞아요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Yes"
+          }
+        }
+      }
+    },
+    "목적지" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "destination"
+          }
+        }
+      }
+    },
+    "목적지까지 걷기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walk to the destination"
+          }
+        }
+      }
+    },
+    "목적지로 설정" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confirm"
+          }
+        }
+      }
+    },
+    "버스 하차 알림" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus exit alerts"
+          }
+        }
+      }
+    },
+    "번" : {
+      "comment" : "번",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " "
+          }
+        }
+      }
+    },
+    "버스" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus"
+          }
+        }
+      }
+    },
+    "버스 승차(도착) 알림" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus boarding alerts"
+          }
+        }
+      }
+    },
+    "버스 이동" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus"
+          }
+        }
+      }
+    },
+    "버스에 탑승하셨나요?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boarded the bus?"
+          }
+        }
+      }
+    },
+    "새로고침 하기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Refresh"
+          }
+        }
+      }
+    },
+    "설정" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "승차정류장" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boarding stop"
+          }
+        }
+      }
+    },
+    "아니오" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice alerts are muted in Silent Mode"
+          }
+        }
+      }
+    },
+    "아이폰 무음 모드가 켜져 있으면 음성 알림이\n들리지 않아요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice alerts mute in Silent Mode"
+          }
+        }
+      }
+    },
+    "안내 시작" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start navigation"
+          }
+        }
+      }
+    },
+    "어디로 갈까요?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Where to?"
+          }
+        }
+      }
+    },
+    "오류가 발생했어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong"
+          }
+        }
+      }
+    },
+    "원하는 장소를 말해보세요" : {
+      "comment" : "원하는 장소를 말해보세요.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Say the place you’re looking for."
+          }
+        }
+      }
+    },
+    "원하는 장소를 말해보세요." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Say the place you’re looking for."
+          }
+        }
+      }
+    },
+    "음성 알림" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice alerts"
+          }
+        }
+      }
+    },
+    "음성 알림을 들으려면 무음 모드를 해제해주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off Silent Mode to hear them"
+          }
+        }
+      }
+    },
+    "음성 알림을 들으려면 무음 모드를 해제해주세요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Turn off Silent Mode to hear them"
+          }
+        }
+      }
+    },
+    "음성으로 찾기" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voice Search"
+          }
+        }
+      }
+    },
+    "이미 목적지에 도착하셨나요?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already at the destination?"
+          }
+        }
+      }
+    },
+    "이미 정류장에 도착하셨나요?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Already at the stop?"
+          }
+        }
+      }
+    },
+    "이번 정류장에서 내려야해요. 하차벨을 눌러주세요" : {
+      "comment" : "이번 정류장에서 내려야해요. 하차벨을 눌러주세요",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You need to get off at this stop. Please press the stop button."
+          }
+        }
+      }
+    },
+    "이번 정류장에서 내리세요" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get off at this stop"
+          }
+        }
+      }
+    },
+    "이번 정류장에서 내리세요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get off at this stop"
+          }
+        }
+      }
+    },
+    "장소 이름 검색하기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Search place"
+          }
+        }
+      }
+    },
+    "정류장" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bus stop"
+          }
+        }
+      }
+    },
+    "정류장 이름이 맞는지" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : " "
+          }
+        }
+      }
+    },
+    "정류장까지 걷기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walk to the bus stop"
+          }
+        }
+      }
+    },
+    "종료하기" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "End"
+          }
+        }
+      }
+    },
+    "지도" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Map"
+          }
+        }
+      }
+    },
+    "지원하지 않는 경로예요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Route not supported"
+          }
+        }
+      }
+    },
+    "진동 알림" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Haptics"
+          }
+        }
+      }
+    },
+    "찾고 있는 장소를 다시 검색해 주세요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try searching another place"
+          }
+        }
+      }
+    },
+    "찾고 있는 장소를 다시 검색해 주세요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try searching another place"
+          }
+        }
+      }
+    },
+    "최근 검색" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recent search"
+          }
+        }
+      }
+    },
+    "최적" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best"
+          }
+        }
+      }
+    },
+    "출발" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "From"
+          }
+        }
+      }
+    },
+    "출발지로 설정" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set as start"
+          }
+        }
+      }
+    },
+    "출발지와 도착지가\n동일해요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start and destination and the same"
+          }
+        }
+      }
+    },
+    "취소" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
+          }
+        }
+      }
+    },
+    "탔어요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Boarded"
+          }
+        }
+      }
+    },
+    "페이지를 나가면 경로 안내가\n종료돼요" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigation will end if you leave this page"
+          }
+        }
+      }
+    },
+    "페이지를 나가면 경로 안내가\n종료돼요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Navigation will end if you leave this page."
+          }
+        }
+      }
+    },
+    "하차 정류장" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exit stop"
+          }
+        }
+      }
+    },
+    "하차하기까지 두정류장 남았습니다." : {
+      "comment" : "하차하기까지 두정류장 남았습니다.",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Two stops remaining until you get off."
+          }
+        }
+      }
+    },
+    "현위치" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your location"
+          }
+        }
+      }
+    },
+    "현재 위치에서 다시\n경로를 검색할까요?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recalculate from your location?"
+          }
+        }
+      }
+    },
+    "화살표 방향에 맞춰" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Walk in the"
+          }
+        }
+      }
+    },
+    "확인" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ok"
+          }
+        }
+      }
+    },
+    "확인해주세요" : {
+
+    },
+    "확인해주세요." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Check the stop name"
+          }
+        }
+      }
+    },
+    "환승 %lld회" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld transfer"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.1"
+}

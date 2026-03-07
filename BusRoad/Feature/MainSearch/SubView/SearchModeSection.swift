@@ -126,10 +126,10 @@ struct SearchModeSection: View {
                         Spacer(minLength: 0)
                         
                         VStack(spacing: 6) {
-                            Text("검색 결과가 없어요.")
+                            Text("검색 결과가 없어요")
                                 .font(.presemi24)
                                 .foregroundStyle(.greyHeavy)
-                            Text("찾고 있는 장소를 다시 검색해 주세요.")
+                            Text("찾고 있는 장소를 다시 검색해 주세요")
                                 .font(.prereg20)
                                 .foregroundStyle(.greyHeavy)
                         }

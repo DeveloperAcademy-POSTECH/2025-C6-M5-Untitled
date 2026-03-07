@@ -5,7 +5,10 @@ import Lottie
 struct BeforeRideCard: View {
     @ObservedObject var viewModel: BeforeRideViewModel
     var waitingStopName: String
+    var englishWaitingStopName: String
     var waitingBusNo: [String]
+    
+    let languageCode = Locale.current.language.languageCode?.identifier
     
     var body: some View {
         ZStack {
@@ -42,7 +45,7 @@ struct BeforeRideCard: View {
                             .foregroundStyle(viewModel.isArrivingSoon ? .subLight : .primaryHeavy)
                         
                         MarqueeText(
-                            text: waitingStopName,
+                            text: languageCode == "ko" ? waitingStopName : englishWaitingStopName,
                             font: .presemi36Scaled,
                             uiFont: .presemi36Scaled,
                             startDelay: 1.0,
@@ -59,6 +62,8 @@ struct BeforeRideCard: View {
                         Text(info.busNo)
                             .font(.presemi32Scaled)
                             .foregroundStyle(viewModel.isArrivingSoon ? .primaryHeavy : .subLight)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                             .padding(.horizontal, 8.wScaled)
                             .padding(.vertical, 4.wScaled)
                             .background(
@@ -82,6 +87,8 @@ struct BeforeRideCard: View {
                         Text(waitingBusNo[0])
                             .font(.presemi32Scaled)
                             .foregroundStyle(.subLight)
+                            .lineLimit(1)
+                            .fixedSize(horizontal: true, vertical: false)
                             .padding(.horizontal, 8.wScaled)
                             .padding(.vertical, 4.wScaled)
                             .background(

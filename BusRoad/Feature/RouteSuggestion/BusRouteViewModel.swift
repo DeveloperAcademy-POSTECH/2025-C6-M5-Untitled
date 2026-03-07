@@ -32,10 +32,11 @@ class BusRouteViewModel: ObservableObject {
     @Published var isRefreshingLocation: Bool = false
     
     
-    let store = LocationStore()
+    let store = LocationStore.shared
     private let journeyManager: JourneyManager
     private let searchManager: SearchManager
     private let arrivalInfoManager: ArrivalInfoManager
+    private let languageCode = Locale.current.language.languageCode?.identifier
     private var bag = Set<AnyCancellable>()
     
     init(journeyManager: JourneyManager = .shared, searchManager: SearchManager = .shared, arrivalInfoManager: ArrivalInfoManager = .shared) {
@@ -75,7 +76,9 @@ class BusRouteViewModel: ObservableObject {
     var isSearchLoading: Bool { searchManager.isLoading }
     var searchErrorMessage: String? { searchManager.errorMessage }
     
-    func search() async { await searchManager.search() }
+    func search() async {
+        languageCode == "ko" ? await searchManager.search() : await searchManager.searchInEnglish()
+    }
     
     func resetSearchMode() { searchManager.resetSearchMode() }
     
@@ -152,10 +155,11 @@ class BusRouteViewModel: ObservableObject {
                     return
                 }
                 
-                if let jsonString = String(data: data, encoding: .utf8) {
-                    print("📬 [ODsay API 응답 원본]")
-                    print(jsonString)
-                }
+                // 원본 JSON 출력 주석처리
+//                if let jsonString = String(data: data, encoding: .utf8) {
+//                    print("📬 [ODsay API 응답 원본]")
+//                    print(jsonString)
+//                }
                 
                 do {
                     if let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] {
@@ -265,7 +269,7 @@ class BusRouteViewModel: ObservableObject {
             let newLocation = try await LocationService.shared.forceRefreshLocation(timeout: 15)
             
             let locationInfo = LocationInfo(
-                name: "현위치",
+                name: NSLocalizedString("현위치", comment: "현위치"),
                 latitude: newLocation.coordinate.latitude,
                 longitude: newLocation.coordinate.longitude
             )
@@ -394,9 +398,9 @@ extension BusRouteViewModel {
         let minutes = item.arrtime / 60
         let arrivalText: String
         if minutes < 1 {
-            arrivalText = "곧 도착"
+            arrivalText = String(localized: "곧 도착")
         } else {
-            arrivalText = "\(minutes)분 후"
+            arrivalText = String(localized: "\(minutes)분 후")
         }
         
         self.arrivalText = arrivalText
@@ -429,11 +433,12 @@ extension BusRouteViewModel {
             }
         }
         
-        // 숫자로 끝날 경우 "번" 추가
-        if let lastChar = result.last, lastChar.isNumber {
-            result += "번"
+        // 한국어일 때만 숫자로 끝날 경우 "번" 추가
+        let isKorean = Locale.current.language.languageCode?.identifier == "ko"
+        if isKorean, let lastChar = result.last, lastChar.isNumber {
+            result += NSLocalizedString("번", comment: "번")
         }
-        
+
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 }

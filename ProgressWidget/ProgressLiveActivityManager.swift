@@ -52,17 +52,18 @@ final class ProgressLiveActivityManager {
         let baseText: String
         switch stage {
         case "walkingToBus", "walkingToDestination":
-            baseText = "\(destination)까지 걷기"
+            baseText = String(format: NSLocalizedString("description_walk_to", comment: "ex: %@까지 걷기"), destination)
         case "waitingForBus":
-            baseText = "\(destination)에서 승차"
+            baseText = String(format: NSLocalizedString("description_board_at", comment: "ex: %@에서 승차"), destination)
         case "onBus":
-            baseText = "\(destination)에서 하차"
+            baseText = String(format: NSLocalizedString("description_getoff_at", comment: "ex: %@에서 하차"), destination)
         default:
             return ""
         }
         
         // splitTextToFit을 static 함수로 변경하여 호출
-        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: 16)
+        let maxCount = isEnglish(text: baseText) ? 26 : 16
+        let adjustedText = splitTextToFit(text: baseText, maxCharactersPerLine: maxCount)
         
         return adjustedText.replacingOccurrences(of: " ", with: "\u{00a0}")
     }
@@ -72,11 +73,11 @@ final class ProgressLiveActivityManager {
         let baseText: String
         switch stage {
         case "walkingToBus", "walkingToDestination":
-            baseText = "\(destination)까지 걷기"
+            baseText = String(format: NSLocalizedString("description_walk_to", comment: "ex: %@까지 걷기"), destination)
         case "waitingForBus":
-            baseText = "\(destination)에서 승차"
+            baseText = String(format: NSLocalizedString("description_board_at", comment: "ex: %@에서 승차"), destination)
         case "onBus":
-            baseText = "\(destination)에서 하차"
+            baseText = String(format: NSLocalizedString("description_getoff_at", comment: "ex: %@에서 하차"), destination)
         default:
             return ""
         }
@@ -88,6 +89,13 @@ final class ProgressLiveActivityManager {
     }
     
     // static 함수로 변경
+    private static func isEnglish(text: String) -> Bool {
+        for scalar in text.unicodeScalars {
+            if !(scalar.value < 128) { return false }
+        }
+        return true
+    }
+
     private static func splitTextToFit(text: String, maxCharactersPerLine: Int) -> String {
         guard text.count > maxCharactersPerLine else {
             return text // 1줄이면 그대로 반환
@@ -110,34 +118,34 @@ final class ProgressLiveActivityManager {
             let walkingHours = minutesLeft / 60
             let walkingMinutes = minutesLeft % 60
             if walkingHours > 0 && walkingMinutes == 0 {
-                return "\(walkingHours)시간 남았어요"
+                return String(format: NSLocalizedString("subdesc_hours_left", comment: "ex: %d시간 남았어요"), walkingHours)
             } else if walkingHours > 0 {
-                return "\(walkingHours)시간 \(walkingMinutes)분 남았어요"
+                return String(format: NSLocalizedString("subdesc_hours_minutes_left", comment: "ex: %d시간 %d분 남았어요"), walkingHours, walkingMinutes)
             } else if leftDistance < 20 {
-                return "목적지 근처에요"
+                return NSLocalizedString("subdesc_near_destination", comment: "목적지 근처에요")
             } else {
-                return "\(walkingMinutes)분 남았어요"
+                return String(format: NSLocalizedString("subdesc_minutes_left", comment: "ex: %d분 남았어요"), walkingMinutes)
             }
         case "onBus":
             if remainingBusStops <= 1 {
-                return "이번 정류장에서 내리세요"
-            } else{
-                return "\(remainingBusStops)정류장 남았어요"
+                return NSLocalizedString("이번 정류장에서 내리세요", comment: "live activity 이번 정류장에서 내리세요")
+            } else {
+                return String(format: NSLocalizedString("subdesc_stops_left", comment: "ex: %d정류장 남았어요"), remainingBusStops)
             }
         case "waitingForBus":
             let hours = timeTillBusArrival / 3600
             let minutes = (timeTillBusArrival % 3600) / 60
-            
+
             if timeTillBusArrival == -1 {
-                return "버스가 지나갔어요"
+                return NSLocalizedString("subdesc_bus_passed", comment: "버스가 지나갔어요")
             } else if hours > 0 && minutes == 0 {
-                return "\(hours)시간 후 버스가 도착해요"
+                return String(format: NSLocalizedString("subdesc_hours_until_bus", comment: "ex: %d시간 후 버스가 도착해요"), hours)
             } else if hours > 0 {
-                return "\(hours)시간 \(minutes)분 후 버스가 도착해요"
+                return String(format: NSLocalizedString("subdesc_hours_minutes_until_bus", comment: "ex: %d시간 %d분 후 버스가 도착해요"), hours, minutes)
             } else if minutes == 1 {
-                return "버스가 곧 도착해요"
+                return NSLocalizedString("subdesc_bus_arriving_soon", comment: "버스가 곧 도착해요")
             } else {
-                return "\(minutes)분 후 버스가 도착해요"
+                return String(format: NSLocalizedString("subdesc_minutes_until_bus", comment: "ex: %d분 후 버스가 도착해요"), minutes)
             }
         default:
             return ""
